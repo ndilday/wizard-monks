@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbilityList>	
+	<Ability id="0">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Art of Memory</AbilityName>
+	</Ability>
+	<Ability id="1">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Artes Liberales</AbilityName>
+	</Ability>
+	<Ability id="2">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Civil and Canon Law</AbilityName>
+	</Ability>
+	<Ability id="3">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Common Law</AbilityName>
+	</Ability>
+	<Ability id="4">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Medicine</AbilityName>
+	</Ability>
+	<Ability id="5">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Philosophiae</AbilityName>
+	</Ability>
+	<Ability id="6">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Theology, Christian</AbilityName>
+	</Ability>
+	<Ability id="7">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Theology, Jewish</AbilityName>
+	</Ability>
+	<Ability id="8">
+	  <AbilityType>Academic</AbilityType>
+	  <AbilityName>Theology, Muslim</AbilityName>
+	</Ability>
+	<Ability id="50">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Bjornaer Lore</AbilityName>
+	</Ability>
+	<Ability id="51">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Code of Hermes</AbilityName>
+	</Ability>
+	<Ability id="52">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Dominion Lore</AbilityName>
+	</Ability>
+	<Ability id="53">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Faerie Lore</AbilityName>
+	</Ability>
+	<Ability id="54">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Faerie Magic</AbilityName>
+	</Ability>
+	<Ability id="55">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Finesse</AbilityName>
+	</Ability>
+	<Ability id="56">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Forest Lore</AbilityName>
+	</Ability>
+	<Ability id="57">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>House Criamon Lore</AbilityName>
+	</Ability>
+	<Ability id="58">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>House Merinita Lore</AbilityName>
+	</Ability>
+	<Ability id="59">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Infernal Lore</AbilityName>
+	</Ability>
+	<Ability id="60">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Magic Lore</AbilityName>
+	</Ability>
+	<Ability id="61">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Magic Theory</AbilityName>
+	</Ability>
+	<Ability id="62">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Parma Magica</AbilityName>
+	</Ability>
+	<Ability id="63">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Penetration</AbilityName>
+	</Ability>
+	<Ability id="64">
+	  <AbilityType>Arcane</AbilityType>
+	  <AbilityName>Verditius Lore</AbilityName>
+	</Ability>
+	<Ability id="100">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Animal Handling</AbilityName>
+	</Ability>
+	<Ability id="101">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Area Lore</AbilityName>
+	</Ability>
+	<Ability id="102">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Athletics</AbilityName>
+	</Ability>
+	<Ability id="103">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Awareness</AbilityName>
+	</Ability>
+	<Ability id="104">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Bargain</AbilityName>
+	</Ability>
+	<Ability id="105">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Brawl</AbilityName>
+	</Ability>
+	<Ability id="106">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Carouse</AbilityName>
+	</Ability>
+	<Ability id="107">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Charm</AbilityName>
+	</Ability>
+	<Ability id="108">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Chiurgy</AbilityName>
+	</Ability>
+	<Ability id="109">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Church Lore</AbilityName>
+	</Ability>
+	<Ability id="110">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Climb</AbilityName>
+	</Ability>
+	<Ability id="111">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Concentration</AbilityName>
+	</Ability>
+	<Ability id="112">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Craft</AbilityName>
+	</Ability>
+	<Ability id="113">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Disguise</AbilityName>
+	</Ability>
+	<Ability id="114">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Etiquette</AbilityName>
+	</Ability>
+	<Ability id="115">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Folk Ken</AbilityName>
+	</Ability>
+	<Ability id="116">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Guile</AbilityName>
+	</Ability>
+	<Ability id="117">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Hunt</AbilityName>
+	</Ability>
+	<Ability id="118">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Intrigue</AbilityName>
+	</Ability>
+	<Ability id="119">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Leadership</AbilityName>
+	</Ability>
+	<Ability id="120">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Legerdemain</AbilityName>
+	</Ability>
+	<Ability id="121">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Music</AbilityName>
+	</Ability>
+	<Ability id="122">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Order of Hermes Lore</AbilityName>
+	</Ability>
+	<Ability id="123">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Organization Lore</AbilityName>
+	</Ability>
+	<Ability id="124">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Profession</AbilityName>
+	</Ability>
+	<Ability id="125">
+	  <AbilityType>General</AbilityType>
+	  <AbilityName>Awareness</AbilityName>
+	</Ability>
+	<Ability id="150">
+	  <AbilityType>Martial</AbilityType>
+	  <AbilityName>Single Weapon</AbilityName>
+	</Ability>
+	<Ability id="151">
+	  <AbilityType>Martial</AbilityType>
+	  <AbilityName>Great Weapon</AbilityName>
+	</Ability>
+	<Ability id="152">
+	  <AbilityType>Martial</AbilityType>
+	  <AbilityName>Bow</AbilityName>
+	</Ability>
+</Abilities>

@@ -9,7 +9,7 @@
     <ProjectGuid>{BC6679C0-6172-4F18-BD1A-DE9AFD2D3BCB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OrderOfHermes.Test</RootNamespace>
+    <RootNamespace>WizardMonks.Test</RootNamespace>
     <AssemblyName>OrderOfHermes.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

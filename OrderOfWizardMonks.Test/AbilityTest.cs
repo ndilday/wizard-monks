@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Xml.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using OrderOfHermes;
+using WizardMonks;
 
-namespace OrderOfHermes.Test
+namespace WizardMonks.Test
 {
     [TestClass]
     public sealed class AbilityTest

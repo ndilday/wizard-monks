@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OrderOfHermes;
+using WizardMonks;
 
-namespace OrderOfHermes.Test
+namespace WizardMonks.Test
 {
     [TestClass]
     public class AttributeTest
@@ -34,26 +34,6 @@ namespace OrderOfHermes.Test
         {
             Attribute attribute = new Attribute(-2);
             attribute.AddDecrepitude((byte)(3));
-            Assert.AreEqual(-3, attribute.Value);
-        }
-
-        [TestMethod]
-        public void TestDecrepitudeLevelAdd()
-        {
-            Attribute attribute = new Attribute(3);
-            Assert.AreEqual(4, attribute.AddDecrepitudeToNextLevel());
-            Assert.AreEqual(2, attribute.Value);
-            Assert.AreEqual(3, attribute.AddDecrepitudeToNextLevel());
-            Assert.AreEqual(1, attribute.Value);
-        }
-
-        [TestMethod]
-        public void TestNegativeDecrepitudeLevelAdd()
-        {
-            Attribute attribute = new Attribute(-1);
-            Assert.AreEqual(2, attribute.AddDecrepitudeToNextLevel());
-            Assert.AreEqual(-2, attribute.Value);
-            Assert.AreEqual(3, attribute.AddDecrepitudeToNextLevel());
             Assert.AreEqual(-3, attribute.Value);
         }
     }

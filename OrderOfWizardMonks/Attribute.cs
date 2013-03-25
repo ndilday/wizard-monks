@@ -3,35 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OrderOfHermes
+namespace WizardMonks
 {
     // TODO: create config option to switch between this attribute and an implementation based upon the strict AM rules
 
     public interface IAttribute
     {
-        sbyte Value { get; }
-        sbyte BaseValue { get; set; }
-        byte Decrepitude { get; }
+        double Value { get; }
+        double BaseValue { get; set; }
+        double Decrepitude { get; }
         void AddDecrepitude(byte additionalDecrepitude);
-        byte AddDecrepitudeToNextLevel();
+        //float AddDecrepitudeToNextLevel();
     }
 
     [Serializable]
     public class Attribute : IAttribute
     {
-        private sbyte _baseValue;
-        private byte _decrepitude;
+        private double _baseValue;
+        private double _decrepitude;
 
-        public sbyte Value { get; private set; }
+        public double Value { get; private set; }
 
-        public Attribute(sbyte startingValue, byte startingDecrepitude = (byte)(0))
+        public Attribute(double startingValue, double startingDecrepitude = 0)
         {
             _baseValue = startingValue;
             _decrepitude = startingDecrepitude;
             RecalculateValue();
         }
 
-        public sbyte BaseValue
+        public double BaseValue
         {
             get { return _baseValue; }
             set 
@@ -41,7 +41,7 @@ namespace OrderOfHermes
             }
         }
 
-        public byte Decrepitude
+        public double Decrepitude
         {
             get { return _decrepitude; }
         }
@@ -52,26 +52,11 @@ namespace OrderOfHermes
             RecalculateValue();
         }
 
-        public byte AddDecrepitudeToNextLevel()
-        {
-            byte decrepitudeUsed = 0;
-            for(sbyte i = _baseValue; i < Value; i--)
-            {
-                decrepitudeUsed = (byte)(decrepitudeUsed + Math.Abs(i) + 1);
-            }
-
-            byte decrepitudeRemaining = (byte)(_decrepitude - decrepitudeUsed);
-            byte decrepitudeNeeded = (byte)( Math.Abs(Value) + 1);
-            byte addedDecreptide = (byte) (decrepitudeNeeded - decrepitudeRemaining);
-            Value--;
-            return addedDecreptide;
-        }
-
         private void RecalculateValue()
         {
-            sbyte tempValue = _baseValue;
-            byte decrepitude = _decrepitude;
-            sbyte absValue = Math.Abs(tempValue);
+            double tempValue = _baseValue;
+            double decrepitude = _decrepitude;
+            double absValue = Math.Abs(tempValue);
 
             while (decrepitude >= absValue + 1)
             {

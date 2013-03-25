@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using OrderOfHermes;
+using WizardMonks;
 
-namespace OrderOfHermes.Test
+namespace WizardMonks.Test
 {
     [TestClass]
     public class BookTest

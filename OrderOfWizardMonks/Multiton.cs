@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-namespace OrderOfHermes
+namespace WizardMonks
 {
     public class Multiton<K, T> where T: new()
     {

@@ -40,8 +40,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharacterFactory.cs" />
+    <Compile Include="NormalStatRoller.cs" />
     <Compile Include="WorldParameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OrderOfWizardMonks\OrderOfWizardMonks.csproj">
+      <Project>{4D44A76B-4EB8-463F-A09A-F69C3C3AC662}</Project>
+      <Name>OrderOfWizardMonks</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

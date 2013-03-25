@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace OrderOfHermes.Test
+namespace WizardMonks.Test
 {
     [TestClass]
     public class TracingTest

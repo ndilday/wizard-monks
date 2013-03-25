@@ -5,6 +5,7 @@ using System.Text;
 
 namespace WorldSimulation
 {
+    [Serializable]
     public class WorldParameters
     {
         // frequency of +1

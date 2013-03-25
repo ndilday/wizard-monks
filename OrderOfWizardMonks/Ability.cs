@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace OrderOfHermes
+namespace WizardMonks
 {
 	[DataContract]
 	public enum AbilityType

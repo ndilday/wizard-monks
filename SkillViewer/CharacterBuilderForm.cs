@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-using OrderOfHermes;
+using WizardMonks;
 
 namespace SkillViewer
 {

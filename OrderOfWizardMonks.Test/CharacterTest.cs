@@ -24,6 +24,11 @@ namespace WizardMonks.Test
             {
                 return Value;
             }
+
+            public double RollDouble()
+            {
+                return Value;
+            }
         }
 
         private static FakeDie _fakeDie;
@@ -47,11 +52,11 @@ namespace WizardMonks.Test
             _fakeDie.Value = 5;
 
             Character character = new Character();
-            ISeason season = new SundrySeason();
+            IAction action = new Exposure(new Ability());
             
             for (uint i = 21; i < 141; i++)
             {
-                character.AddSeason(season);
+                character.CommitAction(action);
                 Assert.AreEqual(i, character.SeasonalAge);
                 Assert.AreEqual(i, character.ApparentAge);
             }
@@ -60,11 +65,11 @@ namespace WizardMonks.Test
         public Character CreateAge35Character()
         {
             Character character = new Character();
-            ISeason season = new SundrySeason();
+            IAction action = new Exposure(new Ability());
 
             for (uint i = 21; i < 141; i++)
             {
-                character.AddSeason(season);
+                character.CommitAction(action);
                 Assert.AreEqual(i, character.SeasonalAge);
                 Assert.AreEqual(i, character.ApparentAge);
             }

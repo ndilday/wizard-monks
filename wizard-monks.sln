@@ -8,11 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderOfWizardMonks.Test", "OrderOfWizardMonks.Test\OrderOfWizardMonks.Test.csproj", "{BC6679C0-6172-4F18-BD1A-DE9AFD2D3BCB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C3A308C-031A-4E88-9F9D-6AF11690A252}"
-	ProjectSection(SolutionItems) = preProject
-		AM2.vsmdi = AM2.vsmdi
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation", "WorldSimulation\WorldSimulation.csproj", "{D97D5FCA-40DF-4533-926C-0921EC93256F}"
 EndProject

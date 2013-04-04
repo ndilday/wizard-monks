@@ -10,6 +10,7 @@ namespace WizardMonks
         ushort RollStressDie(byte botchDiceCount, out byte botchesRolled);
         ushort RollExplodingDie();
         ushort RollSimpleDie();
+        double RollDouble();
     }
 
     public class Die : IAMDie
@@ -93,6 +94,11 @@ namespace WizardMonks
         public ushort RollSimpleDie()
         {
             return Convert.ToUInt16(_random.Next(1, 10));
+        }
+
+        public double RollDouble()
+        {
+            return _random.NextDouble();
         }
     }
 }

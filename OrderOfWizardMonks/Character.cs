@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WizardMonks
 {
@@ -43,14 +44,17 @@ namespace WizardMonks
 
         #region Private Fields
         private uint _noAgingSeasons;
+        private SortedList<PreferenceType, Preference> _preferences;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
 
-        private readonly Dictionary<string, Ability> _abilityList;
-        private readonly List<ISeason> _seasonList;
+        private readonly Dictionary<int, CharacterAbilityBase> _abilityList;
+        private readonly List<IAction> _seasonList;
         private readonly List<IBook> _booksWritten;
         private readonly List<IBook> _booksRead;
+        private readonly List<IBook> _booksOwned;
+        private readonly List<GoalBase> _goals;
         #endregion
 
         public event AgedEventHandler Aged;
@@ -73,12 +77,39 @@ namespace WizardMonks
 
             // All characters start at age 5
             _noAgingSeasons = 0;
+            _preferences = new SortedList<PreferenceType, Preference>();
 
-            _abilityList = new Dictionary<string, Ability>();
-            _seasonList = new List<ISeason>();
+            _abilityList = new Dictionary<int, CharacterAbilityBase>();
+            _seasonList = new List<IAction>();
             _booksRead = new List<IBook>();
             _booksWritten = new List<IBook>();
+            _booksOwned = new List<IBook>();
+            _goals = new List<GoalBase>();
         }
+
+        #region Ability Functions
+        public virtual CharacterAbilityBase GetAbility(Ability ability)
+        {
+            return _abilityList.ContainsKey(ability.AbilityId) ? _abilityList[ability.AbilityId] : new CharacterAbility(ability);
+        }
+        
+        protected virtual void AddAbility(Ability ability)
+        {
+            if (ability.AbilityType == AbilityType.Art)
+            {
+                _abilityList.Add(ability.AbilityId, new AcceleratedAbility(ability));
+            }
+            else
+            {
+                _abilityList.Add(ability.AbilityId, new CharacterAbility(ability));
+            }
+        }
+
+        public virtual double GetLabTotal(Ability technique, Ability form)
+        {
+            return 0;
+        }
+        #endregion
 
         #region Aging
         public virtual void OnAged(AgingEventArgs e)
@@ -183,15 +214,107 @@ namespace WizardMonks
         }
         #endregion
 
-        public void AddSeason(ISeason newSeason)
+        #region Seasonal Functions
+
+        public virtual IAction DecideSeasonalActivity()
         {
-            _seasonList.Add(newSeason);
-            if (SeasonalAge >= 140 && SeasonalAge%4 == 0)
+            if (_goals == null || _goals.Count == 0)
             {
-                //TODO: add aging modifiers
-                Age(0);
+                this.GenerateNewGoals();
+            }
+
+            _goals.ForEach(g => g.Flush());
+            int bestGoalIndex = 0;
+            for (int i = 1; i < _goals.Count; i++)
+            {
+                if (_goals[i].Score(this) > _goals[bestGoalIndex].Score(this))
+                {
+                    bestGoalIndex = i;
+                }
+            }
+
+            // Now that we've deteremined the most important goal,
+            // we need to turn it into a seasonal activity selection
+            return _goals[bestGoalIndex].GetSeasonalActivity(this);
+        }
+
+        public virtual void CommitAction(IAction action)
+        {
+            action.Act(this);
+            this.Age(0);
+        }
+
+        public virtual void GenerateNewGoals()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Book Functions
+        public virtual bool ValidToRead(IBook book)
+        {
+            return book.Author != this && !this._booksRead.Contains(book);
+        }
+
+        public virtual IEnumerable<IBook> GetBooksFromCollection(Ability ability)
+        {
+            return _booksOwned.Where(b => b.Topic == ability).OrderBy(b => b.Quality);
+        }
+
+        public virtual IBook GetBestBookFromCollection(Ability ability)
+        {
+             return GetBooksFromCollection(ability).Except(_booksRead).Except(_booksWritten).OrderBy(b => b.Quality).FirstOrDefault();
+        }
+
+        public virtual double RateBook(IBook book)
+        {
+            CharacterAbilityBase ability;
+            if (book == null)
+            {
+                return 0;
+            }
+            if (_abilityList.ContainsKey(book.Topic.AbilityId))
+            {
+                ability = _abilityList[book.Topic.AbilityId];
+            }
+            else
+            {
+                ability = new CharacterAbility(book.Topic);
+            }
+
+            // determine difference in ability using the new book compared to the old book
+            CharacterAbilityBase newAbility = ability.MakeCopy();
+            newAbility.AddExperience(book.Quality, book.Level);
+            double difference = newAbility.GetValue() - ability.GetValue();
+
+            //TODO: multiply difference by preference
+            return difference;
+        }
+
+        public virtual void ReadBook(IBook book)
+        {
+            CharacterAbilityBase ability = GetAbility(book.Topic);
+            bool previouslyRead = _booksRead.Contains(book);
+            if (!previouslyRead || ability.GetValue() < book.Level)
+            {
+                ability.AddExperience(book.Quality, book.Level);
+            }
+            if (!previouslyRead)
+            {
+                _booksRead.Add(book);
             }
         }
 
+        public virtual void WriteBook()
+        {
+        }
+
+        public double GetBestGain(Ability ability)
+        {
+            // see if there are any books on the topic worth reading
+            double bookExp = RateBook(GetBestBookFromCollection(ability));
+            return bookExp <= 4 ? 4 : bookExp;
+        }
+        #endregion
     }
 }

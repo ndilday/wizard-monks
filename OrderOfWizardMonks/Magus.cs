@@ -24,9 +24,23 @@ namespace WizardMonks
 
         public Arts Arts { get; set; }
 
+        private Ability _magicAbility;
+
         protected void CheckTwilight()
         {
         }
 
+        public override double GetLabTotal(Ability technique, Ability form)
+        {
+            double magicTheory = GetAbility(_magicAbility).GetValue();
+            double techValue = Arts.GetAbility(technique).GetValue();
+            double formValue = Arts.GetAbility(form).GetValue();
+
+            return magicTheory + techValue + formValue;
+            //TODO: laboratory
+            //TODO: foci
+            //TODO: lab assistant
+            //TODO: familiar
+        }
 	}
 }

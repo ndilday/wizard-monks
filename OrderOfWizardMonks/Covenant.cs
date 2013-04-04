@@ -9,17 +9,18 @@ namespace WizardMonks
 	class Covenant
 	{
 		protected List<Magus> Magi;
-		protected Dictionary<AcceleratedAbility, byte> visSources;
-        protected Dictionary<AcceleratedAbility, byte> visStocks;
-		protected List<Tractatus> library;
+		protected Dictionary<Ability, byte> visSources;
+        protected Dictionary<Ability, byte> visStocks;
+		protected List<IBook> library;
         public byte Aura { get; set; }
 
         public Covenant()
         {
             Magi = new List<Magus>();
-            visSources = new Dictionary<AcceleratedAbility, byte>();
-            visStocks = new Dictionary<AcceleratedAbility, byte>();
-            library = new List<Tractatus>();
+            visSources = new Dictionary<Ability, byte>();
+            visStocks = new Dictionary<Ability, byte>();
+            library = new List<IBook>();
+            Aura = 0;
         }
 	}
 }

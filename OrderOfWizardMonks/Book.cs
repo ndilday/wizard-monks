@@ -11,8 +11,9 @@ namespace WizardMonks
 	{
 		public Character Author { get; set; }
 		public Ability Topic { get; set; }
-		public byte Quality { get; set; }
-		public byte Level { get; set; }
+		public double Quality { get; set; }
+		public virtual double Level { get; set; }
+        public virtual double Value { get; set; }
 	}
 
 	[Serializable]
@@ -23,6 +24,15 @@ namespace WizardMonks
     [Serializable]
     public class Tractatus : IBook
     {
-        
+        public override double Level
+        {
+            get
+            {
+                return -1;
+            }
+            set
+            {
+            }
+        }
     }
 }

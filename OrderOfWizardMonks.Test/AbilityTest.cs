@@ -61,5 +61,14 @@ namespace WizardMonks.Test
             Assert.IsNotNull(abilities);
             Assert.AreNotEqual(0, abilities.Count);
         }
+
+        [TestMethod]
+        public void LimitedGainTest()
+        {
+            Ability ability = new Ability(0, AbilityType.General, "TestAbility");
+            CharacterAbility charAbility = new CharacterAbility(ability);
+            charAbility.AddExperience(10, 1);
+            Assert.AreEqual(1, charAbility.GetValue());
+        }
     }
 }

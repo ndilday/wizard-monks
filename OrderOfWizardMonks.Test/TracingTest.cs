@@ -12,7 +12,7 @@ namespace WizardMonks.Test
         public void TestAging()
         {
             uint runningTally = 0;
-            ISeason season = new SundrySeason();
+            IAction action = new Exposure(new Ability());
                                 
             for (int i = 0; i < 100; i++)
             {
@@ -20,7 +20,7 @@ namespace WizardMonks.Test
 
                 while (_character.Decrepitude < 75)
                 {
-                    _character.AddSeason(season);
+                    _character.CommitAction(action);
                 }
                 Trace.WriteLine("Age at Death: " + _character.SeasonalAge);
                 runningTally += _character.SeasonalAge;

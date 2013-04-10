@@ -78,6 +78,9 @@ namespace WizardMonks
 	{
         [DataMember(IsRequired = true)]
         private int _abilityId;
+        protected double _value;
+        protected bool _cached;
+        private double _experience;
 
         protected CharacterAbilityBase(Ability ability)
         {
@@ -104,14 +107,40 @@ namespace WizardMonks
         [DataMember(IsRequired = true)]
 		public bool IsAffinity { get; set; }
         [DataMember(IsRequired = true)]
-		public double Experience { get; set; }
+		public double Experience 
+        {
+            get
+            {
+                return _experience;
+            }
+            set
+            {
+                _experience = value;
+                _cached = false;
+            }
+        }
 
 	    public Ability Ability
 	    {
             get { return ImmutableMultiton<int, Ability>.GetInstance(_abilityId); }
 	    }
 
-		public abstract double GetValue();
+        public double GetValue()
+        {
+            if (_cached)
+            {
+                return _value;
+            }
+
+            double x = GetValueHelper();
+
+            _value = x;
+            _cached = true;
+
+            return x;
+        }
+
+        protected abstract double GetValueHelper();
 
         public virtual void AddExperience(double amount)
         {
@@ -129,7 +158,22 @@ namespace WizardMonks
                 double experienceToLevel = this.GetExperienceUntilLevel(levelLimit);
                 this.Experience += experienceToLevel < amount ? experienceToLevel : amount;
             }
+            _cached = false;
         }
+
+        public virtual double GetVisToReachLevel(double level)
+        {
+            double visTotal = 0;
+            CharacterAbilityBase copy = MakeCopy();
+            while (copy.GetValue() < level)
+            {
+                visTotal += 0.5 + (copy.GetValue() / 10.0);
+                copy.Experience += 6.5;
+            }
+            return visTotal;
+        }
+
+        public abstract int GetTractatiiLimit();
 	}
 
     [DataContract]
@@ -149,8 +193,12 @@ namespace WizardMonks
             return retVal;
         }
 
-        public override double GetValue()
+        protected override double GetValueHelper()
 		{
+            if (_cached)
+            {
+                return _value;
+            }
 			double x = this.Experience;
 			if (this.IsAffinity)
 			{
@@ -174,6 +222,11 @@ namespace WizardMonks
             double totalExperience = level * (level + 1) * 5 / 2;
             return totalExperience - this.Experience;
         }
+
+        public override int GetTractatiiLimit()
+        {
+            return (int)Math.Floor(GetValue());
+        }
     }
 
     [DataContract]
@@ -193,7 +246,7 @@ namespace WizardMonks
             return retVal;
         }
 
-        public override double GetValue()
+        protected override double GetValueHelper()
         {
             double x = this.Experience;
             if (this.IsAffinity)
@@ -217,6 +270,11 @@ namespace WizardMonks
         {
             double totalExperience = level * (level + 1) / 2;
             return totalExperience - this.Experience;
+        }
+
+        public override int GetTractatiiLimit()
+        {
+            return (int)Math.Floor(GetValue() / 5.0);
         }
     }
 }

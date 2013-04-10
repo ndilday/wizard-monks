@@ -13,7 +13,7 @@ namespace WizardMonks
 		public Ability Topic { get; set; }
 		public double Quality { get; set; }
 		public virtual double Level { get; set; }
-        public virtual double Value { get; set; }
+        //public virtual double Value { get; set; }
 	}
 
 	[Serializable]
@@ -34,5 +34,11 @@ namespace WizardMonks
             {
             }
         }
+    }
+
+    public class EvaluatedBook
+    {
+        public IBook Book { get; set; }
+        public double PerceivedValue { get; set; }
     }
 }

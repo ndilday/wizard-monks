@@ -75,6 +75,7 @@
     <Compile Include="Covenant.cs" />
     <Compile Include="Decision.cs" />
     <Compile Include="Dice.cs" />
+    <Compile Include="Economy.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="MagicArts.cs" />
     <Compile Include="Houses.cs" />

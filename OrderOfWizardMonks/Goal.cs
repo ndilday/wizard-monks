@@ -55,6 +55,15 @@ namespace WizardMonks
 
     public class WritingGoal : AbilityGoal
     {
+        public WritingGoal(Ability ability, double level, double quality, uint seasonsToFinish, double priority)
+        {
+            Ability = ability;
+            Level = level;
+            Quality = quality;
+            SeasonsToComplete = seasonsToFinish;
+            Priority = priority;
+        }
+
         public double Quality { get; set; }
 
         public override double Score(Character character)

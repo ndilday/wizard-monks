@@ -44,17 +44,17 @@ namespace WizardMonks
 
         #region Private Fields
         private uint _noAgingSeasons;
-        private SortedList<PreferenceType, Preference> _preferences;
+        protected SortedSet<Preference> _preferences;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityList;
-        private readonly List<IAction> _seasonList;
-        private readonly List<IBook> _booksWritten;
-        private readonly List<IBook> _booksRead;
-        private readonly List<IBook> _booksOwned;
-        private readonly List<GoalBase> _goals;
+        protected readonly List<IAction> _seasonList;
+        protected readonly List<IBook> _booksWritten;
+        protected readonly List<IBook> _booksRead;
+        protected readonly List<IBook> _booksOwned;
+        protected readonly List<GoalBase> _goals;
         #endregion
 
         public event AgedEventHandler Aged;
@@ -77,7 +77,6 @@ namespace WizardMonks
 
             // All characters start at age 5
             _noAgingSeasons = 0;
-            _preferences = new SortedList<PreferenceType, Preference>();
 
             _abilityList = new Dictionary<int, CharacterAbilityBase>();
             _seasonList = new List<IAction>();
@@ -85,7 +84,22 @@ namespace WizardMonks
             _booksWritten = new List<IBook>();
             _booksOwned = new List<IBook>();
             _goals = new List<GoalBase>();
+
+            GeneratePreferences();
+            GenerateNewGoals();
         }
+
+        #region Generation Functions
+        protected virtual void GeneratePreferences()
+        {
+            _preferences = PreferenceFactory.CreatePreferenceList(false);
+        }
+
+        public virtual void GenerateNewGoals()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
 
         #region Ability Functions
         public virtual CharacterAbilityBase GetAbility(Ability ability)
@@ -220,16 +234,32 @@ namespace WizardMonks
         {
             if (_goals == null || _goals.Count == 0)
             {
-                this.GenerateNewGoals();
+                GenerateNewGoals();
             }
 
             _goals.ForEach(g => g.Flush());
             int bestGoalIndex = 0;
-            for (int i = 1; i < _goals.Count; i++)
+            int i = 0;
+            while (_goals[0].Score(this) <= 0)
             {
+                _goals.RemoveAt(0);
+                if(!_goals.Any())
+                {
+                    GenerateNewGoals();
+                }
+            }
+
+            while ( i < _goals.Count() )
+            {
+                if (_goals[i].Score(this) <= 0)
+                {
+                    _goals.RemoveAt(i);
+                    continue;
+                }
                 if (_goals[i].Score(this) > _goals[bestGoalIndex].Score(this))
                 {
                     bestGoalIndex = i;
+                    i++;
                 }
             }
 
@@ -238,15 +268,25 @@ namespace WizardMonks
             return _goals[bestGoalIndex].GetSeasonalActivity(this);
         }
 
+        public virtual IAction DecideSeasonalActivity2()
+        {
+            // process books, looking for most interesting readable title
+            double bookValue = 0;
+            var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
+            if (availableBooks.Any())
+            {
+                var bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(PreferenceType.Art, b.Topic)).First();
+                bookValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
+            }
+
+            // consider the value created per season if writing, instead
+            EvaluatedBook book = EstimateBestBook();
+        }
+
         public virtual void CommitAction(IAction action)
         {
             action.Act(this);
             this.Age(0);
-        }
-
-        public virtual void GenerateNewGoals()
-        {
-            throw new NotImplementedException();
         }
         #endregion
 
@@ -266,29 +306,36 @@ namespace WizardMonks
              return GetBooksFromCollection(ability).Except(_booksRead).Except(_booksWritten).OrderBy(b => b.Quality).FirstOrDefault();
         }
 
-        public virtual double RateBook(IBook book)
+        public virtual double GetBookLevelGain(IBook book)
         {
             CharacterAbilityBase ability;
             if (book == null)
             {
                 return 0;
             }
-            if (_abilityList.ContainsKey(book.Topic.AbilityId))
-            {
-                ability = _abilityList[book.Topic.AbilityId];
-            }
-            else
-            {
-                ability = new CharacterAbility(book.Topic);
-            }
+            ability = GetAbility(book.Topic);
 
             // determine difference in ability using the new book compared to the old book
             CharacterAbilityBase newAbility = ability.MakeCopy();
             newAbility.AddExperience(book.Quality, book.Level);
             double difference = newAbility.GetValue() - ability.GetValue();
 
-            //TODO: multiply difference by preference
             return difference;
+        }
+
+        public virtual double RateLifetimeBookValue(IBook book)
+        {
+            if (book.Level == 0)
+            {
+                return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
+            }
+            CharacterAbilityBase charAbility = GetAbility(book.Topic);
+            double expValue = charAbility.GetExperienceUntilLevel(book.Level);
+            double seasons = expValue / book.Quality;
+            
+            double visNeed = charAbility.GetVisToReachLevel(book.Level);
+            double visPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+            return visNeed / visPer;
         }
 
         public virtual void ReadBook(IBook book)
@@ -309,11 +356,53 @@ namespace WizardMonks
         {
         }
 
+        public virtual EvaluatedBook EstimateBestBook()
+        {
+            return new EvaluatedBook
+            {
+                Book = null,
+                PerceivedValue = 0
+            };
+        }
+
         public double GetBestGain(Ability ability)
         {
             // see if there are any books on the topic worth reading
-            double bookExp = RateBook(GetBestBookFromCollection(ability));
+            double bookExp = GetBookLevelGain(GetBestBookFromCollection(ability));
             return bookExp <= 4 ? 4 : bookExp;
+        }
+        #endregion
+
+        #region Preference/Goal Functions
+        public double GetDesire(PreferenceType type, object spec)
+        {
+            var prefs = _preferences.Where(p => p.Type == type && p.Specifier == spec);
+            return prefs.Any() ? prefs.First().Value : 0;
+        }
+
+        protected virtual double RateSeasonalExperienceGainAsTime(Ability ability, double gain)
+        {
+            //TODO: risk aversion, vis stock, miser
+            double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+
+            CharacterAbilityBase charAbility = GetAbility(ability);
+            double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
+            double visNeeded = gain * visUsePer / 6.5;
+            double visSeasons = (visNeeded / visGainPer) + (gain / 6.5);
+            return visSeasons;
+        }
+
+        protected virtual double RateSeasonalExperienceGainAsVis(Ability ability, double gain)
+        {
+            double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+            if (visGainPer == 0) return 0;
+
+            CharacterAbilityBase charAbility = GetAbility(ability);
+            double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
+            double visNeeded = gain * visUsePer / 6.5;
+            double visSeasons = (visNeeded / visGainPer) + (gain / 6.5);
+            if (visSeasons <= 1) return 0;
+            return (visSeasons - 1) * visGainPer;
         }
         #endregion
     }

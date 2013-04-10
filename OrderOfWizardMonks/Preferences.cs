@@ -43,16 +43,18 @@ namespace WizardMonks
 
     public static class PreferenceFactory
     {
-        public static SortedList<PreferenceType, Preference> CreatePreferenceList(bool isMagus)
+        public static SortedSet<Preference> CreatePreferenceList(bool isMagus)
         {
-            SortedList<PreferenceType, Preference> list = new SortedList<PreferenceType, Preference>();
+            SortedSet<Preference> list = new SortedSet<Preference>();
             if (isMagus)
             {
-                list.Add(PreferenceType.AgeToApprentice, 
-                         new Preference(PreferenceType.AgeToApprentice, null, Die.Instance.RollDouble() * 100));
+                list.Add(new Preference(PreferenceType.AgeToApprentice, null, Die.Instance.RollDouble() * 500));
+                double writingDesire = Die.Instance.RollDouble();
                 foreach (Ability art in MagicArts.GetEnumerator())
                 {
-                    list.Add(PreferenceType.Art, new Preference(PreferenceType.Art, art, Die.Instance.RollDouble()));
+                    double artDesire = Die.Instance.RollDouble();
+                    list.Add(new Preference(PreferenceType.Art, art, artDesire));
+                    list.Add(new Preference(PreferenceType.Writing, art, (artDesire + writingDesire) / 2));
                 }
             }
 

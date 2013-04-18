@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
     public class TwilightEventArgs : EventArgs
@@ -20,22 +22,23 @@ namespace WizardMonks
 	[Serializable]
 	public class Magus : Character
 	{
+        private Ability _magicAbility;
+
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
+            : base(writingLanguage, writingAbility, preferences)
+        {
+            _magicAbility = magicAbility;
+        }
+
 		public Houses House { get; set; }
 
         public Arts Arts { get; set; }
-
-        private Ability _magicAbility;
-
-        protected override void GeneratePreferences()
-        {
-            _preferences = PreferenceFactory.CreatePreferenceList(true);
-        }
 
         public override void GenerateNewGoals()
         {
             foreach (Ability art in MagicArts.GetEnumerator())
             {
-                double apprenticeAge = GetDesire(PreferenceType.AgeToApprentice, null);
+                double apprenticeAge = GetDesire(new Preference(PreferenceType.AgeToApprentice, null));
                 GenerateArtWritingGoal(art);
                 int seasonsLived = 20 + _seasonList.Count();
                 if (apprenticeAge < seasonsLived)
@@ -51,7 +54,7 @@ namespace WizardMonks
 
         private void GenerateArtLearningGoal(Ability art, int seasonsLived, double level)
         {
-            double desire = GetDesire(PreferenceType.Ability, art);
+            double desire = GetDesire(new Preference(PreferenceType.Ability, art));
             _goals.Add(new AbilityGoal
                 {
                     Ability = art,
@@ -63,7 +66,7 @@ namespace WizardMonks
 
         private void GenerateArtWritingGoal(Ability art)
         {
-            double desire = GetDesire(PreferenceType.Writing, art);
+            double desire = GetDesire(new Preference(PreferenceType.Writing, art));
             uint timeFrame = (uint)(20 / desire);
             int tractLimit = GetAbility(art).GetTractatiiLimit();
             if (tractLimit > _booksWritten.Where(b => b.Topic == art && b.Level == 0).Count())
@@ -72,7 +75,7 @@ namespace WizardMonks
             }
         }
 
-        public override EvaluatedBook EstimateBestBook()
+        public override EvaluatedBook EstimateBestBookToWrite()
         {
             EvaluatedBook bestBook = new EvaluatedBook
             {
@@ -103,22 +106,77 @@ namespace WizardMonks
                 }
 
                 // calculate summa value
-                if ((MagicArts.IsArt(art) && ability.GetValue() > 5) || ability.GetValue() > 2)
+                // TODO: how to decide what audience the magus is writing for?
+                // when art > 10, magus will write a /2 book
+                // when art >=20, magus will write a /4 book
+                if ((MagicArts.IsArt(art) && ability.GetValue() >= 10) || ability.GetValue() >= 4)
                 {
                     // start with no q/l switching
+                    CharacterAbilityBase theoreticalPurchaser;
+                    if (MagicArts.IsArt(art))
+                    {
+                        theoreticalPurchaser = new AcceleratedAbility(art);
+                    }
+                    else
+                    {
+                        theoreticalPurchaser = new CharacterAbility(art);
+                    }
+                    theoreticalPurchaser.AddExperience(ability.Experience / 2);
                     Summa s = new Summa
                     {
                         Quality = Communication.Value + 6,
                         Level = ability.GetValue() / 2.0,
                         Topic = art
                     };
-                    EvaluatedBook summa = new EvaluatedBook
+                    double value = RateLifetimeBookValue(s, theoreticalPurchaser);
+                    if (value > bestBook.PerceivedValue)
                     {
-                        Book = s,
-                        PerceivedValue = RateLifetimeBookValue(s)
+                        bestBook = new EvaluatedBook
+                        {
+                            Book = s,
+                            PerceivedValue = value
+                        };
+                    }
+                }
+                if ((MagicArts.IsArt(art) && ability.GetValue() >= 20) || ability.GetValue() >= 6)
+                {
+                    // start with no q/l switching
+                    CharacterAbilityBase theoreticalPurchaser;
+                    if (MagicArts.IsArt(art))
+                    {
+                        theoreticalPurchaser = new AcceleratedAbility(art);
+                    }
+                    else
+                    {
+                        theoreticalPurchaser = new CharacterAbility(art);
+                    }
+                    theoreticalPurchaser.AddExperience(ability.Experience / 4);
+
+                    double qualityAdd = ability.GetValue() / 4;
+                    if (qualityAdd > (Communication.Value + 6))
+                    {
+                        qualityAdd = Communication.Value + 6;
+                    }
+
+                    Summa s = new Summa
+                    {
+                        Quality = Communication.Value + 6 + qualityAdd,
+                        Level = (ability.GetValue() / 2.0) - qualityAdd,
+                        Topic = art
                     };
+                    double seasonsNeeded = s.GetWritingPointsNeeded() / (Communication.Value + GetAbility(_writingAbility).GetValue());
+                    double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
+                    if (value > bestBook.PerceivedValue)
+                    {
+                        bestBook = new EvaluatedBook
+                        {
+                            Book = s,
+                            PerceivedValue = value
+                        };
+                    }
                 }
             }
+            return bestBook;
         }
 
         protected void CheckTwilight()

@@ -140,6 +140,13 @@ namespace WizardMonks
             return x;
         }
 
+        public double GetValueGain(double experience, double levelLimit = 0)
+        {
+            CharacterAbilityBase copy = MakeCopy();
+            copy.AddExperience(experience, levelLimit);
+            return copy.GetValue() - GetValue();
+        }
+
         protected abstract double GetValueHelper();
 
         public virtual void AddExperience(double amount)
@@ -159,18 +166,6 @@ namespace WizardMonks
                 this.Experience += experienceToLevel < amount ? experienceToLevel : amount;
             }
             _cached = false;
-        }
-
-        public virtual double GetVisToReachLevel(double level)
-        {
-            double visTotal = 0;
-            CharacterAbilityBase copy = MakeCopy();
-            while (copy.GetValue() < level)
-            {
-                visTotal += 0.5 + (copy.GetValue() / 10.0);
-                copy.Experience += 6.5;
-            }
-            return visTotal;
         }
 
         public abstract int GetTractatiiLimit();

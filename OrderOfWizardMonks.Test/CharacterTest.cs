@@ -29,6 +29,16 @@ namespace WizardMonks.Test
             {
                 return Value;
             }
+
+            public double RollNormal(double mean, double stdDev)
+            {
+                return Value;
+            }
+
+            public double RollNormal()
+            {
+                return Value;
+            }
         }
 
         private static FakeDie _fakeDie;

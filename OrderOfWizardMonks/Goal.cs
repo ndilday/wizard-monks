@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
     public abstract class GoalBase
@@ -24,8 +26,6 @@ namespace WizardMonks
     {
         public Ability Ability { get; set; }
         public double Level { get; set; }
-
-        private IBook _bookToRead;
 
         public override double Score(Character character)
         {

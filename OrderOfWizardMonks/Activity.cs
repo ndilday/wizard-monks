@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
 	[Serializable]
@@ -106,6 +108,13 @@ namespace WizardMonks
     [Serializable]
     public class Writing : IAction
     {
+        private Ability _topic;
+        private double _level;
+        public Writing(Ability topic, double level)
+        {
+            _topic = topic;
+            _level = level;
+        }
         public ushort? SeasonId { get; private set; }
         public Activity Action
         {

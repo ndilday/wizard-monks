@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace WizardMonks
@@ -53,6 +54,14 @@ namespace WizardMonks
             }
         }
 
+        public static void Initialize(IEnumerable<T> enumerable)
+        {
+            foreach (T t in enumerable)
+            {
+                instances.Add(t.GetKey(), t);
+            }
+        }
+
         public static T GetInstance(K key)
         {
             T instance;
@@ -65,6 +74,16 @@ namespace WizardMonks
                 }
             }
             return instance;
+        }
+
+        public static bool Contains(K key)
+        {
+            return instances.ContainsKey(key);
+        }
+
+        public static Dictionary<K, T>.KeyCollection GetKeys()
+        {
+            return instances.Keys;
         }
     }
 }

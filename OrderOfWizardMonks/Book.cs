@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
 	[Serializable]
@@ -19,6 +21,10 @@ namespace WizardMonks
 	[Serializable]
 	public class Summa : IBook
 	{
+        public double GetWritingPointsNeeded()
+        {
+            return MagicArts.IsArt(Topic) ? Level : Level * 5;
+        }
 	}
 
     [Serializable]

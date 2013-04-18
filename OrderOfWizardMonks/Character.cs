@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
     public class AgingEventArgs : EventArgs
@@ -44,7 +46,9 @@ namespace WizardMonks
 
         #region Private Fields
         private uint _noAgingSeasons;
-        protected SortedSet<Preference> _preferences;
+        protected Ability _writingAbility;
+        protected Ability _writingLanguage;
+        protected Dictionary<Preference, double> _preferences;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
@@ -55,6 +59,7 @@ namespace WizardMonks
         protected readonly List<IBook> _booksRead;
         protected readonly List<IBook> _booksOwned;
         protected readonly List<GoalBase> _goals;
+        protected readonly Preference _visDesire = new Preference(PreferenceType.Vis, null);
         #endregion
 
         public event AgedEventHandler Aged;
@@ -62,16 +67,17 @@ namespace WizardMonks
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
 
-        public Character()
+        public Character(Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
         {
-            Strength = new Attribute(0);
-            Stamina = new Attribute(0);
-            Dexterity = new Attribute(0);
-            Quickness = new Attribute(0);
-            Intelligence = new Attribute(0);
-            Communication = new Attribute(0);
-            Perception = new Attribute(0);
-            Presence = new Attribute(0);
+            Die die = new Die();
+            Strength = new Attribute(die.RollNormal());
+            Stamina = new Attribute(die.RollNormal());
+            Dexterity = new Attribute(die.RollNormal());
+            Quickness = new Attribute(die.RollNormal());
+            Intelligence = new Attribute(die.RollNormal());
+            Communication = new Attribute(die.RollNormal());
+            Perception = new Attribute(die.RollNormal());
+            Presence = new Attribute(die.RollNormal());
 
             Decrepitude = 0;
 
@@ -85,16 +91,12 @@ namespace WizardMonks
             _booksOwned = new List<IBook>();
             _goals = new List<GoalBase>();
 
-            GeneratePreferences();
-            GenerateNewGoals();
+            _writingAbility = writingAbility;
+            _writingLanguage = writingLanguage;
+            _preferences = preferences;
         }
 
         #region Generation Functions
-        protected virtual void GeneratePreferences()
-        {
-            _preferences = PreferenceFactory.CreatePreferenceList(false);
-        }
-
         public virtual void GenerateNewGoals()
         {
             throw new NotImplementedException();
@@ -230,7 +232,7 @@ namespace WizardMonks
 
         #region Seasonal Functions
 
-        public virtual IAction DecideSeasonalActivity()
+        public virtual IAction DecideSeasonalActivityOld()
         {
             if (_goals == null || _goals.Count == 0)
             {
@@ -268,19 +270,94 @@ namespace WizardMonks
             return _goals[bestGoalIndex].GetSeasonalActivity(this);
         }
 
-        public virtual IAction DecideSeasonalActivity2()
+        public virtual IAction DecideSeasonalActivity()
         {
             // process books, looking for most interesting readable title
-            double bookValue = 0;
+            double bestValue = 0;
+            IAction action = null;
             var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
             if (availableBooks.Any())
             {
-                var bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(PreferenceType.Art, b.Topic)).First();
-                bookValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
+                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Art, b.Topic))).First();
+                bestValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
+                action = ConfirmLiteracy(bestBook);
             }
 
             // consider the value created per season if writing, instead
-            EvaluatedBook book = EstimateBestBook();
+            EvaluatedBook book = EstimateBestBookToWrite();
+            if (book.PerceivedValue > bestValue)
+            {
+                action = ConfirmLiteracy(book);
+                bestValue = book.PerceivedValue;
+            }
+
+            // compare the most desirable ability to practice
+            double practiceDesire = 0;
+            Ability practice = GetPreferredAbilityToPractice(out practiceDesire);
+            if (practiceDesire > bestValue)
+            {
+                action = new Practice(practice);
+            }
+
+            return action;
+        }
+
+        public IAction ConfirmLiteracy(IBook book)
+        {
+            if (GetAbility(_writingLanguage).GetValue() < 4)
+            {
+                // we need to learn to read before we can do anything with these books
+                return new Practice(_writingLanguage);
+
+            }
+            else if (GetAbility(_writingAbility).GetValue() < 1)
+            {
+                // TODO: figure out the best way to inject the right activity here
+                return new Practice(_writingAbility);
+            }
+            else
+            {
+                return new Reading(book);
+            }
+        }
+
+        public IAction ConfirmLiteracy(EvaluatedBook book)
+        {
+            double languageValue = GetAbility(_writingLanguage).GetValue();
+            if ( languageValue < 5 && languageValue > 4)
+            {
+                return GetBestActionForGain(_writingLanguage);
+            }
+            else if ( languageValue < 4)
+            {
+                // we need to learn to read before we can do anything with these books
+                return new Practice(_writingLanguage);
+
+            }
+            else if (GetAbility(_writingAbility).GetValue() < 1)
+            {
+                // TODO: figure out the best way to inject the right activity here
+                return new Practice(_writingAbility);
+            }
+            else
+            {
+                return new Writing(book.Book.Topic, book.Book.Level);
+            }
+        }
+
+        public IAction GetBestActionForGain(Ability ability)
+        {
+            // see if there are any books on the topic worth reading
+            IBook book = GetBestBookFromCollection(ability);
+            double bookExp = GetBookLevelGain(book);
+            if (bookExp < 4)
+            {
+                return new Practice(ability);
+            }
+            else
+            {
+                return new Reading(book);
+            }
         }
 
         public virtual void CommitAction(IAction action)
@@ -308,19 +385,13 @@ namespace WizardMonks
 
         public virtual double GetBookLevelGain(IBook book)
         {
-            CharacterAbilityBase ability;
             if (book == null)
             {
                 return 0;
             }
-            ability = GetAbility(book.Topic);
 
             // determine difference in ability using the new book compared to the old book
-            CharacterAbilityBase newAbility = ability.MakeCopy();
-            newAbility.AddExperience(book.Quality, book.Level);
-            double difference = newAbility.GetValue() - ability.GetValue();
-
-            return difference;
+            return GetAbility(book.Topic).GetValueGain(book.Quality, book.Level);
         }
 
         public virtual double RateLifetimeBookValue(IBook book)
@@ -330,10 +401,36 @@ namespace WizardMonks
                 return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
             }
             CharacterAbilityBase charAbility = GetAbility(book.Topic);
-            double expValue = charAbility.GetExperienceUntilLevel(book.Level);
-            double seasons = expValue / book.Quality;
+            if (charAbility.GetValue() > book.Level)
+            {
+                return 0;
+            }
             
-            double visNeed = charAbility.GetVisToReachLevel(book.Level);
+            double expValue = charAbility.GetExperienceUntilLevel(book.Level);
+            double bookSeasons = expValue / book.Quality;
+            double visLearningSeasons = expValue / _preferences[_visDesire];
+            
+            double visNeed = expValue / _preferences[_visDesire];
+            double visPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+            return visNeed / visPer;
+        }
+
+        public virtual double RateLifetimeBookValue(IBook book, CharacterAbilityBase ability)
+        {
+            if (book.Level == 0)
+            {
+                return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
+            }
+            if (ability.GetValue() > book.Level)
+            {
+                return 0;
+            }
+
+            double expValue = ability.GetExperienceUntilLevel(book.Level);
+            double bookSeasons = expValue / book.Quality;
+            double visLearningSeasons = expValue / _preferences[_visDesire];
+
+            double visNeed = expValue / _preferences[_visDesire];
             double visPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
             return visNeed / visPer;
         }
@@ -356,7 +453,7 @@ namespace WizardMonks
         {
         }
 
-        public virtual EvaluatedBook EstimateBestBook()
+        public virtual EvaluatedBook EstimateBestBookToWrite()
         {
             return new EvaluatedBook
             {
@@ -364,20 +461,35 @@ namespace WizardMonks
                 PerceivedValue = 0
             };
         }
-
-        public double GetBestGain(Ability ability)
-        {
-            // see if there are any books on the topic worth reading
-            double bookExp = GetBookLevelGain(GetBestBookFromCollection(ability));
-            return bookExp <= 4 ? 4 : bookExp;
-        }
         #endregion
 
         #region Preference/Goal Functions
-        public double GetDesire(PreferenceType type, object spec)
+        public double GetDesire(Preference pref)
         {
-            var prefs = _preferences.Where(p => p.Type == type && p.Specifier == spec);
-            return prefs.Any() ? prefs.First().Value : 0;
+            return _preferences.ContainsKey(pref) ? _preferences[pref] : 0;
+        }
+
+        public Ability GetPreferredAbilityToPractice(out double preference)
+        {
+            Ability ability = null;
+            preference = 0;
+            foreach (KeyValuePair<Preference, double> prefPair in _preferences)
+            {
+                if (prefPair.Key.Type == PreferenceType.Ability || prefPair.Key.Type == PreferenceType.Art)
+                {
+                    Ability thisAbility = (Ability)prefPair.Key.Specifier;
+                    CharacterAbilityBase charAbility = GetAbility(thisAbility);
+                    double gain = charAbility.GetValueGain(4);
+                    double thisPreference = gain * prefPair.Value;
+                    if (thisPreference > preference)
+                    {
+                        ability = thisAbility;
+                        preference = thisPreference;
+                    }
+                }
+            }
+
+            return ability;
         }
 
         protected virtual double RateSeasonalExperienceGainAsTime(Ability ability, double gain)
@@ -387,8 +499,8 @@ namespace WizardMonks
 
             CharacterAbilityBase charAbility = GetAbility(ability);
             double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-            double visNeeded = gain * visUsePer / 6.5;
-            double visSeasons = (visNeeded / visGainPer) + (gain / 6.5);
+            double visNeeded = gain * visUsePer / _preferences[_visDesire];
+            double visSeasons = (visNeeded / visGainPer) + (gain / _preferences[_visDesire]);
             return visSeasons;
         }
 

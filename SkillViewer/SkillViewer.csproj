@@ -93,6 +93,8 @@
       <DependentUpon>WorldGenerator.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="Properties\DataSources\WizardMonks.Character.datasource" />
+    <None Include="Properties\DataSources\WizardMonks.CharacterAbilityBase.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

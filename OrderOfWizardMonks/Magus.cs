@@ -28,11 +28,24 @@ namespace WizardMonks
             : base(writingLanguage, writingAbility, preferences)
         {
             _magicAbility = magicAbility;
+            Arts = new Arts();
         }
 
 		public Houses House { get; set; }
 
-        public Arts Arts { get; set; }
+        public Arts Arts { get; private set; }
+
+        public override CharacterAbilityBase GetAbility(Ability ability)
+        {
+            if (MagicArts.IsArt(ability))
+            {
+                return Arts.GetAbility(ability);
+            }
+            else
+            {
+                return base.GetAbility(ability);
+            }
+        }
 
         public override void GenerateNewGoals()
         {

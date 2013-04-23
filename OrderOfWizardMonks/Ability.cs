@@ -23,7 +23,9 @@ namespace WizardMonks
         [DataMember]
         Warping,
         [DataMember]
-        Art
+        Art,
+        [DataMember]
+        Language
 	}
 
 	[DataContract]
@@ -117,6 +119,14 @@ namespace WizardMonks
             {
                 _experience = value;
                 _cached = false;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return Ability.AbilityName;
             }
         }
 

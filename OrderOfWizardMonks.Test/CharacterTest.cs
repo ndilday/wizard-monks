@@ -61,7 +61,7 @@ namespace WizardMonks.Test
         {
             _fakeDie.Value = 5;
 
-            Character character = new Character();
+            Character character = new Character(null, null, null);
             IAction action = new Exposure(new Ability());
             
             for (uint i = 21; i < 141; i++)
@@ -74,7 +74,7 @@ namespace WizardMonks.Test
 
         public Character CreateAge35Character()
         {
-            Character character = new Character();
+            Character character = new Character(null, null, null);
             IAction action = new Exposure(new Ability());
 
             for (uint i = 21; i < 141; i++)

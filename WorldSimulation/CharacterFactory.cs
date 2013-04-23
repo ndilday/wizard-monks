@@ -9,9 +9,9 @@ namespace WorldSimulation
 {
     public class CharacterFactory
     {
-        public static Character GenerateNewCharacter()
+        public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility)
         {
-            Character character = new Character();
+            Character character = new Character(langAbility, writingAbility, null);
             NormalizeAttributes(character);
 
             return character;

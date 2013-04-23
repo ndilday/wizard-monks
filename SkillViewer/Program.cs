@@ -15,7 +15,7 @@ namespace SkillViewer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CharacterBuilderForm());
+            Application.Run(new WorldGenerator());
         }
     }
 }

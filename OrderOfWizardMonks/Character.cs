@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using WizardMonks.Instances;
@@ -62,10 +63,16 @@ namespace WizardMonks
         protected readonly Preference _visDesire = new Preference(PreferenceType.Vis, null);
         #endregion
 
+        #region Events
         public event AgedEventHandler Aged;
+        #endregion
 
+        #region Public Fields
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
+        public string Name { get; set; }
+        public string Log { get; set; }
+        #endregion
 
         public Character(Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
         {
@@ -94,6 +101,8 @@ namespace WizardMonks
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
             _preferences = preferences;
+
+            Log = "";
         }
 
         #region Generation Functions
@@ -106,7 +115,17 @@ namespace WizardMonks
         #region Ability Functions
         public virtual CharacterAbilityBase GetAbility(Ability ability)
         {
-            return _abilityList.ContainsKey(ability.AbilityId) ? _abilityList[ability.AbilityId] : new CharacterAbility(ability);
+            if (!_abilityList.ContainsKey(ability.AbilityId))
+            {
+                _abilityList[ability.AbilityId] = new CharacterAbility(ability);
+            }
+            
+            return _abilityList[ability.AbilityId];
+        }
+
+        public virtual IEnumerable<CharacterAbilityBase> GetAbilities()
+        {
+            return _abilityList.Values;
         }
         
         protected virtual void AddAbility(Ability ability)
@@ -278,15 +297,20 @@ namespace WizardMonks
             var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
             if (availableBooks.Any())
             {
-                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Art, b.Topic))).First();
-                bestValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
-                action = ConfirmLiteracy(bestBook);
+                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Art, b.Topic))).FirstOrDefault();
+                if (bestBook != null)
+                {
+                    Log += "Could read a book on " + bestBook.Topic.AbilityName + " at Q" + bestBook.Quality + "\r\n";
+                    bestValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
+                    action = ConfirmLiteracy(bestBook);
+                }
             }
 
             // consider the value created per season if writing, instead
             EvaluatedBook book = EstimateBestBookToWrite();
-            if (book.PerceivedValue > bestValue)
+            if (book != null && book.PerceivedValue > bestValue)
             {
+                Log += "Could write a book on " + book.Book.Topic.AbilityName + " at Q" + book.Book.Quality + "\r\n";
                 action = ConfirmLiteracy(book);
                 bestValue = book.PerceivedValue;
             }
@@ -296,6 +320,7 @@ namespace WizardMonks
             Ability practice = GetPreferredAbilityToPractice(out practiceDesire);
             if (practiceDesire > bestValue)
             {
+                Log += "Decided to practice " + practice.AbilityName + "\r\n";
                 action = new Practice(practice);
             }
 
@@ -307,12 +332,14 @@ namespace WizardMonks
             if (GetAbility(_writingLanguage).GetValue() < 4)
             {
                 // we need to learn to read before we can do anything with these books
+                Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
                 return new Practice(_writingLanguage);
 
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
                 // TODO: figure out the best way to inject the right activity here
+                Log += "Does not know alphabet" + "\r\n";
                 return new Practice(_writingAbility);
             }
             else
@@ -324,19 +351,22 @@ namespace WizardMonks
         public IAction ConfirmLiteracy(EvaluatedBook book)
         {
             double languageValue = GetAbility(_writingLanguage).GetValue();
-            if ( languageValue < 5 && languageValue > 4)
+            if ( languageValue < 5 && languageValue >= 4)
             {
+                Log += "Cannont write " + _writingLanguage.AbilityName + "\r\n";
                 return GetBestActionForGain(_writingLanguage);
             }
             else if ( languageValue < 4)
             {
                 // we need to learn to read before we can do anything with these books
+                Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
                 return new Practice(_writingLanguage);
 
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
                 // TODO: figure out the best way to inject the right activity here
+                Log += "Does not know alphabet" + "\r\n";
                 return new Practice(_writingAbility);
             }
             else
@@ -362,8 +392,24 @@ namespace WizardMonks
 
         public virtual void CommitAction(IAction action)
         {
+            _seasonList.Add(action);
             action.Act(this);
-            this.Age(0);
+            if (SeasonalAge >= 140)
+            {
+                Age(0);
+            }
+        }
+
+        public virtual void Advance()
+        {
+            Log += "Season " + _seasonList.Count() + "\r\n";
+            IAction activity = DecideSeasonalActivity();
+            _seasonList.Add(activity);
+            activity.Act(this);
+            if (SeasonalAge >= 140)
+            {
+                Age(0);
+            }
         }
         #endregion
 

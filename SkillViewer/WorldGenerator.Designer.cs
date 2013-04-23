@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnGenerate = new System.Windows.Forms.Button();
             this.lstMembers = new System.Windows.Forms.ListBox();
+            this.characterBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.characterBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // btnGenerate
@@ -44,12 +47,18 @@
             // 
             // lstMembers
             // 
+            this.lstMembers.DataSource = this.characterBindingSource;
+            this.lstMembers.DisplayMember = "Name";
             this.lstMembers.FormattingEnabled = true;
             this.lstMembers.Location = new System.Drawing.Point(13, 43);
             this.lstMembers.Name = "lstMembers";
             this.lstMembers.Size = new System.Drawing.Size(256, 472);
             this.lstMembers.TabIndex = 1;
             this.lstMembers.DoubleClick += new System.EventHandler(this.lstMembers_DoubleClick);
+            // 
+            // characterBindingSource
+            // 
+            this.characterBindingSource.DataSource = typeof(WizardMonks.Character);
             // 
             // WorldGenerator
             // 
@@ -60,6 +69,7 @@
             this.Controls.Add(this.btnGenerate);
             this.Name = "WorldGenerator";
             this.Text = "WorldGenerator";
+            ((System.ComponentModel.ISupportInitialize)(this.characterBindingSource)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -68,5 +78,6 @@
 
         private System.Windows.Forms.Button btnGenerate;
         private System.Windows.Forms.ListBox lstMembers;
+        private System.Windows.Forms.BindingSource characterBindingSource;
     }
 }

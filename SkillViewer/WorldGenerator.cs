@@ -14,7 +14,7 @@ namespace SkillViewer
     public partial class WorldGenerator : Form
     {
         private Magus[] _magusArray = new Magus[1000];
-        private uint _magusCount = 0;
+        private int _magusCount = 0;
         private Ability _latin;
         private Ability _magicTheory;
         private Ability _artLib;
@@ -23,6 +23,7 @@ namespace SkillViewer
         public WorldGenerator()
         {
             ImmutableMultiton<int, Ability>.Initialize(MagicArts.GetEnumerator());
+            ImmutableMultiton<int, Ability>.Initialize(Abilities.GetEnumerator());
             // read out values in multiton
             foreach(int i in ImmutableMultiton<int, Ability>.GetKeys())
             {
@@ -65,6 +66,38 @@ namespace SkillViewer
         private void btnGenerate_Click(object sender, EventArgs e)
         {
             _magusArray[_magusCount] = CharacterFactory.GenerateNewMagus(_magicTheory, _latin, _artLib);
+            _magusArray[_magusCount].Name = GenerateName(_magusCount);
+            _magusCount++;
+            lstMembers.DataSource = _magusArray.Take(_magusCount).ToList();
+        }
+
+        private string GenerateName(int nameNumber)
+        {
+            switch (nameNumber)
+            {
+                case 0:
+                    return "Zed";
+                case 1:
+                    return "Primus";
+                case 2:
+                    return "Secundus";
+                case 3:
+                    return "Tricundus";
+                case 4:
+                    return "Quatrus";
+                case 5:
+                    return "Quintus";
+                case 6:
+                    return "Sextus";
+                case 7:
+                    return "Septus";
+                case 8:
+                    return "Octus";
+                case 9:
+                    return "Novus";
+                default:
+                    return "Magus " + nameNumber.ToString();
+            }
         }
     }
 }

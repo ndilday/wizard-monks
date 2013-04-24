@@ -495,17 +495,56 @@ namespace WizardMonks
             }
         }
 
-        public virtual void WriteBook()
+        public bool CanWriteTractatus(CharacterAbilityBase charAbility)
         {
+            return charAbility.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == charAbility.Ability && b.Level == 0).Count();
+        }
+
+        public virtual EvaluatedBook EstimateTractatus(CharacterAbilityBase charAbility)
+        {
+            Tractatus t = new Tractatus
+            {
+                Quality = Communication.Value + 3,
+                Topic = charAbility.Ability
+            };
+            return new EvaluatedBook
+            {
+                Book = t,
+                PerceivedValue = RateLifetimeBookValue(t)
+            };
+        }
+
+        public void WriteBook(Ability topic, int desiredLevel = 0)
+        {
+            if (desiredLevel == 0)
+            {
+                WriteTractatus(topic);
+            }
+        }
+
+        private virtual void WriteTractatus(Ability topic)
+        {
+
         }
 
         public virtual EvaluatedBook EstimateBestBookToWrite()
         {
-            return new EvaluatedBook
+            EvaluatedBook bestBook = new EvaluatedBook
             {
                 Book = null,
                 PerceivedValue = 0
             };
+            foreach (CharacterAbilityBase charAbility in _abilityList.Values)
+            {
+                if (CanWriteTractatus(charAbility))
+                {
+                    // TODO: Join this function with the magus version
+                    // TODO: Value of tract. is incorrect, should redo
+                    // TODO: Should a magus care which topic they're writing on?
+                }
+            }
+
+            return bestBook;
         }
         #endregion
 

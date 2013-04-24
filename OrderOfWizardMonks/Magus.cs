@@ -23,12 +23,14 @@ namespace WizardMonks
 	public class Magus : Character
 	{
         private Ability _magicAbility;
+        private Covenant _covenant;
 
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
             : base(writingLanguage, writingAbility, preferences)
         {
             _magicAbility = magicAbility;
             Arts = new Arts();
+            _covenant = null;
         }
 
 		public Houses House { get; set; }
@@ -47,71 +49,44 @@ namespace WizardMonks
             }
         }
 
-        public override void GenerateNewGoals()
+        #region Covenant Functions
+        public void Join(Covenant covenant)
         {
-            foreach (Ability art in MagicArts.GetEnumerator())
-            {
-                double apprenticeAge = GetDesire(new Preference(PreferenceType.AgeToApprentice, null));
-                GenerateArtWritingGoal(art);
-                int seasonsLived = 20 + _seasonList.Count();
-                if (apprenticeAge < seasonsLived)
-                {
-                    GenerateArtLearningGoal(art, seasonsLived, 5);
-                }
-                else
-                {
-                    GenerateArtLearningGoal(art, seasonsLived, 50);
-                }
-            }
+            _covenant = covenant;
+            covenant.AddMagus(this);
         }
 
-        private void GenerateArtLearningGoal(Ability art, int seasonsLived, double level)
+        public Covenant FoundCovenant(int auraLevel = 0)
         {
-            double desire = GetDesire(new Preference(PreferenceType.Ability, art));
-            _goals.Add(new AbilityGoal
-                {
-                    Ability = art,
-                    Level = level,
-                    SeasonsToComplete = (uint)(400 - seasonsLived),
-                    Priority = desire
-                });
+            Covenant coventant = new Covenant();
+            Join(coventant);
+            coventant.Aura = auraLevel;
+            return coventant;
         }
+        #endregion
 
-        private void GenerateArtWritingGoal(Ability art)
+        #region Book Functions
+        public override IEnumerable<IBook> GetBooksFromCollection(Ability ability)
         {
-            double desire = GetDesire(new Preference(PreferenceType.Writing, art));
-            uint timeFrame = (uint)(20 / desire);
-            int tractLimit = GetAbility(art).GetTractatiiLimit();
-            if (tractLimit > _booksWritten.Where(b => b.Topic == art && b.Level == 0).Count())
+            IEnumerable<IBook> books = _booksOwned.Where(b => b.Topic == ability);
+            if (_covenant != null)
             {
-                _goals.Add(new WritingGoal(art, 0, 0, timeFrame, desire));
+                books = books.Union(_covenant.GetLibrary(ability));
             }
+            return books;
         }
 
         public override EvaluatedBook EstimateBestBookToWrite()
         {
-            EvaluatedBook bestBook = new EvaluatedBook
-            {
-                Book = null,
-                PerceivedValue = 0
-            };
+            EvaluatedBook bestBook = base.EstimateBestBookToWrite();
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 CharacterAbilityBase ability = GetAbility(art);
-                if (ability.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == art && b.Level == 0).Count())
+                if (CanWriteTractatus(ability))
                 {
                     //TODO: add in value of exposure?
                     // calculate tractatus value
-                    Tractatus t = new Tractatus
-                    {
-                        Quality = Communication.Value + 3,
-                        Topic = art
-                    };
-                    EvaluatedBook tract = new EvaluatedBook
-                    {
-                        Book = t,
-                        PerceivedValue = RateLifetimeBookValue(t)
-                    };
+                    EvaluatedBook tract = EstimateTractatus(ability);
                     if (tract.PerceivedValue > bestBook.PerceivedValue)
                     {
                         bestBook = tract;
@@ -191,6 +166,50 @@ namespace WizardMonks
             }
             return bestBook;
         }
+        #endregion
+
+        #region Goal/Preference Functions
+        public override void GenerateNewGoals()
+        {
+            foreach (Ability art in MagicArts.GetEnumerator())
+            {
+                double apprenticeAge = GetDesire(new Preference(PreferenceType.AgeToApprentice, null));
+                GenerateArtWritingGoal(art);
+                int seasonsLived = 20 + _seasonList.Count();
+                if (apprenticeAge < seasonsLived)
+                {
+                    GenerateArtLearningGoal(art, seasonsLived, 5);
+                }
+                else
+                {
+                    GenerateArtLearningGoal(art, seasonsLived, 50);
+                }
+            }
+        }
+
+        private void GenerateArtLearningGoal(Ability art, int seasonsLived, double level)
+        {
+            double desire = GetDesire(new Preference(PreferenceType.Ability, art));
+            _goals.Add(new AbilityGoal
+                {
+                    Ability = art,
+                    Level = level,
+                    SeasonsToComplete = (uint)(400 - seasonsLived),
+                    Priority = desire
+                });
+        }
+
+        private void GenerateArtWritingGoal(Ability art)
+        {
+            double desire = GetDesire(new Preference(PreferenceType.Writing, art));
+            uint timeFrame = (uint)(20 / desire);
+            int tractLimit = GetAbility(art).GetTractatiiLimit();
+            if (tractLimit > _booksWritten.Where(b => b.Topic == art && b.Level == 0).Count())
+            {
+                _goals.Add(new WritingGoal(art, 0, 0, timeFrame, desire));
+            }
+        }
+        #endregion
 
         protected void CheckTwilight()
         {
@@ -201,12 +220,17 @@ namespace WizardMonks
             double magicTheory = GetAbility(_magicAbility).GetValue();
             double techValue = Arts.GetAbility(technique).GetValue();
             double formValue = Arts.GetAbility(form).GetValue();
+            double labTotal =  magicTheory + techValue + formValue;
+            if (_covenant != null)
+            {
+                labTotal += _covenant.Aura;
+            }
 
-            return magicTheory + techValue + formValue;
             //TODO: laboratory
             //TODO: foci
             //TODO: lab assistant
             //TODO: familiar
+            return labTotal;
         }
 	}
 }

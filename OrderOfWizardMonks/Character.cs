@@ -61,6 +61,7 @@ namespace WizardMonks
         protected readonly List<IBook> _booksOwned;
         protected readonly List<GoalBase> _goals;
         protected readonly Preference _visDesire = new Preference(PreferenceType.Vis, null);
+        protected List<Summa> _incompleteBooks;
         #endregion
 
         #region Events
@@ -101,6 +102,8 @@ namespace WizardMonks
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
             _preferences = preferences;
+
+            _incompleteBooks = new List<Summa>();
 
             Log = "";
         }
@@ -292,7 +295,6 @@ namespace WizardMonks
         public virtual IAction DecideSeasonalActivity()
         {
             // process books, looking for most interesting readable title
-            double bestValue = 0;
             IAction action = null;
             var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
             if (availableBooks.Any())
@@ -301,92 +303,90 @@ namespace WizardMonks
                 if (bestBook != null)
                 {
                     Log += "Could read a book on " + bestBook.Topic.AbilityName + " at Q" + bestBook.Quality + "\r\n";
-                    bestValue = RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook));
-                    action = ConfirmLiteracy(bestBook);
+                    action = ConfirmLiteracy(bestBook, RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook)));
                 }
             }
 
             // consider the value created per season if writing, instead
             EvaluatedBook book = EstimateBestBookToWrite();
-            if (book != null && book.PerceivedValue > bestValue)
+            if (book != null && (action == null || book.PerceivedValue > action.Desire))
             {
                 Log += "Could write a book on " + book.Book.Topic.AbilityName + " at Q" + book.Book.Quality + "\r\n";
-                action = ConfirmLiteracy(book);
-                bestValue = book.PerceivedValue;
+                action = ConfirmLiteracy(book, book.PerceivedValue);
             }
 
             // compare the most desirable ability to practice
             double practiceDesire = 0;
             Ability practice = GetPreferredAbilityToPractice(out practiceDesire);
-            if (practiceDesire > bestValue)
+            if (action == null || practiceDesire > action.Desire)
             {
                 Log += "Decided to practice " + practice.AbilityName + "\r\n";
-                action = new Practice(practice);
+                action = new Practice(practice, practiceDesire);
             }
 
             return action;
         }
 
-        public IAction ConfirmLiteracy(IBook book)
+        public IAction ConfirmLiteracy(IBook book, double desire)
         {
             if (GetAbility(_writingLanguage).GetValue() < 4)
             {
                 // we need to learn to read before we can do anything with these books
                 Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
-                return new Practice(_writingLanguage);
+                return new Practice(_writingLanguage, desire);
 
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
                 // TODO: figure out the best way to inject the right activity here
                 Log += "Does not know alphabet" + "\r\n";
-                return new Practice(_writingAbility);
+                return new Practice(_writingAbility, desire);
             }
             else
             {
-                return new Reading(book);
+                return new Reading(book, desire);
             }
         }
 
-        public IAction ConfirmLiteracy(EvaluatedBook book)
+        public IAction ConfirmLiteracy(EvaluatedBook book, double desire)
         {
             double languageValue = GetAbility(_writingLanguage).GetValue();
             if ( languageValue < 5 && languageValue >= 4)
             {
                 Log += "Cannont write " + _writingLanguage.AbilityName + "\r\n";
-                return GetBestActionForGain(_writingLanguage);
+                return GetBestActionForGain(_writingLanguage, desire);
             }
             else if ( languageValue < 4)
             {
                 // we need to learn to read before we can do anything with these books
                 Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
-                return new Practice(_writingLanguage);
+                return new Practice(_writingLanguage, desire);
 
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
                 // TODO: figure out the best way to inject the right activity here
                 Log += "Does not know alphabet" + "\r\n";
-                return new Practice(_writingAbility);
+                return new Practice(_writingAbility, desire);
             }
             else
             {
-                return new Writing(book.Book.Topic, book.Book.Level);
+                return new Writing(book.Book.Topic, book.Book.Level, desire);
             }
         }
 
-        public IAction GetBestActionForGain(Ability ability)
+        private IAction GetBestActionForGain(Ability ability, double desire)
         {
             // see if there are any books on the topic worth reading
             IBook book = GetBestBookFromCollection(ability);
             double bookExp = GetBookLevelGain(book);
             if (bookExp < 4)
             {
-                return new Practice(ability);
+                return new Practice(ability, desire);
             }
             else
             {
-                return new Reading(book);
+                return new Reading(book, desire);
             }
         }
 
@@ -500,6 +500,168 @@ namespace WizardMonks
             return charAbility.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == charAbility.Ability && b.Level == 0).Count();
         }
 
+        public void WriteBook(Ability topic, int desiredLevel = 0)
+        {
+            if (desiredLevel == 0)
+            {
+                WriteTractatus(topic);
+            }
+            else
+            {
+                WriteSumma(topic, desiredLevel);
+            }
+        }
+
+        protected virtual void WriteTractatus(Ability topic)
+        {
+            Tractatus t = new Tractatus
+            {
+                Author = this,
+                Quality = this.Communication.Value + 3,
+                Topic = topic
+            };
+            _booksWritten.Add(t);
+        }
+
+        protected virtual void WriteSumma(Ability topic, int desiredLevel)
+        {
+            Summa s;
+            CharacterAbilityBase ability = GetAbility(topic);
+            Summa previousWork = _incompleteBooks.Where(b => b.Topic == topic && b.Level == desiredLevel).FirstOrDefault();
+            if (previousWork == null)
+            {
+                double difference = (ability.GetValue() / 2) - desiredLevel;
+                if (difference < 0)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                s = new Summa()
+                {
+                    Author = this,
+                    Level = desiredLevel,
+                    Topic = topic,
+                    Quality = MagicArts.IsArt(ability.Ability) ?
+                        this.Communication.Value + difference + 6 :
+                        this.Communication.Value + (difference * 3) + 6
+                };
+            }
+            else
+            {
+                s = previousWork;
+            }
+
+            s.PointsComplete += this.Communication.Value + GetAbility(_writingLanguage).GetValue();
+            if (s.PointsComplete >= s.GetWritingPointsNeeded())
+            {
+                _booksWritten.Add(s);
+                if (previousWork != null)
+                {
+                    _incompleteBooks.Remove(previousWork);
+                }
+            }
+        }
+
+        public virtual EvaluatedBook EstimateBestBookToWrite()
+        {
+            EvaluatedBook bestBook = new EvaluatedBook
+            {
+                Book = null,
+                PerceivedValue = 0
+            };
+            foreach (CharacterAbilityBase charAbility in _abilityList.Values)
+            {
+                bestBook = CompareToBestBook(bestBook, charAbility);
+            }
+
+            return bestBook;
+        }
+
+        protected EvaluatedBook CompareToBestBook(EvaluatedBook bestBook, CharacterAbilityBase ability)
+        {
+            if (CanWriteTractatus(ability))
+            {
+                //TODO: add in value of exposure?
+                // calculate tractatus value
+                EvaluatedBook tract = EstimateTractatus(ability);
+                if (tract.PerceivedValue > bestBook.PerceivedValue)
+                {
+                    bestBook = tract;
+                }
+            }
+
+            // calculate summa value
+            // TODO: how to decide what audience the magus is writing for?
+            // when art > 10, magus will write a /2 book
+            // when art >=20, magus will write a /4 book
+            if ((MagicArts.IsArt(ability.Ability) && ability.GetValue() >= 10) || ability.GetValue() >= 4)
+            {
+                // start with no q/l switching
+                CharacterAbilityBase theoreticalPurchaser;
+                if (MagicArts.IsArt(ability.Ability))
+                {
+                    theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
+                }
+                else
+                {
+                    theoreticalPurchaser = new CharacterAbility(ability.Ability);
+                }
+                theoreticalPurchaser.AddExperience(ability.Experience / 2);
+                Summa s = new Summa
+                {
+                    Quality = Communication.Value + 6,
+                    Level = ability.GetValue() / 2.0,
+                    Topic = ability.Ability
+                };
+                double value = RateLifetimeBookValue(s, theoreticalPurchaser);
+                if (value > bestBook.PerceivedValue)
+                {
+                    bestBook = new EvaluatedBook
+                    {
+                        Book = s,
+                        PerceivedValue = value
+                    };
+                }
+            }
+            if ((MagicArts.IsArt(ability.Ability) && ability.GetValue() >= 20) || ability.GetValue() >= 6)
+            {
+                // start with no q/l switching
+                CharacterAbilityBase theoreticalPurchaser;
+                if (MagicArts.IsArt(ability.Ability))
+                {
+                    theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
+                }
+                else
+                {
+                    theoreticalPurchaser = new CharacterAbility(ability.Ability);
+                }
+                theoreticalPurchaser.AddExperience(ability.Experience / 4);
+
+                double qualityAdd = ability.GetValue() / 4;
+                if (qualityAdd > (Communication.Value + 6))
+                {
+                    qualityAdd = Communication.Value + 6;
+                }
+
+                Summa s = new Summa
+                {
+                    Quality = Communication.Value + 6 + qualityAdd,
+                    Level = (ability.GetValue() / 2.0) - qualityAdd,
+                    Topic = ability.Ability
+                };
+                double seasonsNeeded = s.GetWritingPointsNeeded() / (Communication.Value + GetAbility(_writingAbility).GetValue());
+                double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
+                if (value > bestBook.PerceivedValue)
+                {
+                    bestBook = new EvaluatedBook
+                    {
+                        Book = s,
+                        PerceivedValue = value
+                    };
+                }
+            }
+            return bestBook;
+        }
+
         public virtual EvaluatedBook EstimateTractatus(CharacterAbilityBase charAbility)
         {
             Tractatus t = new Tractatus
@@ -512,39 +674,6 @@ namespace WizardMonks
                 Book = t,
                 PerceivedValue = RateLifetimeBookValue(t)
             };
-        }
-
-        public void WriteBook(Ability topic, int desiredLevel = 0)
-        {
-            if (desiredLevel == 0)
-            {
-                WriteTractatus(topic);
-            }
-        }
-
-        private virtual void WriteTractatus(Ability topic)
-        {
-
-        }
-
-        public virtual EvaluatedBook EstimateBestBookToWrite()
-        {
-            EvaluatedBook bestBook = new EvaluatedBook
-            {
-                Book = null,
-                PerceivedValue = 0
-            };
-            foreach (CharacterAbilityBase charAbility in _abilityList.Values)
-            {
-                if (CanWriteTractatus(charAbility))
-                {
-                    // TODO: Join this function with the magus version
-                    // TODO: Value of tract. is incorrect, should redo
-                    // TODO: Should a magus care which topic they're writing on?
-                }
-            }
-
-            return bestBook;
         }
         #endregion
 

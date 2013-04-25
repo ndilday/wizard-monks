@@ -11,6 +11,7 @@ namespace WizardMonks
 	[Serializable]
 	public class IBook
 	{
+        public string Title { get; set; }
 		public Character Author { get; set; }
 		public Ability Topic { get; set; }
 		public double Quality { get; set; }
@@ -25,6 +26,7 @@ namespace WizardMonks
         {
             return MagicArts.IsArt(Topic) ? Level : Level * 5;
         }
+        public double PointsComplete { get; set; }
 	}
 
     [Serializable]

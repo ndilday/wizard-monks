@@ -12,7 +12,7 @@ namespace WizardMonks.Test
         public void TestAging()
         {
             uint runningTally = 0;
-            IAction action = new Exposure(new Ability());
+            IAction action = new Exposure(new Ability(), 0);
                                 
             for (int i = 0; i < 100; i++)
             {

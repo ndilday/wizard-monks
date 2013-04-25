@@ -81,88 +81,7 @@ namespace WizardMonks
             EvaluatedBook bestBook = base.EstimateBestBookToWrite();
             foreach (Ability art in MagicArts.GetEnumerator())
             {
-                CharacterAbilityBase ability = GetAbility(art);
-                if (CanWriteTractatus(ability))
-                {
-                    //TODO: add in value of exposure?
-                    // calculate tractatus value
-                    EvaluatedBook tract = EstimateTractatus(ability);
-                    if (tract.PerceivedValue > bestBook.PerceivedValue)
-                    {
-                        bestBook = tract;
-                    }
-                }
-
-                // calculate summa value
-                // TODO: how to decide what audience the magus is writing for?
-                // when art > 10, magus will write a /2 book
-                // when art >=20, magus will write a /4 book
-                if ((MagicArts.IsArt(art) && ability.GetValue() >= 10) || ability.GetValue() >= 4)
-                {
-                    // start with no q/l switching
-                    CharacterAbilityBase theoreticalPurchaser;
-                    if (MagicArts.IsArt(art))
-                    {
-                        theoreticalPurchaser = new AcceleratedAbility(art);
-                    }
-                    else
-                    {
-                        theoreticalPurchaser = new CharacterAbility(art);
-                    }
-                    theoreticalPurchaser.AddExperience(ability.Experience / 2);
-                    Summa s = new Summa
-                    {
-                        Quality = Communication.Value + 6,
-                        Level = ability.GetValue() / 2.0,
-                        Topic = art
-                    };
-                    double value = RateLifetimeBookValue(s, theoreticalPurchaser);
-                    if (value > bestBook.PerceivedValue)
-                    {
-                        bestBook = new EvaluatedBook
-                        {
-                            Book = s,
-                            PerceivedValue = value
-                        };
-                    }
-                }
-                if ((MagicArts.IsArt(art) && ability.GetValue() >= 20) || ability.GetValue() >= 6)
-                {
-                    // start with no q/l switching
-                    CharacterAbilityBase theoreticalPurchaser;
-                    if (MagicArts.IsArt(art))
-                    {
-                        theoreticalPurchaser = new AcceleratedAbility(art);
-                    }
-                    else
-                    {
-                        theoreticalPurchaser = new CharacterAbility(art);
-                    }
-                    theoreticalPurchaser.AddExperience(ability.Experience / 4);
-
-                    double qualityAdd = ability.GetValue() / 4;
-                    if (qualityAdd > (Communication.Value + 6))
-                    {
-                        qualityAdd = Communication.Value + 6;
-                    }
-
-                    Summa s = new Summa
-                    {
-                        Quality = Communication.Value + 6 + qualityAdd,
-                        Level = (ability.GetValue() / 2.0) - qualityAdd,
-                        Topic = art
-                    };
-                    double seasonsNeeded = s.GetWritingPointsNeeded() / (Communication.Value + GetAbility(_writingAbility).GetValue());
-                    double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
-                    if (value > bestBook.PerceivedValue)
-                    {
-                        bestBook = new EvaluatedBook
-                        {
-                            Book = s,
-                            PerceivedValue = value
-                        };
-                    }
-                }
+                bestBook = CompareToBestBook(bestBook, Arts.GetAbility(art));
             }
             return bestBook;
         }
@@ -213,6 +132,22 @@ namespace WizardMonks
 
         protected void CheckTwilight()
         {
+        }
+
+        public override IAction DecideSeasonalActivity()
+        {
+            // TODO: make sure all preference values are scaled the same
+            IAction start = base.DecideSeasonalActivity();
+
+            if (start.Desire < 1 && _covenant != null && _covenant.Aura > 0)
+            {
+                double visPerSeason = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+
+            }
+
+            // TODO: study vis
+
+            return start;
         }
 
         public override double GetLabTotal(Ability technique, Ability form)

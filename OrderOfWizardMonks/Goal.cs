@@ -44,11 +44,11 @@ namespace WizardMonks
             IBook bookToRead = character.GetBestBookFromCollection(this.Ability);
             if (bookToRead == null)
             {
-                return new Practice(this.Ability);
+                return new Practice(this.Ability, 0);
             }
             else
             {
-                return new Reading(bookToRead);
+                return new Reading(bookToRead, 0);
             }
         }
     }

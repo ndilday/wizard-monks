@@ -84,41 +84,4 @@ namespace WizardMonks
             return _score;
         }
     }
-
-    public class VisGoal : AbilityGoal
-    {
-        public override double Score(Character character)
-        {
-            if (_isCached) return _score;
-            double multiplier = GetMultiplier();
-            if (multiplier == 0)
-            {
-                _isCached = true;
-                _score = 0;
-                return 0;
-            }
-
-            double labTotal = character.GetLabTotal(MagicArts.Creo, MagicArts.Vim);
-            _isCached = true;
-            _score = labTotal * multiplier * this.Priority * this.Level / (10 * this.SeasonsToComplete);
-            return _score;
-        }
-
-        private double GetMultiplier()
-        {
-            if (this.Ability.AbilityId == MagicArts.Vim.AbilityId)
-            {
-                return 1;
-            }
-            else if (MagicArts.IsForm(this.Ability))
-            {
-                return 2;
-            }
-            else if (MagicArts.IsTechnique(this.Ability))
-            {
-                return 4;
-            }
-            return 0;
-        }
-    }
 }

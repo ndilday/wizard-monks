@@ -142,11 +142,6 @@ namespace WizardMonks
                 _abilityList.Add(ability.AbilityId, new CharacterAbility(ability));
             }
         }
-
-        public virtual double GetLabTotal(Ability technique, Ability form)
-        {
-            return 0;
-        }
         #endregion
 
         #region Aging
@@ -308,7 +303,7 @@ namespace WizardMonks
             }
 
             // consider the value created per season if writing, instead
-            EvaluatedBook book = EstimateBestBookToWrite();
+            EvaluatedBook book = RateBestBookToWrite();
             if (book != null && (action == null || book.PerceivedValue > action.Desire))
             {
                 Log += "Could write a book on " + book.Book.Topic.AbilityName + " at Q" + book.Book.Quality + "\r\n";
@@ -338,7 +333,7 @@ namespace WizardMonks
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
-                // TODO: figure out the best way to inject the right activity here
+                // TODO: figure out the best way to inject the right activity here once teaching and training are implemented
                 Log += "Does not know alphabet" + "\r\n";
                 return new Practice(_writingAbility, desire);
             }
@@ -365,13 +360,13 @@ namespace WizardMonks
             }
             else if (GetAbility(_writingAbility).GetValue() < 1)
             {
-                // TODO: figure out the best way to inject the right activity here
+                // TODO: figure out the best way to inject the right activity here once teaching and training are implemented
                 Log += "Does not know alphabet" + "\r\n";
                 return new Practice(_writingAbility, desire);
             }
             else
             {
-                return new Writing(book.Book.Topic, book.Book.Level, desire);
+                return new Writing(book.Book.Topic, book.ExposureAbility, book.Book.Level, desire);
             }
         }
 
@@ -440,13 +435,17 @@ namespace WizardMonks
             return GetAbility(book.Topic).GetValueGain(book.Quality, book.Level);
         }
 
-        public virtual double RateLifetimeBookValue(IBook book)
+        public double RateLifetimeBookValue(IBook book, CharacterAbilityBase charAbility = null)
         {
             if (book.Level == 0)
             {
                 return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
             }
-            CharacterAbilityBase charAbility = GetAbility(book.Topic);
+            if (charAbility == null)
+            {
+                charAbility = GetAbility(book.Topic);
+            }
+
             if (charAbility.GetValue() > book.Level)
             {
                 return 0;
@@ -454,31 +453,7 @@ namespace WizardMonks
             
             double expValue = charAbility.GetExperienceUntilLevel(book.Level);
             double bookSeasons = expValue / book.Quality;
-            double visLearningSeasons = expValue / _preferences[_visDesire];
-            
-            double visNeed = expValue / _preferences[_visDesire];
-            double visPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-            return visNeed / visPer;
-        }
-
-        public virtual double RateLifetimeBookValue(IBook book, CharacterAbilityBase ability)
-        {
-            if (book.Level == 0)
-            {
-                return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
-            }
-            if (ability.GetValue() > book.Level)
-            {
-                return 0;
-            }
-
-            double expValue = ability.GetExperienceUntilLevel(book.Level);
-            double bookSeasons = expValue / book.Quality;
-            double visLearningSeasons = expValue / _preferences[_visDesire];
-
-            double visNeed = expValue / _preferences[_visDesire];
-            double visPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-            return visNeed / visPer;
+            return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality) / bookSeasons;
         }
 
         public virtual void ReadBook(IBook book)
@@ -500,19 +475,28 @@ namespace WizardMonks
             return charAbility.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == charAbility.Ability && b.Level == 0).Count();
         }
 
-        public void WriteBook(Ability topic, int desiredLevel = 0)
+        public IBook WriteBook(Ability topic, double desiredLevel = 0)
         {
+            // TODO: grant exposure experience
+            // TODO: add the book to the owned list
             if (desiredLevel == 0)
             {
-                WriteTractatus(topic);
+                Tractatus t = WriteTractatus(topic);
+                _booksOwned.Add(t);
+                return t;
             }
             else
             {
-                WriteSumma(topic, desiredLevel);
+                Summa s = WriteSumma(topic, desiredLevel);
+                if (s != null)
+                {
+                    _booksOwned.Add(s);
+                }
+                return s;
             }
         }
 
-        protected virtual void WriteTractatus(Ability topic)
+        protected Tractatus WriteTractatus(Ability topic)
         {
             Tractatus t = new Tractatus
             {
@@ -521,9 +505,18 @@ namespace WizardMonks
                 Topic = topic
             };
             _booksWritten.Add(t);
+            return t;
         }
 
-        protected virtual void WriteSumma(Ability topic, int desiredLevel)
+        /// <summary>
+        /// Works on a summa on the given topic. 
+        /// If the work invested is not enough to finish a book on that topic,
+        /// the incomplete work is added to the list
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="desiredLevel"></param>
+        /// <returns>the summa if it is completed, null otherwise</returns>
+        protected Summa WriteSumma(Ability topic, double desiredLevel)
         {
             Summa s;
             CharacterAbilityBase ability = GetAbility(topic);
@@ -558,10 +551,12 @@ namespace WizardMonks
                 {
                     _incompleteBooks.Remove(previousWork);
                 }
+                return s;
             }
+            return null;
         }
 
-        public virtual EvaluatedBook EstimateBestBookToWrite()
+        public virtual EvaluatedBook RateBestBookToWrite()
         {
             EvaluatedBook bestBook = new EvaluatedBook
             {
@@ -570,41 +565,71 @@ namespace WizardMonks
             };
             foreach (CharacterAbilityBase charAbility in _abilityList.Values)
             {
-                bestBook = CompareToBestBook(bestBook, charAbility);
+                bestBook = RateAgainstBestBook(bestBook, charAbility);
             }
+            
+            // compare expose in book ability versus writing language
+            if (GetAbility(bestBook.Book.Topic).GetValueGain(2) > GetAbility(_writingLanguage).GetValueGain(2))
+            {
+                bestBook.ExposureAbility = bestBook.Book.Topic;
+                bestBook.PerceivedValue += RateSeasonalExperienceGainAsTime(bestBook.Book.Topic, 2);
+            }
+            else
+            {
+                bestBook.ExposureAbility = _writingLanguage;
+                bestBook.PerceivedValue += RateSeasonalExperienceGainAsTime(_writingLanguage, 2);
+            }
+
 
             return bestBook;
         }
 
-        protected EvaluatedBook CompareToBestBook(EvaluatedBook bestBook, CharacterAbilityBase ability)
+        protected EvaluatedBook RateAgainstBestBook(EvaluatedBook bestBook, CharacterAbilityBase charAbility)
         {
-            if (CanWriteTractatus(ability))
+            if (CanWriteTractatus(charAbility))
             {
-                //TODO: add in value of exposure?
                 // calculate tractatus value
-                EvaluatedBook tract = EstimateTractatus(ability);
+                EvaluatedBook tract = EstimateTractatus(charAbility);
                 if (tract.PerceivedValue > bestBook.PerceivedValue)
                 {
                     bestBook = tract;
                 }
             }
 
+            bestBook = RateSummaAgainstBestBook(bestBook, charAbility);
+            return bestBook;
+        }
+
+        private Ability DetermineBestWritingExposure(Ability topic)
+        {
+            // TODO: scale these gains according to ability preferences
+            double topicGain = GetAbility(topic).GetValueGain(2);
+            double languageGain = GetAbility(_writingLanguage).GetValueGain(2);
+            double writingGain = GetAbility(_writingAbility).GetValueGain(2);
+            if (topicGain >= languageGain && topicGain >= writingGain)
+            {
+                return topic;
+            }
+            else if (languageGain >= topicGain && languageGain >= writingGain)
+            {
+                return _writingLanguage;
+            }
+            else
+            {
+                return _writingAbility;
+            }
+        }
+
+        protected virtual EvaluatedBook RateSummaAgainstBestBook(EvaluatedBook bestBook, CharacterAbilityBase ability)
+        {
             // calculate summa value
             // TODO: how to decide what audience the magus is writing for?
             // when art > 10, magus will write a /2 book
             // when art >=20, magus will write a /4 book
-            if ((MagicArts.IsArt(ability.Ability) && ability.GetValue() >= 10) || ability.GetValue() >= 4)
+            if (ability.GetValue() >= 4)
             {
                 // start with no q/l switching
-                CharacterAbilityBase theoreticalPurchaser;
-                if (MagicArts.IsArt(ability.Ability))
-                {
-                    theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
-                }
-                else
-                {
-                    theoreticalPurchaser = new CharacterAbility(ability.Ability);
-                }
+                CharacterAbilityBase theoreticalPurchaser = new CharacterAbility(ability.Ability);
                 theoreticalPurchaser.AddExperience(ability.Experience / 2);
                 Summa s = new Summa
                 {
@@ -622,18 +647,10 @@ namespace WizardMonks
                     };
                 }
             }
-            if ((MagicArts.IsArt(ability.Ability) && ability.GetValue() >= 20) || ability.GetValue() >= 6)
+            if (ability.GetValue() >= 6)
             {
-                // start with no q/l switching
-                CharacterAbilityBase theoreticalPurchaser;
-                if (MagicArts.IsArt(ability.Ability))
-                {
-                    theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
-                }
-                else
-                {
-                    theoreticalPurchaser = new CharacterAbility(ability.Ability);
-                }
+                // if more expert, try some q/l switching
+                CharacterAbilityBase theoreticalPurchaser = new CharacterAbility(ability.Ability);
                 theoreticalPurchaser.AddExperience(ability.Experience / 4);
 
                 double qualityAdd = ability.GetValue() / 4;
@@ -706,29 +723,15 @@ namespace WizardMonks
             return ability;
         }
 
+        /// <summary>
+        /// Determines the value of an experience gain in terms of practice seasons
+        /// </summary>
+        /// <param name="ability"></param>
+        /// <param name="gain"></param>
+        /// <returns>the season equivalence of this gain</returns>
         protected virtual double RateSeasonalExperienceGainAsTime(Ability ability, double gain)
         {
-            //TODO: risk aversion, vis stock, miser
-            double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-
-            CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-            double visNeeded = gain * visUsePer / _preferences[_visDesire];
-            double visSeasons = (visNeeded / visGainPer) + (gain / _preferences[_visDesire]);
-            return visSeasons;
-        }
-
-        protected virtual double RateSeasonalExperienceGainAsVis(Ability ability, double gain)
-        {
-            double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-            if (visGainPer == 0) return 0;
-
-            CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-            double visNeeded = gain * visUsePer / 6.5;
-            double visSeasons = (visNeeded / visGainPer) + (gain / 6.5);
-            if (visSeasons <= 1) return 0;
-            return (visSeasons - 1) * visGainPer;
+            return gain / 4;
         }
         #endregion
     }

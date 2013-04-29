@@ -48,5 +48,6 @@ namespace WizardMonks
     {
         public IBook Book { get; set; }
         public double PerceivedValue { get; set; }
+        public Ability ExposureAbility { get; set; }
     }
 }

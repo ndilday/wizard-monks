@@ -117,10 +117,12 @@ namespace WizardMonks
     {
         private Ability _topic;
         private double _level;
+        private Ability _exposure;
 
-        public Writing(Ability topic, double level, double desire)
+        public Writing(Ability topic, Ability exposure, double level, double desire)
         {
             _topic = topic;
+            _exposure = exposure;
             _level = level;
             Desire = desire;
         }
@@ -134,7 +136,75 @@ namespace WizardMonks
 
         public void Act(Character character)
         {
+            character.WriteBook(_topic, _level);
+            character.GetAbility(_exposure).AddExperience(2);
+        }
 
+        public double Desire { get; private set; }
+    }
+
+    [Serializable]
+    public class VisExtracting : IAction
+    {
+        private Ability _exposure;
+
+        public VisExtracting(Ability exposure)
+        {
+            _exposure = exposure;
+        }
+
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.DistillVis; }
+        }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+            if (typeof(Magus) != character.GetType())
+            {
+                throw new InvalidCastException("Only magi can extract vis!");
+            }
+            Magus mage = (Magus)character;
+
+        }
+
+        public double Desire
+        {
+            get
+            {
+                return 1;
+            }
+        }
+    }
+
+    [Serializable]
+    public class VisStudying : IAction
+    {
+        private Ability _art;
+
+        public VisStudying(Ability art, double desire)
+        {
+            _art = art;
+            Desire = desire;
+        }
+
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.StudyVis; }
+        }
+
+        public void Act(Character character)
+        {
+            if (typeof(Magus) != character.GetType())
+            {
+                throw new InvalidCastException("Only magi can extract vis!");
+            }
+            Magus mage = (Magus)character;
         }
 
         public double Desire { get; private set; }

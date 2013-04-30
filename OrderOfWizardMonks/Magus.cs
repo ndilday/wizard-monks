@@ -25,6 +25,7 @@ namespace WizardMonks
         private Ability _magicAbility;
         private Covenant _covenant;
         private Dictionary<Ability, double> _visStock;
+        private List<Ability> _extractionAbilities;
 
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
             : base(writingLanguage, writingAbility, preferences)
@@ -37,10 +38,13 @@ namespace WizardMonks
             {
                 _visStock[art] = 0;
             }
+            _extractionAbilities = new List<Ability>(MagicArts.GetExtractionAbilities());
+            _extractionAbilities.Add(_magicAbility);
         }
 
 		public Houses House { get; set; }
 
+        
         public Arts Arts { get; private set; }
 
         public override CharacterAbilityBase GetAbility(Ability ability)
@@ -162,24 +166,6 @@ namespace WizardMonks
         #endregion
 
         #region Goal/Preference Functions
-        public override void GenerateNewGoals()
-        {
-            foreach (Ability art in MagicArts.GetEnumerator())
-            {
-                double apprenticeAge = GetDesire(new Preference(PreferenceType.AgeToApprentice, null));
-                GenerateArtWritingGoal(art);
-                int seasonsLived = 20 + _seasonList.Count();
-                if (apprenticeAge < seasonsLived)
-                {
-                    GenerateArtLearningGoal(art, seasonsLived, 5);
-                }
-                else
-                {
-                    GenerateArtLearningGoal(art, seasonsLived, 50);
-                }
-            }
-        }
-
         private void GenerateArtLearningGoal(Ability art, int seasonsLived, double level)
         {
             double desire = GetDesire(new Preference(PreferenceType.Ability, art));
@@ -210,40 +196,23 @@ namespace WizardMonks
         /// </summary>
         /// <param name="ability"></param>
         /// <param name="gain"></param>
-        /// <returns>the season equivalence of this gain</returns>
-        protected override double RateSeasonalExperienceGainAsTime(Ability ability, double gain)
-        {
-            if(MagicArts.IsArt(ability))
-            {
-                //TODO: risk aversion, vis stock, miser
-                double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-
-                CharacterAbilityBase charAbility = GetAbility(ability);
-                double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-                double visNeeded = gain * visUsePer / _preferences[_visDesire];
-                double visSeasons = (visNeeded / visGainPer) + (gain / _preferences[_visDesire]);
-                return visSeasons;
-            }
-            else
-            {
-                return base.RateSeasonalExperienceGainAsTime(ability, gain);
-            }
-        }
-
-        private double RateSeasonalExperienceGainAsVis(Ability ability, double gain)
+        /// <returns>the vis equivalence of this gain</returns>
+        protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-            if (visGainPer == 0) return 0;
 
             CharacterAbilityBase charAbility = GetAbility(ability);
             double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-            // assume we will get 6.5 xp per vis study
-            double visNeeded = (gain / 6.5) * visUsePer;
+            // the gain per season depends on how the character views vis
+            double visNeeded = (gain / _preferences[_visDesire]) * visUsePer;
             // compare to the number of seasons we would need to extract the vis
             // plus the number of seasons we would need to study the extracted vis
-            double visSeasons = (visNeeded / visGainPer) + (gain / 6.5);
-            if (visSeasons <= 1) return 0;
-            return (visSeasons - 1) * visGainPer;
+            // this effectively means that a gain's base value is twice its vis cost
+            double extractTime = visNeeded / visGainPer;
+            // TODO: exposure should get rated according to the visUse of the preferred exposure choice
+            // rather than the visUse of the base ability
+            double visValueOfExposure = extractTime * 2 * visUsePer / _preferences[_visDesire];
+            return (2 * visNeeded) - visValueOfExposure;
         }
         #endregion
 
@@ -270,7 +239,14 @@ namespace WizardMonks
             if (start.Desire < 1 && _covenant != null && _covenant.Aura > 0)
             {
                 //TODO: factor in what the exposure will be, and the value of that exposure
-                start = new VisExtracting();
+                Ability exposureAbility = GetBestAbilityToBoost(_extractionAbilities);
+                double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+
+                CharacterAbilityBase charAbility = GetAbility(exposureAbility);
+                double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
+                double visNeeded = visUsePer * 2 / _preferences[_visDesire];
+
+                start = new VisExtracting(exposureAbility, visGainPer + visNeeded);
             }
 
             return start;

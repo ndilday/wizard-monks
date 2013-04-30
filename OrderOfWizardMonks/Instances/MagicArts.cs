@@ -88,6 +88,12 @@ namespace WizardMonks.Instances
             yield return Terram;
             yield return Vim;
         }
+
+        public static IEnumerable<Ability> GetExtractionAbilities()
+        {
+            yield return Creo;
+            yield return Vim;
+        }
     }
 
     public class Arts : IEnumerable<CharacterAbilityBase>

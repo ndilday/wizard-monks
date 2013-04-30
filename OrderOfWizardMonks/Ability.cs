@@ -28,6 +28,8 @@ namespace WizardMonks
         Language
 	}
 
+    public delegate void AbilityValueChangedEventHandler(object sender, EventArgs e);
+
 	[DataContract]
 	public class Ability: IKeyed<int>
 	{
@@ -83,6 +85,16 @@ namespace WizardMonks
         protected double _value;
         protected bool _cached;
         private double _experience;
+
+        public event AbilityValueChangedEventHandler Changed;
+
+        public virtual void OnChanged(EventArgs e)
+        {
+            if (Changed != null)
+            {
+                Changed(this, e);
+            }
+        }
 
         protected CharacterAbilityBase(Ability ability)
         {
@@ -166,6 +178,7 @@ namespace WizardMonks
 
         public virtual void AddExperience(double amount, double levelLimit = 0)
         {
+            double prevExperience = this.Experience;
             if (levelLimit == 0)
             {
                 this.Experience += amount;
@@ -175,7 +188,11 @@ namespace WizardMonks
                 double experienceToLevel = this.GetExperienceUntilLevel(levelLimit);
                 this.Experience += experienceToLevel < amount ? experienceToLevel : amount;
             }
-            _cached = false;
+            if (prevExperience != this.Experience)
+            {
+                _cached = false;
+                OnChanged(new EventArgs());
+            }
         }
 
         public abstract int GetTractatiiLimit();

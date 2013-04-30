@@ -108,13 +108,6 @@ namespace WizardMonks
             Log = "";
         }
 
-        #region Generation Functions
-        public virtual void GenerateNewGoals()
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-
         #region Ability Functions
         public virtual CharacterAbilityBase GetAbility(Ability ability)
         {
@@ -248,45 +241,6 @@ namespace WizardMonks
         #endregion
 
         #region Seasonal Functions
-
-        public virtual IAction DecideSeasonalActivityOld()
-        {
-            if (_goals == null || _goals.Count == 0)
-            {
-                GenerateNewGoals();
-            }
-
-            _goals.ForEach(g => g.Flush());
-            int bestGoalIndex = 0;
-            int i = 0;
-            while (_goals[0].Score(this) <= 0)
-            {
-                _goals.RemoveAt(0);
-                if(!_goals.Any())
-                {
-                    GenerateNewGoals();
-                }
-            }
-
-            while ( i < _goals.Count() )
-            {
-                if (_goals[i].Score(this) <= 0)
-                {
-                    _goals.RemoveAt(i);
-                    continue;
-                }
-                if (_goals[i].Score(this) > _goals[bestGoalIndex].Score(this))
-                {
-                    bestGoalIndex = i;
-                    i++;
-                }
-            }
-
-            // Now that we've deteremined the most important goal,
-            // we need to turn it into a seasonal activity selection
-            return _goals[bestGoalIndex].GetSeasonalActivity(this);
-        }
-
         public virtual IAction DecideSeasonalActivity()
         {
             // process books, looking for most interesting readable title
@@ -298,7 +252,7 @@ namespace WizardMonks
                 if (bestBook != null)
                 {
                     Log += "Could read a book on " + bestBook.Topic.AbilityName + " at Q" + bestBook.Quality + "\r\n";
-                    action = ConfirmLiteracy(bestBook, RateSeasonalExperienceGainAsTime(bestBook.Topic, GetBookLevelGain(bestBook)));
+                    action = ConfirmLiteracy(bestBook, RateSeasonalExperienceGain(bestBook.Topic, GetBookLevelGain(bestBook)));
                 }
             }
 
@@ -385,6 +339,11 @@ namespace WizardMonks
             }
         }
 
+        protected Ability GetBestAbilityToBoost(IEnumerable<Ability> abilityList)
+        {
+            return abilityList.OrderBy(a => RateSeasonalExperienceGain(a, 2)).First();
+        }
+
         public virtual void CommitAction(IAction action)
         {
             _seasonList.Add(action);
@@ -439,7 +398,7 @@ namespace WizardMonks
         {
             if (book.Level == 0)
             {
-                return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality);
+                return RateSeasonalExperienceGain(book.Topic, book.Quality);
             }
             if (charAbility == null)
             {
@@ -453,7 +412,7 @@ namespace WizardMonks
             
             double expValue = charAbility.GetExperienceUntilLevel(book.Level);
             double bookSeasons = expValue / book.Quality;
-            return RateSeasonalExperienceGainAsTime(book.Topic, book.Quality) / bookSeasons;
+            return RateSeasonalExperienceGain(book.Topic, book.Quality) / bookSeasons;
         }
 
         public virtual void ReadBook(IBook book)
@@ -572,12 +531,12 @@ namespace WizardMonks
             if (GetAbility(bestBook.Book.Topic).GetValueGain(2) > GetAbility(_writingLanguage).GetValueGain(2))
             {
                 bestBook.ExposureAbility = bestBook.Book.Topic;
-                bestBook.PerceivedValue += RateSeasonalExperienceGainAsTime(bestBook.Book.Topic, 2);
+                bestBook.PerceivedValue += RateSeasonalExperienceGain(bestBook.Book.Topic, 2);
             }
             else
             {
                 bestBook.ExposureAbility = _writingLanguage;
-                bestBook.PerceivedValue += RateSeasonalExperienceGainAsTime(_writingLanguage, 2);
+                bestBook.PerceivedValue += RateSeasonalExperienceGain(_writingLanguage, 2);
             }
 
 
@@ -729,7 +688,7 @@ namespace WizardMonks
         /// <param name="ability"></param>
         /// <param name="gain"></param>
         /// <returns>the season equivalence of this gain</returns>
-        protected virtual double RateSeasonalExperienceGainAsTime(Ability ability, double gain)
+        protected virtual double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             return gain / 4;
         }

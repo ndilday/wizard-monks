@@ -148,9 +148,10 @@ namespace WizardMonks
     {
         private Ability _exposure;
 
-        public VisExtracting(Ability exposure)
+        public VisExtracting(Ability exposure, double desire)
         {
             _exposure = exposure;
+            Desire = desire;
         }
 
         public ushort? SeasonId { get; private set; }
@@ -171,13 +172,7 @@ namespace WizardMonks
 
         }
 
-        public double Desire
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public double Desire { get; private set; }
     }
 
     [Serializable]

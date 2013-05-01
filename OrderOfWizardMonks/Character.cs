@@ -118,6 +118,12 @@ namespace WizardMonks
             if (!_abilityList.ContainsKey(ability.AbilityId))
             {
                 _abilityList[ability.AbilityId] = new CharacterAbility(ability);
+
+                // if the character doesn't already have a preference related to this ability, add it
+                if(!_preferences.ContainsKey(new Preference(PreferenceType.Ability, ability)))
+                {
+                    _preferences[new Preference(PreferenceType.Ability, ability)] = Die.Instance.RollDouble();
+                }
             }
             
             return _abilityList[ability.AbilityId];
@@ -343,10 +349,14 @@ namespace WizardMonks
             }
         }
 
+        /// <summary>
+        /// Determines which ability in the provided list the character is most interested in boosting
+        /// </summary>
+        /// <param name="abilityList"></param>
+        /// <returns>whichever ability from the list has the highest product of value gain and preference score</returns>
         protected Ability GetBestAbilityToBoost(IEnumerable<Ability> abilityList)
         {
-            // TODO: take preferences into account
-            return abilityList.OrderBy(a => RateSeasonalExperienceGain(a, 2)).First();
+            return abilityList.OrderBy(a => RateSeasonalExperienceGain(a, 2) * _preferences[new Preference(PreferenceType.Ability, a)]).First();
         }
 
         public virtual void CommitAction(IAction action)
@@ -441,13 +451,13 @@ namespace WizardMonks
 
         public IBook WriteBook(Ability topic, double desiredLevel = 0)
         {
-            // TODO: grant exposure experience
+            // grant exposure experience
             List<Ability> abilityList = new List<Ability>(_writingAbilities);
             abilityList.Add(topic);
             Ability exposureAbility = GetBestAbilityToBoost(abilityList);
             GetAbility(exposureAbility).AddExperience(2);
             
-            // TODO: add the book to the owned list
+            // TODO: When should books moved from the owned list to the covenant library?
             if (desiredLevel == 0)
             {
                 Tractatus t = WriteTractatus(topic);
@@ -567,26 +577,6 @@ namespace WizardMonks
 
             bestBook = RateSummaAgainstBestBook(bestBook, charAbility);
             return bestBook;
-        }
-
-        private Ability DetermineBestWritingExposure(Ability topic)
-        {
-            // TODO: scale these gains according to ability preferences
-            double topicGain = GetAbility(topic).GetValueGain(2);
-            double languageGain = GetAbility(_writingLanguage).GetValueGain(2);
-            double writingGain = GetAbility(_writingAbility).GetValueGain(2);
-            if (topicGain >= languageGain && topicGain >= writingGain)
-            {
-                return topic;
-            }
-            else if (languageGain >= topicGain && languageGain >= writingGain)
-            {
-                return _writingLanguage;
-            }
-            else
-            {
-                return _writingAbility;
-            }
         }
 
         protected virtual EvaluatedBook RateSummaAgainstBestBook(EvaluatedBook bestBook, CharacterAbilityBase ability)

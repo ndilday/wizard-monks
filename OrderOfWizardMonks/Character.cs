@@ -62,6 +62,7 @@ namespace WizardMonks
         protected readonly List<GoalBase> _goals;
         protected readonly Preference _visDesire = new Preference(PreferenceType.Vis, null);
         protected List<Summa> _incompleteBooks;
+        private readonly List<Ability> _writingAbilities;
         #endregion
 
         #region Events
@@ -102,6 +103,9 @@ namespace WizardMonks
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
             _preferences = preferences;
+            _writingAbilities = new List<Ability>();
+            _writingAbilities.Add(_writingAbility);
+            _writingAbilities.Add(_writingLanguage);
 
             _incompleteBooks = new List<Summa>();
 
@@ -341,6 +345,7 @@ namespace WizardMonks
 
         protected Ability GetBestAbilityToBoost(IEnumerable<Ability> abilityList)
         {
+            // TODO: take preferences into account
             return abilityList.OrderBy(a => RateSeasonalExperienceGain(a, 2)).First();
         }
 
@@ -437,6 +442,11 @@ namespace WizardMonks
         public IBook WriteBook(Ability topic, double desiredLevel = 0)
         {
             // TODO: grant exposure experience
+            List<Ability> abilityList = new List<Ability>(_writingAbilities);
+            abilityList.Add(topic);
+            Ability exposureAbility = GetBestAbilityToBoost(abilityList);
+            GetAbility(exposureAbility).AddExperience(2);
+            
             // TODO: add the book to the owned list
             if (desiredLevel == 0)
             {

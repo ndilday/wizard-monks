@@ -163,13 +163,17 @@ namespace WizardMonks
 
         public void Act(Character character)
         {
-            // TODO: implement
             if (typeof(Magus) != character.GetType())
             {
                 throw new InvalidCastException("Only magi can extract vis!");
             }
             Magus mage = (Magus)character;
-
+            if (mage.Covenant == null)
+            {
+                throw new ArgumentNullException("Magi can only extract vis in an aura!");
+            }
+            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10);
+            mage.GetAbility(_exposure).AddExperience(2);
         }
 
         public double Desire { get; private set; }
@@ -182,6 +186,10 @@ namespace WizardMonks
 
         public VisStudying(Ability art, double desire)
         {
+            if (!MagicArts.IsArt(art))
+            {
+                throw new ArgumentException("Only magic arts have vis associated with them!");
+            }
             _art = art;
             Desire = desire;
         }
@@ -200,6 +208,16 @@ namespace WizardMonks
                 throw new InvalidCastException("Only magi can extract vis!");
             }
             Magus mage = (Magus)character;
+
+            // determine the amount of vis needed
+            CharacterAbilityBase charAbility = mage.GetAbility(_art);
+            double visNeeded = 0.5 + (charAbility.GetValue() / 10.0);
+            
+            // decrement the used vis
+            mage.RemoveVis(_art, visNeeded);
+
+            // add experience
+            charAbility.AddExperience(Die.Instance.RollExplodingDie());
         }
 
         public double Desire { get; private set; }

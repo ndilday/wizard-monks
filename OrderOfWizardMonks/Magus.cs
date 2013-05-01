@@ -26,6 +26,7 @@ namespace WizardMonks
         private Covenant _covenant;
         private Dictionary<Ability, double> _visStock;
         private List<Ability> _extractionAbilities;
+        private Ability _preferredExtractionAbility;
 
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
             : base(writingLanguage, writingAbility, preferences)
@@ -40,10 +41,18 @@ namespace WizardMonks
             }
             _extractionAbilities = new List<Ability>(MagicArts.GetExtractionAbilities());
             _extractionAbilities.Add(_magicAbility);
+            // TODO: set up events for caching which abilities to choose for exposure in various situations
         }
 
 		public Houses House { get; set; }
 
+        public Covenant Covenant
+        {
+            get
+            {
+                return _covenant;
+            }
+        }
         
         public Arts Arts { get; private set; }
 
@@ -200,6 +209,14 @@ namespace WizardMonks
         protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
+            if (MagicArts.IsTechnique(ability))
+            {
+                visGainPer /= 4;
+            }
+            else if (MagicArts.IsForm(ability) && ability != MagicArts.Vim)
+            {
+                visGainPer /= 2;
+            }
 
             CharacterAbilityBase charAbility = GetAbility(ability);
             double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
@@ -228,17 +245,22 @@ namespace WizardMonks
             // study vis
             foreach (Ability art in _visStock.Keys)
             {
-                if (_visStock[art] >= GetAbility(art).GetValue())
+                CharacterAbilityBase charAbility = GetAbility(art);
+                double visUse = 0.5 + (charAbility.GetValue() / 10);
+                
+                if (_visStock[art] + Covenant.GetVis(art) >= visUse)
                 {
-                    // TODO: figure out valuation of vis studying
-                    double desire = 1;
-                    start = new VisStudying(art, desire);
+                    double desire = RateSeasonalExperienceGain(art, _preferences[new Preference(PreferenceType.Vis, null)]) - visUse;
+                    if (desire > start.Desire)
+                    {
+                        start = new VisStudying(art, desire);
+                    }
                 }
             }
 
-            if (start.Desire < 1 && _covenant != null && _covenant.Aura > 0)
+            if (_covenant != null && _covenant.Aura > 0)
             {
-                //TODO: factor in what the exposure will be, and the value of that exposure
+                // factor in what ability the exposure will be in, and the value of that exposure
                 Ability exposureAbility = GetBestAbilityToBoost(_extractionAbilities);
                 double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
 
@@ -275,7 +297,32 @@ namespace WizardMonks
         {
             // add vis to personal inventory or covenant inventory
             _visStock[MagicArts.Vim] += GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
-            // TODO: grant exposure experience
+            
+            // grant exposure experience
+            GetAbility(GetBestAbilityToBoost(_extractionAbilities)).AddExperience(2);
+        }
+
+        public double RemoveVis(Ability visType, double amount)
+        {
+            if (!MagicArts.IsArt(visType))
+            {
+                throw new ArgumentException("Only magic arts have vis!");
+            }
+            if (_visStock[visType] + Covenant.GetVis(visType) < amount)
+            {
+                throw new ArgumentException("Insufficient vis available!");
+            }
+            if (amount > _visStock[visType])
+            {
+                amount -= _visStock[visType];
+                Covenant.RemoveVis(visType, amount);
+                return 0;
+            }
+            else
+            {
+                _visStock[visType] -= amount;
+                return _visStock[visType];
+            }
         }
         #endregion
     }

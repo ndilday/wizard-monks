@@ -22,6 +22,8 @@ namespace WizardMonks
 		Adventure,
 		DistillVis,
 		StudyVis,
+        Teach,
+        Learn,
 		WriteBook,
 		CopyBook,
 		BuildLaboratory,
@@ -36,8 +38,8 @@ namespace WizardMonks
 	{
 		ushort? SeasonId { get; }
         Activity Action { get; }
-        void Act(Character character);
         double Desire { get; }
+        void Act(Character character);
 	}
 
     [Serializable]
@@ -51,6 +53,7 @@ namespace WizardMonks
         }
 
         public ushort? SeasonId { get; private set; }
+        
         public Activity Action
         {
             get
@@ -63,12 +66,12 @@ namespace WizardMonks
             }
         }
 
+        public double Desire { get; private set; }
+
         public void Act(Character character)
         {
             character.ReadBook(_book);
         }
-
-        public double Desire { get; private set; }
     }
 
     [Serializable]
@@ -88,12 +91,12 @@ namespace WizardMonks
             get { return Activity.Practice; }
         }
 
+        public double Desire { get; private set; }
+
         public virtual void Act(Character character)
         {
             character.GetAbility(_ability).AddExperience(4);
         }
-
-        public double Desire { get; private set; }
     }
 
     [Serializable]
@@ -134,13 +137,13 @@ namespace WizardMonks
             get { return Activity.WriteBook; }
         }
 
+        public double Desire { get; private set; }
+
         public void Act(Character character)
         {
             character.WriteBook(_topic, _level);
             character.GetAbility(_exposure).AddExperience(2);
         }
-
-        public double Desire { get; private set; }
     }
 
     [Serializable]
@@ -161,6 +164,8 @@ namespace WizardMonks
             get { return Activity.DistillVis; }
         }
 
+        public double Desire { get; private set; }
+
         public void Act(Character character)
         {
             if (typeof(Magus) != character.GetType())
@@ -175,8 +180,6 @@ namespace WizardMonks
             mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10);
             mage.GetAbility(_exposure).AddExperience(2);
         }
-
-        public double Desire { get; private set; }
     }
 
     [Serializable]
@@ -201,6 +204,8 @@ namespace WizardMonks
             get { return Activity.StudyVis; }
         }
 
+        public double Desire { get; private set; }
+
         public void Act(Character character)
         {
             if (typeof(Magus) != character.GetType())
@@ -219,7 +224,93 @@ namespace WizardMonks
             // add experience
             charAbility.AddExperience(Die.Instance.RollExplodingDie());
         }
+    }
+
+    [Serializable]
+    public class CopyBook : IAction
+    {
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.CopyBook; }
+        }
 
         public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+        }
+    }
+
+    [Serializable]
+    public class Teach : IAction
+    {
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.Teach; }
+        }
+
+        public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+        }
+    }
+
+    [Serializable]
+    public class Learn : IAction
+    {
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.Learn; }
+        }
+
+        public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+        }
+    }
+
+    public class BuildLaboratory : IAction
+    {
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.BuildLaboratory; }
+        }
+
+        public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+        }
+    }
+
+    public class RefineLaboratory : IAction
+    {
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.RefineLaboratory; }
+        }
+
+        public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // TODO: implement
+        }
     }
 }

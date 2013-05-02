@@ -39,9 +39,15 @@ namespace WizardMonks
             {
                 _visStock[art] = 0;
             }
-            _extractionAbilities = new List<Ability>(MagicArts.GetExtractionAbilities());
+            _extractionAbilities = new List<Ability>(MagicArts.GetExtractionArts());
             _extractionAbilities.Add(_magicAbility);
-            // TODO: set up events for caching which abilities to choose for exposure in various situations
+            
+            // set up events for caching which abilities to choose for exposure in various situations
+            foreach (Ability ability in _extractionAbilities)
+            {
+                GetAbility(ability).Changed += ExtractionAbilityChanged;
+            }
+            RecalculateBestExtractionAbility();
         }
 
 		public Houses House { get; set; }
@@ -67,6 +73,18 @@ namespace WizardMonks
                 return base.GetAbility(ability);
             }
         }
+
+        #region Event Handlers
+        private void ExtractionAbilityChanged(object sender, EventArgs e)
+        {
+            RecalculateBestExtractionAbility();
+        }
+
+        private void RecalculateBestExtractionAbility()
+        {
+            _preferredExtractionAbility = GetBestAbilityToBoost(_extractionAbilities);
+        }
+        #endregion
 
         #region Covenant Functions
         public void Join(Covenant covenant)
@@ -245,8 +263,7 @@ namespace WizardMonks
             // study vis
             foreach (Ability art in _visStock.Keys)
             {
-                CharacterAbilityBase charAbility = GetAbility(art);
-                double visUse = 0.5 + (charAbility.GetValue() / 10);
+                double visUse = 0.5 + (GetAbility(art).GetValue() / 10);
                 
                 if (_visStock[art] + Covenant.GetVis(art) >= visUse)
                 {
@@ -261,14 +278,13 @@ namespace WizardMonks
             if (_covenant != null && _covenant.Aura > 0)
             {
                 // factor in what ability the exposure will be in, and the value of that exposure
-                Ability exposureAbility = GetBestAbilityToBoost(_extractionAbilities);
                 double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
 
-                CharacterAbilityBase charAbility = GetAbility(exposureAbility);
+                CharacterAbilityBase charAbility = GetAbility(_preferredExtractionAbility);
                 double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
                 double visNeeded = visUsePer * 2 / _preferences[_visDesire];
 
-                start = new VisExtracting(exposureAbility, visGainPer + visNeeded);
+                start = new VisExtracting(_preferredExtractionAbility, visGainPer + visNeeded);
             }
 
             return start;
@@ -299,7 +315,7 @@ namespace WizardMonks
             _visStock[MagicArts.Vim] += GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10;
             
             // grant exposure experience
-            GetAbility(GetBestAbilityToBoost(_extractionAbilities)).AddExperience(2);
+            GetAbility(_preferredExtractionAbility).AddExperience(2);
         }
 
         public double RemoveVis(Ability visType, double amount)

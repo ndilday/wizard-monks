@@ -89,7 +89,7 @@ namespace WizardMonks.Instances
             yield return Vim;
         }
 
-        public static IEnumerable<Ability> GetExtractionAbilities()
+        public static IEnumerable<Ability> GetExtractionArts()
         {
             yield return Creo;
             yield return Vim;

@@ -24,6 +24,7 @@ namespace WizardMonks
 	{
         private Ability _magicAbility;
         private Covenant _covenant;
+        private Laboratory _laboratory;
         private Dictionary<Ability, double> _visStock;
         private List<Ability> _extractionAbilities;
         private Ability _preferredExtractionAbility;
@@ -34,6 +35,7 @@ namespace WizardMonks
             _magicAbility = magicAbility;
             Arts = new Arts();
             _covenant = null;
+            _laboratory = null;
             _visStock = new Dictionary<Ability, double>();
             foreach (Ability art in MagicArts.GetEnumerator())
             {
@@ -251,30 +253,43 @@ namespace WizardMonks
         }
         #endregion
 
-        protected void CheckTwilight()
-        {
-        }
-
+        #region Seasonal/Rating Functions
         public override IAction DecideSeasonalActivity()
         {
-            // make sure all preference values are scaled the same
-            IAction start = base.DecideSeasonalActivity();
-
-            // study vis
-            foreach (Ability art in _visStock.Keys)
+            // TODO: how to estimate future return on investment?
+            // we're currently really rating everything on a basis
+            // sort  of defined by opportunity cost
+            IAction start;
+            if (_laboratory == null)
             {
-                double visUse = 0.5 + (GetAbility(art).GetValue() / 10);
-                
-                if (_visStock[art] + Covenant.GetVis(art) >= visUse)
+                if (_covenant == null)
                 {
-                    double desire = RateSeasonalExperienceGain(art, _preferences[new Preference(PreferenceType.Vis, null)]) - visUse;
-                    if (desire > start.Desire)
-                    {
-                        start = new VisStudying(art, desire);
-                    }
+                    // if we don't have a covenant, perhaps we should look for a site to found one
+                    // before building a lab
                 }
+                // in most circumstances, building a lab should come first
+                // TODO: when shouldn't it?
+                return new BuildLaboratory(_magicAbility, 100);
+            }
+            else
+            {
+                // TODO: how do we rate lab work against non-lab work?
+                // TODO: refine lab logic
             }
 
+            // make sure all preference values are scaled the same
+            start = base.DecideSeasonalActivity();
+
+            // study vis
+            start = RateVisStudy(start);
+
+            start = RateVisExtraction(start);
+
+            return start;
+        }
+
+        private IAction RateVisExtraction(IAction start)
+        {
             if (_covenant != null && _covenant.Aura > 0)
             {
                 // factor in what ability the exposure will be in, and the value of that exposure
@@ -286,9 +301,36 @@ namespace WizardMonks
 
                 start = new VisExtracting(_preferredExtractionAbility, visGainPer + visNeeded);
             }
-
             return start;
         }
+
+        private IAction RateVisStudy(IAction start)
+        {
+            foreach (Ability art in _visStock.Keys)
+            {
+                double visUse = 0.5 + (GetAbility(art).GetValue() / 10);
+                // prorate vis use in terms of vim eqivalent
+                if (MagicArts.IsForm(art))
+                {
+                    visUse *= 2;
+                }
+                if (MagicArts.IsTechnique(art))
+                {
+                    visUse *= 4;
+                }
+
+                if (_visStock[art] + Covenant.GetVis(art) >= visUse)
+                {
+                    double desire = RateSeasonalExperienceGain(art, _preferences[new Preference(PreferenceType.Vis, null)]) - visUse;
+                    if (desire > start.Desire)
+                    {
+                        start = new VisStudying(art, desire);
+                    }
+                }
+            }
+            return start;
+        }
+        #endregion
 
         #region Magic Functions
         public double GetLabTotal(Ability technique, Ability form)
@@ -309,6 +351,10 @@ namespace WizardMonks
             return labTotal;
         }
 
+        protected void CheckTwilight()
+        {
+        }
+
         public void ExtractVis()
         {
             // add vis to personal inventory or covenant inventory
@@ -318,7 +364,7 @@ namespace WizardMonks
             GetAbility(_preferredExtractionAbility).AddExperience(2);
         }
 
-        public double RemoveVis(Ability visType, double amount)
+        public double UseVis(Ability visType, double amount)
         {
             if (!MagicArts.IsArt(visType))
             {
@@ -339,6 +385,12 @@ namespace WizardMonks
                 _visStock[visType] -= amount;
                 return _visStock[visType];
             }
+        }
+
+        public void BuildLaboratory()
+        {
+            // TODO: flesh out laboratory specialization
+            _laboratory = new Laboratory(this, 0);
         }
         #endregion
     }

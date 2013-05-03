@@ -7,13 +7,14 @@ namespace WizardMonks.Instances
 {
     public static class Abilities
     {
-        public static Ability English { get; set; }
-        public static Ability Latin { get; set; }
-        public static Ability MagicTheory { get; set; }
-        public static Ability ArtesLiberales { get; set; }
-        public static Ability ParmaMagica { get; set; }
-        public static Ability Penetration { get; set; }
-        public static Ability Etiquette { get; set; }
+        public static Ability English { get; private set; }
+        public static Ability Latin { get; private set; }
+        public static Ability MagicTheory { get; private set; }
+        public static Ability ArtesLiberales { get; private set; }
+        public static Ability ParmaMagica { get; private set; }
+        public static Ability Penetration { get; private set; }
+        public static Ability Etiquette { get; private set; }
+        public static Ability AreaLore { get; private set; }
 
         static Abilities()
         {
@@ -27,6 +28,7 @@ namespace WizardMonks.Instances
             Penetration = new Ability(252, AbilityType.Arcane, "Penetration");
 
             Etiquette = new Ability(0, AbilityType.General, "Etiquette");
+            AreaLore = new Ability(1, AbilityType.General, "Area Lore");
         }
 
         public static IEnumerable<Ability> GetEnumerator()
@@ -38,7 +40,7 @@ namespace WizardMonks.Instances
             yield return ParmaMagica;
             yield return Penetration;
             yield return Etiquette;
-
+            yield return AreaLore;
         }
     }
 }

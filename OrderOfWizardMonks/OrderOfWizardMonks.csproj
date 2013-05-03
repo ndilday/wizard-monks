@@ -80,6 +80,7 @@
     <Compile Include="Instances\Abilities.cs" />
     <Compile Include="Instances\MagicArts.cs" />
     <Compile Include="Houses.cs" />
+    <Compile Include="Laboratory.cs" />
     <Compile Include="Magus.cs" />
     <Compile Include="Multiton.cs" />
     <Compile Include="Preferences.cs" />

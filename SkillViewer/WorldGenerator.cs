@@ -18,6 +18,7 @@ namespace SkillViewer
         private Ability _latin;
         private Ability _magicTheory;
         private Ability _artLib;
+        private Ability _areaLore;
         private Die _die = new Die();
 
         public WorldGenerator()
@@ -40,9 +41,19 @@ namespace SkillViewer
                 {
                     _artLib = ability;
                 }
+                else if (ability.AbilityName == "Area Lore")
+                {
+                    _areaLore = ability;
+                }
             }
 
             InitializeComponent();
+
+            foreach (Magus founder in Founders.GetEnumerator())
+            {
+                _magusArray[_magusCount] = founder;
+                _magusCount++;
+            }
         }
 
         public void InitializeFromFile()
@@ -65,7 +76,7 @@ namespace SkillViewer
 
         private void btnGenerate_Click(object sender, EventArgs e)
         {
-            _magusArray[_magusCount] = CharacterFactory.GenerateNewMagus(_magicTheory, _latin, _artLib);
+            _magusArray[_magusCount] = CharacterFactory.GenerateNewMagus(_magicTheory, _latin, _artLib, _areaLore);
             _magusArray[_magusCount].Name = GenerateName(_magusCount);
             _magusCount++;
             lstMembers.DataSource = _magusArray.Take(_magusCount).ToList();

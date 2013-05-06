@@ -49,6 +49,7 @@ namespace WizardMonks
         private uint _noAgingSeasons;
         protected Ability _writingAbility;
         protected Ability _writingLanguage;
+        protected Ability _areaAbility;
         protected Dictionary<Preference, double> _preferences;
 
         private readonly string[] _virtueList = new string[10];
@@ -76,7 +77,7 @@ namespace WizardMonks
         public string Log { get; set; }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Dictionary<Preference, double> preferences)
+        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
         {
             Die die = new Die();
             Strength = new Attribute(die.RollNormal());
@@ -100,6 +101,7 @@ namespace WizardMonks
             _booksOwned = new List<IBook>();
             _goals = new List<GoalBase>();
 
+            _areaAbility = areaAbility;
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
             _preferences = preferences;

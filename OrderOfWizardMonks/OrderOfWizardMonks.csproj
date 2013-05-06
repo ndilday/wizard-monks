@@ -78,6 +78,7 @@
     <Compile Include="Economy.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="Instances\Abilities.cs" />
+    <Compile Include="Instances\Founders.cs" />
     <Compile Include="Instances\MagicArts.cs" />
     <Compile Include="Houses.cs" />
     <Compile Include="Laboratory.cs" />

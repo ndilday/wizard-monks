@@ -9,9 +9,9 @@ namespace WorldSimulation
 {
     public class CharacterFactory
     {
-        public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility)
+        public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
-            Character character = new Character(langAbility, writingAbility, null);
+            Character character = new Character(langAbility, writingAbility, areaAbility, null);
             NormalizeAttributes(character);
 
             return character;
@@ -29,10 +29,10 @@ namespace WorldSimulation
             character.Communication.BaseValue = NormalStatRoller.RandomStat();
         }
 
-        public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility)
+        public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
-            Dictionary<Preference, double> preferences = PreferenceFactory.CreateMagusPreferenceList(magicAbility, langAbility, writingAbility);
-            Magus magus = new Magus(magicAbility, langAbility, writingAbility, preferences);
+            Dictionary<Preference, double> preferences = PreferenceFactory.CreateMagusPreferenceList(magicAbility, langAbility, writingAbility, areaAbility);
+            Magus magus = new Magus(magicAbility, langAbility, writingAbility, areaAbility, preferences);
             NormalizeAttributes(magus);
             return magus;
         }
@@ -40,7 +40,7 @@ namespace WorldSimulation
 
     public static class PreferenceFactory
     {
-        public static Dictionary<Preference, double> CreateMagusPreferenceList(Ability magicAbility, Ability langAbility, Ability writingAbility)
+        public static Dictionary<Preference, double> CreateMagusPreferenceList(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
             Dictionary<Preference, double> dictionary = new Dictionary<Preference, double>();
             dictionary[new Preference(PreferenceType.AgeToApprentice, null)] = Die.Instance.RollDouble() * 150;
@@ -54,6 +54,7 @@ namespace WorldSimulation
             dictionary[new Preference(PreferenceType.Vis, null)] = Die.Instance.RollNormal(6.5, 0.1);
             dictionary[new Preference(PreferenceType.Ability, magicAbility)] = Die.Instance.RollDouble();
             dictionary[new Preference(PreferenceType.Ability, writingAbility)] = Die.Instance.RollDouble();
+            dictionary[new Preference(PreferenceType.Ability, areaAbility)] = Die.Instance.RollDouble();
 
             return dictionary;
         }

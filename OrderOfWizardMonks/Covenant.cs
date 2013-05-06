@@ -13,7 +13,7 @@ namespace WizardMonks
 		protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<IBook> _library;
-        public int Aura { get; set; }
+        public double Aura { get; set; }
         public string Name { get; set; }
 
         public Covenant()

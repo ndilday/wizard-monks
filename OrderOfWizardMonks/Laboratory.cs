@@ -11,6 +11,7 @@ namespace WizardMonks
         public double Aesthetics { get; protected set; }
         public double Quality { get; protected set; }
         public double Safety { get; protected set; }
+        public double Upkeep { get; protected set; }
         public double Warping { get; protected set; }
         public Dictionary<Ability, double> ArtModifiers { get; protected set; }
         public Dictionary<Activity, double> ActivityModifiers { get; protected set; }
@@ -23,6 +24,7 @@ namespace WizardMonks
             Aesthetics = 0;
             Quality = 0;
             Safety = 0;
+            Upkeep = 0;
             Warping = 0;
         }
     }
@@ -31,14 +33,14 @@ namespace WizardMonks
     {
         public double Size { get; private set; }
 
-        private List<Feature> _refinements;
+        private List<Feature> _features;
         private Magus _owner;
 
         private double _availableRefinement;
 
         public Laboratory(Magus owner, double size) : base()
         {
-            _refinements = new List<Feature>();
+            _features = new List<Feature>();
             _owner = owner;
             Size = size;
             _availableRefinement = size;
@@ -46,7 +48,20 @@ namespace WizardMonks
 
         public double GetModifier(Ability technique, Ability form, Activity activity)
         {
-            return 0;
+            double totalModifier = Quality;
+            if (ArtModifiers.ContainsKey(technique))
+            {
+                totalModifier += ArtModifiers[technique];
+            }
+            if (ArtModifiers.ContainsKey(form))
+            {
+                totalModifier += ArtModifiers[form];
+            }
+            if (ActivityModifiers.ContainsKey(activity))
+            {
+                totalModifier += ActivityModifiers[activity];
+            }
+            return totalModifier;
         }
 
         public void Refine()
@@ -55,33 +70,53 @@ namespace WizardMonks
             _availableRefinement++;
         }
 
-        public void AddFeature(Feature refinement)
+        public void AddFeature(Feature feature)
         {
-            _refinements.Add(refinement);
-            foreach (KeyValuePair<Ability, double> artModifier in refinement.ArtModifiers)
+            _features.Add(feature);
+            AddFeatureStats(feature);
+            foreach (KeyValuePair<Ability, double> artModifier in feature.ArtModifiers)
             {
                 ArtModifiers[artModifier.Key] += artModifier.Value;
             }
-            foreach (KeyValuePair<Activity, double> activityModifier in refinement.ActivityModifiers)
+            foreach (KeyValuePair<Activity, double> activityModifier in feature.ActivityModifiers)
             {
                 ActivityModifiers[activityModifier.Key] += activityModifier.Value;
             }
         }
 
-        public void RemoveFeature(Feature refinement)
+        private void AddFeatureStats(Feature feature)
         {
-            if (_refinements.Contains(refinement))
+            Aesthetics += feature.Aesthetics;
+            Quality += feature.Quality;
+            Safety += feature.Safety;
+            Upkeep += feature.Upkeep;
+            Warping += feature.Warping;
+        }
+
+        public void RemoveFeature(Feature feature)
+        {
+            if (_features.Contains(feature))
             {
-                _refinements.Remove(refinement);
-                foreach (KeyValuePair<Ability, double> artModifier in refinement.ArtModifiers)
+                _features.Remove(feature);
+                SubtractFeatureStats(feature);
+                foreach (KeyValuePair<Ability, double> artModifier in feature.ArtModifiers)
                 {
                     ArtModifiers[artModifier.Key] -= artModifier.Value;
                 }
-                foreach (KeyValuePair<Activity, double> activityModifier in refinement.ActivityModifiers)
+                foreach (KeyValuePair<Activity, double> activityModifier in feature.ActivityModifiers)
                 {
                     ActivityModifiers[activityModifier.Key] -= activityModifier.Value;
                 }
             }
+        }
+
+        private void SubtractFeatureStats(Feature feature)
+        {
+            Aesthetics -= feature.Aesthetics;
+            Quality -= feature.Quality;
+            Safety -= feature.Safety;
+            Upkeep -= feature.Upkeep;
+            Warping -= feature.Warping;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace WizardMonks.Test
                                 
             for (int i = 0; i < 100; i++)
             {
-                _character = new Character(null, null, null);
+                _character = new Character(null, null, null, null);
 
                 while (_character.Decrepitude < 75)
                 {

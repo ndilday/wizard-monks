@@ -186,7 +186,7 @@ namespace WizardMonks
             {
                 throw new ArgumentNullException("Magi can only extract vis in an aura!");
             }
-            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArts.Creo, MagicArts.Vim) / 10);
+            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArts.Creo, MagicArts.Vim, Activity.DistillVis) / 10);
             mage.GetAbility(_exposure).AddExperience(2);
         }
     }
@@ -318,6 +318,13 @@ namespace WizardMonks
 
     public class FindAura : IAction
     {
+        private Ability _exposureAbility;
+
+        public FindAura(Ability exposureAbility, double desire)
+        {
+            _exposureAbility = exposureAbility;
+            Desire = desire;
+        }
 
         public ushort? SeasonId { get; private set; }
 
@@ -331,7 +338,36 @@ namespace WizardMonks
         public void Act(Character character)
         {
             // see if the character can safely spont aura-finding spells
+            if (typeof(Magus) == character.GetType())
+            {
+                MageAuraSearch((Magus)character);
+            }
+            else
+            {
+                CharacterAuraSearch(character);
+            }
+            // TODO: store knowledge of locations
+            // TODO: as we go, eventually, do we want locations to be set, rather than generated upon finding?
+        }
 
+        private void CharacterAuraSearch(Character character)
+        {
+            // TODO: eventually characters will be able to use magical items to do the search
+            // making them work similar to the mage
+        }
+
+        private void MageAuraSearch(Magus mage)
+        {
+            // add bonus to area lore equal to casting total div 5?
+            double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
+            areaLore += mage.GetCastingTotal(MagicArts.Intellego, MagicArts.Vim) / 5;
+            double roll = Die.Instance.RollDouble() * 5;
+            double auraFound = Math.Sqrt(roll * areaLore);
+            if (auraFound > 1)
+            {
+                mage.FoundCovenant(auraFound);
+            }
+            mage.GetAbility(_exposureAbility).AddExperience(2);
         }
     }
 }

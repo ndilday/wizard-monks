@@ -54,6 +54,7 @@ namespace SkillViewer
                 _magusArray[_magusCount] = founder;
                 _magusCount++;
             }
+            lstMembers.DataSource = _magusArray.Take(_magusCount).ToList();
         }
 
         public void InitializeFromFile()

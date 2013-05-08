@@ -52,9 +52,18 @@ namespace WizardMonks.Instances
             BuildVerditius();
         }
 
+        private static Dictionary<Preference, double> BuildBasicPreferences()
+        {
+            Dictionary<Preference, double> preferences = new Dictionary<Preference, double>();
+            preferences[Preferences.VisDesire] = 6.5;
+            preferences[new Preference(PreferenceType.Ability, Abilities.MagicTheory)] = .5;
+
+            return preferences;
+        }
+
         public static void BuildBjornaer()
         {
-            Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Bjornaer.Name = "Bjornaer";
             Bjornaer.GetAbility(MagicArts.Creo).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -84,7 +93,7 @@ namespace WizardMonks.Instances
 
         public static void BuildBonisagus()
         {
-            Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Bonisgaus.Name = "Bonisagus";
             Bonisgaus.GetAbility(MagicArts.Creo).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -114,7 +123,7 @@ namespace WizardMonks.Instances
 
         public static void BuildCriamon()
         {
-            Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Criamon.Name = "Criamon";
             Criamon.GetAbility(MagicArts.Creo).AddExperience(0);
             Criamon.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -144,7 +153,7 @@ namespace WizardMonks.Instances
 
         public static void BuildDiedne()
         {
-            Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Diedne.Name = "Diedne";
             Diedne.GetAbility(MagicArts.Creo).AddExperience(0);
             Diedne.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -174,7 +183,7 @@ namespace WizardMonks.Instances
 
         public static void BuildFlambeau()
         {
-            Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Flambeau.Name = "Flambeau";
             Flambeau.GetAbility(MagicArts.Creo).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -204,7 +213,7 @@ namespace WizardMonks.Instances
 
         public static void BuildGuernicus()
         {
-            Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Guernicus.Name = "Guernicus";
             Guernicus.GetAbility(MagicArts.Creo).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -234,7 +243,7 @@ namespace WizardMonks.Instances
 
         public static void BuildJerbiton()
         {
-            Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Jerbiton.Name = "Jerbiton";
             Jerbiton.GetAbility(MagicArts.Creo).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -264,7 +273,7 @@ namespace WizardMonks.Instances
 
         public static void BuildMercere()
         {
-            Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Mercere.Name = "Mercere";
             Mercere.GetAbility(MagicArts.Creo).AddExperience(0);
             Mercere.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -294,7 +303,7 @@ namespace WizardMonks.Instances
 
         public static void BuildMerinita()
         {
-            Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Merinita.Name = "Merinita";
             Merinita.GetAbility(MagicArts.Creo).AddExperience(0);
             Merinita.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -324,7 +333,7 @@ namespace WizardMonks.Instances
 
         public static void BuildTremere()
         {
-            Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Tremere.Name = "Tremere";
             Tremere.GetAbility(MagicArts.Creo).AddExperience(0);
             Tremere.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -354,7 +363,7 @@ namespace WizardMonks.Instances
 
         public static void BuildTytalus()
         {
-            Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Tytalus.Name = "Tytalus";
             Tytalus.GetAbility(MagicArts.Creo).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Intellego).AddExperience(0);
@@ -384,7 +393,7 @@ namespace WizardMonks.Instances
 
         public static void BuildVerditius()
         {
-            Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, null);
+            Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, BuildBasicPreferences());
             Verditius.Name = "Verditius";
             Verditius.GetAbility(MagicArts.Creo).AddExperience(0);
             Verditius.GetAbility(MagicArts.Intellego).AddExperience(0);

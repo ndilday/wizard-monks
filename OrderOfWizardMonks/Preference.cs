@@ -9,7 +9,6 @@ namespace WizardMonks
         AgeToApprentice,
         Writing,
         Ability,
-        Art,
         Vis
     }
 
@@ -37,6 +36,23 @@ namespace WizardMonks
             {
                 return _specifier;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(Preference))
+            {
+                return false;
+            }
+            Preference pref = (Preference)obj;
+            return (pref.Type == this.Type && 
+                ((pref.Specifier == null && this.Specifier == null) ||
+                    (pref.Specifier == this.Specifier)));
+        }
+
+        public override int GetHashCode()
+        {
+            return _specifier == null ? _type.GetHashCode() : _specifier.GetHashCode() + _type.GetHashCode();
         }
     }
 }

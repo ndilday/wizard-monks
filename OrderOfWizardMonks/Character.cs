@@ -61,7 +61,6 @@ namespace WizardMonks
         protected readonly List<IBook> _booksRead;
         protected readonly List<IBook> _booksOwned;
         protected readonly List<GoalBase> _goals;
-        protected readonly Preference _visDesire = new Preference(PreferenceType.Vis, null);
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
         #endregion
@@ -104,7 +103,14 @@ namespace WizardMonks
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
-            _preferences = preferences;
+            if (preferences == null)
+            {
+                _preferences = new Dictionary<Preference, double>();
+            }
+            else
+            {
+                _preferences = preferences;
+            }
             _writingAbilities = new List<Ability>();
             _writingAbilities.Add(_writingAbility);
             _writingAbilities.Add(_writingLanguage);
@@ -260,7 +266,7 @@ namespace WizardMonks
             var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
             if (availableBooks.Any())
             {
-                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Art, b.Topic))).FirstOrDefault();
+                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Ability, b.Topic))).FirstOrDefault();
                 if (bestBook != null)
                 {
                     Log += "Could read a book on " + bestBook.Topic.AbilityName + " at Q" + bestBook.Quality + "\r\n";
@@ -667,7 +673,7 @@ namespace WizardMonks
             preference = 0;
             foreach (KeyValuePair<Preference, double> prefPair in _preferences)
             {
-                if (prefPair.Key.Type == PreferenceType.Ability || prefPair.Key.Type == PreferenceType.Art)
+                if (prefPair.Key.Type == PreferenceType.Ability)
                 {
                     Ability thisAbility = (Ability)prefPair.Key.Specifier;
                     CharacterAbilityBase charAbility = GetAbility(thisAbility);

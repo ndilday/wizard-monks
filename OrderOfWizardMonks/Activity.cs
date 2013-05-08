@@ -370,4 +370,57 @@ namespace WizardMonks
             mage.GetAbility(_exposureAbility).AddExperience(2);
         }
     }
+
+    public class FindApprentice : IAction
+    {
+        private Ability _exposureAbility;
+
+        public FindApprentice(Ability exposureAbility, double desire)
+        {
+            _exposureAbility = exposureAbility;
+            Desire = desire;
+        }
+
+        public ushort? SeasonId { get; private set; }
+
+        public Activity Action
+        {
+            get { return Activity.FindApprentice; }
+        }
+
+        public double Desire { get; private set; }
+
+        public void Act(Character character)
+        {
+            // see if the character can safely spont gift-finding spells
+            if (typeof(Magus) == character.GetType())
+            {
+                MageApprenticeSearch((Magus)character);
+            }
+            else
+            {
+                CharacterApprenticeSearch(character);
+            }
+        }
+
+        private void CharacterApprenticeSearch(Character character)
+        {
+            // TODO: eventually characters will be able to use magical items to do the search
+            // making them work similar to the mage
+        }
+
+        private void MageApprenticeSearch(Magus mage)
+        {
+            // add bonus to area lore equal to casting total div 5?
+            double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
+            areaLore += mage.GetCastingTotal(MagicArts.Intellego, MagicArts.Vim) / 5;
+            double roll = Die.Instance.RollDouble() * 5;
+            double apprenticeFound = Math.Sqrt(roll * areaLore);
+            if (apprenticeFound > 1)
+            {
+                mage.TakeApprentice(CharacterFactory.GenerateNewMagus());
+            }
+            mage.GetAbility(_exposureAbility).AddExperience(2);
+        }
+    }
 }

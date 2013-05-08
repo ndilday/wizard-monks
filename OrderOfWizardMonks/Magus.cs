@@ -30,7 +30,21 @@ namespace WizardMonks
         private List<Ability> _magicSearchAbilities;
         private Ability _preferredExtractionAbility;
         private Ability _preferredMagicSearchAbility;
+        private Magus _apprentice;
 
+        public Houses House { get; set; }
+
+        public Covenant Covenant
+        {
+            get
+            {
+                return _covenant;
+            }
+        }
+        
+        public Arts Arts { get; private set; }
+
+        #region Initialization Functions
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
             : base(writingLanguage, writingAbility, areaAbility, preferences)
         {
@@ -43,17 +57,38 @@ namespace WizardMonks
             {
                 _visStock[art] = 0;
             }
+
+            // we need to set the preferred extraction ability to a default before doing the calculation
+            _preferredExtractionAbility = _magicAbility;
+
+            InitializeExtractionAbilities();
+            InitializeMagicSearchAbilities();
+        }
+
+        private void InitializeExtractionAbilities()
+        {
             _extractionAbilities = new List<Ability>(3);
             _extractionAbilities.Add(_magicAbility);
             _extractionAbilities.Add(MagicArts.Creo);
             _extractionAbilities.Add(MagicArts.Vim);
 
             // set up events for caching which abilities to choose for exposure in various situations
+            Preference preference;
             foreach (Ability ability in _extractionAbilities)
             {
                 GetAbility(ability).Changed += ExtractionAbilityChanged;
+                preference = new Preference(PreferenceType.Ability, ability);
+                if (!_preferences.ContainsKey(preference))
+                {
+                    _preferences[preference] = Die.Instance.RollDouble();
+                }
             }
+            RecalculateBestExtractionAbility();
+        }
 
+        private void InitializeMagicSearchAbilities()
+        {
+            Preference preference;
             _magicSearchAbilities = new List<Ability>(3);
             _magicSearchAbilities.Add(_areaAbility);
             _magicSearchAbilities.Add(MagicArts.Intellego);
@@ -63,25 +98,17 @@ namespace WizardMonks
             foreach (Ability ability in _magicSearchAbilities)
             {
                 GetAbility(ability).Changed += SearchAbilityChanged;
+                preference = new Preference(PreferenceType.Ability, ability);
+                if (!_preferences.ContainsKey(preference))
+                {
+                    _preferences[new Preference(PreferenceType.Ability, ability)] = Die.Instance.RollDouble() / 2;
+                }
             }
-
-
-            RecalculateBestExtractionAbility();
             RecalculateBestSearchAbility();
         }
+        #endregion
 
-		public Houses House { get; set; }
-
-        public Covenant Covenant
-        {
-            get
-            {
-                return _covenant;
-            }
-        }
-        
-        public Arts Arts { get; private set; }
-
+        #region Ability Functions
         public override CharacterAbilityBase GetAbility(Ability ability)
         {
             if (MagicArts.IsArt(ability))
@@ -93,6 +120,7 @@ namespace WizardMonks
                 return base.GetAbility(ability);
             }
         }
+        #endregion
 
         #region Event Handlers
         private void ExtractionAbilityChanged(object sender, EventArgs e)
@@ -269,7 +297,7 @@ namespace WizardMonks
             CharacterAbilityBase charAbility = GetAbility(ability);
             double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
             // the gain per season depends on how the character views vis
-            double visNeeded = (gain / _preferences[_visDesire]) * visUsePer;
+            double visNeeded = (gain / _preferences[Preferences.VisDesire]) * visUsePer;
             // compare to the number of seasons we would need to extract the vis
             // plus the number of seasons we would need to study the extracted vis
             // this effectively means that a gain's base value is twice its vis cost
@@ -277,7 +305,7 @@ namespace WizardMonks
             // exposure should get rated according to the visUse of the preferred exposure choice
             // rather than the visUse of the base ability
             double extractVisUsePer = (GetAbility(_preferredExtractionAbility).GetValue() / 10.0) + 0.5;
-            double visValueOfExposure = extractTime * 2 * extractVisUsePer / _preferences[_visDesire];
+            double visValueOfExposure = extractTime * 2 * extractVisUsePer / _preferences[Preferences.VisDesire];
             return (2 * visNeeded) - visValueOfExposure;
         }
         #endregion
@@ -307,6 +335,8 @@ namespace WizardMonks
                 // TODO: refine lab logic
             }
 
+            // TODO: find apprentice
+
             // make sure all preference values are scaled the same
             start = base.DecideSeasonalActivity();
 
@@ -327,7 +357,7 @@ namespace WizardMonks
 
                 CharacterAbilityBase charAbility = GetAbility(_preferredExtractionAbility);
                 double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-                double visNeeded = visUsePer * 2 / _preferences[_visDesire];
+                double visNeeded = visUsePer * 2 / _preferences[Preferences.VisDesire];
 
                 start = new VisExtracting(_preferredExtractionAbility, visGainPer + visNeeded);
             }
@@ -351,7 +381,7 @@ namespace WizardMonks
 
                 if (_visStock[art] + Covenant.GetVis(art) >= visUse)
                 {
-                    double desire = RateSeasonalExperienceGain(art, _preferences[new Preference(PreferenceType.Vis, null)]) - visUse;
+                    double desire = RateSeasonalExperienceGain(art, _preferences[Preferences.VisDesire]) - visUse;
                     if (desire > start.Desire)
                     {
                         start = new VisStudying(art, desire);
@@ -454,6 +484,20 @@ namespace WizardMonks
                 throw new NullReferenceException("The mage has no laboratory!");
             }
 
+        }
+        #endregion
+
+        #region Apprentice Functions
+        public void TakeApprentice(Magus apprentice)
+        {
+            // TODO: what sort of error checking should go here?
+            _apprentice = apprentice;
+        }
+
+        public void GauntletApprentice()
+        {
+            _apprentice.House = House;
+            _apprentice = null;
         }
         #endregion
     }

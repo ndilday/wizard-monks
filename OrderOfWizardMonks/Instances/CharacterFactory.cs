@@ -5,7 +5,7 @@ using WizardMonks;
 using WizardMonks.Instances;
 
 
-namespace WorldSimulation
+namespace WizardMonks.Instances
 {
     public class CharacterFactory
     {
@@ -19,20 +19,29 @@ namespace WorldSimulation
 
         private static void NormalizeAttributes(Character character)
         {
-            character.Stamina.BaseValue = NormalStatRoller.RandomStat();
-            character.Strength.BaseValue = NormalStatRoller.RandomStat();
-            character.Dexterity.BaseValue = NormalStatRoller.RandomStat();
-            character.Quickness.BaseValue = NormalStatRoller.RandomStat();
-            character.Intelligence.BaseValue = NormalStatRoller.RandomStat();
-            character.Perception.BaseValue = NormalStatRoller.RandomStat();
-            character.Presence.BaseValue = NormalStatRoller.RandomStat();
-            character.Communication.BaseValue = NormalStatRoller.RandomStat();
+            character.Stamina.BaseValue = Die.Instance.RollNormal();
+            character.Strength.BaseValue = Die.Instance.RollNormal();
+            character.Dexterity.BaseValue = Die.Instance.RollNormal();
+            character.Quickness.BaseValue = Die.Instance.RollNormal();
+            character.Intelligence.BaseValue = Die.Instance.RollNormal();
+            character.Perception.BaseValue = Die.Instance.RollNormal();
+            character.Presence.BaseValue = Die.Instance.RollNormal();
+            character.Communication.BaseValue = Die.Instance.RollNormal();
         }
 
         public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
             Dictionary<Preference, double> preferences = PreferenceFactory.CreateMagusPreferenceList(magicAbility, langAbility, writingAbility, areaAbility);
             Magus magus = new Magus(magicAbility, langAbility, writingAbility, areaAbility, preferences);
+            NormalizeAttributes(magus);
+            return magus;
+        }
+
+        public static Magus GenerateNewMagus()
+        {
+            Dictionary<Preference, double> preferences = 
+                PreferenceFactory.CreateMagusPreferenceList(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            Magus magus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, preferences);
             NormalizeAttributes(magus);
             return magus;
         }
@@ -48,10 +57,10 @@ namespace WorldSimulation
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 double artDesire = Die.Instance.RollDouble();
-                dictionary[new Preference(PreferenceType.Art, art)] = artDesire;
+                dictionary[new Preference(PreferenceType.Ability, art)] = artDesire;
                 dictionary[new Preference(PreferenceType.Writing, art)] = (artDesire + writingDesire) / 2;
             }
-            dictionary[new Preference(PreferenceType.Vis, null)] = Die.Instance.RollNormal(6.5, 0.1);
+            dictionary[Preferences.VisDesire] = Die.Instance.RollNormal(6.5, 0.1);
             dictionary[new Preference(PreferenceType.Ability, magicAbility)] = Die.Instance.RollDouble();
             dictionary[new Preference(PreferenceType.Ability, writingAbility)] = Die.Instance.RollDouble();
             dictionary[new Preference(PreferenceType.Ability, areaAbility)] = Die.Instance.RollDouble();

@@ -25,6 +25,9 @@ namespace WizardMonks
         private Ability _magicAbility;
         private Covenant _covenant;
         private Laboratory _laboratory;
+        private List<Spell> _spellList;
+        private Spell _partialSpell;
+        private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
         private List<Ability> _extractionAbilities;
         private List<Ability> _magicSearchAbilities;
@@ -53,6 +56,9 @@ namespace WizardMonks
             _covenant = null;
             _laboratory = null;
             _visStock = new Dictionary<Ability, double>();
+            _spellList = new List<Spell>();
+            _partialSpell = null;
+            _partialSpellProgress = 0;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 _visStock[art] = 0;
@@ -284,7 +290,7 @@ namespace WizardMonks
         /// <returns>the vis equivalence of this gain</returns>
         protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
-            double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim, Activity.DistillVis) / 10.0;
+            double visGainPer = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
             if (MagicArts.IsTechnique(ability))
             {
                 visGainPer /= 4;
@@ -332,7 +338,10 @@ namespace WizardMonks
             else
             {
                 // TODO: how do we rate lab work against non-lab work?
-                // TODO: refine lab logic
+                // TODO: refinement
+                // TODO: write lab text
+                // TODO: copy lab text
+                // TODO: invent spell
             }
 
             // TODO: find apprentice
@@ -353,7 +362,7 @@ namespace WizardMonks
             if (_covenant != null && _covenant.Aura > 0)
             {
                 // factor in what ability the exposure will be in, and the value of that exposure
-                double visGainPer = GetLabTotal(MagicArts.Creo, MagicArts.Vim, Activity.DistillVis) / 10;
+                double visGainPer = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
 
                 CharacterAbilityBase charAbility = GetAbility(_preferredExtractionAbility);
                 double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
@@ -393,46 +402,15 @@ namespace WizardMonks
         #endregion
 
         #region Magic Functions
-        public double GetCastingTotal(Ability technique, Ability form)
+        public double GetCastingTotal(ArtPair artPair)
         {
-            double techValue = Arts.GetAbility(technique).GetValue();
-            double formValue = Arts.GetAbility(form).GetValue();
+            double techValue = Arts.GetAbility(artPair.Technique).GetValue();
+            double formValue = Arts.GetAbility(artPair.Form).GetValue();
             return techValue + formValue + Stamina.Value;
-        }
-
-        public double GetLabTotal(Ability technique, Ability form, Activity activity)
-        {
-            double magicTheory = GetAbility(_magicAbility).GetValue();
-            double techValue = Arts.GetAbility(technique).GetValue();
-            double formValue = Arts.GetAbility(form).GetValue();
-            double labTotal =  magicTheory + techValue + formValue + Intelligence.Value;
-            if (_covenant != null)
-            {
-                labTotal += _covenant.Aura;
-
-                if (_laboratory != null)
-                {
-                    labTotal += _laboratory.GetModifier(technique, form, activity);
-                }
-            }
-
-            //TODO: foci
-            //TODO: lab assistant
-            //TODO: familiar
-            return labTotal;
         }
 
         protected void CheckTwilight()
         {
-        }
-
-        public void ExtractVis()
-        {
-            // add vis to personal inventory or covenant inventory
-            _visStock[MagicArts.Vim] += GetLabTotal(MagicArts.Creo, MagicArts.Vim, Activity.DistillVis) / 10;
-            
-            // grant exposure experience
-            GetAbility(_preferredExtractionAbility).AddExperience(2);
         }
 
         public double UseVis(Ability visType, double amount)
@@ -457,6 +435,30 @@ namespace WizardMonks
                 return _visStock[visType];
             }
         }
+        #endregion
+
+        #region Lab Activities
+        public double GetLabTotal(ArtPair artPair, Activity activity)
+        {
+            double magicTheory = GetAbility(_magicAbility).GetValue();
+            double techValue = Arts.GetAbility(artPair.Technique).GetValue();
+            double formValue = Arts.GetAbility(artPair.Form).GetValue();
+            double labTotal = magicTheory + techValue + formValue + Intelligence.Value;
+            if (_covenant != null)
+            {
+                labTotal += _covenant.Aura;
+
+                if (_laboratory != null)
+                {
+                    labTotal += _laboratory.GetModifier(artPair, activity);
+                }
+            }
+
+            //TODO: foci
+            //TODO: lab assistant
+            //TODO: familiar
+            return labTotal;
+        }
 
         public void BuildLaboratory()
         {
@@ -470,7 +472,7 @@ namespace WizardMonks
             {
                 throw new NullReferenceException("The mage has no laboratory!");
             }
-            if(GetAbility(_magicAbility).GetValue() - 4 < _laboratory.Refinement)
+            if (GetAbility(_magicAbility).GetValue() - 4 < _laboratory.Refinement)
             {
                 throw new ArgumentOutOfRangeException("The mage's magical understanding is not high enough to refine this laboratory any further.");
             }
@@ -483,7 +485,50 @@ namespace WizardMonks
             {
                 throw new NullReferenceException("The mage has no laboratory!");
             }
+            // TODO: Implement
+        }
 
+        public void ExtractVis()
+        {
+            // add vis to personal inventory or covenant inventory
+            _visStock[MagicArts.Vim] += GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
+
+            // grant exposure experience
+            GetAbility(_preferredExtractionAbility).AddExperience(2);
+        }
+
+        public void InventSpell(Spell spell)
+        {
+            // TODO: multiple spells in a season
+            // TODO: foci
+            // TODO: Working from Lab Text
+            double labTotal = GetLabTotal(spell.BaseArts, Activity.InventSpells);
+            if(spell == _partialSpell)
+            {
+                // continue previous spell work
+                _partialSpellProgress += labTotal - spell.Level;
+                if (_partialSpellProgress >= _partialSpell.Level)
+                {
+                    _spellList.Add(_partialSpell);
+                    _partialSpell = null;
+                    _partialSpellProgress = 0;
+                }
+            }
+            if(labTotal <= spell.Level)
+            {
+                throw new ArgumentException("This mage cannot invent this spell!");
+            }
+            else if (labTotal >= spell.Level * 2)
+            {
+                _spellList.Add(spell);
+                _partialSpell = null;
+                _partialSpellProgress = 0;
+            }
+            else
+            {
+                _partialSpell = spell;
+                _partialSpellProgress = labTotal - spell.Level;
+            }
         }
         #endregion
 

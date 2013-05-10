@@ -14,6 +14,8 @@ namespace WizardMonks
 		ReadArtBook,
 		InventSpells,
 		InventItem,
+        WriteLabText,
+        CopyLabText,
 		LongevityRitual,
 		EnchantFamiliar,
 		OriginalResearch,
@@ -61,6 +63,25 @@ namespace WizardMonks
             }
             return (Magus)character;
         }
+    }
+
+    public abstract class ExposingMageAction : MageAction
+    {
+        private Ability _exposure;
+
+        protected ExposingMageAction(Ability exposure, double desire)
+        {
+            _exposure = exposure;
+            Desire = desire;
+        }
+
+        public override sealed void Act(Character character)
+        {
+            DoMageAction(ConfirmCharacterIsMage(character));
+ 	        character.GetAbility(_exposure).AddExperience(2);
+        }
+
+        protected abstract void DoMageAction(Magus mage);
     }
 
     [Serializable]
@@ -168,26 +189,20 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class VisExtracting : MageAction
+    public class VisExtracting : ExposingMageAction
     {
-        private Ability _exposure;
-
-        public VisExtracting(Ability exposure, double desire)
+        public VisExtracting(Ability exposure, double desire) : base(exposure, desire)
         {
-            _exposure = exposure;
-            Desire = desire;
             Action = Activity.DistillVis;
         }
 
-        public override void Act(Character character)
+        protected override void DoMageAction(Magus mage)
         {
-            Magus mage = ConfirmCharacterIsMage(character);
             if (mage.Covenant == null)
             {
                 throw new ArgumentNullException("Magi can only extract vis in an aura!");
             }
-            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArts.Creo, MagicArts.Vim, Activity.DistillVis) / 10);
-            mage.GetAbility(_exposure).AddExperience(2);
+            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
         }
     }
 
@@ -277,42 +292,29 @@ namespace WizardMonks
         }
     }
 
-    public class BuildLaboratory : MageAction
+    public class BuildLaboratory : ExposingMageAction
     {
-        private Ability _exposure;
-
-        public BuildLaboratory(Ability exposure, double desire)
+        public BuildLaboratory(Ability exposure, double desire) : base(exposure, desire)
         {
-            Desire = desire;
             Action = Activity.BuildLaboratory;
-            _exposure = exposure;
         }
 
-        public override void Act(Character character)
+        protected override void DoMageAction(Magus mage)
         {
-            Magus mage = ConfirmCharacterIsMage(character);
             mage.BuildLaboratory();
-            mage.GetAbility(_exposure).AddExperience(2);
         }
     }
 
-    public class RefineLaboratory : MageAction
+    public class RefineLaboratory : ExposingMageAction
     {
-        private Ability _exposure;
-
-        public RefineLaboratory(Ability exposure, double desire)
+        public RefineLaboratory(Ability exposure, double desire) : base(exposure, desire)
         {
-            Desire = desire;
             Action = Activity.BuildLaboratory;
-            _exposure = exposure;
         }
 
-        public override void Act(Character character)
+        protected override void DoMageAction(Magus mage)
         {
-            Magus mage = ConfirmCharacterIsMage(character);
             // TODO: implement
-            // grant exposure experience
-            mage.GetAbility(_exposure).AddExperience(2);
         }
     }
 
@@ -360,7 +362,7 @@ namespace WizardMonks
         {
             // add bonus to area lore equal to casting total div 5?
             double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
-            areaLore += mage.GetCastingTotal(MagicArts.Intellego, MagicArts.Vim) / 5;
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
             double roll = Die.Instance.RollDouble() * 5;
             double auraFound = Math.Sqrt(roll * areaLore);
             if (auraFound > 1)
@@ -413,14 +415,40 @@ namespace WizardMonks
         {
             // add bonus to area lore equal to casting total div 5?
             double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
-            areaLore += mage.GetCastingTotal(MagicArts.Intellego, MagicArts.Vim) / 5;
-            double roll = Die.Instance.RollDouble() * 5;
-            double apprenticeFound = Math.Sqrt(roll * areaLore);
-            if (apprenticeFound > 1)
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+            double roll = Die.Instance.RollDouble();
+            if (roll > 1)
             {
                 mage.TakeApprentice(CharacterFactory.GenerateNewMagus());
             }
             mage.GetAbility(_exposureAbility).AddExperience(2);
+            // TODO: gradual reduction in chance?
+        }
+    }
+
+    public class CopyLabText : ExposingMageAction
+    {
+        public CopyLabText(Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.CopyLabText;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            //TODO: implement
+        }
+    }
+
+    public class WriteLabText : ExposingMageAction
+    {
+        public WriteLabText(Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.WriteLabText;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            //TODO: implement
         }
     }
 }

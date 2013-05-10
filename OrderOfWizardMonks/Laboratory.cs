@@ -46,16 +46,16 @@ namespace WizardMonks
             _availableRefinement = size;
         }
 
-        public double GetModifier(Ability technique, Ability form, Activity activity)
+        public double GetModifier(ArtPair artPair, Activity activity)
         {
             double totalModifier = Quality;
-            if (ArtModifiers.ContainsKey(technique))
+            if (ArtModifiers.ContainsKey(artPair.Technique))
             {
-                totalModifier += ArtModifiers[technique];
+                totalModifier += ArtModifiers[artPair.Technique];
             }
-            if (ArtModifiers.ContainsKey(form))
+            if (ArtModifiers.ContainsKey(artPair.Form))
             {
-                totalModifier += ArtModifiers[form];
+                totalModifier += ArtModifiers[artPair.Form];
             }
             if (ActivityModifiers.ContainsKey(activity))
             {

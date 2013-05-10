@@ -83,12 +83,14 @@
     <Compile Include="Instances\MagicArts.cs" />
     <Compile Include="Houses.cs" />
     <Compile Include="Instances\Preferences.cs" />
+    <Compile Include="Instances\SpellModifiers.cs" />
     <Compile Include="Laboratory.cs" />
     <Compile Include="Magus.cs" />
     <Compile Include="Multiton.cs" />
     <Compile Include="Preference.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Activity.cs" />
+    <Compile Include="Spell.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

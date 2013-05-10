@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
 	[DataContract]
@@ -297,6 +299,23 @@ namespace WizardMonks
         public override int GetTractatiiLimit()
         {
             return (int)Math.Floor(GetValue() / 5.0);
+        }
+    }
+
+    [DataContract]
+    public class ArtPair
+    {
+        public Ability Technique { get; private set; }
+        public Ability Form { get; private set; }
+
+        public ArtPair(Ability technique, Ability form)
+        {
+            if (!MagicArts.IsTechnique(technique) || !MagicArts.IsForm(form))
+            {
+                throw new ArgumentException("one of the arts used to initialize this pair is invalid!");
+            }
+            Technique = technique;
+            Form = form;
         }
     }
 }

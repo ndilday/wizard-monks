@@ -10,8 +10,7 @@ namespace WizardMonks
 	[Serializable]
 	public enum Activity
 	{
-		ReadAbilityBook,
-		ReadArtBook,
+		ReadBook,
 		InventSpells,
 		InventItem,
         WriteLabText,
@@ -37,52 +36,14 @@ namespace WizardMonks
         Practice
 	}
 
-	public interface IAction
+    #region IAction Classes
+    public interface IAction
 	{
 		ushort? SeasonId { get; }
         Activity Action { get; }
         double Desire { get; }
         void Act(Character character);
 	}
-
-    public abstract class MageAction : IAction
-    {
-        public ushort? SeasonId { get; protected set; }
-
-        public Activity Action { get; protected set; }
-
-        public double Desire { get; protected set; }
-
-        public abstract void Act(Character character);
-
-        protected Magus ConfirmCharacterIsMage(Character character)
-        {
-            if (typeof(Magus) != character.GetType())
-            {
-                throw new InvalidCastException("Only magi can extract vis!");
-            }
-            return (Magus)character;
-        }
-    }
-
-    public abstract class ExposingMageAction : MageAction
-    {
-        private Ability _exposure;
-
-        protected ExposingMageAction(Ability exposure, double desire)
-        {
-            _exposure = exposure;
-            Desire = desire;
-        }
-
-        public override sealed void Act(Character character)
-        {
-            DoMageAction(ConfirmCharacterIsMage(character));
- 	        character.GetAbility(_exposure).AddExperience(2);
-        }
-
-        protected abstract void DoMageAction(Magus mage);
-    }
 
     [Serializable]
     public class Reading : IAction
@@ -95,16 +56,12 @@ namespace WizardMonks
         }
 
         public ushort? SeasonId { get; private set; }
-        
+
         public Activity Action
         {
             get
             {
-                if (this._book != null && MagicArts.IsArt(this._book.Topic))
-                {
-                    return Activity.ReadArtBook;
-                }
-                return Activity.ReadAbilityBook;
+                return Activity.ReadBook;
             }
         }
 
@@ -127,7 +84,7 @@ namespace WizardMonks
         }
 
         public ushort? SeasonId { get; private set; }
-        
+
         public virtual Activity Action
         {
             get { return Activity.Practice; }
@@ -142,7 +99,7 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Exposure: Practice
+    public class Exposure : Practice
     {
         public Exposure(Ability ability, double desire) : base(ability, desire) { }
 
@@ -154,123 +111,6 @@ namespace WizardMonks
         public override void Act(Character character)
         {
             character.GetAbility(_ability).AddExperience(2);
-        }
-    }
-
-    [Serializable]
-    public class Writing : IAction
-    {
-        private Ability _topic;
-        private double _level;
-        private Ability _exposure;
-
-        public Writing(Ability topic, Ability exposure, double level, double desire)
-        {
-            _topic = topic;
-            _exposure = exposure;
-            _level = level;
-            Desire = desire;
-        }
-
-        public ushort? SeasonId { get; private set; }
-
-        public Activity Action
-        {
-            get { return Activity.WriteBook; }
-        }
-
-        public double Desire { get; private set; }
-
-        public void Act(Character character)
-        {
-            character.WriteBook(_topic, _level);
-            character.GetAbility(_exposure).AddExperience(2);
-        }
-    }
-
-    [Serializable]
-    public class VisExtracting : ExposingMageAction
-    {
-        public VisExtracting(Ability exposure, double desire) : base(exposure, desire)
-        {
-            Action = Activity.DistillVis;
-        }
-
-        protected override void DoMageAction(Magus mage)
-        {
-            if (mage.Covenant == null)
-            {
-                throw new ArgumentNullException("Magi can only extract vis in an aura!");
-            }
-            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
-        }
-    }
-
-    [Serializable]
-    public class VisStudying : MageAction
-    {
-        private Ability _art;
-
-        public VisStudying(Ability art, double desire)
-        {
-            if (!MagicArts.IsArt(art))
-            {
-                throw new ArgumentException("Only magic arts have vis associated with them!");
-            }
-            _art = art;
-            Desire = desire;
-            Action = Activity.StudyVis;
-        }
-
-        public override void Act(Character character)
-        {
-            Magus mage = ConfirmCharacterIsMage(character);
-
-            // determine the amount of vis needed
-            CharacterAbilityBase charAbility = mage.GetAbility(_art);
-            double visNeeded = 0.5 + (charAbility.GetValue() / 10.0);
-            
-            // decrement the used vis
-            mage.UseVis(_art, visNeeded);
-
-            // add experience
-            charAbility.AddExperience(Die.Instance.RollExplodingDie());
-        }
-    }
-
-    [Serializable]
-    public class CopyBook : IAction
-    {
-        public ushort? SeasonId { get; private set; }
-
-        public Activity Action
-        {
-            get { return Activity.CopyBook; }
-        }
-
-        public double Desire { get; private set; }
-
-        public void Act(Character character)
-        {
-            // TODO: implement
-        }
-    }
-
-    [Serializable]
-    public class Teach : IAction
-    {
-        public ushort? SeasonId { get; private set; }
-
-        public Activity Action
-        {
-            get { return Activity.Teach; }
-        }
-
-        public double Desire { get; private set; }
-
-        public void Act(Character character)
-        {
-            // TODO: implement
         }
     }
 
@@ -291,53 +131,81 @@ namespace WizardMonks
             // TODO: implement
         }
     }
+    #endregion
 
-    public class BuildLaboratory : ExposingMageAction
+    #region ExposingAction classes
+    public abstract class ExposingAction : IAction
     {
-        public BuildLaboratory(Ability exposure, double desire) : base(exposure, desire)
+        private Ability _exposure;
+
+        public ushort? SeasonId { get; protected set; }
+
+        public Activity Action { get; protected set; }
+
+        public double Desire { get; protected set; }
+
+        protected ExposingAction(Ability exposure, double desire)
         {
-            Action = Activity.BuildLaboratory;
+            _exposure = exposure;
+            Desire = desire;
         }
 
-        protected override void DoMageAction(Magus mage)
+        public void Act(Character character)
         {
-            mage.BuildLaboratory();
+            DoAction(character);
+ 	        character.GetAbility(_exposure).AddExperience(2);
+        }
+
+        protected abstract void DoAction(Character character);
+    }
+
+    [Serializable]
+    public class Writing : ExposingAction
+    {
+        private Ability _topic;
+        private double _level;
+
+        public Writing(Ability topic, Ability exposure, double level, double desire)
+            : base(exposure, desire)
+        {
+            _topic = topic;
+            _level = level;
+            Action = Activity.WriteBook;
+        }
+
+        protected override void DoAction(Character character)
+        {
+            character.WriteBook(_topic, _level);
         }
     }
 
-    public class RefineLaboratory : ExposingMageAction
+    [Serializable]
+    public class CopyBook : ExposingAction
     {
-        public RefineLaboratory(Ability exposure, double desire) : base(exposure, desire)
+        bool _copyQuickly;
+
+        public CopyBook(bool copyQuickly, Ability exposure, double desire)
+            : base(exposure, desire)
         {
-            Action = Activity.BuildLaboratory;
+            _copyQuickly = copyQuickly;
+            Action = Activity.CopyBook;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoAction(Character character)
         {
             // TODO: implement
         }
     }
 
-    public class FindAura : IAction
+    public class FindAura : ExposingAction
     {
-        private Ability _exposureAbility;
-
         public FindAura(Ability exposureAbility, double desire)
+            : base(exposureAbility, desire)
         {
-            _exposureAbility = exposureAbility;
-            Desire = desire;
+            Action = Activity.FindAura;
         }
 
-        public ushort? SeasonId { get; private set; }
-
-        public Activity Action
-        {
-            get { return Activity.FindAura; }
-        }
-
-        public double Desire { get; private set; }
-
-        public void Act(Character character)
+        protected override void DoAction(Character character)
         {
             // see if the character can safely spont aura-finding spells
             if (typeof(Magus) == character.GetType())
@@ -369,30 +237,17 @@ namespace WizardMonks
             {
                 mage.FoundCovenant(auraFound);
             }
-            mage.GetAbility(_exposureAbility).AddExperience(2);
         }
     }
 
-    public class FindApprentice : IAction
+    public class FindApprentice : ExposingAction
     {
-        private Ability _exposureAbility;
-
-        public FindApprentice(Ability exposureAbility, double desire)
+        public FindApprentice(Ability exposureAbility, double desire) : base(exposureAbility, desire)
         {
-            _exposureAbility = exposureAbility;
-            Desire = desire;
+            Action = Activity.FindApprentice;
         }
 
-        public ushort? SeasonId { get; private set; }
-
-        public Activity Action
-        {
-            get { return Activity.FindApprentice; }
-        }
-
-        public double Desire { get; private set; }
-
-        public void Act(Character character)
+        protected override void DoAction(Character character)
         {
             // see if the character can safely spont gift-finding spells
             if (typeof(Magus) == character.GetType())
@@ -421,8 +276,162 @@ namespace WizardMonks
             {
                 mage.TakeApprentice(CharacterFactory.GenerateNewMagus());
             }
-            mage.GetAbility(_exposureAbility).AddExperience(2);
             // TODO: gradual reduction in chance?
+        }
+    }
+
+    [Serializable]
+    public class Teach : ExposingAction
+    {
+        public Teach(Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.Teach;
+        }
+
+        protected override void DoAction(Character character)
+        {
+            // TODO: implement
+        }
+    }
+    #endregion
+
+    #region MageAction Classes
+    public abstract class MageAction : IAction
+    {
+        public ushort? SeasonId { get; protected set; }
+
+        public Activity Action { get; protected set; }
+
+        public double Desire { get; protected set; }
+
+        public abstract void Act(Character character);
+
+        protected Magus ConfirmCharacterIsMage(Character character)
+        {
+            if (typeof(Magus) != character.GetType())
+            {
+                throw new InvalidCastException("Only magi can extract vis!");
+            }
+            return (Magus)character;
+        }
+    }
+
+    [Serializable]
+    public class VisStudying : MageAction
+    {
+        private Ability _art;
+
+        public VisStudying(Ability art, double desire)
+        {
+            if (!MagicArts.IsArt(art))
+            {
+                throw new ArgumentException("Only magic arts have vis associated with them!");
+            }
+            _art = art;
+            Desire = desire;
+            Action = Activity.StudyVis;
+        }
+
+        public override void Act(Character character)
+        {
+            Magus mage = ConfirmCharacterIsMage(character);
+
+            // determine the amount of vis needed
+            CharacterAbilityBase charAbility = mage.GetAbility(_art);
+            double visNeeded = 0.5 + (charAbility.GetValue() / 10.0);
+
+            // decrement the used vis
+            mage.UseVis(_art, visNeeded);
+
+            // add experience
+            charAbility.AddExperience(Die.Instance.RollExplodingDie());
+        }
+    }
+    #endregion
+
+    #region ExposingMageAction Classes
+    public abstract class ExposingMageAction : MageAction
+    {
+        private Ability _exposure;
+
+        protected ExposingMageAction(Ability exposure, double desire)
+        {
+            _exposure = exposure;
+            Desire = desire;
+        }
+
+        public override sealed void Act(Character character)
+        {
+            DoMageAction(ConfirmCharacterIsMage(character));
+ 	        character.GetAbility(_exposure).AddExperience(2);
+        }
+
+        protected abstract void DoMageAction(Magus mage);
+    }
+
+    [Serializable]
+    public class VisExtracting : ExposingMageAction
+    {
+        public VisExtracting(Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.DistillVis;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            if (mage.Covenant == null)
+            {
+                throw new ArgumentNullException("Magi can only extract vis in an aura!");
+            }
+            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
+        }
+    }
+
+    public class BuildLaboratory : ExposingMageAction
+    {
+        public BuildLaboratory(Ability exposure, double desire)
+            : base(exposure, desire)
+        {
+            Action = Activity.BuildLaboratory;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            // TODO: build size
+            // TODO: pre-existing conditions
+            mage.BuildLaboratory();
+        }
+    }
+
+    public class RefineLaboratory : ExposingMageAction
+    {
+        public RefineLaboratory(Ability exposure, double desire)
+            : base(exposure, desire)
+        {
+            Action = Activity.BuildLaboratory;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            // TODO: implement
+        }
+    }
+
+    public class InventSpell : ExposingMageAction
+    {
+        private Spell _spell;
+
+        public InventSpell(Spell spell, Ability exposure, double desire)
+            : base(exposure, desire)
+        {
+            _spell = spell;
+            Action = Activity.InventSpells;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            // TODO: multiple spells
+            mage.InventSpell(_spell);
         }
     }
 
@@ -451,4 +460,5 @@ namespace WizardMonks
             //TODO: implement
         }
     }
+    #endregion
 }

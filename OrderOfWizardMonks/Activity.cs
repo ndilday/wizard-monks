@@ -283,14 +283,22 @@ namespace WizardMonks
     [Serializable]
     public class Teach : ExposingAction
     {
-        public Teach(Ability exposure, double desire) : base(exposure, desire)
+        private Character _student;
+        private Ability _abilityToTeach;
+        public Teach(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
         {
             Action = Activity.Teach;
+            _student = student;
+            _abilityToTeach = abilityToTeach;
         }
 
         protected override void DoAction(Character character)
         {
             // TODO: implement
+            if (_student.GetAbility(_abilityToTeach).GetValue() >= character.GetAbility(_abilityToTeach).GetValue())
+            {
+                throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
+            }
         }
     }
     #endregion

@@ -47,6 +47,11 @@ namespace WizardMonks
         
         public Arts Arts { get; private set; }
 
+        public Laboratory Laboratory
+        {
+            get { return _laboratory;}
+        }
+
         #region Initialization Functions
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
             : base(writingLanguage, writingAbility, areaAbility, preferences)

@@ -128,7 +128,7 @@ namespace WizardMonks
 
         public void Act(Character character)
         {
-            // TODO: implement
+            // TODO: currently this logic is over in teach; how do we get this to work?
         }
     }
     #endregion
@@ -283,6 +283,7 @@ namespace WizardMonks
     [Serializable]
     public class Teach : ExposingAction
     {
+        // TODO: enable multiple students
         private Character _student;
         private Ability _abilityToTeach;
         public Teach(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
@@ -294,11 +295,17 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            // TODO: implement
-            if (_student.GetAbility(_abilityToTeach).GetValue() >= character.GetAbility(_abilityToTeach).GetValue())
+            double abilityDifference = character.GetAbility(_abilityToTeach).GetValue() - _student.GetAbility(_abilityToTeach).GetValue();
+            if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
             }
+            double amountTaught = 6 + character.Communication.Value + character.GetAbility(Abilities.Teaching).GetValue();
+            if (amountTaught > abilityDifference)
+            {
+                amountTaught = abilityDifference;
+            }
+            _student.GetAbility(_abilityToTeach).AddExperience(amountTaught);
         }
     }
     #endregion
@@ -416,12 +423,13 @@ namespace WizardMonks
         public RefineLaboratory(Ability exposure, double desire)
             : base(exposure, desire)
         {
-            Action = Activity.BuildLaboratory;
+            Action = Activity.RefineLaboratory;
         }
 
         protected override void DoMageAction(Magus mage)
         {
-            // TODO: implement
+            // TODO: we may want to do the check here as well to be safe
+            mage.RefineLaboratory();
         }
     }
 

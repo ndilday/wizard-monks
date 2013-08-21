@@ -16,6 +16,7 @@ namespace WizardMonks.Instances
         public static Ability Etiquette { get; private set; }
         public static Ability AreaLore { get; private set; }
         public static Ability Concentration { get; private set; }
+        public static Ability Teaching { get; private set; }
 
         static Abilities()
         {
@@ -31,6 +32,7 @@ namespace WizardMonks.Instances
             Etiquette = new Ability(0, AbilityType.General, "Etiquette");
             AreaLore = new Ability(1, AbilityType.General, "Area Lore");
             Concentration = new Ability(2, AbilityType.General, "Concentration");
+            Teaching = new Ability(3, AbilityType.General, "Teaching");
         }
 
         public static IEnumerable<Ability> GetEnumerator()
@@ -44,6 +46,7 @@ namespace WizardMonks.Instances
             yield return Etiquette;
             yield return AreaLore;
             yield return Concentration;
+            yield return Teaching;
         }
     }
 }

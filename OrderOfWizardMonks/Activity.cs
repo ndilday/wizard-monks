@@ -24,6 +24,7 @@ namespace WizardMonks
 		DistillVis,
 		StudyVis,
         Teach,
+        Train
         Learn,
 		WriteBook,
 		CopyBook,
@@ -182,21 +183,40 @@ namespace WizardMonks
     [Serializable]
     public class CopyBook : ExposingAction
     {
+        // TODO: handle multiple books to copy
         bool _copyQuickly;
+        IBook _book;
 
-        public CopyBook(bool copyQuickly, Ability exposure, double desire)
+        public CopyBook(bool copyQuickly, IBook bookToCopy, Ability exposure, double desire)
             : base(exposure, desire)
         {
             _copyQuickly = copyQuickly;
+            _book = bookToCopy;
             Action = Activity.CopyBook;
         }
 
         protected override void DoAction(Character character)
         {
-            // TODO: implement
+            double scribeAbilityValue = character.GetAbility(Abilities.Scribing).GetValue();
+            if(_book.Level == -1)
+            {
+                Tractatus tract = new Tractatus
+                {
+                    Author = _book.Author,
+                    Quality = _book.Quality,
+                    Title = _book.Title,
+                    Topic = _book.Topic
+                };
+                character.AddBookToCollection(tract);
+            }
+            else
+            {
+                // TODO: implement logic for copying summae
+            }
         }
     }
 
+    [Serializable]
     public class FindAura : ExposingAction
     {
         public FindAura(Ability exposureAbility, double desire)
@@ -240,6 +260,7 @@ namespace WizardMonks
         }
     }
 
+    [Serializable]
     public class FindApprentice : ExposingAction
     {
         public FindApprentice(Ability exposureAbility, double desire) : base(exposureAbility, desire)
@@ -306,6 +327,35 @@ namespace WizardMonks
                 amountTaught = abilityDifference;
             }
             _student.GetAbility(_abilityToTeach).AddExperience(amountTaught);
+        }
+    }
+
+    [Serializable]
+    public class Train : ExposingAction
+    {
+        // TODO: enable multiple students
+        private Character _student;
+        private Ability _abilityToTrain;
+        public Train(Character student, Ability abilityToTrain, Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.Train;
+            _student = student;
+            _abilityToTrain = abilityToTrain;
+        }
+
+        protected override void DoAction(Character character)
+        {
+            double abilityDifference = character.GetAbility(_abilityToTrain).GetValue() - _student.GetAbility(_abilityToTrain).GetValue();
+            if (abilityDifference <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Trainer has nothing to teach this student!");
+            }
+            double amountTrained = 3 + character.GetAbility(_abilityToTrain).GetValue();
+            if (amountTrained > abilityDifference)
+            {
+                amountTrained = abilityDifference;
+            }
+            _student.GetAbility(_abilityToTrain).AddExperience(amountTrained);
         }
     }
     #endregion

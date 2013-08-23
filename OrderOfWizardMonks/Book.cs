@@ -16,7 +16,6 @@ namespace WizardMonks
 		public Ability Topic { get; set; }
 		public double Quality { get; set; }
 		public virtual double Level { get; set; }
-        //public virtual double Value { get; set; }
 	}
 
 	[Serializable]
@@ -27,6 +26,21 @@ namespace WizardMonks
             return MagicArts.IsArt(Topic) ? Level : Level * 5;
         }
         public double PointsComplete { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(Summa))
+            {
+                return false;
+            }
+            Summa otherBook = (Summa)obj;
+            return 
+                this.Author == otherBook.Author && 
+                this.Level == otherBook.Level && 
+                this.Quality == otherBook.Quality && 
+                this.Title == otherBook.Title && 
+                this.Topic == otherBook.Topic;
+        }
 	}
 
     [Serializable]
@@ -41,6 +55,20 @@ namespace WizardMonks
             set
             {
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(Tractatus))
+            {
+                return false;
+            }
+            Tractatus otherBook = (Tractatus)obj;
+            return
+                this.Author == otherBook.Author &&
+                this.Quality == otherBook.Quality &&
+                this.Title == otherBook.Title &&
+                this.Topic == otherBook.Topic;
         }
     }
 

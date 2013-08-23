@@ -396,6 +396,11 @@ namespace WizardMonks
             return book.Author != this && !this._booksRead.Contains(book);
         }
 
+        public virtual void AddBookToCollection(IBook book)
+        {
+            _booksOwned.Add(book);
+        }
+
         public virtual IEnumerable<IBook> GetBooksFromCollection(Ability ability)
         {
             return _booksOwned.Where(b => b.Topic == ability).OrderBy(b => b.Quality);

@@ -181,7 +181,7 @@ namespace WizardMonks
     #region ExposingAction classes
     public abstract class ExposingAction : IAction
     {
-        private Ability _exposure;
+        public Ability Exposure { get; private set; }
 
         public ushort? SeasonId { get; protected set; }
 
@@ -191,14 +191,14 @@ namespace WizardMonks
 
         protected ExposingAction(Ability exposure, double desire)
         {
-            _exposure = exposure;
+            Exposure = exposure;
             Desire = desire;
         }
 
         public void Act(Character character)
         {
             DoAction(character);
- 	        character.GetAbility(_exposure).AddExperience(2);
+ 	        character.GetAbility(Exposure).AddExperience(2);
         }
 
         protected abstract void DoAction(Character character);
@@ -222,7 +222,7 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            character.WriteBook(Topic, Level);
+            character.WriteBook(Topic, Exposure, Level);
         }
 
         public override bool Matches(IAction action)
@@ -315,9 +315,12 @@ namespace WizardMonks
         private void MageAuraSearch(Magus mage)
         {
             // add bonus to area lore equal to casting total div 5?
+            // TODO: once spells are implemented, increase finding chances based on aura-detection spells
             double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
             double roll = Die.Instance.RollDouble() * 5;
+
+            // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
             double auraFound = Math.Sqrt(roll * areaLore);
             if (auraFound > 1)
             {

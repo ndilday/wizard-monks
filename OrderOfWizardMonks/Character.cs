@@ -47,7 +47,6 @@ namespace WizardMonks
         protected Ability _writingAbility;
         protected Ability _writingLanguage;
         protected Ability _areaAbility;
-        protected Dictionary<Preference, double> _preferences;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
@@ -57,7 +56,6 @@ namespace WizardMonks
         protected readonly List<IBook> _booksWritten;
         protected readonly List<IBook> _booksRead;
         protected readonly List<IBook> _booksOwned;
-        protected readonly List<GoalBase> _goals;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
         #endregion
@@ -88,7 +86,7 @@ namespace WizardMonks
         }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
+        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility)
         {
             Die die = new Die();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
@@ -110,19 +108,10 @@ namespace WizardMonks
             _booksRead = new List<IBook>();
             _booksWritten = new List<IBook>();
             _booksOwned = new List<IBook>();
-            _goals = new List<GoalBase>();
 
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
-            if (preferences == null)
-            {
-                _preferences = new Dictionary<Preference, double>();
-            }
-            else
-            {
-                _preferences = preferences;
-            }
             _writingAbilities = new List<Ability>();
             _writingAbilities.Add(_writingAbility);
             _writingAbilities.Add(_writingLanguage);
@@ -138,12 +127,6 @@ namespace WizardMonks
             if (!_abilityList.ContainsKey(ability.AbilityId))
             {
                 _abilityList[ability.AbilityId] = new CharacterAbility(ability);
-
-                // if the character doesn't already have a preference related to this ability, add it
-                if(!_preferences.ContainsKey(new Preference(PreferenceType.Ability, ability)))
-                {
-                    _preferences[new Preference(PreferenceType.Ability, ability)] = Die.Instance.RollDouble();
-                }
             }
             
             return _abilityList[ability.AbilityId];
@@ -271,41 +254,6 @@ namespace WizardMonks
         #endregion
 
         #region Seasonal Functions
-        public virtual IAction DecideSeasonalActivity()
-        {
-            // process books, looking for most interesting readable title
-            IAction action = null;
-            // exclude tractatii that have been read and summae which are beneath the current ability level
-            var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 1000)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
-            if (availableBooks.Any())
-            {
-                IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Ability, b.Topic))).FirstOrDefault();
-                if (bestBook != null)
-                {
-                    Log += "Could read a book on " + bestBook.Topic.AbilityName + " at Q" + bestBook.Quality + "\r\n";
-                    action = ConfirmLiteracy(bestBook, RateSeasonalExperienceGain(bestBook.Topic, GetBookLevelGain(bestBook)));
-                }
-            }
-
-            // consider the value created per season if writing, instead
-            EvaluatedBook book = RateBestBookToWrite();
-            if (book != null && (action == null || book.PerceivedValue > action.Desire))
-            {
-                Log += "Could write a book on " + book.Book.Topic.AbilityName + " at Q" + book.Book.Quality + "\r\n";
-                action = ConfirmLiteracy(book, book.PerceivedValue);
-            }
-
-            // compare the most desirable ability to practice
-            double practiceDesire = 0;
-            Ability practice = GetPreferredAbilityToPractice(out practiceDesire);
-            if (action == null || practiceDesire > action.Desire)
-            {
-                Log += "Decided to practice " + practice.AbilityName + "\r\n";
-                action = new Practice(practice, practiceDesire);
-            }
-
-            return action;
-        }
 
         public IAction ConfirmLiteracy(IBook book, double desire)
         {
@@ -368,16 +316,6 @@ namespace WizardMonks
             {
                 return new Reading(book, desire);
             }
-        }
-
-        /// <summary>
-        /// Determines which ability in the provided list the character is most interested in boosting
-        /// </summary>
-        /// <param name="abilityList"></param>
-        /// <returns>whichever ability from the list has the highest product of value gain and preference score</returns>
-        protected Ability GetBestAbilityToBoost(IEnumerable<Ability> abilityList)
-        {
-            return abilityList.OrderBy(a => RateSeasonalExperienceGain(a, 2) * _preferences[new Preference(PreferenceType.Ability, a)]).First();
         }
 
         public virtual void CommitAction(IAction action)
@@ -475,12 +413,11 @@ namespace WizardMonks
             return charAbility.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == charAbility.Ability && b.Level == 0).Count();
         }
 
-        public IBook WriteBook(Ability topic, double desiredLevel = 0)
+        public IBook WriteBook(Ability topic, Ability exposureAbility, double desiredLevel = 0)
         {
             // grant exposure experience
             List<Ability> abilityList = new List<Ability>(_writingAbilities);
             abilityList.Add(topic);
-            Ability exposureAbility = GetBestAbilityToBoost(abilityList);
             GetAbility(exposureAbility).AddExperience(2);
             
             // TODO: When should books moved from the owned list to the covenant library?
@@ -680,33 +617,6 @@ namespace WizardMonks
         #endregion
 
         #region Preference/Goal Functions
-        public double GetDesire(Preference pref)
-        {
-            return _preferences.ContainsKey(pref) ? _preferences[pref] : 0;
-        }
-
-        public Ability GetPreferredAbilityToPractice(out double preference)
-        {
-            Ability ability = null;
-            preference = 0;
-            foreach (KeyValuePair<Preference, double> prefPair in _preferences)
-            {
-                if (prefPair.Key.Type == PreferenceType.Ability)
-                {
-                    Ability thisAbility = (Ability)prefPair.Key.Specifier;
-                    CharacterAbilityBase charAbility = GetAbility(thisAbility);
-                    double gain = charAbility.GetValueGain(4);
-                    double thisPreference = gain * prefPair.Value;
-                    if (thisPreference > preference)
-                    {
-                        ability = thisAbility;
-                        preference = thisPreference;
-                    }
-                }
-            }
-
-            return ability;
-        }
 
         /// <summary>
         /// Determines the value of an experience gain in terms of practice seasons

@@ -20,19 +20,17 @@ namespace WizardMonks
     }
 
 	[Serializable]
-	public class Magus : Character
+	public partial class Magus : Character
 	{
         private Ability _magicAbility;
         private Covenant _covenant;
         private Laboratory _laboratory;
-        private List<Spell> _spellList;
+        public List<Spell> SpellList { get; private set; }
         private Spell _partialSpell;
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
         private List<Ability> _extractionAbilities;
         private List<Ability> _magicSearchAbilities;
-        private Ability _preferredExtractionAbility;
-        private Ability _preferredMagicSearchAbility;
         private Magus _apprentice;
 
         public Houses House { get; set; }
@@ -53,15 +51,15 @@ namespace WizardMonks
         }
 
         #region Initialization Functions
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
-            : base(writingLanguage, writingAbility, areaAbility, preferences)
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility)
+            : base(writingLanguage, writingAbility, areaAbility)
         {
             _magicAbility = magicAbility;
             Arts = new Arts();
             _covenant = null;
             _laboratory = null;
             _visStock = new Dictionary<Ability, double>();
-            _spellList = new List<Spell>();
+            SpellList = new List<Spell>();
             _partialSpell = null;
             _partialSpellProgress = 0;
             foreach (Ability art in MagicArts.GetEnumerator())
@@ -69,11 +67,9 @@ namespace WizardMonks
                 _visStock[art] = 0;
             }
 
-            // we need to set the preferred extraction ability to a default before doing the calculation
-            _preferredExtractionAbility = _magicAbility;
-
             InitializeExtractionAbilities();
             InitializeMagicSearchAbilities();
+
         }
 
         private void InitializeExtractionAbilities()
@@ -82,40 +78,14 @@ namespace WizardMonks
             _extractionAbilities.Add(_magicAbility);
             _extractionAbilities.Add(MagicArts.Creo);
             _extractionAbilities.Add(MagicArts.Vim);
-
-            // set up events for caching which abilities to choose for exposure in various situations
-            Preference preference;
-            foreach (Ability ability in _extractionAbilities)
-            {
-                GetAbility(ability).Changed += ExtractionAbilityChanged;
-                preference = new Preference(PreferenceType.Ability, ability);
-                if (!_preferences.ContainsKey(preference))
-                {
-                    _preferences[preference] = Die.Instance.RollDouble();
-                }
-            }
-            RecalculateBestExtractionAbility();
         }
 
         private void InitializeMagicSearchAbilities()
         {
-            Preference preference;
             _magicSearchAbilities = new List<Ability>(3);
             _magicSearchAbilities.Add(_areaAbility);
             _magicSearchAbilities.Add(MagicArts.Intellego);
             _magicSearchAbilities.Add(MagicArts.Vim);
-
-            // set up events for caching which abilities to choose for exposure in various situations
-            foreach (Ability ability in _magicSearchAbilities)
-            {
-                GetAbility(ability).Changed += SearchAbilityChanged;
-                preference = new Preference(PreferenceType.Ability, ability);
-                if (!_preferences.ContainsKey(preference))
-                {
-                    _preferences[new Preference(PreferenceType.Ability, ability)] = Die.Instance.RollDouble() / 2;
-                }
-            }
-            RecalculateBestSearchAbility();
         }
         #endregion
 
@@ -130,28 +100,6 @@ namespace WizardMonks
             {
                 return base.GetAbility(ability);
             }
-        }
-        #endregion
-
-        #region Event Handlers
-        private void ExtractionAbilityChanged(object sender, EventArgs e)
-        {
-            RecalculateBestExtractionAbility();
-        }
-
-        private void SearchAbilityChanged(object sender, EventArgs e)
-        {
-            RecalculateBestSearchAbility();
-        }
-
-        private void RecalculateBestExtractionAbility()
-        {
-            _preferredExtractionAbility = GetBestAbilityToBoost(_extractionAbilities);
-        }
-
-        private void RecalculateBestSearchAbility()
-        {
-            _preferredMagicSearchAbility = GetBestAbilityToBoost(_magicSearchAbilities);
         }
         #endregion
 
@@ -262,28 +210,6 @@ namespace WizardMonks
         #endregion
 
         #region Goal/Preference Functions
-        private void GenerateArtLearningGoal(Ability art, int seasonsLived, double level)
-        {
-            double desire = GetDesire(new Preference(PreferenceType.Ability, art));
-            _goals.Add(new AbilityGoal
-                {
-                    Ability = art,
-                    Level = level,
-                    SeasonsToComplete = (uint)(400 - seasonsLived),
-                    Priority = desire
-                });
-        }
-
-        private void GenerateArtWritingGoal(Ability art)
-        {
-            double desire = GetDesire(new Preference(PreferenceType.Writing, art));
-            uint timeFrame = (uint)(20 / desire);
-            int tractLimit = GetAbility(art).GetTractatiiLimit();
-            if (tractLimit > _booksWritten.Where(b => b.Topic == art && b.Level == 0).Count())
-            {
-                _goals.Add(new WritingGoal(art, 0, 0, timeFrame, desire));
-            }
-        }
 
         /// <summary>
         /// Determines the value of an experience gain in terms of the value of vis, 
@@ -295,114 +221,29 @@ namespace WizardMonks
         /// <returns>the vis equivalence of this gain</returns>
         protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
-            double visGainPer = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+            double distillVisRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
             if (MagicArts.IsTechnique(ability))
             {
-                visGainPer /= 4;
+                distillVisRate /= 4;
             }
             else if (MagicArts.IsForm(ability) && ability != MagicArts.Vim)
             {
-                visGainPer /= 2;
+                distillVisRate /= 2;
             }
 
             CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
+            double visUsedPerStudySeason = 0.5 + (charAbility.GetValue() / 10.0);
             // the gain per season depends on how the character views vis
-            double visNeeded = (gain / _preferences[Preferences.VisDesire]) * visUsePer;
+            double visNeeded = gain * visUsedPerStudySeason;
             // compare to the number of seasons we would need to extract the vis
             // plus the number of seasons we would need to study the extracted vis
             // this effectively means that a gain's base value is twice its vis cost
-            double extractTime = visNeeded / visGainPer;
+            double extractTime = visNeeded / distillVisRate;
             // exposure should get rated according to the visUse of the preferred exposure choice
             // rather than the visUse of the base ability
-            double extractVisUsePer = (GetAbility(_preferredExtractionAbility).GetValue() / 10.0) + 0.5;
-            double visValueOfExposure = extractTime * 2 * extractVisUsePer / _preferences[Preferences.VisDesire];
+            double extractVisUsePer = (GetAbility(Abilities.MagicTheory).GetValue() / 10.0) + 0.5;
+            double visValueOfExposure = extractTime * 2 * extractVisUsePer;
             return (2 * visNeeded) - visValueOfExposure;
-        }
-        #endregion
-
-        #region Seasonal/Rating Functions
-        public override IAction DecideSeasonalActivity()
-        {
-            // TODO: how to estimate future return on investment?
-            // we're currently really rating everything on a basis
-            // sort  of defined by opportunity cost
-            IAction start;
-            if (_laboratory == null)
-            {
-                if (_covenant == null)
-                {
-                    // if we don't have a covenant, perhaps we should look for a site to found one
-                    // before building a lab
-                    return new FindAura(_preferredMagicSearchAbility, 100);
-                }
-                // in most circumstances, building a lab should come first
-                // TODO: when shouldn't it?
-                return new BuildLaboratory(_magicAbility, 100);
-            }
-            else
-            {
-                // TODO: how do we rate lab work against non-lab work?
-                // TODO: refinement
-                // TODO: write lab text
-                // TODO: copy lab text
-                // TODO: invent spell
-            }
-
-            // TODO: find apprentice
-
-            // make sure all preference values are scaled the same
-            start = base.DecideSeasonalActivity();
-
-            // study vis
-            start = RateVisStudy(start);
-
-            start = RateVisExtraction(start);
-
-            return start;
-        }
-
-        private IAction RateVisExtraction(IAction start)
-        {
-            if (_covenant != null && _covenant.Aura > 0)
-            {
-                // factor in what ability the exposure will be in, and the value of that exposure
-                double visGainPer = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
-
-                CharacterAbilityBase charAbility = GetAbility(_preferredExtractionAbility);
-                double visUsePer = 0.5 + (charAbility.GetValue() / 10.0);
-                double visNeeded = visUsePer * 2 / _preferences[Preferences.VisDesire];
-
-                start = new VisExtracting(_preferredExtractionAbility, visGainPer + visNeeded);
-            }
-            return start;
-        }
-
-        private IAction RateVisStudy(IAction start)
-        {
-            foreach (Ability art in _visStock.Keys)
-            {
-                double visUse = 0.5 + (GetAbility(art).GetValue() / 10);
-                // prorate vis use in terms of vim eqivalent
-                if (MagicArts.IsForm(art))
-                {
-                    visUse *= 2;
-                }
-                if (MagicArts.IsTechnique(art))
-                {
-                    visUse *= 4;
-                }
-
-                if (_visStock[art] + Covenant.GetVis(art) >= visUse)
-                {
-                    double desire = RateSeasonalExperienceGain(art, _preferences[Preferences.VisDesire]) - visUse;
-                    if (desire > start.Desire)
-                    {
-                        start = new VisStudying(art, desire);
-                    }
-                }
-            }
-            return start;
         }
         #endregion
 
@@ -493,13 +334,13 @@ namespace WizardMonks
             // TODO: Implement
         }
 
-        public void ExtractVis()
+        public void ExtractVis(Ability exposureAbility)
         {
             // add vis to personal inventory or covenant inventory
             _visStock[MagicArts.Vim] += GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
 
             // grant exposure experience
-            GetAbility(_preferredExtractionAbility).AddExperience(2);
+            GetAbility(exposureAbility).AddExperience(2);
         }
 
         public void InventSpell(Spell spell)
@@ -514,7 +355,7 @@ namespace WizardMonks
                 _partialSpellProgress += labTotal - spell.Level;
                 if (_partialSpellProgress >= _partialSpell.Level)
                 {
-                    _spellList.Add(_partialSpell);
+                    SpellList.Add(_partialSpell);
                     _partialSpell = null;
                     _partialSpellProgress = 0;
                 }
@@ -525,7 +366,7 @@ namespace WizardMonks
             }
             else if (labTotal >= spell.Level * 2)
             {
-                _spellList.Add(spell);
+                SpellList.Add(spell);
                 _partialSpell = null;
                 _partialSpellProgress = 0;
             }

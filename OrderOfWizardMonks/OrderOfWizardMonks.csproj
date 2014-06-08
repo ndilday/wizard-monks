@@ -72,6 +72,7 @@
     <Compile Include="Attribute.cs" />
     <Compile Include="Book.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="GoalCondition.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />
     <Compile Include="Covenant.cs" />
     <Compile Include="Decision.cs" />

@@ -16,6 +16,18 @@ namespace WizardMonks
         //float AddDecrepitudeToNextLevel();
     }
 
+    public enum AttributeType
+    {
+        Strength,
+        Stamina,
+        Dexterity,
+        Quickness,
+        Intelligence,
+        Communication,
+        Perception,
+        Presence
+    }
+
     [Serializable]
     public class Attribute : IAttribute
     {

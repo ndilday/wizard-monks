@@ -32,17 +32,14 @@ namespace WizardMonks
     public delegate void AgedEventHandler(object sender, AgingEventArgs e);
 
 	[Serializable]
-	public class Character
+	public partial class Character
 	{
         #region Attributes
-		public Attribute Strength { get; private set; }
-		public Attribute Stamina { get; private set; }
-		public Attribute Dexterity { get; private set; }
-		public Attribute Quickness { get; private set; }
-		public Attribute Intelligence { get; private set; }
-		public Attribute Communication { get; private set; }
-		public Attribute Perception { get; private set; }
-		public Attribute Presence { get; private set; }
+        protected Attribute[] _attributes = new Attribute[Enum.GetNames(typeof(AttributeType)).Length];
+        public Attribute GetAttribute(AttributeType attributeType)
+        {
+            return _attributes[(short)attributeType];
+        }
         #endregion
 
         #region Private Fields
@@ -74,19 +71,34 @@ namespace WizardMonks
         public CharacterAbility Warping { get; private set; }
         public string Name { get; set; }
         public string Log { get; set; }
+        public IEnumerable<IBook> Books
+        {
+            get
+            {
+                return _booksOwned;
+            }
+        }
+
+        public IEnumerable<IBook> ReadableBooks
+        {
+            get
+            {
+                return _booksOwned.Where(b => b.Author != this && b.Level > this.GetAbility(b.Topic).GetValue());
+            }
+        }
         #endregion
 
         public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, Dictionary<Preference, double> preferences)
         {
             Die die = new Die();
-            Strength = new Attribute(die.RollNormal());
-            Stamina = new Attribute(die.RollNormal());
-            Dexterity = new Attribute(die.RollNormal());
-            Quickness = new Attribute(die.RollNormal());
-            Intelligence = new Attribute(die.RollNormal());
-            Communication = new Attribute(die.RollNormal());
-            Perception = new Attribute(die.RollNormal());
-            Presence = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Stamina] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Dexterity] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Quickness] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Intelligence] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Communication] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Perception] = new Attribute(die.RollNormal());
+            _attributes[(short)AttributeType.Presence] = new Attribute(die.RollNormal());
 
             Decrepitude = 0;
 
@@ -200,7 +212,7 @@ namespace WizardMonks
                 if (crisisRoll > 14)
                 {
                     int staDiff = 3 * (crisisRoll - 14);
-                    if(Stamina.Value + Die.Instance.RollSimpleDie() < staDiff)
+                    if(GetAttribute(AttributeType.Stamina).Value + Die.Instance.RollSimpleDie() < staDiff)
                     {
                         died = true;
                         Decrepitude = 75;
@@ -263,7 +275,8 @@ namespace WizardMonks
         {
             // process books, looking for most interesting readable title
             IAction action = null;
-            var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 0)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
+            // exclude tractatii that have been read and summae which are beneath the current ability level
+            var availableBooks = _booksOwned.Except(_booksRead.Where(b => b.Level == 1000)).Where(b => b.Level > GetAbility(b.Topic).GetValue());
             if (availableBooks.Any())
             {
                 IBook bestBook = availableBooks.OrderBy(b => GetBookLevelGain(b) * GetDesire(new Preference(PreferenceType.Ability, b.Topic))).FirstOrDefault();
@@ -493,7 +506,7 @@ namespace WizardMonks
             Tractatus t = new Tractatus
             {
                 Author = this,
-                Quality = this.Communication.Value + 3,
+                Quality = this.GetAttribute(AttributeType.Communication).Value + 3,
                 Topic = topic
             };
             _booksWritten.Add(t);
@@ -526,8 +539,8 @@ namespace WizardMonks
                     Level = desiredLevel,
                     Topic = topic,
                     Quality = MagicArts.IsArt(ability.Ability) ?
-                        this.Communication.Value + difference + 6 :
-                        this.Communication.Value + (difference * 3) + 6
+                        this.GetAttribute(AttributeType.Communication).Value + difference + 6 :
+                        this.GetAttribute(AttributeType.Communication).Value + (difference * 3) + 6
                 };
             }
             else
@@ -535,7 +548,7 @@ namespace WizardMonks
                 s = previousWork;
             }
 
-            s.PointsComplete += this.Communication.Value + GetAbility(_writingLanguage).GetValue();
+            s.PointsComplete += this.GetAttribute(AttributeType.Communication).Value + GetAbility(_writingLanguage).GetValue();
             if (s.PointsComplete >= s.GetWritingPointsNeeded())
             {
                 _booksWritten.Add(s);
@@ -605,7 +618,7 @@ namespace WizardMonks
                 theoreticalPurchaser.AddExperience(ability.Experience / 2);
                 Summa s = new Summa
                 {
-                    Quality = Communication.Value + 6,
+                    Quality = GetAttribute(AttributeType.Communication).Value + 6,
                     Level = ability.GetValue() / 2.0,
                     Topic = ability.Ability
                 };
@@ -626,18 +639,18 @@ namespace WizardMonks
                 theoreticalPurchaser.AddExperience(ability.Experience / 4);
 
                 double qualityAdd = ability.GetValue() / 4;
-                if (qualityAdd > (Communication.Value + 6))
+                if (qualityAdd > (GetAttribute(AttributeType.Communication).Value + 6))
                 {
-                    qualityAdd = Communication.Value + 6;
+                    qualityAdd = GetAttribute(AttributeType.Communication).Value + 6;
                 }
 
                 Summa s = new Summa
                 {
-                    Quality = Communication.Value + 6 + qualityAdd,
+                    Quality = GetAttribute(AttributeType.Communication).Value + 6 + qualityAdd,
                     Level = (ability.GetValue() / 2.0) - qualityAdd,
                     Topic = ability.Ability
                 };
-                double seasonsNeeded = s.GetWritingPointsNeeded() / (Communication.Value + GetAbility(_writingAbility).GetValue());
+                double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).GetValue());
                 double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
                 if (value > bestBook.PerceivedValue)
                 {
@@ -655,7 +668,7 @@ namespace WizardMonks
         {
             Tractatus t = new Tractatus
             {
-                Quality = Communication.Value + 3,
+                Quality = GetAttribute(AttributeType.Communication).Value + 3,
                 Topic = charAbility.Ability
             };
             return new EvaluatedBook

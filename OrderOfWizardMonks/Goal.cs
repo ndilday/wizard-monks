@@ -71,7 +71,8 @@ namespace WizardMonks
             if (_isCached) return _score;
             CharacterAbilityBase ability = character.GetAbility(this.Ability);
             double charLevel = ability.GetValue();
-            if (this.Level != 0 && (this.Level * 2 > charLevel || this.Level * 2 + this.Quality > charLevel + character.Communication.Value + 9))
+            if (this.Level != 0 && (this.Level * 2 > charLevel || 
+                this.Level * 2 + this.Quality > charLevel + character.GetAttribute(AttributeType.Communication).Value + 9))
             {
                 _score = 0;
                 _isCached = true;

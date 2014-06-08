@@ -50,7 +50,7 @@ namespace WizardMonks
         {
             get
             {
-                return -1;
+                return 1000;
             }
             set
             {

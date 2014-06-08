@@ -19,14 +19,14 @@ namespace WizardMonks.Instances
 
         private static void NormalizeAttributes(Character character)
         {
-            character.Stamina.BaseValue = Die.Instance.RollNormal();
-            character.Strength.BaseValue = Die.Instance.RollNormal();
-            character.Dexterity.BaseValue = Die.Instance.RollNormal();
-            character.Quickness.BaseValue = Die.Instance.RollNormal();
-            character.Intelligence.BaseValue = Die.Instance.RollNormal();
-            character.Perception.BaseValue = Die.Instance.RollNormal();
-            character.Presence.BaseValue = Die.Instance.RollNormal();
-            character.Communication.BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Stamina).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Strength).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Dexterity).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Quickness).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Intelligence).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Perception).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Presence).BaseValue = Die.Instance.RollNormal();
+            character.GetAttribute(AttributeType.Communication).BaseValue = Die.Instance.RollNormal();
         }
 
         public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)

@@ -24,7 +24,7 @@ namespace WizardMonks
 		DistillVis,
 		StudyVis,
         Teach,
-        Train
+        Train,
         Learn,
 		WriteBook,
 		CopyBook,
@@ -42,19 +42,21 @@ namespace WizardMonks
 	{
 		ushort? SeasonId { get; }
         Activity Action { get; }
-        double Desire { get; }
+        double Desire { get; set; }
         void Act(Character character);
+        bool Matches(IAction action);
 	}
 
     [Serializable]
     public class Reading : IAction
     {
-        private IBook _book;
         public Reading(IBook book, double desire)
         {
-            _book = book;
+            Book = book;
             Desire = desire;
         }
+
+        public IBook Book { get; private set; }
 
         public ushort? SeasonId { get; private set; }
 
@@ -66,23 +68,34 @@ namespace WizardMonks
             }
         }
 
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public void Act(Character character)
         {
-            character.ReadBook(_book);
+            character.ReadBook(Book);
+        }
+
+        public bool Matches(IAction action)
+        {
+            if (action.Action != Activity.ReadBook)
+            {
+                return false;
+            }
+            Reading reading = (Reading)action;
+            return reading.Book == this.Book;
         }
     }
 
     [Serializable]
     public class Practice : IAction
     {
-        protected Ability _ability;
         public Practice(Ability ability, double desire)
         {
-            _ability = ability;
+            Ability = ability;
             Desire = desire;
         }
+
+        public Ability Ability { get; private set; }
 
         public ushort? SeasonId { get; private set; }
 
@@ -91,11 +104,21 @@ namespace WizardMonks
             get { return Activity.Practice; }
         }
 
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public virtual void Act(Character character)
         {
-            character.GetAbility(_ability).AddExperience(4);
+            character.GetAbility(Ability).AddExperience(4);
+        }
+
+        public virtual bool Matches(IAction action)
+        {
+            if (action.Action != Activity.Practice)
+            {
+                return false;
+            }
+            Practice practice = (Practice)action;
+            return practice.Ability == this.Ability;
         }
     }
 
@@ -111,7 +134,17 @@ namespace WizardMonks
 
         public override void Act(Character character)
         {
-            character.GetAbility(_ability).AddExperience(2);
+            character.GetAbility(Ability).AddExperience(2);
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.Sundry)
+            {
+                return false;
+            }
+            Exposure exposure = (Exposure)action;
+            return exposure.Ability == this.Ability;
         }
     }
 
@@ -125,11 +158,22 @@ namespace WizardMonks
             get { return Activity.Learn; }
         }
 
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public void Act(Character character)
         {
             // TODO: currently this logic is over in teach; how do we get this to work?
+        }
+
+        public bool Matches(IAction action)
+        {
+            if (action.Action != Activity.Learn)
+            {
+                return false;
+            }
+            Learn learn = (Learn)action;
+            // TODO: add logic here once we flesh out learning
+            return true;
         }
     }
     #endregion
@@ -143,7 +187,7 @@ namespace WizardMonks
 
         public Activity Action { get; protected set; }
 
-        public double Desire { get; protected set; }
+        public double Desire { get; set; }
 
         protected ExposingAction(Ability exposure, double desire)
         {
@@ -158,25 +202,37 @@ namespace WizardMonks
         }
 
         protected abstract void DoAction(Character character);
+
+        public abstract bool Matches(IAction action);
     }
 
     [Serializable]
     public class Writing : ExposingAction
     {
-        private Ability _topic;
-        private double _level;
+        public Ability Topic { get; private set; }
+        public double Level { get; private set; }
 
         public Writing(Ability topic, Ability exposure, double level, double desire)
             : base(exposure, desire)
         {
-            _topic = topic;
-            _level = level;
+            Topic = topic;
+            Level = level;
             Action = Activity.WriteBook;
         }
 
         protected override void DoAction(Character character)
         {
-            character.WriteBook(_topic, _level);
+            character.WriteBook(Topic, Level);
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.WriteBook)
+            {
+                return false;
+            }
+            Writing writing = (Writing)action;
+            return writing.Topic == this.Topic && writing.Level == this.Level;
         }
     }
 
@@ -184,28 +240,28 @@ namespace WizardMonks
     public class CopyBook : ExposingAction
     {
         // TODO: handle multiple books to copy
-        bool _copyQuickly;
-        IBook _book;
+        public bool CopyQuickly { get; private set; }
+        public IBook Book { get; private set; }
 
         public CopyBook(bool copyQuickly, IBook bookToCopy, Ability exposure, double desire)
             : base(exposure, desire)
         {
-            _copyQuickly = copyQuickly;
-            _book = bookToCopy;
+            CopyQuickly = copyQuickly;
+            Book = bookToCopy;
             Action = Activity.CopyBook;
         }
 
         protected override void DoAction(Character character)
         {
             double scribeAbilityValue = character.GetAbility(Abilities.Scribing).GetValue();
-            if(_book.Level == -1)
+            if(Book.Level == 1000)
             {
                 Tractatus tract = new Tractatus
                 {
-                    Author = _book.Author,
-                    Quality = _book.Quality,
-                    Title = _book.Title,
-                    Topic = _book.Topic
+                    Author = Book.Author,
+                    Quality = Book.Quality,
+                    Title = Book.Title,
+                    Topic = Book.Topic
                 };
                 character.AddBookToCollection(tract);
             }
@@ -213,6 +269,16 @@ namespace WizardMonks
             {
                 // TODO: implement logic for copying summae
             }
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.CopyBook)
+            {
+                return false;
+            }
+            CopyBook copy = (CopyBook)action;
+            return copy.Book == this.Book && copy.CopyQuickly == this.CopyQuickly;
         }
     }
 
@@ -258,6 +324,11 @@ namespace WizardMonks
                 mage.FoundCovenant(auraFound);
             }
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.FindAura;
+        }
     }
 
     [Serializable]
@@ -299,34 +370,49 @@ namespace WizardMonks
             }
             // TODO: gradual reduction in chance?
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.FindApprentice;
+        }
     }
 
     [Serializable]
     public class Teach : ExposingAction
     {
         // TODO: enable multiple students
-        private Character _student;
-        private Ability _abilityToTeach;
+        public Character Student { get; private set; }
+        public Ability AbilityToTeach { get; private set; }
         public Teach(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
         {
             Action = Activity.Teach;
-            _student = student;
-            _abilityToTeach = abilityToTeach;
+            Student = student;
+            AbilityToTeach = abilityToTeach;
         }
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(_abilityToTeach).GetValue() - _student.GetAbility(_abilityToTeach).GetValue();
+            double abilityDifference = character.GetAbility(AbilityToTeach).GetValue() - Student.GetAbility(AbilityToTeach).GetValue();
             if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
             }
-            double amountTaught = 6 + character.Communication.Value + character.GetAbility(Abilities.Teaching).GetValue();
+            double amountTaught = 6 + character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Teaching).GetValue();
             if (amountTaught > abilityDifference)
             {
                 amountTaught = abilityDifference;
             }
-            _student.GetAbility(_abilityToTeach).AddExperience(amountTaught);
+            Student.GetAbility(AbilityToTeach).AddExperience(amountTaught);
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.Teach)
+            {
+                return false;
+            }
+            Teach teach = (Teach)action;
+            return teach.Student == this.Student && teach.AbilityToTeach == this.AbilityToTeach;
         }
     }
 
@@ -334,28 +420,38 @@ namespace WizardMonks
     public class Train : ExposingAction
     {
         // TODO: enable multiple students
-        private Character _student;
-        private Ability _abilityToTrain;
+        public Character Student { get; private set; }
+        public Ability AbilityToTrain { get; private set; }
         public Train(Character student, Ability abilityToTrain, Ability exposure, double desire) : base(exposure, desire)
         {
             Action = Activity.Train;
-            _student = student;
-            _abilityToTrain = abilityToTrain;
+            Student = student;
+            AbilityToTrain = abilityToTrain;
         }
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(_abilityToTrain).GetValue() - _student.GetAbility(_abilityToTrain).GetValue();
+            double abilityDifference = character.GetAbility(AbilityToTrain).GetValue() - Student.GetAbility(AbilityToTrain).GetValue();
             if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Trainer has nothing to teach this student!");
             }
-            double amountTrained = 3 + character.GetAbility(_abilityToTrain).GetValue();
+            double amountTrained = 3 + character.GetAbility(AbilityToTrain).GetValue();
             if (amountTrained > abilityDifference)
             {
                 amountTrained = abilityDifference;
             }
-            _student.GetAbility(_abilityToTrain).AddExperience(amountTrained);
+            Student.GetAbility(AbilityToTrain).AddExperience(amountTrained);
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.Train)
+            {
+                return false;
+            }
+            Train train = (Train)action;
+            return train.AbilityToTrain == this.AbilityToTrain && train.Student == this.Student;
         }
     }
     #endregion
@@ -367,7 +463,7 @@ namespace WizardMonks
 
         public Activity Action { get; protected set; }
 
-        public double Desire { get; protected set; }
+        public double Desire { get; set; }
 
         public abstract void Act(Character character);
 
@@ -379,12 +475,14 @@ namespace WizardMonks
             }
             return (Magus)character;
         }
+
+        public abstract bool Matches(IAction action);
     }
 
     [Serializable]
     public class VisStudying : MageAction
     {
-        private Ability _art;
+        public Ability Art { get; private set; }
 
         public VisStudying(Ability art, double desire)
         {
@@ -392,7 +490,7 @@ namespace WizardMonks
             {
                 throw new ArgumentException("Only magic arts have vis associated with them!");
             }
-            _art = art;
+            Art = art;
             Desire = desire;
             Action = Activity.StudyVis;
         }
@@ -402,14 +500,24 @@ namespace WizardMonks
             Magus mage = ConfirmCharacterIsMage(character);
 
             // determine the amount of vis needed
-            CharacterAbilityBase charAbility = mage.GetAbility(_art);
+            CharacterAbilityBase charAbility = mage.GetAbility(Art);
             double visNeeded = 0.5 + (charAbility.GetValue() / 10.0);
 
             // decrement the used vis
-            mage.UseVis(_art, visNeeded);
+            mage.UseVis(Art, visNeeded);
 
             // add experience
             charAbility.AddExperience(Die.Instance.RollExplodingDie());
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.StudyVis)
+            {
+                return false;
+            }
+            VisStudying study = (VisStudying)action;
+            return study.Art == this.Art;
         }
     }
     #endregion
@@ -450,6 +558,11 @@ namespace WizardMonks
             }
             mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.DistillVis;
+        }
     }
 
     public class BuildLaboratory : ExposingMageAction
@@ -466,6 +579,11 @@ namespace WizardMonks
             // TODO: pre-existing conditions
             mage.BuildLaboratory();
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.BuildLaboratory;
+        }
     }
 
     public class RefineLaboratory : ExposingMageAction
@@ -481,23 +599,38 @@ namespace WizardMonks
             // TODO: we may want to do the check here as well to be safe
             mage.RefineLaboratory();
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.RefineLaboratory;
+        }
     }
 
     public class InventSpell : ExposingMageAction
     {
-        private Spell _spell;
+        public Spell Spell { get; private set; }
 
         public InventSpell(Spell spell, Ability exposure, double desire)
             : base(exposure, desire)
         {
-            _spell = spell;
+            Spell = spell;
             Action = Activity.InventSpells;
         }
 
         protected override void DoMageAction(Magus mage)
         {
             // TODO: multiple spells
-            mage.InventSpell(_spell);
+            mage.InventSpell(Spell);
+        }
+
+        public override bool Matches(IAction action)
+        {
+            if (action.Action != Activity.InventSpells)
+            {
+                return false;
+            }
+            InventSpell invent = (InventSpell)action;
+            return invent.Spell == this.Spell;
         }
     }
 
@@ -512,6 +645,11 @@ namespace WizardMonks
         {
             //TODO: implement
         }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.CopyLabText;
+        }
     }
 
     public class WriteLabText : ExposingMageAction
@@ -524,6 +662,11 @@ namespace WizardMonks
         protected override void DoMageAction(Magus mage)
         {
             //TODO: implement
+        }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.WriteLabText;
         }
     }
     #endregion

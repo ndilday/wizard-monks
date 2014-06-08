@@ -29,14 +29,14 @@ namespace SkillViewer
 
         private void DisplayCharacteristics()
         {
-            txtStrength.Text = _character.Strength.Value.ToString(FORMAT_STRING);
-            txtStamina.Text = _character.Stamina.Value.ToString(FORMAT_STRING);
-            txtDexterity.Text = _character.Dexterity.Value.ToString(FORMAT_STRING);
-            txtQuickness.Text = _character.Quickness.Value.ToString(FORMAT_STRING);
-            txtIntelligence.Text = _character.Intelligence.Value.ToString(FORMAT_STRING);
-            txtCommunication.Text = _character.Communication.Value.ToString(FORMAT_STRING);
-            txtPresence.Text = _character.Presence.Value.ToString(FORMAT_STRING);
-            txtPerception.Text = _character.Perception.Value.ToString(FORMAT_STRING);
+            txtStrength.Text = _character.GetAttribute(AttributeType.Strength).Value.ToString(FORMAT_STRING);
+            txtStamina.Text = _character.GetAttribute(AttributeType.Stamina).Value.ToString(FORMAT_STRING);
+            txtDexterity.Text = _character.GetAttribute(AttributeType.Dexterity).Value.ToString(FORMAT_STRING);
+            txtQuickness.Text = _character.GetAttribute(AttributeType.Quickness).Value.ToString(FORMAT_STRING);
+            txtIntelligence.Text = _character.GetAttribute(AttributeType.Intelligence).Value.ToString(FORMAT_STRING);
+            txtCommunication.Text = _character.GetAttribute(AttributeType.Communication).Value.ToString(FORMAT_STRING);
+            txtPresence.Text = _character.GetAttribute(AttributeType.Presence).Value.ToString(FORMAT_STRING);
+            txtPerception.Text = _character.GetAttribute(AttributeType.Perception).Value.ToString(FORMAT_STRING);
         }
 
         private void DisplayArts()

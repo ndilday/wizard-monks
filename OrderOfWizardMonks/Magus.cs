@@ -208,7 +208,7 @@ namespace WizardMonks
                     
                     Summa s = new Summa
                     {
-                        Quality = Communication.Value + 6,
+                        Quality = GetAttribute(AttributeType.Communication).Value + 6,
                         Level = ability.GetValue() / 2.0,
                         Topic = ability.Ability
                     };
@@ -230,18 +230,18 @@ namespace WizardMonks
                     theoreticalPurchaser.AddExperience(ability.Experience / 4);
 
                     double qualityAdd = ability.GetValue() / 4;
-                    if (qualityAdd > (Communication.Value + 6))
+                    if (qualityAdd > (GetAttribute(AttributeType.Communication).Value + 6))
                     {
-                        qualityAdd = Communication.Value + 6;
+                        qualityAdd = GetAttribute(AttributeType.Communication).Value + 6;
                     }
 
                     Summa s = new Summa
                     {
-                        Quality = Communication.Value + 6 + qualityAdd,
+                        Quality = GetAttribute(AttributeType.Communication).Value + 6 + qualityAdd,
                         Level = (ability.GetValue() / 2.0) - qualityAdd,
                         Topic = ability.Ability
                     };
-                    double seasonsNeeded = s.GetWritingPointsNeeded() / (Communication.Value + GetAbility(_writingAbility).GetValue());
+                    double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).GetValue());
                     double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
                     if (value > bestBook.PerceivedValue)
                     {
@@ -411,7 +411,7 @@ namespace WizardMonks
         {
             double techValue = Arts.GetAbility(artPair.Technique).GetValue();
             double formValue = Arts.GetAbility(artPair.Form).GetValue();
-            return techValue + formValue + Stamina.Value;
+            return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
         }
 
         protected void CheckTwilight()
@@ -448,7 +448,7 @@ namespace WizardMonks
             double magicTheory = GetAbility(_magicAbility).GetValue();
             double techValue = Arts.GetAbility(artPair.Technique).GetValue();
             double formValue = Arts.GetAbility(artPair.Form).GetValue();
-            double labTotal = magicTheory + techValue + formValue + Intelligence.Value;
+            double labTotal = magicTheory + techValue + formValue + GetAttribute(AttributeType.Intelligence).Value;
             if (_covenant != null)
             {
                 labTotal += _covenant.Aura;

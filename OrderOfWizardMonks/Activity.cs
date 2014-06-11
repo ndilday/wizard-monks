@@ -45,6 +45,7 @@ namespace WizardMonks
         double Desire { get; set; }
         void Act(Character character);
         bool Matches(IAction action);
+        string Log();
 	}
 
     [Serializable]
@@ -84,6 +85,11 @@ namespace WizardMonks
             Reading reading = (Reading)action;
             return reading.Book == this.Book;
         }
+
+        public string Log()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [Serializable]
@@ -121,6 +127,11 @@ namespace WizardMonks
             Practice practice = (Practice)action;
             return practice.Ability == this.Ability;
         }
+
+        public virtual string Log()
+        {
+            return "Practicing " + Ability.AbilityName + " worth " + Desire.ToString("0.00");
+        }
     }
 
     [Serializable]
@@ -146,6 +157,11 @@ namespace WizardMonks
             }
             Exposure exposure = (Exposure)action;
             return exposure.Ability == this.Ability;
+        }
+
+        public override string Log()
+        {
+            return "Exposing " + Ability.AbilityName + " worth " + Desire.ToString("0.00");
         }
     }
 
@@ -176,6 +192,11 @@ namespace WizardMonks
             // TODO: add logic here once we flesh out learning
             return true;
         }
+
+        public string Log()
+        {
+            return "Learning worth " + Desire.ToString("0.00");
+        }
     }
     #endregion
 
@@ -205,6 +226,8 @@ namespace WizardMonks
         protected abstract void DoAction(Character character);
 
         public abstract bool Matches(IAction action);
+
+        public abstract string Log();
     }
 
     [Serializable]
@@ -234,6 +257,11 @@ namespace WizardMonks
             }
             Writing writing = (Writing)action;
             return writing.Topic == this.Topic && writing.Level == this.Level;
+        }
+
+        public override string Log()
+        {
+            return "Writing on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
         }
     }
 
@@ -280,6 +308,11 @@ namespace WizardMonks
             }
             CopyBook copy = (CopyBook)action;
             return copy.Book == this.Book && copy.CopyQuickly == this.CopyQuickly;
+        }
+
+        public override string Log()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -335,6 +368,11 @@ namespace WizardMonks
         {
             return action.Action == Activity.FindAura;
         }
+
+        public override string Log()
+        {
+            return "Finding a new aura worth " + Desire.ToString("0.00");
+        }
     }
 
     [Serializable]
@@ -381,6 +419,11 @@ namespace WizardMonks
         {
             return action.Action == Activity.FindApprentice;
         }
+
+        public override string Log()
+        {
+            return "Finding apprentice worth " + Desire.ToString("0.00");
+        }
     }
 
     [Serializable]
@@ -419,6 +462,11 @@ namespace WizardMonks
             }
             Teach teach = (Teach)action;
             return teach.Student == this.Student && teach.AbilityToTeach == this.AbilityToTeach;
+        }
+
+        public override string Log()
+        {
+            return "Teaching worth " + Desire.ToString("0.00");
         }
     }
 
@@ -459,6 +507,11 @@ namespace WizardMonks
             Train train = (Train)action;
             return train.AbilityToTrain == this.AbilityToTrain && train.Student == this.Student;
         }
+
+        public override string Log()
+        {
+            return "Training worth " + Desire.ToString("0.00");
+        }
     }
     #endregion
 
@@ -483,6 +536,8 @@ namespace WizardMonks
         }
 
         public abstract bool Matches(IAction action);
+
+        public abstract string Log();
     }
 
     [Serializable]
@@ -524,6 +579,11 @@ namespace WizardMonks
             }
             VisStudying study = (VisStudying)action;
             return study.Art == this.Art;
+        }
+
+        public override string Log()
+        {
+            return "Studying " + Art.AbilityName + " vis worth " + Desire.ToString("0.00");
         }
     }
     #endregion
@@ -571,6 +631,11 @@ namespace WizardMonks
         {
             return action.Action == Activity.DistillVis;
         }
+
+        public override string Log()
+        {
+            return "Extracting vis worth " + Desire.ToString("0.00");
+        }
     }
 
     public class BuildLaboratory : ExposingMageAction
@@ -593,6 +658,11 @@ namespace WizardMonks
         {
             return action.Action == Activity.BuildLaboratory;
         }
+
+        public override string Log()
+        {
+            return "Building lab worth " + Desire.ToString("0.00");
+        }
     }
 
     public class RefineLaboratory : ExposingMageAction
@@ -612,6 +682,11 @@ namespace WizardMonks
         public override bool Matches(IAction action)
         {
             return action.Action == Activity.RefineLaboratory;
+        }
+
+        public override string Log()
+        {
+            return "Refining lab worth " + Desire.ToString("0.00");
         }
     }
 
@@ -641,6 +716,11 @@ namespace WizardMonks
             InventSpell invent = (InventSpell)action;
             return invent.Spell == this.Spell;
         }
+
+        public override string Log()
+        {
+            return "Inventing " + Spell.BaseArts.Technique.AbilityName + " " + Spell.BaseArts.Form.AbilityName + " spell worth " + Desire.ToString("0.00");
+        }
     }
 
     public class CopyLabText : ExposingMageAction
@@ -659,6 +739,11 @@ namespace WizardMonks
         {
             return action.Action == Activity.CopyLabText;
         }
+
+        public override string Log()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class WriteLabText : ExposingMageAction
@@ -676,6 +761,11 @@ namespace WizardMonks
         public override bool Matches(IAction action)
         {
             return action.Action == Activity.WriteLabText;
+        }
+
+        public override string Log()
+        {
+            throw new NotImplementedException();
         }
     }
     
@@ -696,6 +786,11 @@ namespace WizardMonks
         public override bool Matches(IAction action)
         {
             return action.Action == Activity.LongevityRitual;
+        }
+
+        public override string Log()
+        {
+            return "Longevity Ritual worth " + Desire.ToString("0.00");
         }
     }
     #endregion

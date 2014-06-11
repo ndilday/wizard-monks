@@ -44,7 +44,14 @@ namespace WizardMonks
         {
             if (MagicArts.IsArt(visType))
             {
-                _visStock[visType] += amount;
+                if (_visStock.ContainsKey(visType))
+                {
+                    _visStock[visType] += amount;
+                }
+                else
+                {
+                    _visStock[visType] = amount;
+                }
                 return _visStock[visType];
             }
             return 0;

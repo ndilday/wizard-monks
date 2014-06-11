@@ -692,7 +692,7 @@
             // 
             // txtWarp
             // 
-            this.txtWarp.Location = new System.Drawing.Point(519, 22);
+            this.txtWarp.Location = new System.Drawing.Point(619, 22);
             this.txtWarp.MaxLength = 5;
             this.txtWarp.Name = "txtWarp";
             this.txtWarp.ReadOnly = true;
@@ -702,7 +702,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(461, 25);
+            this.label25.Location = new System.Drawing.Point(561, 25);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(47, 13);
             this.label25.TabIndex = 23;
@@ -713,14 +713,14 @@
             this.lstLog.FormattingEnabled = true;
             this.lstLog.Location = new System.Drawing.Point(374, 51);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(191, 329);
+            this.lstLog.Size = new System.Drawing.Size(281, 329);
             this.lstLog.TabIndex = 25;
             // 
             // CharacterSheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(577, 429);
+            this.ClientSize = new System.Drawing.Size(667, 429);
             this.Controls.Add(this.lstLog);
             this.Controls.Add(this.txtWarp);
             this.Controls.Add(this.label25);

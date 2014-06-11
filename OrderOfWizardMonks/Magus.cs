@@ -23,9 +23,6 @@ namespace WizardMonks
 	public partial class Magus : Character
 	{
         private Ability _magicAbility;
-        private Covenant _covenant;
-        private Laboratory _laboratory;
-        public List<Spell> SpellList { get; private set; }
         private Spell _partialSpell;
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
@@ -33,31 +30,20 @@ namespace WizardMonks
         private List<Ability> _magicSearchAbilities;
         private Magus _apprentice;
 
-        public Houses House { get; set; }
-
-        public Covenant Covenant
-        {
-            get
-            {
-                return _covenant;
-            }
-        }
-        
+        public Laboratory Laboratory { get; private set; }
+        public List<Spell> SpellList { get; private set; }
+        public Houses House { get; private set; }
+        public Covenant Covenant { get; private set; }
         public Arts Arts { get; private set; }
 
-        public Laboratory Laboratory
-        {
-            get { return _laboratory;}
-        }
-
         #region Initialization Functions
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility)
-            : base(writingLanguage, writingAbility, areaAbility)
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseAge = 20)
+            : base(writingLanguage, writingAbility, areaAbility, startingGoals, baseAge)
         {
             _magicAbility = magicAbility;
             Arts = new Arts();
-            _covenant = null;
-            _laboratory = null;
+            Covenant = null;
+            Laboratory = null;
             _visStock = new Dictionary<Ability, double>();
             SpellList = new List<Spell>();
             _partialSpell = null;
@@ -69,7 +55,7 @@ namespace WizardMonks
 
             InitializeExtractionAbilities();
             InitializeMagicSearchAbilities();
-
+            InitializeGoals();
         }
 
         private void InitializeExtractionAbilities()
@@ -86,6 +72,13 @@ namespace WizardMonks
             _magicSearchAbilities.Add(_areaAbility);
             _magicSearchAbilities.Add(MagicArts.Intellego);
             _magicSearchAbilities.Add(MagicArts.Vim);
+        }
+
+        private void InitializeGoals()
+        {
+            uint seasonsLeftToAging = 140 - SeasonalAge;
+
+            _goals.Add(new LongevityRitualGoal(100, seasonsLeftToAging));
         }
         #endregion
 
@@ -106,7 +99,7 @@ namespace WizardMonks
         #region Covenant Functions
         public void Join(Covenant covenant)
         {
-            _covenant = covenant;
+            Covenant = covenant;
             covenant.AddMagus(this);
         }
 
@@ -123,9 +116,9 @@ namespace WizardMonks
         public override IEnumerable<IBook> GetBooksFromCollection(Ability ability)
         {
             IEnumerable<IBook> books = _booksOwned.Where(b => b.Topic == ability);
-            if (_covenant != null)
+            if (Covenant != null)
             {
-                books = books.Union(_covenant.GetLibrary(ability));
+                books = books.Union(Covenant.GetLibrary(ability));
             }
             return books;
         }
@@ -148,7 +141,7 @@ namespace WizardMonks
                 // TODO: how to decide what audience the magus is writing for?
                 // when art > 10, magus will write a /2 book
                 // when art >=20, magus will write a /4 book
-                if (ability.GetValue() >= 10)
+                if (ability.Value >= 10)
                 {
                     // start with no q/l switching
                     CharacterAbilityBase theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
@@ -157,7 +150,7 @@ namespace WizardMonks
                     Summa s = new Summa
                     {
                         Quality = GetAttribute(AttributeType.Communication).Value + 6,
-                        Level = ability.GetValue() / 2.0,
+                        Level = ability.Value / 2.0,
                         Topic = ability.Ability
                     };
                    
@@ -171,13 +164,13 @@ namespace WizardMonks
                         };
                     }
                 }
-                if (ability.GetValue() >= 20)
+                if (ability.Value >= 20)
                 {
                     // start with no q/l switching
                     CharacterAbilityBase theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
                     theoreticalPurchaser.AddExperience(ability.Experience / 4);
 
-                    double qualityAdd = ability.GetValue() / 4;
+                    double qualityAdd = ability.Value / 4;
                     if (qualityAdd > (GetAttribute(AttributeType.Communication).Value + 6))
                     {
                         qualityAdd = GetAttribute(AttributeType.Communication).Value + 6;
@@ -186,10 +179,10 @@ namespace WizardMonks
                     Summa s = new Summa
                     {
                         Quality = GetAttribute(AttributeType.Communication).Value + 6 + qualityAdd,
-                        Level = (ability.GetValue() / 2.0) - qualityAdd,
+                        Level = (ability.Value / 2.0) - qualityAdd,
                         Topic = ability.Ability
                     };
-                    double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).GetValue());
+                    double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).Value);
                     double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
                     if (value > bestBook.PerceivedValue)
                     {
@@ -232,7 +225,7 @@ namespace WizardMonks
             }
 
             CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsedPerStudySeason = 0.5 + (charAbility.GetValue() / 10.0);
+            double visUsedPerStudySeason = 0.5 + (charAbility.Value / 10.0);
             // the gain per season depends on how the character views vis
             double visNeeded = gain * visUsedPerStudySeason;
             // compare to the number of seasons we would need to extract the vis
@@ -241,22 +234,35 @@ namespace WizardMonks
             double extractTime = visNeeded / distillVisRate;
             // exposure should get rated according to the visUse of the preferred exposure choice
             // rather than the visUse of the base ability
-            double extractVisUsePer = (GetAbility(Abilities.MagicTheory).GetValue() / 10.0) + 0.5;
+            double extractVisUsePer = (GetAbility(Abilities.MagicTheory).Value / 10.0) + 0.5;
             double visValueOfExposure = extractTime * 2 * extractVisUsePer;
             return (2 * visNeeded) - visValueOfExposure;
+        }
+
+        public override void ReprioritizeGoals()
+        {
         }
         #endregion
 
         #region Magic Functions
         public double GetCastingTotal(ArtPair artPair)
         {
-            double techValue = Arts.GetAbility(artPair.Technique).GetValue();
-            double formValue = Arts.GetAbility(artPair.Form).GetValue();
+            double techValue = Arts.GetAbility(artPair.Technique).Value;
+            double formValue = Arts.GetAbility(artPair.Form).Value;
             return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
         }
 
         protected void CheckTwilight()
         {
+        }
+
+        public double GetVisCount(Ability visArt)
+        {
+            if(_visStock.ContainsKey(visArt))
+            {
+                return _visStock[visArt];
+            }
+            return 0;
         }
 
         public double UseVis(Ability visType, double amount)
@@ -286,17 +292,17 @@ namespace WizardMonks
         #region Lab Activities
         public double GetLabTotal(ArtPair artPair, Activity activity)
         {
-            double magicTheory = GetAbility(_magicAbility).GetValue();
-            double techValue = Arts.GetAbility(artPair.Technique).GetValue();
-            double formValue = Arts.GetAbility(artPair.Form).GetValue();
+            double magicTheory = GetAbility(_magicAbility).Value;
+            double techValue = Arts.GetAbility(artPair.Technique).Value;
+            double formValue = Arts.GetAbility(artPair.Form).Value;
             double labTotal = magicTheory + techValue + formValue + GetAttribute(AttributeType.Intelligence).Value;
-            if (_covenant != null)
+            if (Covenant != null)
             {
-                labTotal += _covenant.Aura;
+                labTotal += Covenant.Aura;
 
-                if (_laboratory != null)
+                if (Laboratory != null)
                 {
-                    labTotal += _laboratory.GetModifier(artPair, activity);
+                    labTotal += Laboratory.GetModifier(artPair, activity);
                 }
             }
 
@@ -309,25 +315,25 @@ namespace WizardMonks
         public void BuildLaboratory()
         {
             // TODO: flesh out laboratory specialization
-            _laboratory = new Laboratory(this, 0);
+            Laboratory = new Laboratory(this, 0);
         }
 
         public void RefineLaboratory()
         {
-            if (_laboratory == null)
+            if (Laboratory == null)
             {
                 throw new NullReferenceException("The mage has no laboratory!");
             }
-            if (GetAbility(_magicAbility).GetValue() - 4 < _laboratory.Refinement)
+            if (GetAbility(_magicAbility).Value - 4 < Laboratory.Refinement)
             {
                 throw new ArgumentOutOfRangeException("The mage's magical understanding is not high enough to refine this laboratory any further.");
             }
-            _laboratory.Refine();
+            Laboratory.Refine();
         }
 
         public void AddFeatureToLaboratory(Feature feature)
         {
-            if (_laboratory == null)
+            if (Laboratory == null)
             {
                 throw new NullReferenceException("The mage has no laboratory!");
             }

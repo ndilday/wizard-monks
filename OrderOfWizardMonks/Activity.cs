@@ -108,6 +108,7 @@ namespace WizardMonks
 
         public virtual void Act(Character character)
         {
+            character.Log.Add("Practicing " + Ability.AbilityName);
             character.GetAbility(Ability).AddExperience(4);
         }
 
@@ -253,7 +254,7 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            double scribeAbilityValue = character.GetAbility(Abilities.Scribing).GetValue();
+            double scribeAbilityValue = character.GetAbility(Abilities.Scribing).Value;
             if(Book.Level == 1000)
             {
                 Tractatus tract = new Tractatus
@@ -293,6 +294,7 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
+            character.Log.Add("Searched for an aura");
             // see if the character can safely spont aura-finding spells
             if (typeof(Magus) == character.GetType())
             {
@@ -316,7 +318,7 @@ namespace WizardMonks
         {
             // add bonus to area lore equal to casting total div 5?
             // TODO: once spells are implemented, increase finding chances based on aura-detection spells
-            double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
+            double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
             double roll = Die.Instance.RollDouble() * 5;
 
@@ -324,6 +326,7 @@ namespace WizardMonks
             double auraFound = Math.Sqrt(roll * areaLore);
             if (auraFound > 1)
             {
+                mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.00"));
                 mage.FoundCovenant(auraFound);
             }
         }
@@ -364,7 +367,7 @@ namespace WizardMonks
         private void MageApprenticeSearch(Magus mage)
         {
             // add bonus to area lore equal to casting total div 5?
-            double areaLore = mage.GetAbility(Abilities.AreaLore).GetValue();
+            double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
             double roll = Die.Instance.RollDouble();
             if (roll > 1)
@@ -395,12 +398,12 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(AbilityToTeach).GetValue() - Student.GetAbility(AbilityToTeach).GetValue();
+            double abilityDifference = character.GetAbility(AbilityToTeach).Value - Student.GetAbility(AbilityToTeach).Value;
             if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
             }
-            double amountTaught = 6 + character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Teaching).GetValue();
+            double amountTaught = 6 + character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Teaching).Value;
             if (amountTaught > abilityDifference)
             {
                 amountTaught = abilityDifference;
@@ -434,12 +437,12 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(AbilityToTrain).GetValue() - Student.GetAbility(AbilityToTrain).GetValue();
+            double abilityDifference = character.GetAbility(AbilityToTrain).Value - Student.GetAbility(AbilityToTrain).Value;
             if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Trainer has nothing to teach this student!");
             }
-            double amountTrained = 3 + character.GetAbility(AbilityToTrain).GetValue();
+            double amountTrained = 3 + character.GetAbility(AbilityToTrain).Value;
             if (amountTrained > abilityDifference)
             {
                 amountTrained = abilityDifference;
@@ -504,7 +507,7 @@ namespace WizardMonks
 
             // determine the amount of vis needed
             CharacterAbilityBase charAbility = mage.GetAbility(Art);
-            double visNeeded = 0.5 + (charAbility.GetValue() / 10.0);
+            double visNeeded = 0.5 + (charAbility.Value / 10.0);
 
             // decrement the used vis
             mage.UseVis(Art, visNeeded);
@@ -559,6 +562,8 @@ namespace WizardMonks
             {
                 throw new ArgumentNullException("Magi can only extract vis in an aura!");
             }
+            double amount = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+            mage.Log.Add("Extracted " + amount.ToString("0.00") + " pawns of vis from aura");
             mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
         }
 
@@ -580,6 +585,7 @@ namespace WizardMonks
         {
             // TODO: build size
             // TODO: pre-existing conditions
+            mage.Log.Add("Built laboratory");
             mage.BuildLaboratory();
         }
 
@@ -670,6 +676,26 @@ namespace WizardMonks
         public override bool Matches(IAction action)
         {
             return action.Action == Activity.WriteLabText;
+        }
+    }
+    
+    public class LongevityRitual : ExposingMageAction
+    {
+        public LongevityRitual(Ability exposure, double desire) : base(exposure, desire)
+        {
+            Action = Activity.LongevityRitual;
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            uint strength = Convert.ToUInt16(mage.GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual));
+            mage.Log.Add("Created a longevity ritual of strength " + strength);
+            mage.ApplyLongevityRitual(Convert.ToUInt16(mage.GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual)));
+        }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.LongevityRitual;
         }
     }
     #endregion

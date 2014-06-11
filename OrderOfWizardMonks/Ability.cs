@@ -149,26 +149,29 @@ namespace WizardMonks
             get { return ImmutableMultiton<int, Ability>.GetInstance(_abilityId); }
 	    }
 
-        public double GetValue()
+        public double Value
         {
-            if (_cached)
+            get
             {
-                return _value;
+                if (_cached)
+                {
+                    return _value;
+                }
+
+                double x = GetValueHelper();
+
+                _value = x;
+                _cached = true;
+
+                return x;
             }
-
-            double x = GetValueHelper();
-
-            _value = x;
-            _cached = true;
-
-            return x;
         }
 
         public double GetValueGain(double experience, double levelLimit = 0)
         {
             CharacterAbilityBase copy = MakeCopy();
             copy.AddExperience(experience, levelLimit);
-            return copy.GetValue() - GetValue();
+            return copy.Value - Value;
         }
 
         protected abstract double GetValueHelper();
@@ -249,7 +252,7 @@ namespace WizardMonks
 
         public override int GetTractatiiLimit()
         {
-            return (int)Math.Floor(GetValue());
+            return (int)Math.Floor(Value);
         }
     }
 
@@ -298,7 +301,7 @@ namespace WizardMonks
 
         public override int GetTractatiiLimit()
         {
-            return (int)Math.Floor(GetValue() / 5.0);
+            return (int)Math.Floor(Value / 5.0);
         }
     }
 

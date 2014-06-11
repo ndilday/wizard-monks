@@ -54,43 +54,75 @@ namespace WizardMonks.Instances
 
         public static void BuildBjornaer()
         {
-            Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Animal);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Bjornaer.Name = "Bjornaer";
+
+            Bjornaer.GetAttribute(AttributeType.Stamina).BaseValue = 3;
+            Bjornaer.GetAttribute(AttributeType.Strength).BaseValue = 1;
+            Bjornaer.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
+            Bjornaer.GetAttribute(AttributeType.Quickness).BaseValue = -2;
+            Bjornaer.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Bjornaer.GetAttribute(AttributeType.Communication).BaseValue = 1;
+            Bjornaer.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Bjornaer.GetAttribute(AttributeType.Perception).BaseValue = -1;
+
             Bjornaer.GetAbility(MagicArts.Creo).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Muto).AddExperience(0);
+            Bjornaer.GetAbility(MagicArts.Muto).AddExperience(55);
             Bjornaer.GetAbility(MagicArts.Perdo).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Rego).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Animal).AddExperience(0);
+            Bjornaer.GetAbility(MagicArts.Animal).AddExperience(55);
             Bjornaer.GetAbility(MagicArts.Aquam).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Auram).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Corpus).AddExperience(0);
+            Bjornaer.GetAbility(MagicArts.Corpus).AddExperience(55);
             Bjornaer.GetAbility(MagicArts.Herbam).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Ignem).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Mentem).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Terram).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Vim).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Bjornaer.GetAbility(Abilities.AreaLore).AddExperience(45);
+            Bjornaer.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Bjornaer.GetAbility(Abilities.English).AddExperience(75);
-            Bjornaer.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Bjornaer.GetAbility(Abilities.Latin).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.ParmaMagica).AddExperience(0);
+            Bjornaer.GetAbility(Abilities.Etiquette).AddExperience(0);
+            Bjornaer.GetAbility(Abilities.Latin).AddExperience(30);
+            Bjornaer.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Bjornaer.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Bjornaer.GetAbility(Abilities.Penetration).AddExperience(0);
             Bjornaer.GetAbility(Abilities.Concentration).AddExperience(0);
         }
 
         public static void BuildBonisagus()
         {
-            Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(Abilities.MagicTheory);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 10, 75);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Bonisgaus.Name = "Bonisagus";
-            Bonisgaus.GetAbility(MagicArts.Creo).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Muto).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Rego).AddExperience(0);
+
+            Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Quickness).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Intelligence).BaseValue = 5;
+            Bonisgaus.GetAttribute(AttributeType.Communication).BaseValue = 2;
+            Bonisgaus.GetAttribute(AttributeType.Presence).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Perception).BaseValue = 0;
+
+            Bonisgaus.GetAbility(MagicArts.Creo).AddExperience(1);
+            Bonisgaus.GetAbility(MagicArts.Intellego).AddExperience(1);
+            Bonisgaus.GetAbility(MagicArts.Muto).AddExperience(1);
+            Bonisgaus.GetAbility(MagicArts.Perdo).AddExperience(1);
+            Bonisgaus.GetAbility(MagicArts.Rego).AddExperience(1);
             Bonisgaus.GetAbility(MagicArts.Animal).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Aquam).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Auram).AddExperience(0);
@@ -100,24 +132,50 @@ namespace WizardMonks.Instances
             Bonisgaus.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Mentem).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Terram).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Vim).AddExperience(0);
+            Bonisgaus.GetAbility(MagicArts.Vim).AddExperience(55);
             Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Bonisgaus.GetAbility(Abilities.English).AddExperience(75);
-            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(0);
+            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(45);
+            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(75);
+            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(75);
+            Bonisgaus.GetAbility(Abilities.ParmaMagica).AddExperience(5);
+            Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(5);
+            Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(5);
         }
 
         public static void BuildCriamon()
         {
-            Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(Abilities.MagicTheory);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 60);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+            
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.AreaLore);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.ArtesLiberales);
+            goal = new AbilityScoreCondition(abilityList, 5, 40);
+            goals.Add(goal);
+
+            Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Criamon.Name = "Criamon";
+
+            Criamon.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Criamon.GetAttribute(AttributeType.Strength).BaseValue = -2;
+            Criamon.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
+            Criamon.GetAttribute(AttributeType.Quickness).BaseValue = 1;
+            Criamon.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Criamon.GetAttribute(AttributeType.Communication).BaseValue = -1;
+            Criamon.GetAttribute(AttributeType.Presence).BaseValue = 3;
+            Criamon.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
             Criamon.GetAbility(MagicArts.Creo).AddExperience(0);
-            Criamon.GetAbility(MagicArts.Intellego).AddExperience(0);
+            Criamon.GetAbility(MagicArts.Intellego).AddExperience(15);
             Criamon.GetAbility(MagicArts.Muto).AddExperience(0);
             Criamon.GetAbility(MagicArts.Perdo).AddExperience(0);
             Criamon.GetAbility(MagicArts.Rego).AddExperience(0);
@@ -130,84 +188,217 @@ namespace WizardMonks.Instances
             Criamon.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Criamon.GetAbility(MagicArts.Mentem).AddExperience(0);
             Criamon.GetAbility(MagicArts.Terram).AddExperience(0);
-            Criamon.GetAbility(MagicArts.Vim).AddExperience(0);
-            Criamon.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Criamon.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Criamon.GetAbility(MagicArts.Vim).AddExperience(15);
+            Criamon.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Criamon.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Criamon.GetAbility(Abilities.English).AddExperience(75);
-            Criamon.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Criamon.GetAbility(Abilities.Latin).AddExperience(0);
-            Criamon.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Criamon.GetAbility(Abilities.ParmaMagica).AddExperience(0);
+            Criamon.GetAbility(Abilities.Etiquette).AddExperience(15);
+            Criamon.GetAbility(Abilities.Latin).AddExperience(50);
+            Criamon.GetAbility(Abilities.MagicTheory).AddExperience(50);
+            Criamon.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Criamon.GetAbility(Abilities.Penetration).AddExperience(0);
-            Criamon.GetAbility(Abilities.Concentration).AddExperience(0);
+            Criamon.GetAbility(Abilities.Concentration).AddExperience(75);
         }
 
         public static void BuildDiedne()
         {
-            Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Creo);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Intellego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Muto);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Perdo);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Rego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Animal);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Aquam);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Corpus);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Herbam);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Ignem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Imaginem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Mentem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Terram);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Vim);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Diedne.Name = "Diedne";
-            Diedne.GetAbility(MagicArts.Creo).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Muto).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Rego).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Animal).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Aquam).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Auram).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Corpus).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Herbam).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Ignem).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Imaginem).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Mentem).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Terram).AddExperience(0);
-            Diedne.GetAbility(MagicArts.Vim).AddExperience(0);
-            Diedne.GetAbility(Abilities.AreaLore).AddExperience(0);
+
+            Diedne.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Diedne.GetAttribute(AttributeType.Strength).BaseValue = -2;
+            Diedne.GetAttribute(AttributeType.Dexterity).BaseValue = 0;
+            Diedne.GetAttribute(AttributeType.Quickness).BaseValue = 0;
+            Diedne.GetAttribute(AttributeType.Intelligence).BaseValue = 1;
+            Diedne.GetAttribute(AttributeType.Communication).BaseValue = 1;
+            Diedne.GetAttribute(AttributeType.Presence).BaseValue = 3;
+            Diedne.GetAttribute(AttributeType.Perception).BaseValue = 1;
+
+            Diedne.GetAbility(MagicArts.Creo).AddExperience(12);
+            Diedne.GetAbility(MagicArts.Intellego).AddExperience(12);
+            Diedne.GetAbility(MagicArts.Muto).AddExperience(12);
+            Diedne.GetAbility(MagicArts.Perdo).AddExperience(12);
+            Diedne.GetAbility(MagicArts.Rego).AddExperience(12);
+            Diedne.GetAbility(MagicArts.Animal).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Aquam).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Auram).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Corpus).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Herbam).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Ignem).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Imaginem).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Mentem).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Terram).AddExperience(6);
+            Diedne.GetAbility(MagicArts.Vim).AddExperience(6);
+            Diedne.GetAbility(Abilities.AreaLore).AddExperience(30);
             Diedne.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
             Diedne.GetAbility(Abilities.English).AddExperience(75);
-            Diedne.GetAbility(Abilities.Etiquette).AddExperience(5);
+            Diedne.GetAbility(Abilities.Etiquette).AddExperience(15);
             Diedne.GetAbility(Abilities.Latin).AddExperience(0);
-            Diedne.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Diedne.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Diedne.GetAbility(Abilities.Penetration).AddExperience(0);
-            Diedne.GetAbility(Abilities.Concentration).AddExperience(0);
+            Diedne.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Diedne.GetAbility(Abilities.ParmaMagica).AddExperience(30);
+            Diedne.GetAbility(Abilities.Penetration).AddExperience(30);
+            Diedne.GetAbility(Abilities.Concentration).AddExperience(30);
         }
 
         public static void BuildFlambeau()
         {
-            Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Ignem);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Penetration);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.ParmaMagica);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Flambeau.Name = "Flambeau";
-            Flambeau.GetAbility(MagicArts.Creo).AddExperience(0);
+
+            Flambeau.GetAttribute(AttributeType.Stamina).BaseValue = 2;
+            Flambeau.GetAttribute(AttributeType.Strength).BaseValue = 2;
+            Flambeau.GetAttribute(AttributeType.Dexterity).BaseValue = 2;
+            Flambeau.GetAttribute(AttributeType.Quickness).BaseValue = 0;
+            Flambeau.GetAttribute(AttributeType.Intelligence).BaseValue = 1;
+            Flambeau.GetAttribute(AttributeType.Communication).BaseValue = -2;
+            Flambeau.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Flambeau.GetAttribute(AttributeType.Perception).BaseValue = -2;
+
+            Flambeau.GetAbility(MagicArts.Creo).AddExperience(3);
             Flambeau.GetAbility(MagicArts.Intellego).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Muto).AddExperience(0);
-            Flambeau.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Flambeau.GetAbility(MagicArts.Rego).AddExperience(0);
+            Flambeau.GetAbility(MagicArts.Perdo).AddExperience(3);
+            Flambeau.GetAbility(MagicArts.Rego).AddExperience(3);
             Flambeau.GetAbility(MagicArts.Animal).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Aquam).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Auram).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Corpus).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Herbam).AddExperience(0);
-            Flambeau.GetAbility(MagicArts.Ignem).AddExperience(0);
+            Flambeau.GetAbility(MagicArts.Ignem).AddExperience(21);
             Flambeau.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Mentem).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Terram).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Vim).AddExperience(0);
-            Flambeau.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Flambeau.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Flambeau.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Flambeau.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Flambeau.GetAbility(Abilities.English).AddExperience(75);
-            Flambeau.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Flambeau.GetAbility(Abilities.Latin).AddExperience(0);
-            Flambeau.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Flambeau.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Flambeau.GetAbility(Abilities.Penetration).AddExperience(0);
-            Flambeau.GetAbility(Abilities.Concentration).AddExperience(0);
+            Flambeau.GetAbility(Abilities.Etiquette).AddExperience(30);
+            Flambeau.GetAbility(Abilities.Latin).AddExperience(75);
+            Flambeau.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Flambeau.GetAbility(Abilities.ParmaMagica).AddExperience(30);
+            Flambeau.GetAbility(Abilities.Penetration).AddExperience(30);
+            Flambeau.GetAbility(Abilities.Concentration).AddExperience(30);
         }
 
         public static void BuildGuernicus()
         {
-            Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Terram);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.ArtesLiberales);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.MagicTheory);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Guernicus.Name = "Guernicus";
+
+            Guernicus.GetAttribute(AttributeType.Stamina).BaseValue = 2;
+            Guernicus.GetAttribute(AttributeType.Strength).BaseValue = 0;
+            Guernicus.GetAttribute(AttributeType.Dexterity).BaseValue = -1;
+            Guernicus.GetAttribute(AttributeType.Quickness).BaseValue = -2;
+            Guernicus.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Guernicus.GetAttribute(AttributeType.Communication).BaseValue = 2;
+            Guernicus.GetAttribute(AttributeType.Presence).BaseValue = 1;
+            Guernicus.GetAttribute(AttributeType.Perception).BaseValue = 1;
+
             Guernicus.GetAbility(MagicArts.Creo).AddExperience(0);
-            Guernicus.GetAbility(MagicArts.Intellego).AddExperience(0);
+            Guernicus.GetAbility(MagicArts.Intellego).AddExperience(15);
             Guernicus.GetAbility(MagicArts.Muto).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Perdo).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Rego).AddExperience(0);
@@ -219,58 +410,105 @@ namespace WizardMonks.Instances
             Guernicus.GetAbility(MagicArts.Ignem).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Mentem).AddExperience(0);
-            Guernicus.GetAbility(MagicArts.Terram).AddExperience(0);
+            Guernicus.GetAbility(MagicArts.Terram).AddExperience(55);
             Guernicus.GetAbility(MagicArts.Vim).AddExperience(0);
-            Guernicus.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Guernicus.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Guernicus.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Guernicus.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Guernicus.GetAbility(Abilities.English).AddExperience(75);
-            Guernicus.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Guernicus.GetAbility(Abilities.Latin).AddExperience(0);
-            Guernicus.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Guernicus.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Guernicus.GetAbility(Abilities.Penetration).AddExperience(0);
-            Guernicus.GetAbility(Abilities.Concentration).AddExperience(0);
+            Guernicus.GetAbility(Abilities.Etiquette).AddExperience(30);
+            Guernicus.GetAbility(Abilities.Latin).AddExperience(75);
+            Guernicus.GetAbility(Abilities.MagicTheory).AddExperience(50);
+            Guernicus.GetAbility(Abilities.ParmaMagica).AddExperience(5);
+            Guernicus.GetAbility(Abilities.Penetration).AddExperience(5);
+            Guernicus.GetAbility(Abilities.Concentration).AddExperience(5);
         }
 
         public static void BuildJerbiton()
         {
-            Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Imaginem);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.ArtesLiberales);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Etiquette);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Jerbiton.Name = "Jerbiton";
-            Jerbiton.GetAbility(MagicArts.Creo).AddExperience(0);
-            Jerbiton.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Jerbiton.GetAbility(MagicArts.Muto).AddExperience(0);
+
+            Jerbiton.GetAttribute(AttributeType.Stamina).BaseValue = -1;
+            Jerbiton.GetAttribute(AttributeType.Strength).BaseValue = -2;
+            Jerbiton.GetAttribute(AttributeType.Dexterity).BaseValue = 0;
+            Jerbiton.GetAttribute(AttributeType.Quickness).BaseValue = -1;
+            Jerbiton.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Jerbiton.GetAttribute(AttributeType.Communication).BaseValue = 2;
+            Jerbiton.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Jerbiton.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
+            Jerbiton.GetAbility(MagicArts.Creo).AddExperience(3);
+            Jerbiton.GetAbility(MagicArts.Intellego).AddExperience(1);
+            Jerbiton.GetAbility(MagicArts.Muto).AddExperience(3);
             Jerbiton.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Jerbiton.GetAbility(MagicArts.Rego).AddExperience(0);
+            Jerbiton.GetAbility(MagicArts.Rego).AddExperience(3);
             Jerbiton.GetAbility(MagicArts.Animal).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Aquam).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Auram).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Corpus).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Herbam).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Ignem).AddExperience(0);
-            Jerbiton.GetAbility(MagicArts.Imaginem).AddExperience(0);
+            Jerbiton.GetAbility(MagicArts.Imaginem).AddExperience(55);
             Jerbiton.GetAbility(MagicArts.Mentem).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Terram).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Vim).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Jerbiton.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Jerbiton.GetAbility(Abilities.ArtesLiberales).AddExperience(50);
             Jerbiton.GetAbility(Abilities.English).AddExperience(75);
-            Jerbiton.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Jerbiton.GetAbility(Abilities.Latin).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.ParmaMagica).AddExperience(0);
+            Jerbiton.GetAbility(Abilities.Etiquette).AddExperience(30);
+            Jerbiton.GetAbility(Abilities.Latin).AddExperience(75);
+            Jerbiton.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Jerbiton.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Jerbiton.GetAbility(Abilities.Penetration).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.Concentration).AddExperience(0);
+            Jerbiton.GetAbility(Abilities.Concentration).AddExperience(15);
         }
 
         public static void BuildMercere()
         {
-            Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Mentem);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Etiquette);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Mercere.Name = "Mercere";
-            Mercere.GetAbility(MagicArts.Creo).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Muto).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Rego).AddExperience(0);
+
+            Mercere.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Mercere.GetAttribute(AttributeType.Strength).BaseValue = 1;
+            Mercere.GetAttribute(AttributeType.Dexterity).BaseValue = 1;
+            Mercere.GetAttribute(AttributeType.Quickness).BaseValue = 1;
+            Mercere.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Mercere.GetAttribute(AttributeType.Communication).BaseValue = 2;
+            Mercere.GetAttribute(AttributeType.Presence).BaseValue = -3;
+            Mercere.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
+            Mercere.GetAbility(MagicArts.Creo).AddExperience(15);
+            Mercere.GetAbility(MagicArts.Intellego).AddExperience(6);
+            Mercere.GetAbility(MagicArts.Muto).AddExperience(15);
+            Mercere.GetAbility(MagicArts.Perdo).AddExperience(3);
+            Mercere.GetAbility(MagicArts.Rego).AddExperience(15);
             Mercere.GetAbility(MagicArts.Animal).AddExperience(0);
             Mercere.GetAbility(MagicArts.Aquam).AddExperience(0);
             Mercere.GetAbility(MagicArts.Auram).AddExperience(0);
@@ -278,54 +516,191 @@ namespace WizardMonks.Instances
             Mercere.GetAbility(MagicArts.Herbam).AddExperience(0);
             Mercere.GetAbility(MagicArts.Ignem).AddExperience(0);
             Mercere.GetAbility(MagicArts.Imaginem).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Mentem).AddExperience(0);
+            Mercere.GetAbility(MagicArts.Mentem).AddExperience(55);
             Mercere.GetAbility(MagicArts.Terram).AddExperience(0);
-            Mercere.GetAbility(MagicArts.Vim).AddExperience(0);
-            Mercere.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Mercere.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Mercere.GetAbility(MagicArts.Vim).AddExperience(1);
+            Mercere.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Mercere.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Mercere.GetAbility(Abilities.English).AddExperience(75);
-            Mercere.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Mercere.GetAbility(Abilities.Latin).AddExperience(0);
-            Mercere.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Mercere.GetAbility(Abilities.ParmaMagica).AddExperience(0);
+            Mercere.GetAbility(Abilities.Etiquette).AddExperience(30);
+            Mercere.GetAbility(Abilities.Latin).AddExperience(50);
+            Mercere.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Mercere.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Mercere.GetAbility(Abilities.Penetration).AddExperience(0);
             Mercere.GetAbility(Abilities.Concentration).AddExperience(0);
         }
 
         public static void BuildMerinita()
         {
-            Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Herbam);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Animal);
+            goal = new AbilityScoreCondition(abilityList, 15, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Creo);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Intellego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Muto);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Perdo);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Rego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Merinita.Name = "Merinita";
-            Merinita.GetAbility(MagicArts.Creo).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Muto).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Rego).AddExperience(0);
+
+            Merinita.GetAttribute(AttributeType.Stamina).BaseValue = 0;
+            Merinita.GetAttribute(AttributeType.Strength).BaseValue = -1;
+            Merinita.GetAttribute(AttributeType.Dexterity).BaseValue = 0;
+            Merinita.GetAttribute(AttributeType.Quickness).BaseValue = 0;
+            Merinita.GetAttribute(AttributeType.Intelligence).BaseValue = 1;
+            Merinita.GetAttribute(AttributeType.Communication).BaseValue = 1;
+            Merinita.GetAttribute(AttributeType.Presence).BaseValue = 3;
+            Merinita.GetAttribute(AttributeType.Perception).BaseValue = 0;
+
+            Merinita.GetAbility(MagicArts.Creo).AddExperience(15);
+            Merinita.GetAbility(MagicArts.Intellego).AddExperience(15);
+            Merinita.GetAbility(MagicArts.Muto).AddExperience(15);
+            Merinita.GetAbility(MagicArts.Perdo).AddExperience(10);
+            Merinita.GetAbility(MagicArts.Rego).AddExperience(15);
             Merinita.GetAbility(MagicArts.Animal).AddExperience(0);
             Merinita.GetAbility(MagicArts.Aquam).AddExperience(0);
             Merinita.GetAbility(MagicArts.Auram).AddExperience(0);
             Merinita.GetAbility(MagicArts.Corpus).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Herbam).AddExperience(0);
+            Merinita.GetAbility(MagicArts.Herbam).AddExperience(55);
             Merinita.GetAbility(MagicArts.Ignem).AddExperience(0);
             Merinita.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Merinita.GetAbility(MagicArts.Mentem).AddExperience(0);
-            Merinita.GetAbility(MagicArts.Terram).AddExperience(0);
+            Merinita.GetAbility(MagicArts.Terram).AddExperience(15);
             Merinita.GetAbility(MagicArts.Vim).AddExperience(0);
-            Merinita.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Merinita.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Merinita.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Merinita.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Merinita.GetAbility(Abilities.English).AddExperience(75);
-            Merinita.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Merinita.GetAbility(Abilities.Latin).AddExperience(0);
-            Merinita.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Merinita.GetAbility(Abilities.ParmaMagica).AddExperience(0);
+            Merinita.GetAbility(Abilities.Etiquette).AddExperience(15);
+            Merinita.GetAbility(Abilities.Latin).AddExperience(50);
+            Merinita.GetAbility(Abilities.MagicTheory).AddExperience(15);
+            Merinita.GetAbility(Abilities.ParmaMagica).AddExperience(15);
             Merinita.GetAbility(Abilities.Penetration).AddExperience(0);
-            Merinita.GetAbility(Abilities.Concentration).AddExperience(0);
+            Merinita.GetAbility(Abilities.Concentration).AddExperience(15);
         }
 
         public static void BuildTremere()
         {
-            Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Creo);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Intellego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Muto);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Perdo);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Rego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Animal);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Aquam);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Corpus);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Herbam);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Ignem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Imaginem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Mentem);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Terram);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Vim);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Penetration);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.ParmaMagica);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Tremere.Name = "Tremere";
+
+            Tremere.GetAttribute(AttributeType.Stamina).BaseValue = 0;
+            Tremere.GetAttribute(AttributeType.Strength).BaseValue = 0;
+            Tremere.GetAttribute(AttributeType.Dexterity).BaseValue = 0;
+            Tremere.GetAttribute(AttributeType.Quickness).BaseValue = 1;
+            Tremere.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Tremere.GetAttribute(AttributeType.Communication).BaseValue = 1;
+            Tremere.GetAttribute(AttributeType.Presence).BaseValue = -1;
+            Tremere.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
             Tremere.GetAbility(MagicArts.Creo).AddExperience(0);
             Tremere.GetAbility(MagicArts.Intellego).AddExperience(0);
             Tremere.GetAbility(MagicArts.Muto).AddExperience(0);
@@ -342,25 +717,56 @@ namespace WizardMonks.Instances
             Tremere.GetAbility(MagicArts.Terram).AddExperience(0);
             Tremere.GetAbility(MagicArts.Vim).AddExperience(0);
             Tremere.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Tremere.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Tremere.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Tremere.GetAbility(Abilities.English).AddExperience(75);
             Tremere.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Tremere.GetAbility(Abilities.Latin).AddExperience(0);
-            Tremere.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Tremere.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Tremere.GetAbility(Abilities.Penetration).AddExperience(0);
+            Tremere.GetAbility(Abilities.Latin).AddExperience(75);
+            Tremere.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Tremere.GetAbility(Abilities.ParmaMagica).AddExperience(30);
+            Tremere.GetAbility(Abilities.Penetration).AddExperience(30);
             Tremere.GetAbility(Abilities.Concentration).AddExperience(0);
         }
 
         public static void BuildTytalus()
         {
-            Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Rego);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Mentem);
+            goal = new AbilityScoreCondition(abilityList, 10, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Penetration);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(Abilities.Finesse);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Tytalus.Name = "Tytalus";
+
+            Tytalus.GetAttribute(AttributeType.Stamina).BaseValue = 3;
+            Tytalus.GetAttribute(AttributeType.Strength).BaseValue = 0;
+            Tytalus.GetAttribute(AttributeType.Dexterity).BaseValue = 0;
+            Tytalus.GetAttribute(AttributeType.Quickness).BaseValue = -1;
+            Tytalus.GetAttribute(AttributeType.Intelligence).BaseValue = 2;
+            Tytalus.GetAttribute(AttributeType.Communication).BaseValue = -2;
+            Tytalus.GetAttribute(AttributeType.Presence).BaseValue = -1;
+            Tytalus.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
             Tytalus.GetAbility(MagicArts.Creo).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Tytalus.GetAbility(MagicArts.Muto).AddExperience(0);
-            Tytalus.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Tytalus.GetAbility(MagicArts.Rego).AddExperience(0);
+            Tytalus.GetAbility(MagicArts.Muto).AddExperience(10);
+            Tytalus.GetAbility(MagicArts.Perdo).AddExperience(15);
+            Tytalus.GetAbility(MagicArts.Rego).AddExperience(55);
             Tytalus.GetAbility(MagicArts.Animal).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Aquam).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Auram).AddExperience(0);
@@ -371,26 +777,62 @@ namespace WizardMonks.Instances
             Tytalus.GetAbility(MagicArts.Mentem).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Terram).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Vim).AddExperience(0);
-            Tytalus.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Tytalus.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Tytalus.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Tytalus.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Tytalus.GetAbility(Abilities.English).AddExperience(75);
-            Tytalus.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Tytalus.GetAbility(Abilities.Latin).AddExperience(0);
-            Tytalus.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Tytalus.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Tytalus.GetAbility(Abilities.Penetration).AddExperience(0);
-            Tytalus.GetAbility(Abilities.Concentration).AddExperience(0);
+            Tytalus.GetAbility(Abilities.Etiquette).AddExperience(15);
+            Tytalus.GetAbility(Abilities.Latin).AddExperience(50);
+            Tytalus.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Tytalus.GetAbility(Abilities.ParmaMagica).AddExperience(30);
+            Tytalus.GetAbility(Abilities.Penetration).AddExperience(30);
+            Tytalus.GetAbility(Abilities.Concentration).AddExperience(15);
         }
 
         public static void BuildVerditius()
         {
-            Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            List<Ability> abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Intellego);
+            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Muto);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Intellego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Rego);
+            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goals.Add(goal);
+
+            abilityList = new List<Ability>();
+            abilityList.Add(MagicArts.Terram);
+            goal = new AbilityScoreCondition(abilityList, 20, 50);
+            goals.Add(goal);
+
+            Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Verditius.Name = "Verditius";
-            Verditius.GetAbility(MagicArts.Creo).AddExperience(0);
+
+            Verditius.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Verditius.GetAttribute(AttributeType.Strength).BaseValue = 0;
+            Verditius.GetAttribute(AttributeType.Dexterity).BaseValue = 2;
+            Verditius.GetAttribute(AttributeType.Quickness).BaseValue = -3;
+            Verditius.GetAttribute(AttributeType.Intelligence).BaseValue = 3;
+            Verditius.GetAttribute(AttributeType.Communication).BaseValue = -2;
+            Verditius.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Verditius.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
+            Verditius.GetAbility(MagicArts.Creo).AddExperience(15);
             Verditius.GetAbility(MagicArts.Intellego).AddExperience(0);
             Verditius.GetAbility(MagicArts.Muto).AddExperience(0);
             Verditius.GetAbility(MagicArts.Perdo).AddExperience(0);
-            Verditius.GetAbility(MagicArts.Rego).AddExperience(0);
+            Verditius.GetAbility(MagicArts.Rego).AddExperience(15);
             Verditius.GetAbility(MagicArts.Animal).AddExperience(0);
             Verditius.GetAbility(MagicArts.Aquam).AddExperience(0);
             Verditius.GetAbility(MagicArts.Auram).AddExperience(0);
@@ -399,17 +841,17 @@ namespace WizardMonks.Instances
             Verditius.GetAbility(MagicArts.Ignem).AddExperience(0);
             Verditius.GetAbility(MagicArts.Imaginem).AddExperience(0);
             Verditius.GetAbility(MagicArts.Mentem).AddExperience(0);
-            Verditius.GetAbility(MagicArts.Terram).AddExperience(0);
-            Verditius.GetAbility(MagicArts.Vim).AddExperience(0);
-            Verditius.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Verditius.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
+            Verditius.GetAbility(MagicArts.Terram).AddExperience(15);
+            Verditius.GetAbility(MagicArts.Vim).AddExperience(15);
+            Verditius.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Verditius.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Verditius.GetAbility(Abilities.English).AddExperience(75);
-            Verditius.GetAbility(Abilities.Etiquette).AddExperience(5);
-            Verditius.GetAbility(Abilities.Latin).AddExperience(0);
-            Verditius.GetAbility(Abilities.MagicTheory).AddExperience(0);
-            Verditius.GetAbility(Abilities.ParmaMagica).AddExperience(0);
-            Verditius.GetAbility(Abilities.Penetration).AddExperience(0);
-            Verditius.GetAbility(Abilities.Concentration).AddExperience(0);
+            Verditius.GetAbility(Abilities.Etiquette).AddExperience(30);
+            Verditius.GetAbility(Abilities.Latin).AddExperience(75);
+            Verditius.GetAbility(Abilities.MagicTheory).AddExperience(30);
+            Verditius.GetAbility(Abilities.ParmaMagica).AddExperience(15);
+            Verditius.GetAbility(Abilities.Penetration).AddExperience(15);
+            Verditius.GetAbility(Abilities.Concentration).AddExperience(15);
         }
     }
 }

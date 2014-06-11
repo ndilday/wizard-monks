@@ -44,6 +44,7 @@ namespace WizardMonks
 
         #region Private Fields
         private uint _noAgingSeasons;
+        private uint _baseAge;
         protected Ability _writingAbility;
         protected Ability _writingLanguage;
         protected Ability _areaAbility;
@@ -64,11 +65,12 @@ namespace WizardMonks
         public event AgedEventHandler Aged;
         #endregion
 
-        #region Public Fields
+        #region Public Properties
+        public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
         public string Name { get; set; }
-        public string Log { get; set; }
+        public List<string> Log { get; private set; }
         public IEnumerable<IBook> Books
         {
             get
@@ -76,17 +78,16 @@ namespace WizardMonks
                 return _booksOwned;
             }
         }
-
         public IEnumerable<IBook> ReadableBooks
         {
             get
             {
-                return _booksOwned.Where(b => b.Author != this && b.Level > this.GetAbility(b.Topic).GetValue());
+                return _booksOwned.Where(b => b.Author != this && b.Level > this.GetAbility(b.Topic).Value);
             }
         }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility)
+        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseSeasonableAge = 20)
         {
             Die die = new Die();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
@@ -100,8 +101,8 @@ namespace WizardMonks
 
             Decrepitude = 0;
 
-            // All characters start at age 5
             _noAgingSeasons = 0;
+            _baseAge = baseSeasonableAge;
 
             _abilityList = new Dictionary<int, CharacterAbilityBase>();
             _seasonList = new List<IAction>();
@@ -117,8 +118,9 @@ namespace WizardMonks
             _writingAbilities.Add(_writingLanguage);
 
             _incompleteBooks = new List<Summa>();
-
-            Log = "";
+            _goals = startingGoals == null ? new List<IGoal>() : startingGoals;
+            Log = new List<string>();
+            Warping = new CharacterAbility(Abilities.Warping);
         }
 
         #region Ability Functions
@@ -161,7 +163,7 @@ namespace WizardMonks
 
         public uint SeasonalAge
         {
-            get { return (uint)(_seasonList.Count + 20); }
+            get { return (uint)(_seasonList.Count + _baseAge); }
         }
 
 	    public uint ApparentAge
@@ -169,14 +171,23 @@ namespace WizardMonks
             get { return SeasonalAge - _noAgingSeasons; }
 	    }
 
+        public void ApplyLongevityRitual(ushort strength)
+        {
+            LongevityRitual = strength;
+        }
+
         private void Age(ushort modifiers)
         {
             // roll exploding die for aging
+            if (LongevityRitual > 0)
+            {
+                Warping.AddExperience(0.25);
+            }
             bool apparent = true;
             bool crisis = false;
             bool died = false;
             ushort agingRoll = Die.Instance.RollExplodingDie();
-            agingRoll += modifiers;
+            agingRoll -= modifiers;
             ushort ageModifier = (ushort)Math.Ceiling(SeasonalAge / 40.0m);
             agingRoll += ageModifier;
 
@@ -189,6 +200,7 @@ namespace WizardMonks
             if (agingRoll == 13 || agingRoll > 21)
             {
                 crisis = true;
+                LongevityRitual = 0;
                 IncreaseDecrepitudeToNextLevel();
                 int crisisRoll = Die.Instance.RollSimpleDie();
                 crisisRoll = crisisRoll + ageModifier + GetDecrepitudeScore();
@@ -255,54 +267,6 @@ namespace WizardMonks
 
         #region Seasonal Functions
 
-        public IAction ConfirmLiteracy(IBook book, double desire)
-        {
-            if (GetAbility(_writingLanguage).GetValue() < 4)
-            {
-                // we need to learn to read before we can do anything with these books
-                Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
-                return new Practice(_writingLanguage, desire);
-
-            }
-            else if (GetAbility(_writingAbility).GetValue() < 1)
-            {
-                // TODO: figure out the best way to inject the right activity here once teaching and training are implemented
-                Log += "Does not know alphabet" + "\r\n";
-                return new Practice(_writingAbility, desire);
-            }
-            else
-            {
-                return new Reading(book, desire);
-            }
-        }
-
-        public IAction ConfirmLiteracy(EvaluatedBook book, double desire)
-        {
-            double languageValue = GetAbility(_writingLanguage).GetValue();
-            if ( languageValue < 5 && languageValue >= 4)
-            {
-                Log += "Cannont write " + _writingLanguage.AbilityName + "\r\n";
-                return GetBestActionForGain(_writingLanguage, desire);
-            }
-            else if ( languageValue < 4)
-            {
-                // we need to learn to read before we can do anything with these books
-                Log += "Cannont read " + _writingLanguage.AbilityName + "\r\n";
-                return new Practice(_writingLanguage, desire);
-
-            }
-            else if (GetAbility(_writingAbility).GetValue() < 1)
-            {
-                // TODO: figure out the best way to inject the right activity here once teaching and training are implemented
-                Log += "Does not know alphabet" + "\r\n";
-                return new Practice(_writingAbility, desire);
-            }
-            else
-            {
-                return new Writing(book.Book.Topic, book.ExposureAbility, book.Book.Level, desire);
-            }
-        }
-
         private IAction GetBestActionForGain(Ability ability, double desire)
         {
             // see if there are any books on the topic worth reading
@@ -324,19 +288,19 @@ namespace WizardMonks
             action.Act(this);
             if (SeasonalAge >= 140)
             {
-                Age(0);
+                Age(LongevityRitual);
             }
         }
 
         public virtual void Advance()
         {
-            Log += "Season " + _seasonList.Count() + "\r\n";
+            Log.Add("Season " + _seasonList.Count());
             IAction activity = DecideSeasonalActivity();
             _seasonList.Add(activity);
             activity.Act(this);
             if (SeasonalAge >= 140)
             {
-                Age(0);
+                Age(LongevityRitual);
             }
         }
         #endregion
@@ -384,7 +348,7 @@ namespace WizardMonks
                 charAbility = GetAbility(book.Topic);
             }
 
-            if (charAbility.GetValue() > book.Level)
+            if (charAbility.Value > book.Level)
             {
                 return 0;
             }
@@ -398,7 +362,7 @@ namespace WizardMonks
         {
             CharacterAbilityBase ability = GetAbility(book.Topic);
             bool previouslyRead = _booksRead.Contains(book);
-            if (!previouslyRead || ability.GetValue() < book.Level)
+            if (!previouslyRead || ability.Value < book.Level)
             {
                 ability.AddExperience(book.Quality, book.Level);
             }
@@ -465,7 +429,7 @@ namespace WizardMonks
             Summa previousWork = _incompleteBooks.Where(b => b.Topic == topic && b.Level == desiredLevel).FirstOrDefault();
             if (previousWork == null)
             {
-                double difference = (ability.GetValue() / 2) - desiredLevel;
+                double difference = (ability.Value / 2) - desiredLevel;
                 if (difference < 0)
                 {
                     throw new ArgumentOutOfRangeException();
@@ -485,7 +449,7 @@ namespace WizardMonks
                 s = previousWork;
             }
 
-            s.PointsComplete += this.GetAttribute(AttributeType.Communication).Value + GetAbility(_writingLanguage).GetValue();
+            s.PointsComplete += this.GetAttribute(AttributeType.Communication).Value + GetAbility(_writingLanguage).Value;
             if (s.PointsComplete >= s.GetWritingPointsNeeded())
             {
                 _booksWritten.Add(s);
@@ -548,7 +512,7 @@ namespace WizardMonks
             // TODO: how to decide what audience the magus is writing for?
             // when art > 10, magus will write a /2 book
             // when art >=20, magus will write a /4 book
-            if (ability.GetValue() >= 4)
+            if (ability.Value >= 4)
             {
                 // start with no q/l switching
                 CharacterAbilityBase theoreticalPurchaser = new CharacterAbility(ability.Ability);
@@ -556,7 +520,7 @@ namespace WizardMonks
                 Summa s = new Summa
                 {
                     Quality = GetAttribute(AttributeType.Communication).Value + 6,
-                    Level = ability.GetValue() / 2.0,
+                    Level = ability.Value / 2.0,
                     Topic = ability.Ability
                 };
                 double value = RateLifetimeBookValue(s, theoreticalPurchaser);
@@ -569,13 +533,13 @@ namespace WizardMonks
                     };
                 }
             }
-            if (ability.GetValue() >= 6)
+            if (ability.Value >= 6)
             {
                 // if more expert, try some q/l switching
                 CharacterAbilityBase theoreticalPurchaser = new CharacterAbility(ability.Ability);
                 theoreticalPurchaser.AddExperience(ability.Experience / 4);
 
-                double qualityAdd = ability.GetValue() / 4;
+                double qualityAdd = ability.Value / 4;
                 if (qualityAdd > (GetAttribute(AttributeType.Communication).Value + 6))
                 {
                     qualityAdd = GetAttribute(AttributeType.Communication).Value + 6;
@@ -584,10 +548,10 @@ namespace WizardMonks
                 Summa s = new Summa
                 {
                     Quality = GetAttribute(AttributeType.Communication).Value + 6 + qualityAdd,
-                    Level = (ability.GetValue() / 2.0) - qualityAdd,
+                    Level = (ability.Value / 2.0) - qualityAdd,
                     Topic = ability.Ability
                 };
-                double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).GetValue());
+                double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).Value);
                 double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
                 if (value > bestBook.PerceivedValue)
                 {

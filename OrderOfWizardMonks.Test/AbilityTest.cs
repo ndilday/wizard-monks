@@ -27,7 +27,7 @@ namespace WizardMonks.Test
             CharacterAbility characterAbility = new CharacterAbility(ability);
             characterAbility.Experience = 0;
 
-            Assert.AreEqual(0, characterAbility.GetValue());
+            Assert.AreEqual(0, characterAbility.Value);
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace WizardMonks.Test
             CharacterAbility characterAbility = new CharacterAbility(ability);
             characterAbility.Experience = 15;
 
-            Assert.AreEqual(2, characterAbility.GetValue());
+            Assert.AreEqual(2, characterAbility.Value);
         }
 
         [TestMethod]
@@ -47,7 +47,7 @@ namespace WizardMonks.Test
             CharacterAbility characterAbility = new CharacterAbility(ability);
             characterAbility.Experience = 37;
 
-            Assert.AreEqual(3, characterAbility.GetValue());
+            Assert.AreEqual(3, characterAbility.Value);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace WizardMonks.Test
             Ability ability = new Ability(0, AbilityType.General, "TestAbility");
             CharacterAbility charAbility = new CharacterAbility(ability);
             charAbility.AddExperience(10, 1);
-            Assert.AreEqual(1, charAbility.GetValue());
+            Assert.AreEqual(1, charAbility.Value);
         }
     }
 }

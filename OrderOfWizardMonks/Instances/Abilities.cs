@@ -10,6 +10,7 @@ namespace WizardMonks.Instances
         public static Ability English { get; private set; }
         public static Ability Latin { get; private set; }
         public static Ability MagicTheory { get; private set; }
+        public static Ability Finesse { get; private set; }
         public static Ability ArtesLiberales { get; private set; }
         public static Ability ParmaMagica { get; private set; }
         public static Ability Penetration { get; private set; }
@@ -18,6 +19,7 @@ namespace WizardMonks.Instances
         public static Ability Concentration { get; private set; }
         public static Ability Teaching { get; private set; }
         public static Ability Scribing { get; private set; }
+        public static Ability Warping { get; private set; }
 
         static Abilities()
         {
@@ -29,12 +31,15 @@ namespace WizardMonks.Instances
             MagicTheory = new Ability(250, AbilityType.Arcane, "Magic Theory");
             ParmaMagica = new Ability(251, AbilityType.Arcane, "Parma Magica");
             Penetration = new Ability(252, AbilityType.Arcane, "Penetration");
+            Finesse = new Ability(253, AbilityType.Arcane, "Finesse");
 
             Etiquette = new Ability(0, AbilityType.General, "Etiquette");
             AreaLore = new Ability(1, AbilityType.General, "Area Lore");
             Concentration = new Ability(2, AbilityType.General, "Concentration");
             Teaching = new Ability(3, AbilityType.General, "Teaching");
             Scribing = new Ability(4, AbilityType.General, "Scribing");
+
+            Warping = new Ability(-1, AbilityType.Arcane, "Warping");
         }
 
         public static IEnumerable<Ability> GetEnumerator()
@@ -45,6 +50,7 @@ namespace WizardMonks.Instances
             yield return ArtesLiberales;
             yield return ParmaMagica;
             yield return Penetration;
+            yield return Finesse;
             yield return Etiquette;
             yield return AreaLore;
             yield return Concentration;

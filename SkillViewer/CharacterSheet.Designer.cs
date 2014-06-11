@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -81,14 +82,17 @@
             this.AbilityName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Experience = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.btnAdvance = new System.Windows.Forms.Button();
-            this.txtLog = new System.Windows.Forms.TextBox();
             this.isPuissantDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.isAffinityDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.experienceDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.abilityDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.characterAbilityBaseBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.txtAge = new System.Windows.Forms.TextBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.txtWarp = new System.Windows.Forms.TextBox();
+            this.label25 = new System.Windows.Forms.Label();
+            this.lstLog = new System.Windows.Forms.ListBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAbilities)).BeginInit();
@@ -309,7 +313,7 @@
             this.txtVim.MaxLength = 5;
             this.txtVim.Name = "txtVim";
             this.txtVim.ReadOnly = true;
-            this.txtVim.Size = new System.Drawing.Size(30, 20);
+            this.txtVim.Size = new System.Drawing.Size(35, 20);
             this.txtVim.TabIndex = 42;
             // 
             // label23
@@ -327,7 +331,7 @@
             this.txtTerram.MaxLength = 5;
             this.txtTerram.Name = "txtTerram";
             this.txtTerram.ReadOnly = true;
-            this.txtTerram.Size = new System.Drawing.Size(30, 20);
+            this.txtTerram.Size = new System.Drawing.Size(35, 20);
             this.txtTerram.TabIndex = 40;
             // 
             // label22
@@ -345,7 +349,7 @@
             this.txtMentem.MaxLength = 5;
             this.txtMentem.Name = "txtMentem";
             this.txtMentem.ReadOnly = true;
-            this.txtMentem.Size = new System.Drawing.Size(30, 20);
+            this.txtMentem.Size = new System.Drawing.Size(35, 20);
             this.txtMentem.TabIndex = 38;
             // 
             // label21
@@ -363,7 +367,7 @@
             this.txtImaginem.MaxLength = 5;
             this.txtImaginem.Name = "txtImaginem";
             this.txtImaginem.ReadOnly = true;
-            this.txtImaginem.Size = new System.Drawing.Size(30, 20);
+            this.txtImaginem.Size = new System.Drawing.Size(35, 20);
             this.txtImaginem.TabIndex = 36;
             // 
             // label20
@@ -381,7 +385,7 @@
             this.txtIgnem.MaxLength = 5;
             this.txtIgnem.Name = "txtIgnem";
             this.txtIgnem.ReadOnly = true;
-            this.txtIgnem.Size = new System.Drawing.Size(30, 20);
+            this.txtIgnem.Size = new System.Drawing.Size(35, 20);
             this.txtIgnem.TabIndex = 34;
             // 
             // label19
@@ -399,7 +403,7 @@
             this.txtHerbam.MaxLength = 5;
             this.txtHerbam.Name = "txtHerbam";
             this.txtHerbam.ReadOnly = true;
-            this.txtHerbam.Size = new System.Drawing.Size(30, 20);
+            this.txtHerbam.Size = new System.Drawing.Size(35, 20);
             this.txtHerbam.TabIndex = 32;
             // 
             // label18
@@ -417,7 +421,7 @@
             this.txtCorpus.MaxLength = 5;
             this.txtCorpus.Name = "txtCorpus";
             this.txtCorpus.ReadOnly = true;
-            this.txtCorpus.Size = new System.Drawing.Size(30, 20);
+            this.txtCorpus.Size = new System.Drawing.Size(35, 20);
             this.txtCorpus.TabIndex = 30;
             // 
             // label17
@@ -435,7 +439,7 @@
             this.txtAuram.MaxLength = 5;
             this.txtAuram.Name = "txtAuram";
             this.txtAuram.ReadOnly = true;
-            this.txtAuram.Size = new System.Drawing.Size(30, 20);
+            this.txtAuram.Size = new System.Drawing.Size(35, 20);
             this.txtAuram.TabIndex = 28;
             // 
             // label16
@@ -453,7 +457,7 @@
             this.txtAquam.MaxLength = 5;
             this.txtAquam.Name = "txtAquam";
             this.txtAquam.ReadOnly = true;
-            this.txtAquam.Size = new System.Drawing.Size(30, 20);
+            this.txtAquam.Size = new System.Drawing.Size(35, 20);
             this.txtAquam.TabIndex = 26;
             // 
             // label15
@@ -471,7 +475,7 @@
             this.txtAnimal.MaxLength = 5;
             this.txtAnimal.Name = "txtAnimal";
             this.txtAnimal.ReadOnly = true;
-            this.txtAnimal.Size = new System.Drawing.Size(30, 20);
+            this.txtAnimal.Size = new System.Drawing.Size(35, 20);
             this.txtAnimal.TabIndex = 24;
             // 
             // label14
@@ -489,7 +493,7 @@
             this.txtRego.MaxLength = 5;
             this.txtRego.Name = "txtRego";
             this.txtRego.ReadOnly = true;
-            this.txtRego.Size = new System.Drawing.Size(30, 20);
+            this.txtRego.Size = new System.Drawing.Size(35, 20);
             this.txtRego.TabIndex = 22;
             // 
             // label13
@@ -507,7 +511,7 @@
             this.txtPerdo.MaxLength = 5;
             this.txtPerdo.Name = "txtPerdo";
             this.txtPerdo.ReadOnly = true;
-            this.txtPerdo.Size = new System.Drawing.Size(30, 20);
+            this.txtPerdo.Size = new System.Drawing.Size(35, 20);
             this.txtPerdo.TabIndex = 20;
             // 
             // label12
@@ -525,7 +529,7 @@
             this.txtMuto.MaxLength = 5;
             this.txtMuto.Name = "txtMuto";
             this.txtMuto.ReadOnly = true;
-            this.txtMuto.Size = new System.Drawing.Size(30, 20);
+            this.txtMuto.Size = new System.Drawing.Size(35, 20);
             this.txtMuto.TabIndex = 18;
             // 
             // label11
@@ -543,7 +547,7 @@
             this.txtIntellego.MaxLength = 5;
             this.txtIntellego.Name = "txtIntellego";
             this.txtIntellego.ReadOnly = true;
-            this.txtIntellego.Size = new System.Drawing.Size(30, 20);
+            this.txtIntellego.Size = new System.Drawing.Size(35, 20);
             this.txtIntellego.TabIndex = 16;
             // 
             // label10
@@ -561,7 +565,7 @@
             this.txtCreo.MaxLength = 5;
             this.txtCreo.Name = "txtCreo";
             this.txtCreo.ReadOnly = true;
-            this.txtCreo.Size = new System.Drawing.Size(30, 20);
+            this.txtCreo.Size = new System.Drawing.Size(35, 20);
             this.txtCreo.TabIndex = 14;
             // 
             // label9
@@ -609,7 +613,9 @@
             // 
             // Value
             // 
-            this.Value.DataPropertyName = "Experience";
+            this.Value.DataPropertyName = "Value";
+            dataGridViewCellStyle1.Format = "0.00";
+            this.Value.DefaultCellStyle = dataGridViewCellStyle1;
             this.Value.FillWeight = 15F;
             this.Value.HeaderText = "Level";
             this.Value.MaxInputLength = 2;
@@ -619,32 +625,13 @@
             // 
             // Experience
             // 
+            this.Experience.DataPropertyName = "Experience";
             this.Experience.FillWeight = 15F;
             this.Experience.HeaderText = "Exp";
             this.Experience.MaxInputLength = 3;
             this.Experience.Name = "Experience";
             this.Experience.ReadOnly = true;
             this.Experience.Width = 50;
-            // 
-            // btnAdvance
-            // 
-            this.btnAdvance.Location = new System.Drawing.Point(381, 13);
-            this.btnAdvance.Name = "btnAdvance";
-            this.btnAdvance.Size = new System.Drawing.Size(75, 23);
-            this.btnAdvance.TabIndex = 19;
-            this.btnAdvance.Text = "Advance";
-            this.btnAdvance.UseVisualStyleBackColor = true;
-            this.btnAdvance.Click += new System.EventHandler(this.btnAdvance_Click);
-            // 
-            // txtLog
-            // 
-            this.txtLog.Location = new System.Drawing.Point(381, 43);
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(150, 337);
-            this.txtLog.TabIndex = 20;
             // 
             // isPuissantDataGridViewCheckBoxColumn
             // 
@@ -685,13 +672,60 @@
             // 
             this.characterAbilityBaseBindingSource.DataSource = typeof(WizardMonks.CharacterAbilityBase);
             // 
+            // txtAge
+            // 
+            this.txtAge.Location = new System.Drawing.Point(420, 22);
+            this.txtAge.MaxLength = 5;
+            this.txtAge.Name = "txtAge";
+            this.txtAge.ReadOnly = true;
+            this.txtAge.Size = new System.Drawing.Size(35, 20);
+            this.txtAge.TabIndex = 22;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(383, 25);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(26, 13);
+            this.label24.TabIndex = 21;
+            this.label24.Text = "Age";
+            // 
+            // txtWarp
+            // 
+            this.txtWarp.Location = new System.Drawing.Point(519, 22);
+            this.txtWarp.MaxLength = 5;
+            this.txtWarp.Name = "txtWarp";
+            this.txtWarp.ReadOnly = true;
+            this.txtWarp.Size = new System.Drawing.Size(35, 20);
+            this.txtWarp.TabIndex = 24;
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(461, 25);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(47, 13);
+            this.label25.TabIndex = 23;
+            this.label25.Text = "Warping";
+            // 
+            // lstLog
+            // 
+            this.lstLog.FormattingEnabled = true;
+            this.lstLog.Location = new System.Drawing.Point(374, 51);
+            this.lstLog.Name = "lstLog";
+            this.lstLog.Size = new System.Drawing.Size(191, 329);
+            this.lstLog.TabIndex = 25;
+            // 
             // CharacterSheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(543, 389);
-            this.Controls.Add(this.txtLog);
-            this.Controls.Add(this.btnAdvance);
+            this.ClientSize = new System.Drawing.Size(577, 429);
+            this.Controls.Add(this.lstLog);
+            this.Controls.Add(this.txtWarp);
+            this.Controls.Add(this.label25);
+            this.Controls.Add(this.txtAge);
+            this.Controls.Add(this.label24);
             this.Controls.Add(this.dgvAbilities);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -760,6 +794,10 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.DataGridView dgvAbilities;
         private System.Windows.Forms.BindingSource characterAbilityBaseBindingSource;
+        private System.Windows.Forms.TextBox txtAge;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.TextBox txtWarp;
+        private System.Windows.Forms.Label label25;
         private System.Windows.Forms.DataGridViewTextBoxColumn AbilityName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
         private System.Windows.Forms.DataGridViewTextBoxColumn Experience;
@@ -768,7 +806,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn experienceDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn abilityDataGridViewTextBoxColumn;
-        private System.Windows.Forms.Button btnAdvance;
-        private System.Windows.Forms.TextBox txtLog;
+        private System.Windows.Forms.ListBox lstLog;
     }
 }

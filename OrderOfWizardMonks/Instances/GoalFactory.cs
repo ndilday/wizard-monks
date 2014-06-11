@@ -12,7 +12,8 @@ namespace WizardMonks.Instances
         FindApprentice,
         BindFamiliar,
         BuildLab,
-        Ability
+        Ability,
+        InventSpell
     }
 
     class GoalFactory
@@ -28,6 +29,11 @@ namespace WizardMonks.Instances
                 default:
                     return null;
             }
+        }
+
+        public static IGoal GenerateSpellGoal(Spell spell, double desire)
+        {
+            return new InventSpellGoal(spell, desire);
         }
     }
 }

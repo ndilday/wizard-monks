@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 using WizardMonks;
 using WizardMonks.Instances;
@@ -11,15 +11,18 @@ using WorldSimulation;
 
 namespace SkillViewer
 {
+    delegate void AdvanceCharacterDelegate(Character character);
+
     public partial class WorldGenerator : Form
     {
-        private Magus[] _magusArray = new Magus[1000];
+        private Magus[] _magusArray = new Magus[100];
         private int _magusCount = 0;
         private Ability _latin;
         private Ability _magicTheory;
         private Ability _artLib;
         private Ability _areaLore;
         private Die _die = new Die();
+        private List<string> _log;
 
         public WorldGenerator()
         {
@@ -55,6 +58,8 @@ namespace SkillViewer
                 _magusCount++;
             }
             lstMembers.DataSource = _magusArray.Take(_magusCount).ToList();
+             _log = new List<string>();
+             lstAdvance.DataSource = _log;
         }
 
         public void InitializeFromFile()
@@ -110,6 +115,37 @@ namespace SkillViewer
                 default:
                     return "Magus " + nameNumber.ToString();
             }
+        }
+
+        private void btnAdvance_Click(object sender, EventArgs e)
+        {
+            btnAdvance.Enabled = false;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            //_magusArray[2].Advance();
+            Parallel.ForEach(_magusArray.Where(m => m != null), character =>
+                {
+                    _log.Add("Advancing " + character.Name);
+                    Task reportProgressTask = Task.Factory.StartNew(() =>
+                        {
+                            lstAdvance.DataSource = null;
+                            lstAdvance.DataSource = _log;
+                        },
+                        CancellationToken.None,
+                        TaskCreationOptions.None,
+                        uiScheduler);
+                    character.Advance();
+                    _log.Add("Done advancing " + character.Name);
+                    reportProgressTask = Task.Factory.StartNew(() =>
+                    {
+                        lstAdvance.DataSource = null;
+                        lstAdvance.DataSource = _log;
+                    },
+                        CancellationToken.None,
+                        TaskCreationOptions.None,
+                        uiScheduler);
+                } );
+
+            btnAdvance.Enabled = true;
         }
     }
 }

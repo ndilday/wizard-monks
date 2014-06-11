@@ -16,6 +16,7 @@ namespace SkillViewer
     {
         private Character _character;
         private const string FORMAT_STRING = "0.00";
+
         public CharacterSheet(Character character)
         {
             _character = character;
@@ -24,7 +25,14 @@ namespace SkillViewer
             DisplayCharacteristics();
             DisplayArts();
             DisplayAbilities();
-            txtLog.Text = _character.Log;
+            DisplayMisc();
+            lstLog.DataSource = _character.Log;
+        }
+
+        private void DisplayMisc()
+        {
+            txtAge.Text = (_character.SeasonalAge / 4).ToString();
+            txtWarp.Text = _character.Warping.Value.ToString(FORMAT_STRING);
         }
 
         private void DisplayCharacteristics()
@@ -41,36 +49,26 @@ namespace SkillViewer
 
         private void DisplayArts()
         {
-            txtCreo.Text = _character.GetAbility(MagicArts.Creo).GetValue().ToString(FORMAT_STRING);
-            txtIntellego.Text = _character.GetAbility(MagicArts.Intellego).GetValue().ToString(FORMAT_STRING);
-            txtMuto.Text = _character.GetAbility(MagicArts.Muto).GetValue().ToString(FORMAT_STRING);
-            txtPerdo.Text = _character.GetAbility(MagicArts.Perdo).GetValue().ToString(FORMAT_STRING);
-            txtRego.Text = _character.GetAbility(MagicArts.Rego).GetValue().ToString(FORMAT_STRING);
-            txtAnimal.Text = _character.GetAbility(MagicArts.Animal).GetValue().ToString(FORMAT_STRING);
-            txtAquam.Text = _character.GetAbility(MagicArts.Aquam).GetValue().ToString(FORMAT_STRING);
-            txtAuram.Text = _character.GetAbility(MagicArts.Auram).GetValue().ToString(FORMAT_STRING);
-            txtCorpus.Text = _character.GetAbility(MagicArts.Corpus).GetValue().ToString(FORMAT_STRING);
-            txtHerbam.Text = _character.GetAbility(MagicArts.Herbam).GetValue().ToString(FORMAT_STRING);
-            txtIgnem.Text = _character.GetAbility(MagicArts.Ignem).GetValue().ToString(FORMAT_STRING);
-            txtImaginem.Text = _character.GetAbility(MagicArts.Imaginem).GetValue().ToString(FORMAT_STRING);
-            txtMentem.Text = _character.GetAbility(MagicArts.Mentem).GetValue().ToString(FORMAT_STRING);
-            txtTerram.Text = _character.GetAbility(MagicArts.Terram).GetValue().ToString(FORMAT_STRING);
-            txtVim.Text = _character.GetAbility(MagicArts.Vim).GetValue().ToString(FORMAT_STRING);
+            txtCreo.Text = _character.GetAbility(MagicArts.Creo).Value.ToString(FORMAT_STRING);
+            txtIntellego.Text = _character.GetAbility(MagicArts.Intellego).Value.ToString(FORMAT_STRING);
+            txtMuto.Text = _character.GetAbility(MagicArts.Muto).Value.ToString(FORMAT_STRING);
+            txtPerdo.Text = _character.GetAbility(MagicArts.Perdo).Value.ToString(FORMAT_STRING);
+            txtRego.Text = _character.GetAbility(MagicArts.Rego).Value.ToString(FORMAT_STRING);
+            txtAnimal.Text = _character.GetAbility(MagicArts.Animal).Value.ToString(FORMAT_STRING);
+            txtAquam.Text = _character.GetAbility(MagicArts.Aquam).Value.ToString(FORMAT_STRING);
+            txtAuram.Text = _character.GetAbility(MagicArts.Auram).Value.ToString(FORMAT_STRING);
+            txtCorpus.Text = _character.GetAbility(MagicArts.Corpus).Value.ToString(FORMAT_STRING);
+            txtHerbam.Text = _character.GetAbility(MagicArts.Herbam).Value.ToString(FORMAT_STRING);
+            txtIgnem.Text = _character.GetAbility(MagicArts.Ignem).Value.ToString(FORMAT_STRING);
+            txtImaginem.Text = _character.GetAbility(MagicArts.Imaginem).Value.ToString(FORMAT_STRING);
+            txtMentem.Text = _character.GetAbility(MagicArts.Mentem).Value.ToString(FORMAT_STRING);
+            txtTerram.Text = _character.GetAbility(MagicArts.Terram).Value.ToString(FORMAT_STRING);
+            txtVim.Text = _character.GetAbility(MagicArts.Vim).Value.ToString(FORMAT_STRING);
         }
 
         private void DisplayAbilities()
         {
-            dgvAbilities.DataSource = _character.GetAbilities();
-        }
-
-        private void btnAdvance_Click(object sender, EventArgs e)
-        {
-            _character.Advance();
-
-            DisplayArts();
-            DisplayAbilities();
-
-            txtLog.Text = _character.Log;
+            dgvAbilities.DataSource = _character.GetAbilities().Where(a => !MagicArts.IsArt(a.Ability)).ToList();
         }
     }
 }

@@ -21,20 +21,22 @@ namespace WizardMonks
 
 	[Serializable]
 	public partial class Magus : Character
-	{
+    {
+        #region Private Fields
         private Ability _magicAbility;
         private Spell _partialSpell;
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
-        private List<Ability> _extractionAbilities;
-        private List<Ability> _magicSearchAbilities;
-        private Magus _apprentice;
+        #endregion
 
+        #region Public Properties
+        public Magus Apprentice { get; private set; }
         public Laboratory Laboratory { get; private set; }
         public List<Spell> SpellList { get; private set; }
         public Houses House { get; private set; }
         public Covenant Covenant { get; private set; }
         public Arts Arts { get; private set; }
+        #endregion
 
         #region Initialization Functions
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseAge = 20)
@@ -53,25 +55,7 @@ namespace WizardMonks
                 _visStock[art] = 0;
             }
 
-            InitializeExtractionAbilities();
-            InitializeMagicSearchAbilities();
             InitializeGoals();
-        }
-
-        private void InitializeExtractionAbilities()
-        {
-            _extractionAbilities = new List<Ability>(3);
-            _extractionAbilities.Add(_magicAbility);
-            _extractionAbilities.Add(MagicArts.Creo);
-            _extractionAbilities.Add(MagicArts.Vim);
-        }
-
-        private void InitializeMagicSearchAbilities()
-        {
-            _magicSearchAbilities = new List<Ability>(3);
-            _magicSearchAbilities.Add(_areaAbility);
-            _magicSearchAbilities.Add(MagicArts.Intellego);
-            _magicSearchAbilities.Add(MagicArts.Vim);
         }
 
         private void InitializeGoals()
@@ -103,11 +87,10 @@ namespace WizardMonks
             covenant.AddMagus(this);
         }
 
-        public Covenant FoundCovenant(double auraLevel = 0)
+        public Covenant FoundCovenant(Aura aura)
         {
-            Covenant coventant = new Covenant();
+            Covenant coventant = new Covenant(aura);
             Join(coventant);
-            coventant.Aura = auraLevel;
             return coventant;
         }
         #endregion
@@ -258,11 +241,16 @@ namespace WizardMonks
 
         public double GetVisCount(Ability visArt)
         {
+            double total = 0;
+            if (Covenant != null)
+            {
+                total += Covenant.GetVis(visArt);
+            }
             if(_visStock.ContainsKey(visArt))
             {
-                return _visStock[visArt];
+                total += _visStock[visArt];
             }
-            return 0;
+            return total;
         }
 
         public double UseVis(Ability visType, double amount)
@@ -275,17 +263,18 @@ namespace WizardMonks
             {
                 throw new ArgumentException("Insufficient vis available!");
             }
-            if (amount > _visStock[visType])
+            double covVis = Covenant.GetVis(visType);
+            if (covVis > 0 && amount > covVis)
             {
-                amount -= _visStock[visType];
-                Covenant.RemoveVis(visType, amount);
-                return 0;
+                amount -= covVis;
+                Covenant.RemoveVis(visType, covVis);
+                _visStock[visType] -= amount;
             }
             else
             {
-                _visStock[visType] -= amount;
-                return _visStock[visType];
+                Covenant.RemoveVis(visType, amount);
             }
+            return _visStock[visType];
         }
         #endregion
 
@@ -298,7 +287,7 @@ namespace WizardMonks
             double labTotal = magicTheory + techValue + formValue + GetAttribute(AttributeType.Intelligence).Value;
             if (Covenant != null)
             {
-                labTotal += Covenant.Aura;
+                labTotal += Covenant.Aura.Strength;
 
                 if (Laboratory != null)
                 {
@@ -388,13 +377,31 @@ namespace WizardMonks
         public void TakeApprentice(Magus apprentice)
         {
             // TODO: what sort of error checking should go here?
-            _apprentice = apprentice;
+            Apprentice = apprentice;
         }
 
         public void GauntletApprentice()
         {
-            _apprentice.House = House;
-            _apprentice = null;
+            Apprentice.House = House;
+            Apprentice = null;
+        }
+        #endregion
+
+        #region Seasonal Functions
+        public override void Advance()
+        {
+            // harvest vis
+            foreach (Aura aura in KnownAuras)
+            {
+                foreach (VisSource source in aura.VisSources)
+                {
+                    if ((CurrentSeason & source.Seasons) == CurrentSeason)
+                    {
+                        _visStock[source.Art] += source.Amount;
+                    }
+                }
+            }
+            base.Advance();
         }
         #endregion
     }

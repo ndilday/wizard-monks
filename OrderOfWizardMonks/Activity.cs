@@ -349,18 +349,23 @@ namespace WizardMonks
 
         private void MageAuraSearch(Magus mage)
         {
-            // add bonus to area lore equal to casting total div 5?
+            // add bonus to area lore equal to casting total div 10?
             // TODO: once spells are implemented, increase finding chances based on aura-detection spells
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
-            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             double roll = Die.Instance.RollDouble() * 5;
 
             // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
-            double auraFound = Math.Sqrt(roll * areaLore);
+            double auraFound = Math.Sqrt(roll * areaLore / (mage.KnownAuras.Count() + 1));
             if (auraFound > 1)
             {
+                Aura aura = new Aura(Domain.Magic, auraFound);
                 mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.00"));
-                mage.FoundCovenant(auraFound);
+                mage.KnownAuras.Add(aura);
+                if (mage.Covenant == null)
+                {
+                    mage.FoundCovenant(aura);
+                }
             }
         }
 
@@ -423,6 +428,156 @@ namespace WizardMonks
         public override string Log()
         {
             return "Finding apprentice worth " + Desire.ToString("0.00");
+        }
+    }
+
+    [Serializable]
+    public class FindVisSource : ExposingAction
+    {
+        public Aura Aura { get; private set; }
+
+        public FindVisSource(Aura auraToSearch, Ability exposure, double desire) : base(exposure, desire)
+        {
+            Aura = auraToSearch;
+            Action = Activity.FindVisSource;
+        }
+
+        protected override void DoAction(Character character)
+        {
+            if (character.GetType() == typeof(Magus))
+            {
+                character.Log.Add("Searching for a vis site in aura " + Aura.Strength.ToString("0.00"));
+                Magus mage = (Magus)character;
+                // add bonus to area lore equal to casting total div 5?
+                // TODO: once spells are implemented, increase finding chances based on aura-detection spells
+                double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
+                magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+                double roll = Die.Instance.RollDouble() * 5;
+
+                // die roll will be 0-5; area lore will be between 0 and 25; aura will be 0-9, giving vis counts of 0-35
+                double visSourceFound = Math.Sqrt(roll * magicLore * Aura.Strength);
+                visSourceFound -= Aura.VisSources.Select(v => v.AnnualAmount).Sum();
+                if (visSourceFound > 1)
+                {
+                    Season seasons = DetermineSeasons(ref visSourceFound);
+                    Ability art = DetermineArt();
+                    string logMessage = art.AbilityName + " vis source of size " + visSourceFound + " found; havestable ";
+                    if ((seasons & Season.Spring) == Season.Spring)
+                    {
+                        logMessage += "Sp";
+                    }
+                    if ((seasons & Season.Summer) == Season.Summer)
+                    {
+                        logMessage += "Su";
+                    }
+                    if ((seasons & Season.Autumn) == Season.Autumn)
+                    {
+                        logMessage += "Au";
+                    }
+                    if ((seasons & Season.Winter) == Season.Winter)
+                    {
+                        logMessage += "Wi";
+                    }
+                    mage.Log.Add(logMessage);
+                    Aura.VisSources.Add(new VisSource(Aura, art, seasons, visSourceFound));
+                }
+            }
+        }
+
+        private Ability DetermineArt()
+        {
+            double artRoll = Die.Instance.RollDouble() * 15;
+            switch ((int)artRoll)
+            {
+                case 0:
+                    return MagicArts.Creo;
+                case 1:
+                    return MagicArts.Intellego;
+                case 2:
+                    return MagicArts.Muto;
+                case 3:
+                    return MagicArts.Perdo;
+                case 4:
+                    return MagicArts.Rego;
+                case 5:
+                    return MagicArts.Animal;
+                case 6:
+                    return MagicArts.Aquam;
+                case 7:
+                    return MagicArts.Auram;
+                case 8:
+                    return MagicArts.Corpus;
+                case 9:
+                    return MagicArts.Herbam;
+                case 10:
+                    return MagicArts.Ignem;
+                case 11:
+                    return MagicArts.Imaginem;
+                case 12:
+                    return MagicArts.Mentem;
+                case 13:
+                    return MagicArts.Terram;
+                default:
+                    return MagicArts.Vim;
+            }
+
+        }
+
+        private Season DetermineSeasons(ref double visSourceFound)
+        {
+            // we always want at least 1 pawn/harvest season
+            // the larger the source, the more likely multiple seasons should be
+            // let's call a rook of vis/season the max
+            int seasons = (int)(visSourceFound / (Die.Instance.RollDouble() * 10)) + 1;
+            if (seasons > 4)
+            {
+                seasons = 4;
+            }
+            visSourceFound /= seasons;
+            switch (seasons)
+            {
+                case 4:
+                    return Season.Spring | Season.Summer | Season.Autumn | Season.Winter;
+                case 1:
+                    double dieRoll = Die.Instance.RollDouble() * 4;
+                    if (dieRoll < 1) return Season.Spring;
+                    if (dieRoll < 2) return Season.Summer;
+                    if (dieRoll < 3) return Season.Autumn;
+                    return Season.Winter;
+                case 3:
+                    double dieRoll3 = Die.Instance.RollDouble() * 4;
+                    if (dieRoll3 < 1) return Season.Summer | Season.Autumn | Season.Winter;
+                    if (dieRoll3 < 2) return Season.Spring | Season.Autumn | Season.Winter;
+                    if (dieRoll3 < 3) return Season.Spring | Season.Summer | Season.Winter;
+                    return Season.Spring | Season.Summer | Season.Autumn;
+                default:
+                    double dieRoll1 = Die.Instance.RollDouble() * 4;
+                    double dieRoll2;
+                    do
+                    {
+                        dieRoll2 = Die.Instance.RollDouble() * 4;
+                    } while ((int)dieRoll2 == (int)dieRoll1);
+                    Season season;
+                    if (dieRoll1 < 1) season = Season.Spring;
+                    else if (dieRoll1 < 2) season = Season.Summer;
+                    else if (dieRoll1 < 3) season = Season.Autumn;
+                    else season = Season.Winter;
+                    if (dieRoll2 < 1) season |= Season.Spring;
+                    else if (dieRoll2 < 1) season |= Season.Summer;
+                    else if (dieRoll2 < 1) season |= Season.Autumn;
+                    else season |= Season.Winter;
+                    return season;
+            }
+        }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.FindVisSource && ((FindVisSource)action).Aura == this.Aura;
+        }
+
+        public override string Log()
+        {
+            return "Finding vis source worth " + Desire.ToString("0.00");
         }
     }
 

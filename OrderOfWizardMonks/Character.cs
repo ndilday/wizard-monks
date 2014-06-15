@@ -69,7 +69,9 @@ namespace WizardMonks
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
+        public IList<Aura> KnownAuras { get; private set; }
         public string Name { get; set; }
+        public Season CurrentSeason { get; private set; }
         public List<string> Log { get; private set; }
         public IEnumerable<IBook> Books
         {
@@ -100,6 +102,8 @@ namespace WizardMonks
             _attributes[(short)AttributeType.Presence] = new Attribute(die.RollNormal());
 
             Decrepitude = 0;
+            CurrentSeason = Season.Spring;
+            KnownAuras = new List<Aura>();
 
             _noAgingSeasons = 0;
             _baseAge = baseSeasonableAge;
@@ -302,6 +306,22 @@ namespace WizardMonks
             {
                 Age(LongevityRitual);
             }
+            switch (CurrentSeason)
+            {
+                case Season.Spring:
+                    CurrentSeason = Season.Summer;
+                    break;
+                case Season.Summer:
+                    CurrentSeason = Season.Autumn;
+                    break;
+                case Season.Autumn:
+                    CurrentSeason = Season.Winter;
+                    break;
+                case Season.Winter:
+                    CurrentSeason = Season.Spring;
+                    break;
+            }
+            ReprioritizeGoals();
         }
         #endregion
 

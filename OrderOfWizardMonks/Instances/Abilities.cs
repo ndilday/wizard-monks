@@ -16,6 +16,8 @@ namespace WizardMonks.Instances
         public static Ability Penetration { get; private set; }
         public static Ability Etiquette { get; private set; }
         public static Ability AreaLore { get; private set; }
+        public static Ability FolkLore { get; private set; }
+        public static Ability MagicLore { get; private set; }
         public static Ability Concentration { get; private set; }
         public static Ability Teaching { get; private set; }
         public static Ability Scribing { get; private set; }
@@ -38,6 +40,8 @@ namespace WizardMonks.Instances
             Concentration = new Ability(2, AbilityType.General, "Concentration");
             Teaching = new Ability(3, AbilityType.General, "Teaching");
             Scribing = new Ability(4, AbilityType.General, "Scribing");
+            FolkLore = new Ability(5, AbilityType.General, "Folk Lore");
+            MagicLore = new Ability(6, AbilityType.General, "Magic Lore");
 
             Warping = new Ability(-1, AbilityType.Arcane, "Warping");
         }
@@ -53,6 +57,8 @@ namespace WizardMonks.Instances
             yield return Finesse;
             yield return Etiquette;
             yield return AreaLore;
+            yield return FolkLore;
+            yield return MagicLore;
             yield return Concentration;
             yield return Teaching;
         }

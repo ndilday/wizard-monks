@@ -121,7 +121,10 @@ namespace SkillViewer
         {
             btnAdvance.Enabled = false;
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            //_magusArray[2].Advance();
+            //foreach (Magus mage in _magusArray)
+            //{
+            //    mage.Advance();
+            //}
             Parallel.ForEach(_magusArray.Where(m => m != null), character =>
                 {
                     _log.Add("Advancing " + character.Name);

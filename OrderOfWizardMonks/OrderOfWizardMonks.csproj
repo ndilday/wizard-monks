@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Ability.cs" />
     <Compile Include="Attribute.cs" />
+    <Compile Include="Aura.cs" />
     <Compile Include="Book.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Goal.cs" />

@@ -100,9 +100,7 @@ namespace WizardMonks.Instances
 
         public static void BuildBonisagus()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(Abilities.MagicTheory);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 10, 75);
+            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 10, 75);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
@@ -146,20 +144,14 @@ namespace WizardMonks.Instances
 
         public static void BuildCriamon()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(Abilities.MagicTheory);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 60);
+            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 60);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
             
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.AreaLore);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.AreaLore, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.ArtesLiberales);
-            goal = new AbilityScoreCondition(abilityList, 5, 40);
+            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 40);
             goals.Add(goal);
 
             Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -202,75 +194,47 @@ namespace WizardMonks.Instances
 
         public static void BuildDiedne()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Creo);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Creo, 5, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Intellego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Muto);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Perdo);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Rego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Animal);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Animal, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Aquam);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Aquam, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Corpus);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Corpus, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Herbam);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Herbam, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Ignem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Ignem, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Imaginem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Imaginem, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Mentem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Mentem, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Terram);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Terram, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Vim);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Vim, 5, 50);
             goals.Add(goal);
 
             Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -313,20 +277,14 @@ namespace WizardMonks.Instances
 
         public static void BuildFlambeau()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Ignem);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Ignem, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Penetration);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.ParmaMagica);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 50);
             goals.Add(goal);
 
             Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -369,20 +327,14 @@ namespace WizardMonks.Instances
 
         public static void BuildGuernicus()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Terram);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Terram, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.ArtesLiberales);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.MagicTheory);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 50);
             goals.Add(goal);
 
             Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -425,20 +377,14 @@ namespace WizardMonks.Instances
 
         public static void BuildJerbiton()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Imaginem);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Imaginem, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.ArtesLiberales);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Etiquette);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Etiquette, 5, 50);
             goals.Add(goal);
 
             Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -481,15 +427,11 @@ namespace WizardMonks.Instances
 
         public static void BuildMercere()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Mentem);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Mentem, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Etiquette);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Etiquette, 5, 50);
             goals.Add(goal);
 
             Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -532,40 +474,26 @@ namespace WizardMonks.Instances
 
         public static void BuildMerinita()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Herbam);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Herbam, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Animal);
-            goal = new AbilityScoreCondition(abilityList, 15, 50);
+            goal = new AbilityScoreCondition(MagicArts.Animal, 15, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Creo);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Creo, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Intellego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Muto);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Perdo);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Rego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 50);
             goals.Add(goal);
 
             Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -608,85 +536,14 @@ namespace WizardMonks.Instances
 
         public static void BuildTremere()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Creo);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            IGoal goal = new HasApprenticeCondition(50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Intellego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Muto);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Perdo);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Rego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Animal);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Aquam);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Corpus);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Herbam);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Ignem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Imaginem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Mentem);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Terram);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Vim);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Penetration);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
-            goals.Add(goal);
-
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.ParmaMagica);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 50);
             goals.Add(goal);
 
             Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -729,25 +586,17 @@ namespace WizardMonks.Instances
 
         public static void BuildTytalus()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Rego);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Rego, 20, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Mentem);
-            goal = new AbilityScoreCondition(abilityList, 10, 50);
+            goal = new AbilityScoreCondition(MagicArts.Mentem, 10, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Penetration);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(Abilities.Finesse);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.Finesse, 5, 50);
             goals.Add(goal);
 
             Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -790,30 +639,20 @@ namespace WizardMonks.Instances
 
         public static void BuildVerditius()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Intellego);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 5, 50);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 50);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Muto);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Intellego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Rego);
-            goal = new AbilityScoreCondition(abilityList, 5, 50);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 50);
             goals.Add(goal);
 
-            abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Terram);
-            goal = new AbilityScoreCondition(abilityList, 20, 50);
+            goal = new AbilityScoreCondition(MagicArts.Terram, 20, 50);
             goals.Add(goal);
 
             Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);

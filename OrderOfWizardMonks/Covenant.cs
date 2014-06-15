@@ -13,7 +13,7 @@ namespace WizardMonks
 		protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<IBook> _library;
-        public double Aura { get; set; }
+        public Aura Aura { get; private set; }
         public string Name { get; set; }
 
         public Covenant()
@@ -22,7 +22,12 @@ namespace WizardMonks
             _visSources = new Dictionary<Ability, double>();
             _visStock = new Dictionary<Ability, double>();
             _library = new List<IBook>();
-            Aura = 0;
+            Aura = null;
+        }
+
+        public Covenant(Aura aura) : this()
+        {
+            Aura = aura;
         }
 
         public void AddMagus(Magus mage)
@@ -77,7 +82,7 @@ namespace WizardMonks
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            return _visStock[visType];
+            return _visStock.ContainsKey(visType) ? _visStock[visType] : 0;
         }
         #endregion
 

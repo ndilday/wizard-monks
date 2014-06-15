@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -614,8 +614,8 @@
             // Value
             // 
             this.Value.DataPropertyName = "Value";
-            dataGridViewCellStyle1.Format = "0.00";
-            this.Value.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Format = "0.00";
+            this.Value.DefaultCellStyle = dataGridViewCellStyle2;
             this.Value.FillWeight = 15F;
             this.Value.HeaderText = "Level";
             this.Value.MaxInputLength = 2;
@@ -711,7 +711,7 @@
             // lstLog
             // 
             this.lstLog.FormattingEnabled = true;
-            this.lstLog.Location = new System.Drawing.Point(374, 51);
+            this.lstLog.Location = new System.Drawing.Point(380, 49);
             this.lstLog.Name = "lstLog";
             this.lstLog.Size = new System.Drawing.Size(281, 329);
             this.lstLog.TabIndex = 25;
@@ -720,7 +720,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 429);
+            this.ClientSize = new System.Drawing.Size(667, 387);
             this.Controls.Add(this.lstLog);
             this.Controls.Add(this.txtWarp);
             this.Controls.Add(this.label25);

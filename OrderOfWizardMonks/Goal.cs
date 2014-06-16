@@ -580,20 +580,22 @@ namespace WizardMonks
                 // determine average vis source found
                 double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
                 magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
-
-                foreach (Aura aura in mage.KnownAuras)
+                if (magicLore > 0)
                 {
-                    double visSourceFound = Math.Sqrt(2.5 * magicLore * aura.Strength);
-                    visSourceFound -= aura.VisSources.Select(v => v.AnnualAmount).Sum();
+                    foreach (Aura aura in mage.KnownAuras)
+                    {
+                        double visSourceFound = Math.Sqrt(2.5 * magicLore * aura.Strength);
+                        visSourceFound -= aura.VisSources.Select(v => v.AnnualAmount).Sum();
 
-                    // modify by chance vis will be of the proper type
-                    visSourceFound = visSourceFound * _visTypes.Count() / 15;
+                        // modify by chance vis will be of the proper type
+                        visSourceFound = visSourceFound * _visTypes.Count() / 15;
 
-                    // TODO: modify by lifelong value of source?
-                    log.Add("Looking for vis source worth " + (dueDateDesire).ToString("0.00"));
-                    alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
+                        // TODO: modify by lifelong value of source?
+                        log.Add("Looking for vis source worth " + (visSourceFound * dueDateDesire).ToString("0.00"));
+                        alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
 
-                    // TODO: consider the value of getting better at the vis search skills first?
+                        // TODO: consider the value of getting better at the vis search skills first?
+                    }
                 }
                 // consider the value of looking for a new aura
                 double areaLore = mage.GetAbility(Abilities.AreaLore).Value;

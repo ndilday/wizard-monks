@@ -64,11 +64,15 @@ namespace WizardMonks
 
         public double RemoveVis(Ability visType, double amount)
         {
+            if (amount <= 0)
+            {
+                return _visStock.ContainsKey(visType) ? _visStock[visType] : 0;
+            }
             if (!MagicArts.IsArt(visType))
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            if (_visStock[visType] < amount)
+            if(!_visStock.ContainsKey(visType) || _visStock[visType] < amount)
             {
                 throw new ArgumentException("Insufficient vis available!");
             }

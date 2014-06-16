@@ -264,15 +264,15 @@ namespace WizardMonks
                 throw new ArgumentException("Insufficient vis available!");
             }
             double covVis = Covenant.GetVis(visType);
-            if (covVis > 0 && amount > covVis)
+            if (covVis >= amount)
+            {
+                Covenant.RemoveVis(visType, amount);
+            }
+            else
             {
                 amount -= covVis;
                 Covenant.RemoveVis(visType, covVis);
                 _visStock[visType] -= amount;
-            }
-            else
-            {
-                Covenant.RemoveVis(visType, amount);
             }
             return _visStock[visType];
         }

@@ -87,6 +87,7 @@ namespace WizardMonks
         void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
         bool IsComplete(Character character);
         uint? DueDate { get; }
+        byte Tier { get; }
         double Desire { get; }
         bool DecrementDueDate();
     }
@@ -95,6 +96,7 @@ namespace WizardMonks
     public abstract class BaseGoal : IGoal
     {
         public uint? DueDate {get; private set;}
+        public byte Tier {get; private set;}
         public double Desire {get; private set;}
         public virtual bool DecrementDueDate()
         {
@@ -107,10 +109,11 @@ namespace WizardMonks
         }
         public abstract bool IsComplete(Character character);
         public abstract void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
-        public BaseGoal(double desire, uint? dueDate = null)
+        public BaseGoal(double desire, byte tier = 0, uint? dueDate = null)
         {
             DueDate = dueDate;
             Desire = desire;
+            Tier = tier;
         }
     }
 
@@ -121,13 +124,13 @@ namespace WizardMonks
         protected double _total;
         #endregion
 
-        public AbilityScoreCondition(List<Ability> abilities, double total, double desire, uint? dueDate = null) : base(desire, dueDate)
+        public AbilityScoreCondition(List<Ability> abilities, double total, double desire, byte tier = 0, uint? dueDate = null) : base(desire, tier, dueDate)
         {
             _abilities = abilities;
             _total = total;
         }
 
-        public AbilityScoreCondition(Ability ability, double total, double desire, uint? dueDate = null) : base(desire, dueDate)
+        public AbilityScoreCondition(Ability ability, double total, double desire, byte tier = 0, uint? dueDate = null) : base(desire, tier, dueDate)
         {
             _abilities = new List<Ability>();
             _abilities.Add(ability);
@@ -137,7 +140,7 @@ namespace WizardMonks
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             double remainingTotal = GetRemainingTotal(character);
-            double dueDateDesire = Desire;
+            double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -145,7 +148,6 @@ namespace WizardMonks
                     log.Add("Ability Condition failed!");
                     return;
                 }
-                dueDateDesire /= (double)DueDate;
             }
             IEnumerable<IBook> readableBooks = character.ReadableBooks;
             foreach (Ability ability in _abilities)
@@ -155,20 +157,18 @@ namespace WizardMonks
                 var topicalBooks = readableBooks.Where(b => b.Topic == ability);
                 AddReading(character, alreadyConsidered, topicalBooks, remainingTotal, dueDateDesire);
 
-                // Handle Practice
-                // For now, assume 4pt practice on everything
-                double desire = dueDateDesire * charAbility.GetValueGain(4) / remainingTotal;
-                log.Add("Practicing " + ability.AbilityName + " worth " + desire.ToString("0.00"));
-                Practice practiceAction = new Practice(ability, desire);
-                alreadyConsidered.Add(practiceAction);
-
-                if (character.GetType() == typeof(Magus))
+                // Abilities get practice, arts get vis study
+                if (!MagicArts.IsArt(ability))
+                {
+                    double desire = dueDateDesire * charAbility.GetValueGain(4) / remainingTotal;
+                    log.Add("Practicing " + ability.AbilityName + " worth " + desire.ToString("0.00"));
+                    Practice practiceAction = new Practice(ability, desire);
+                    alreadyConsidered.Add(practiceAction);
+                }
+                else if (character.GetType() == typeof(Magus))
                 {
                     Magus mage = (Magus)character;
-                    if (MagicArts.IsArt(charAbility.Ability))
-                    {
-                        HandleVisUse(mage, charAbility, remainingTotal, dueDateDesire, alreadyConsidered, log);
-                    }
+                    HandleVisUse(mage, charAbility, remainingTotal, dueDateDesire, alreadyConsidered, log);
                 }
 
                 // TODO: Learning By Training
@@ -195,7 +195,7 @@ namespace WizardMonks
                 // only try to extract the vis now if there's sufficient time to do so
                 List<Ability> visType = new List<Ability>();
                 visType.Add(charAbility.Ability);
-                VisCondition visCondition = new VisCondition(visType, visNeed - stockpile, baseDesire / 2, DueDate == null ? null : DueDate - 1);
+                VisCondition visCondition = new VisCondition(visType, visNeed - stockpile, baseDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                 visCondition.ModifyActionList(mage, alreadyConsidered, log);
             }
             
@@ -242,8 +242,8 @@ namespace WizardMonks
     {
         protected List<AttributeType> _attributes;
 
-        public CharacteristicAbilityScoreCondition(List<Ability> abilities, List<AttributeType> attributes, double total, double desire, uint? dueDate = null) :
-            base(abilities, total, desire, dueDate)
+        public CharacteristicAbilityScoreCondition(List<Ability> abilities, List<AttributeType> attributes, double total, double desire, byte tier, uint? dueDate = null) :
+            base(abilities, total, desire, tier, dueDate)
         {
             _attributes = attributes;
         }
@@ -275,10 +275,10 @@ namespace WizardMonks
     {
         private HasLabCondition _hasLabCondition;
 
-        public LabScoreGoal(List<Ability> abilities, List<AttributeType> attributes, double total, double desire, uint? dueDate = null)
-            : base(abilities, attributes, total, desire, dueDate)
+        public LabScoreGoal(List<Ability> abilities, List<AttributeType> attributes, double total, double desire, byte tier, uint? dueDate = null)
+            : base(abilities, attributes, total, desire, tier, dueDate)
         {
-            _hasLabCondition = new HasLabCondition(desire, dueDate);
+            _hasLabCondition = new HasLabCondition(desire, tier, dueDate);
         }
 
         public override bool DecrementDueDate()
@@ -349,6 +349,7 @@ namespace WizardMonks
         private AbilityScoreCondition _minScore;
 
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
         public bool DecrementDueDate()
@@ -362,20 +363,21 @@ namespace WizardMonks
             return true;
         }
 
-        public HasCovenantCondition(double value, uint? dueDate = null)
+        public HasCovenantCondition(double value, byte tier, uint? dueDate = null)
         {
             Desire = value;
             DueDate = dueDate;
+            Tier = tier;
             List<Ability> abilities = new List<Ability>();
             abilities.Add(Abilities.AreaLore);
             abilities.Add(MagicArts.Intellego);
             abilities.Add(MagicArts.Vim);
-            _minScore = new AbilityScoreCondition(abilities, 2, value, dueDate == null ? null : dueDate - 1);
+            _minScore = new AbilityScoreCondition(abilities, 2, value, tier, dueDate == null ? null : dueDate - 1);
         }
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = Desire;
+            double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -383,7 +385,7 @@ namespace WizardMonks
                     log.Add("Has Covenant Condition failed");
                     return;
                 }
-                desire /= (double)DueDate;
+                dueDateDesire /= (double)DueDate;
             }
 
             if (!_minScore.IsComplete(character))
@@ -392,21 +394,22 @@ namespace WizardMonks
             }
             else
             {
-                log.Add("Looking for an aura worth " + (desire).ToString("0.00"));
-                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+                log.Add("Looking for an aura worth " + (dueDateDesire).ToString("0.00"));
+                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
                 // consider the incremental improvement of increasing skills
-                if (desire > 0.1)
+                if (dueDateDesire > 0.1)
                 {
                     double artTotal = character.GetAbility(MagicArts.Intellego).Value + character.GetAbility(MagicArts.Vim).Value;
                     List<Ability> artHelper = new List<Ability>();
                     artHelper.Add(MagicArts.Intellego);
                     artHelper.Add(MagicArts.Vim);
-                    IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(artHelper, Desire / 10, artTotal, DueDate == null ? null : DueDate - 1);
+                    IncreaseAbilitiesHelper helper = 
+                        new IncreaseAbilitiesHelper(artHelper, Desire / 10, artTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                     helper.ModifyActionList(character, alreadyConsidered, log);
                     List<Ability> al = new List<Ability>();
                     al.Add(Abilities.AreaLore);
                     IncreaseAbilitiesHelper helper2 =
-                        new IncreaseAbilitiesHelper(al, Desire / 2, character.GetAbility(Abilities.AreaLore).Value, DueDate == null ? null : DueDate - 1);
+                        new IncreaseAbilitiesHelper(al, Desire / 2, character.GetAbility(Abilities.AreaLore).Value, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                 }
             }
         }
@@ -423,6 +426,7 @@ namespace WizardMonks
         private AbilityScoreCondition _mtCondition;
 
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
         public bool DecrementDueDate()
@@ -437,17 +441,18 @@ namespace WizardMonks
             return true;
         }
 
-        public HasLabCondition(double value, uint? dueDate = null)
+        public HasLabCondition(double value, byte tier, uint? dueDate = null)
         {
             Desire = value;
             DueDate = dueDate;
-            _hasCovenant = new HasCovenantCondition(value, dueDate == null ? null : dueDate - 2);
-            _mtCondition = new AbilityScoreCondition(Abilities.MagicTheory, 3, value, dueDate == null ? null : dueDate - 1);
+            Tier = tier;
+            _hasCovenant = new HasCovenantCondition(value, tier, dueDate == null ? null : dueDate - 2);
+            _mtCondition = new AbilityScoreCondition(Abilities.MagicTheory, 3, value, tier, dueDate == null ? null : dueDate - 1);
         }
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = Desire;
+            double desire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -490,11 +495,13 @@ namespace WizardMonks
         bool _isVimSufficient;
 
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
-        public VisCondition(List<Ability> visTypes, double total, double desire, uint? dueDate = null)
+        public VisCondition(List<Ability> visTypes, double total, double desire, byte tier, uint? dueDate = null)
         {
             DueDate = dueDate;
+            Tier = tier;
             Desire = desire;
 
             _extractArts = new List<Ability>();
@@ -505,7 +512,7 @@ namespace WizardMonks
             _total = total;
             _isVimSufficient = visTypes.Where(v => v == MagicArts.Vim).Any();
 
-            _hasLab = new HasLabCondition(desire, dueDate == null || dueDate < 2 ? null : dueDate - 1);
+            _hasLab = new HasLabCondition(desire, tier, dueDate == null || dueDate < 2 ? null : dueDate - 1);
         }
 
         public bool DecrementDueDate()
@@ -521,7 +528,7 @@ namespace WizardMonks
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double dueDateDesire = Desire;
+            double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -565,7 +572,7 @@ namespace WizardMonks
                         // the difference between the desire of starting now
                         // and the desire of starting after gaining experience
                         // is the effective value of practicing here
-                        IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractArts, Desire, labTotal, DueDate - 1);
+                        IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractArts, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
                         helper.ModifyActionList(character, alreadyConsidered, log);
                     }
                 }
@@ -586,14 +593,15 @@ namespace WizardMonks
                     {
                         double visSourceFound = Math.Sqrt(2.5 * magicLore * aura.Strength);
                         visSourceFound -= aura.VisSources.Select(v => v.AnnualAmount).Sum();
+                        if (visSourceFound > 0)
+                        {
+                            // modify by chance vis will be of the proper type
+                            visSourceFound = visSourceFound * _visTypes.Count() / 15;
 
-                        // modify by chance vis will be of the proper type
-                        visSourceFound = visSourceFound * _visTypes.Count() / 15;
-
-                        // TODO: modify by lifelong value of source?
-                        log.Add("Looking for vis source worth " + (visSourceFound * dueDateDesire).ToString("0.00"));
-                        alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
-
+                            // TODO: modify by lifelong value of source?
+                            log.Add("Looking for vis source worth " + (visSourceFound * dueDateDesire).ToString("0.00"));
+                            alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
+                        }
                         // TODO: consider the value of getting better at the vis search skills first?
                     }
                 }
@@ -632,6 +640,7 @@ namespace WizardMonks
         private Spell _spell;
 
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
         public bool DecrementDueDate()
@@ -645,9 +654,10 @@ namespace WizardMonks
             return true;
         }
 
-        public InventSpellGoal(Spell spell, double desire, uint? dueDate = null)
+        public InventSpellGoal(Spell spell, double desire, byte tier, uint? dueDate = null)
         {
             DueDate = dueDate;
+            Tier = tier;
             Desire = desire;
             _spell = spell;
             _abilitiesRequired = new List<Ability>();
@@ -667,12 +677,12 @@ namespace WizardMonks
             {
                 // TODO: throw error?
             }
-            _labScore = new LabScoreGoal(_abilitiesRequired, attributes, spell.Level, desire, labScoreDueDate);
+            _labScore = new LabScoreGoal(_abilitiesRequired, attributes, spell.Level, desire, tier, labScoreDueDate);
         }
  
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = Desire;
+            double desire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -717,7 +727,7 @@ namespace WizardMonks
                     // the difference between the desire of starting now
                     // and the desire of starting after practice
                     // is the effective value of practicing here
-                    IncreaseAbilitiesVersusLevelHelper helper = new IncreaseAbilitiesVersusLevelHelper(_abilitiesRequired, desire, extraTotal, level);
+                    IncreaseAbilitiesVersusLevelHelper helper = new IncreaseAbilitiesVersusLevelHelper(_abilitiesRequired, desire, extraTotal, level, (byte)(Tier + 1));
                     helper.ModifyActionList(character, alreadyConsidered, log);
                 }
             }
@@ -736,6 +746,7 @@ namespace WizardMonks
         private List<Ability> _artsRequired;
 
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
         public bool DecrementDueDate()
@@ -749,9 +760,10 @@ namespace WizardMonks
             return true;
         }
 
-        public LongevityRitualGoal(double desire, uint? dueDate = null)
+        public LongevityRitualGoal(double desire, byte tier, uint? dueDate = null)
         {
             DueDate = dueDate;
+            Tier = tier;
             Desire = desire;
             _abilitiesRequired = new List<Ability>();
             _abilitiesRequired.Add(MagicArts.Creo);
@@ -764,7 +776,7 @@ namespace WizardMonks
             attributes.Add(AttributeType.Intelligence);
 
             // we need a lab to create a longevity ritual
-            _hasLabCondition = new HasLabCondition(desire, dueDate == null || dueDate <= 3 ? null : dueDate - 3);
+            _hasLabCondition = new HasLabCondition(desire, tier, dueDate == null || dueDate <= 3 ? null : dueDate - 3);
         }
  
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
@@ -772,7 +784,7 @@ namespace WizardMonks
             if (character.GetType() == typeof(Magus))
             {
                 double visNeed = character.SeasonalAge / 20.0;
-                VisCondition visCondition = new VisCondition(_artsRequired, visNeed, Desire, DueDate == null ? null : DueDate - 2);
+                VisCondition visCondition = new VisCondition(_artsRequired, visNeed, Desire, Tier, DueDate == null ? null : DueDate - 1);
 
                 bool visComplete = visCondition.IsComplete(character);
                 bool labComplete = _hasLabCondition.IsComplete(character);
@@ -788,7 +800,7 @@ namespace WizardMonks
                 if (visComplete && labComplete)
                 {
                     //effectively, every five points of lab total is worth a decade of effectiveness
-                    double dueDateDesire = Desire;
+                    double dueDateDesire = Desire / (Tier + 1);
                     if (DueDate != null)
                     {
                         if (DueDate == 0)
@@ -802,7 +814,7 @@ namespace WizardMonks
                     alreadyConsidered.Add(new LongevityRitual(Abilities.MagicTheory, dueDateDesire));
                     double labTotal = ((Magus)character).GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual);
                     IncreaseAbilitiesHelper helper = 
-                        new IncreaseAbilitiesHelper(_abilitiesRequired, Desire, labTotal, DueDate == null ? null : DueDate - 1);
+                        new IncreaseAbilitiesHelper(_abilitiesRequired, Desire, labTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                     helper.ModifyActionList(character, alreadyConsidered, log);
                 }
             }
@@ -820,6 +832,7 @@ namespace WizardMonks
         AbilityScoreCondition[] _artRequirements;
         #endregion
         public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
         public double Desire { get; private set; }
 
         public bool DecrementDueDate()
@@ -839,29 +852,46 @@ namespace WizardMonks
             return true;
         }
 
-        public HasApprenticeCondition(double desire, uint? dueDate = null)
+        public HasApprenticeCondition(double desire, byte tier, uint? dueDate = null)
         {
             DueDate = dueDate;
+            Tier = tier;
             Desire = desire;
 
             // TODO: remove the magic number
             _artRequirements = new AbilityScoreCondition[15];
             uint? modifiedDueDate = dueDate == null || dueDate < 3 ? null : dueDate - 2;
-            _artRequirements[0] = new AbilityScoreCondition(MagicArts.Creo, 5, Desire, modifiedDueDate);
-            _artRequirements[1] = new AbilityScoreCondition(MagicArts.Intellego, 5, Desire, modifiedDueDate);
-            _artRequirements[2] = new AbilityScoreCondition(MagicArts.Muto, 5, Desire, modifiedDueDate);
-            _artRequirements[3] = new AbilityScoreCondition(MagicArts.Perdo, 5, Desire, modifiedDueDate);
-            _artRequirements[4] = new AbilityScoreCondition(MagicArts.Rego, 5, Desire, modifiedDueDate);
-            _artRequirements[5] = new AbilityScoreCondition(MagicArts.Animal, 5, Desire, modifiedDueDate);
-            _artRequirements[6] = new AbilityScoreCondition(MagicArts.Aquam, 5, Desire, modifiedDueDate);
-            _artRequirements[7] = new AbilityScoreCondition(MagicArts.Auram, 5, Desire, modifiedDueDate);
-            _artRequirements[8] = new AbilityScoreCondition(MagicArts.Corpus, 5, Desire, modifiedDueDate);
-            _artRequirements[9] = new AbilityScoreCondition(MagicArts.Herbam, 5, Desire, modifiedDueDate);
-            _artRequirements[10] = new AbilityScoreCondition(MagicArts.Ignem, 5, Desire, modifiedDueDate);
-            _artRequirements[11] = new AbilityScoreCondition(MagicArts.Imaginem, 5, Desire, modifiedDueDate);
-            _artRequirements[12] = new AbilityScoreCondition(MagicArts.Mentem, 5, Desire, modifiedDueDate);
-            _artRequirements[13] = new AbilityScoreCondition(MagicArts.Terram, 5, Desire, modifiedDueDate);
-            _artRequirements[14] = new AbilityScoreCondition(MagicArts.Vim, 5, Desire, modifiedDueDate);
+            byte nextTier = (byte)(tier + 1);
+            _artRequirements[0] = new AbilityScoreCondition(MagicArts.Creo, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[1] = new AbilityScoreCondition(MagicArts.Intellego, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[2] = new AbilityScoreCondition(MagicArts.Muto, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[3] = new AbilityScoreCondition(MagicArts.Perdo, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[4] = new AbilityScoreCondition(MagicArts.Rego, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[5] = new AbilityScoreCondition(MagicArts.Animal, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[6] = new AbilityScoreCondition(MagicArts.Aquam, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[7] = new AbilityScoreCondition(MagicArts.Auram, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[8] = new AbilityScoreCondition(MagicArts.Corpus, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[9] = new AbilityScoreCondition(MagicArts.Herbam, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[10] = new AbilityScoreCondition(MagicArts.Ignem, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[11] = new AbilityScoreCondition(MagicArts.Imaginem, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[12] = new AbilityScoreCondition(MagicArts.Mentem, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[13] = new AbilityScoreCondition(MagicArts.Terram, 5, Desire,
+                nextTier, modifiedDueDate);
+            _artRequirements[14] = new AbilityScoreCondition(MagicArts.Vim, 5, Desire,
+                nextTier, modifiedDueDate);
         }
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
@@ -877,7 +907,7 @@ namespace WizardMonks
             }
             if (isReady)
             {
-                double desire = Desire;
+                double desire = Desire / (Tier + 1);
                 if(DueDate != null)
                 {
                     if (DueDate == 0)
@@ -904,12 +934,14 @@ namespace WizardMonks
     {
         public double BaseDesire { get; private set; }
         public uint? BaseDueDate { get; private set; }
+        public byte BaseTier { get; private set; }
         public List<Ability> Abilities { get; private set; }
 
-        public BaseHelper(List<Ability> abilities, double baseDesire, uint? baseDueDate = null)
+        public BaseHelper(List<Ability> abilities, double baseDesire, byte tier, uint? baseDueDate = null)
         {
             Abilities = abilities;
             BaseDesire = baseDesire;
+            BaseTier = tier;
             BaseDueDate = baseDueDate;
         }
 
@@ -930,17 +962,14 @@ namespace WizardMonks
                 HandleReading(character, alreadyConsidered, topicalBooks);
 
                 // Handle Practice
-                HandlePractice(character, alreadyConsidered, log, ability);
-
-
-                // Handle Vis
-                if (character.GetType() == typeof(Magus))
+                if(!MagicArts.IsArt(ability))
+                {
+                    HandlePractice(character, alreadyConsidered, log, ability);
+                }
+                else if (character.GetType() == typeof(Magus))
                 {
                     Magus mage = (Magus)character;
-                    if (MagicArts.IsArt(charAbility.Ability))
-                    {
-                        HandleVisUse(mage, charAbility, alreadyConsidered, log);
-                    }
+                    HandleVisUse(mage, charAbility, alreadyConsidered, log);
                 }
 
                 // TODO: Learning By Training
@@ -955,7 +984,7 @@ namespace WizardMonks
             // after lots of math, the right equation is:
             // Desire * (labTotal + increase)/(labTotal + increase + level)
             double increase = character.GetAbility(ability).GetValueGain(4);
-            double desire = CalculateDesire(increase);
+            double desire = CalculateDesire(increase) / (BaseTier + 1);
             if (BaseDueDate != null)
             {
                 desire /= (double)BaseDueDate;
@@ -975,7 +1004,7 @@ namespace WizardMonks
                              book.Level ascending
                      select book).First();
                 double increase = character.GetBookLevelGain(bestBook);
-                double desire = CalculateDesire(increase);
+                double desire = CalculateDesire(increase) / (BaseTier + 1);
                 if (BaseDueDate != null)
                 {
                     desire /= (double)BaseDueDate;
@@ -992,7 +1021,7 @@ namespace WizardMonks
             double stockpile = mage.GetVisCount(magicArt.Ability);
             double visNeed = 0.5 + (magicArt.Value / 10.0);
             double increase = magicArt.GetValueGain(6);
-            double baseDesire = CalculateDesire(increase);
+            double baseDesire = CalculateDesire(increase) / (BaseTier + 1);
             if (BaseDueDate != null)
             {
                 baseDesire /= (double)BaseDueDate;
@@ -1010,7 +1039,8 @@ namespace WizardMonks
             {
                 List<Ability> visType = new List<Ability>();
                 visType.Add(magicArt.Ability);
-                VisCondition visCondition = new VisCondition(visType, visNeed - stockpile, baseDesire / 2, BaseDueDate == null ? null : BaseDueDate - 1);
+                VisCondition visCondition = 
+                    new VisCondition(visType, visNeed - stockpile, baseDesire, (byte)(BaseTier + 1), BaseDueDate == null ? null : BaseDueDate - 1);
                 visCondition.ModifyActionList(mage, alreadyConsidered, log);
             }
         }
@@ -1024,8 +1054,8 @@ namespace WizardMonks
     {
         private double _currentGain;
         private double _effectLevel;
-        public IncreaseAbilitiesVersusLevelHelper(List<Ability> abilities, double desire, double currentRate, double level, uint? dueDate = null) 
-            : base(abilities, desire, dueDate)
+        public IncreaseAbilitiesVersusLevelHelper(List<Ability> abilities, double desire, double currentRate, double level, byte tier, uint? dueDate = null) 
+            : base(abilities, desire, tier, dueDate)
         {
             _currentGain = currentRate;
             _effectLevel = level;
@@ -1044,8 +1074,8 @@ namespace WizardMonks
     class IncreaseAbilitiesHelper : BaseHelper
     {
         private double _currentTotal;
-        public IncreaseAbilitiesHelper(List<Ability> abilities, double desire, double currentTotal, uint? dueDate = null) 
-            : base(abilities, desire, dueDate)
+        public IncreaseAbilitiesHelper(List<Ability> abilities, double desire, double currentTotal, byte tier, uint? dueDate = null) 
+            : base(abilities, desire, tier, dueDate)
         {
             _currentTotal = currentTotal;
         }

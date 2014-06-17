@@ -23,9 +23,9 @@ namespace WizardMonks.Instances
             switch (goalType)
             {
                 case GoalType.FoundCovenant:
-                    return new HasCovenantCondition(desire);
+                    return new HasCovenantCondition(desire, 0);
                 case GoalType.BuildLab:
-                    return new HasLabCondition(desire);
+                    return new HasLabCondition(desire, 0);
                 default:
                     return null;
             }
@@ -33,7 +33,7 @@ namespace WizardMonks.Instances
 
         public static IGoal GenerateSpellGoal(Spell spell, double desire)
         {
-            return new InventSpellGoal(spell, desire);
+            return new InventSpellGoal(spell, desire, 0);
         }
     }
 }

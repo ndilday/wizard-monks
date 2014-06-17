@@ -457,11 +457,11 @@ namespace WizardMonks
                 // die roll will be 0-5; area lore will be between 0 and 25; aura will be 0-9, giving vis counts of 0-35
                 double visSourceFound = Math.Sqrt(roll * magicLore * Aura.Strength);
                 visSourceFound -= Aura.VisSources.Select(v => v.AnnualAmount).Sum();
-                if (visSourceFound > 1)
+                if (visSourceFound > 1.0)
                 {
                     Season seasons = DetermineSeasons(ref visSourceFound);
                     Ability art = DetermineArt();
-                    string logMessage = art.AbilityName + " vis source of size " + visSourceFound + " found; havestable ";
+                    string logMessage = art.AbilityName + " vis source of size " + visSourceFound.ToString("0.00") + " found: ";
                     if ((seasons & Season.Spring) == Season.Spring)
                     {
                         logMessage += "Sp";
@@ -528,7 +528,21 @@ namespace WizardMonks
             // we always want at least 1 pawn/harvest season
             // the larger the source, the more likely multiple seasons should be
             // let's call a rook of vis/season the max
-            int seasons = (int)(visSourceFound / (Die.Instance.RollDouble() * 10)) + 1;
+            // TODO: make this math better
+            int seasons;
+            if (visSourceFound <= 4)
+            {
+                seasons = (int)(visSourceFound * Die.Instance.RollDouble()) + 1;
+            }
+            else if (visSourceFound > 10)
+            {
+                seasons = 4;
+            }
+            else
+            {
+                seasons = (int)(visSourceFound / (Die.Instance.RollDouble() * 10)) + 1;
+            }
+
             if (seasons > 4)
             {
                 seasons = 4;
@@ -723,7 +737,10 @@ namespace WizardMonks
             mage.UseVis(Art, visNeeded);
 
             // add experience
-            charAbility.AddExperience(Die.Instance.RollExplodingDie());
+            ushort roll = Die.Instance.RollExplodingDie();
+            character.Log.Add("Studying " + visNeeded.ToString("0.00") + " pawns of " + Art.AbilityName + " vis.");
+            character.Log.Add("Gainewd " + roll + " experience.");
+            charAbility.AddExperience(roll);
         }
 
         public override bool Matches(IAction action)

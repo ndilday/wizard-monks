@@ -536,7 +536,7 @@ namespace WizardMonks.Instances
 
         public static void BuildTremere()
         {
-            IGoal goal = new HasApprenticeCondition(50);
+            IGoal goal = new HasApprenticeCondition(50, 0);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 

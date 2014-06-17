@@ -62,7 +62,7 @@ namespace WizardMonks
         {
             uint seasonsLeftToAging = 140 - SeasonalAge;
 
-            _goals.Add(new LongevityRitualGoal(100, seasonsLeftToAging));
+            _goals.Add(new LongevityRitualGoal(100, 0, seasonsLeftToAging));
         }
         #endregion
 

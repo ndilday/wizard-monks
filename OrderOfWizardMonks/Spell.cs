@@ -48,6 +48,7 @@ namespace WizardMonks
         public Target Target { get; private set; }
         public byte Base { get; private set; }
         public byte Modifiers { get; private set; }
+        public bool IsRitual { get; private set; }
 
         public SpellArts RequisiteTechniques { get; private set; }
         public SpellArts RequisiteForms { get; private set; }
@@ -68,13 +69,15 @@ namespace WizardMonks
             }
         }
 
-        public Spell(ArtPair artPair, Range range, Duration duration, Target target, byte baseLevel, string name)
+        public Spell(ArtPair artPair, Range range, Duration duration, Target target, byte baseLevel, byte modifiers, bool isRitual, string name)
         {
             BaseArts = artPair;
             Range = range;
             Duration = duration;
             Target = target;
             Base = baseLevel;
+            Modifiers = modifiers;
+            IsRitual = isRitual;
             Name = name;
         }
     }

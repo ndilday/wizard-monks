@@ -253,6 +253,32 @@ namespace WizardMonks
             return total;
         }
 
+        public VisDesires GetVisDesires()
+        {
+            VisDesire[] desires = new VisDesire[15];
+            desires[0] = new VisDesire(MagicArts.Creo, this.GetVisCount(MagicArts.Creo));
+            desires[1] = new VisDesire(MagicArts.Intellego, this.GetVisCount(MagicArts.Intellego));
+            desires[2] = new VisDesire(MagicArts.Muto, this.GetVisCount(MagicArts.Muto));
+            desires[3] = new VisDesire(MagicArts.Perdo, this.GetVisCount(MagicArts.Perdo));
+            desires[4] = new VisDesire(MagicArts.Rego, this.GetVisCount(MagicArts.Rego));
+            desires[5] = new VisDesire(MagicArts.Animal, this.GetVisCount(MagicArts.Animal));
+            desires[6] = new VisDesire(MagicArts.Aquam, this.GetVisCount(MagicArts.Aquam));
+            desires[7] = new VisDesire(MagicArts.Auram, this.GetVisCount(MagicArts.Auram));
+            desires[8] = new VisDesire(MagicArts.Corpus, this.GetVisCount(MagicArts.Corpus));
+            desires[9] = new VisDesire(MagicArts.Herbam, this.GetVisCount(MagicArts.Herbam));
+            desires[10] = new VisDesire(MagicArts.Ignem, this.GetVisCount(MagicArts.Ignem));
+            desires[11] = new VisDesire(MagicArts.Imaginem, this.GetVisCount(MagicArts.Imaginem));
+            desires[12] = new VisDesire(MagicArts.Mentem, this.GetVisCount(MagicArts.Mentem));
+            desires[13] = new VisDesire(MagicArts.Terram, this.GetVisCount(MagicArts.Terram));
+            desires[14] = new VisDesire(MagicArts.Vim, this.GetVisCount(MagicArts.Vim));
+            foreach (IGoal goal in _goals)
+            {
+                goal.ModifyVisNeeds(desires);
+            }
+
+            return new VisDesires(this, desires);
+        }
+
         public double UseVis(Ability visType, double amount)
         {
             if (!MagicArts.IsArt(visType))

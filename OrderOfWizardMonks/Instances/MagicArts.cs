@@ -30,16 +30,16 @@ namespace WizardMonks.Instances
             Muto = new Ability(302, AbilityType.Art, "Muto");
             Perdo = new Ability(303, AbilityType.Art, "Perdo");
             Rego = new Ability(304, AbilityType.Art, "Rego");
-            Animal = new Ability(350, AbilityType.Art, "Animal");
-            Aquam = new Ability(351, AbilityType.Art, "Aquam");
-            Auram = new Ability(352, AbilityType.Art, "Auram");
-            Corpus = new Ability(353, AbilityType.Art, "Corpus");
-            Herbam = new Ability(354, AbilityType.Art, "Herbam");
-            Ignem = new Ability(355, AbilityType.Art, "Ignem");
-            Imaginem = new Ability(356, AbilityType.Art, "Imaginem");
-            Mentem = new Ability(357, AbilityType.Art, "Mentem");
-            Terram = new Ability(358, AbilityType.Art, "Terram");
-            Vim = new Ability(359, AbilityType.Art, "Vim");
+            Animal = new Ability(305, AbilityType.Art, "Animal");
+            Aquam = new Ability(306, AbilityType.Art, "Aquam");
+            Auram = new Ability(307, AbilityType.Art, "Auram");
+            Corpus = new Ability(308, AbilityType.Art, "Corpus");
+            Herbam = new Ability(309, AbilityType.Art, "Herbam");
+            Ignem = new Ability(310, AbilityType.Art, "Ignem");
+            Imaginem = new Ability(311, AbilityType.Art, "Imaginem");
+            Mentem = new Ability(312, AbilityType.Art, "Mentem");
+            Terram = new Ability(313, AbilityType.Art, "Terram");
+            Vim = new Ability(314, AbilityType.Art, "Vim");
         }
 
         public static bool IsTechnique(Ability ability)

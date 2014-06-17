@@ -532,7 +532,7 @@ namespace WizardMonks
             int seasons;
             if (visSourceFound <= 4)
             {
-                seasons = (int)(visSourceFound * Die.Instance.RollDouble()) + 1;
+                seasons = (int)(visSourceFound * Die.Instance.RollDouble());
             }
             else if (visSourceFound > 10)
             {
@@ -542,8 +542,11 @@ namespace WizardMonks
             {
                 seasons = (int)(visSourceFound / (Die.Instance.RollDouble() * 10)) + 1;
             }
-
-            if (seasons > 4)
+            if (seasons < 1)
+            {
+                seasons = 1;
+            }
+            else if (seasons > 4)
             {
                 seasons = 4;
             }

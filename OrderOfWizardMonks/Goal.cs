@@ -84,12 +84,14 @@ namespace WizardMonks
 
     public interface IGoal
     {
-        void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
-        bool IsComplete(Character character);
         uint? DueDate { get; }
         byte Tier { get; }
         double Desire { get; }
+
+        void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
+        bool IsComplete(Character character);
         bool DecrementDueDate();
+        void ModifyVisNeeds(VisDesire[] desires);
     }
 
     #region Basic (1-tier) Goals
@@ -109,6 +111,7 @@ namespace WizardMonks
         }
         public abstract bool IsComplete(Character character);
         public abstract void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
+        public abstract void ModifyVisNeeds(Character character, VisDesire[] desires);
         public BaseGoal(double desire, byte tier = 0, uint? dueDate = null)
         {
             DueDate = dueDate;
@@ -137,6 +140,24 @@ namespace WizardMonks
             _total = total;
         }
 
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            if (!IsComplete(character))
+            {
+                foreach (Ability ability in _abilities)
+                {
+                    if (MagicArts.IsArt(ability))
+                    {
+                        CharacterAbilityBase charAbility = character.GetAbility(ability);
+                        double experienceNeeded = charAbility.GetExperienceUntilLevel(_total);
+                        double visPer = 0.5 + (charAbility.Value + _total) / 20.0;
+                        double visNeeded = experienceNeeded * visPer / 6;
+                        desires[charAbility.Ability.AbilityId % 300].Quantity += visNeeded;
+                    }
+                }
+            }
+        }
+
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             double remainingTotal = GetRemainingTotal(character);
@@ -149,30 +170,33 @@ namespace WizardMonks
                     return;
                 }
             }
-            IEnumerable<IBook> readableBooks = character.ReadableBooks;
-            foreach (Ability ability in _abilities)
+            if (dueDateDesire > 0.1)
             {
-                // Handle Reading
-                CharacterAbilityBase charAbility = character.GetAbility(ability);
-                var topicalBooks = readableBooks.Where(b => b.Topic == ability);
-                AddReading(character, alreadyConsidered, topicalBooks, remainingTotal, dueDateDesire);
-
-                // Abilities get practice, arts get vis study
-                if (!MagicArts.IsArt(ability))
+                IEnumerable<IBook> readableBooks = character.ReadableBooks;
+                foreach (Ability ability in _abilities)
                 {
-                    double desire = dueDateDesire * charAbility.GetValueGain(4) / remainingTotal;
-                    log.Add("Practicing " + ability.AbilityName + " worth " + desire.ToString("0.00"));
-                    Practice practiceAction = new Practice(ability, desire);
-                    alreadyConsidered.Add(practiceAction);
-                }
-                else if (character.GetType() == typeof(Magus))
-                {
-                    Magus mage = (Magus)character;
-                    HandleVisUse(mage, charAbility, remainingTotal, dueDateDesire, alreadyConsidered, log);
-                }
+                    // Handle Reading
+                    CharacterAbilityBase charAbility = character.GetAbility(ability);
+                    var topicalBooks = readableBooks.Where(b => b.Topic == ability);
+                    AddReading(character, alreadyConsidered, topicalBooks, remainingTotal, dueDateDesire);
 
-                // TODO: Learning By Training
-                // TODO: Learning by Teaching
+                    // Abilities get practice, arts get vis study
+                    if (!MagicArts.IsArt(ability))
+                    {
+                        double desire = dueDateDesire * charAbility.GetValueGain(4) / remainingTotal;
+                        log.Add("Practicing " + ability.AbilityName + " worth " + desire.ToString("0.00"));
+                        Practice practiceAction = new Practice(ability, desire);
+                        alreadyConsidered.Add(practiceAction);
+                    }
+                    else if (character.GetType() == typeof(Magus))
+                    {
+                        Magus mage = (Magus)character;
+                        HandleVisUse(mage, charAbility, remainingTotal, dueDateDesire, alreadyConsidered, log);
+                    }
+
+                    // TODO: Learning By Training
+                    // TODO: Learning by Teaching
+                }
             }
         }
 
@@ -363,6 +387,8 @@ namespace WizardMonks
             return true;
         }
 
+        public void ModifyVisNeeds(Character character, VisDesire[] desires){}
+
         public HasCovenantCondition(double value, byte tier, uint? dueDate = null)
         {
             Desire = value;
@@ -388,11 +414,11 @@ namespace WizardMonks
                 dueDateDesire /= (double)DueDate;
             }
 
-            if (!_minScore.IsComplete(character))
+            if (!_minScore.IsComplete(character) && dueDateDesire > 0.1)
             {
                 _minScore.ModifyActionList(character, alreadyConsidered, log);
             }
-            else
+            else if(dueDateDesire > 0.1)
             {
                 log.Add("Looking for an aura worth " + (dueDateDesire).ToString("0.00"));
                 alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
@@ -441,6 +467,8 @@ namespace WizardMonks
             return true;
         }
 
+        public void ModifyVisNeeds(Character character, VisDesire[] desires) { }
+
         public HasLabCondition(double value, byte tier, uint? dueDate = null)
         {
             Desire = value;
@@ -452,7 +480,7 @@ namespace WizardMonks
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = Desire / (Tier + 1);
+            double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -460,22 +488,25 @@ namespace WizardMonks
                     log.Add("Not enough time to build lab");
                     return;
                 }
-                desire /= (double)DueDate;
+                dueDateDesire /= (double)DueDate;
             }
-            bool hasCovenant = _hasCovenant.IsComplete(character);
-            bool hasMT = _mtCondition.IsComplete(character);
-            if (!hasCovenant)
+            if (dueDateDesire > 0.1)
             {
-                _hasCovenant.ModifyActionList(character, alreadyConsidered, log);
-            }
-            if (!hasMT)
-            {
-                _mtCondition.ModifyActionList(character, alreadyConsidered, log);
-            }
-            if(hasCovenant && hasMT)
-            {
-                log.Add("Setting up a lab worth " + (desire).ToString("0.00"));
-                alreadyConsidered.Add(new BuildLaboratory(Abilities.MagicTheory, desire));
+                bool hasCovenant = _hasCovenant.IsComplete(character);
+                bool hasMT = _mtCondition.IsComplete(character);
+                if (!hasCovenant)
+                {
+                    _hasCovenant.ModifyActionList(character, alreadyConsidered, log);
+                }
+                if (!hasMT)
+                {
+                    _mtCondition.ModifyActionList(character, alreadyConsidered, log);
+                }
+                if (hasCovenant && hasMT)
+                {
+                    log.Add("Setting up a lab worth " + (dueDateDesire).ToString("0.00"));
+                    alreadyConsidered.Add(new BuildLaboratory(Abilities.MagicTheory, dueDateDesire));
+                }
             }
         }
 
@@ -526,6 +557,14 @@ namespace WizardMonks
             return true;
         }
 
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            foreach (Ability ability in _visTypes)
+            {
+                desires[ability.AbilityId % 300].Quantity += _total;
+            }
+        }
+
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             double dueDateDesire = Desire / (Tier + 1);
@@ -538,82 +577,98 @@ namespace WizardMonks
                 }
                 dueDateDesire /= (double)DueDate;
             }
-            Magus mage = (Magus)character;
-            bool hasLab = _hasLab.IsComplete(character);
-
-            if (_isVimSufficient)
+            if (dueDateDesire > 0.1)
             {
-                // determine value of extracting vis from aura
+                Magus mage = (Magus)character;
+                bool hasLab = _hasLab.IsComplete(character);
 
-                if (!hasLab)
+                if (_isVimSufficient)
                 {
-                    // if we don't have a lab, we need a lab
-                    _hasLab.ModifyActionList(character, alreadyConsidered, log);
-                }
-                else
-                {
-                    // Now we need to consider both the value of starting to distill vis now
-                    // and the value of instead learning more before doing so.
-                    double labTotal = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
-                    double currentRate = labTotal / 10;
-                    if (currentRate >= _total)
+                    // determine value of extracting vis from aura
+
+                    if (!hasLab)
                     {
-                        // we can get what we want in one season, go ahead and do it
-                        log.Add("Extracting vis worth " + (dueDateDesire).ToString("0.00"));
-                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, dueDateDesire));
+                        // if we don't have a lab, we need a lab
+                        _hasLab.ModifyActionList(character, alreadyConsidered, log);
                     }
                     else
                     {
-                        // we are in the multi-season-to-fulfill scenario
-                        double desire = currentRate * dueDateDesire / _total;
-                        log.Add("Extracting vis worth " + (desire).ToString("0.00"));
-                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, desire));
-
-                        // the difference between the desire of starting now
-                        // and the desire of starting after gaining experience
-                        // is the effective value of practicing here
-                        IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractArts, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
-                        helper.ModifyActionList(character, alreadyConsidered, log);
-                    }
-                }
-            }
-            // determine current rate of automatic accrual of vis of the desired type
-            double annualGain = 
-                mage.KnownAuras.SelectMany( a => a.VisSources).Where(v => _visTypes.Contains(v.Art)).Select(v => v.AnnualAmount).Sum();
-            if (annualGain == 0 || (DueDate != null && (annualGain * DueDate / 4) < _total))
-            {
-                // we're not getting vis fast enough, so we need to find a new source
-                // consider the value of searching for new vis sites in current auras
-                // determine average vis source found
-                double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
-                magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
-                if (magicLore > 0)
-                {
-                    foreach (Aura aura in mage.KnownAuras)
-                    {
-                        double visSourceFound = Math.Sqrt(2.5 * magicLore * aura.Strength);
-                        visSourceFound -= aura.VisSources.Select(v => v.AnnualAmount).Sum();
-                        if (visSourceFound > 0)
+                        // Now we need to consider both the value of starting to distill vis now
+                        // and the value of instead learning more before doing so.
+                        double labTotal = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+                        double currentRate = labTotal / 10;
+                        if (currentRate >= _total)
                         {
-                            // modify by chance vis will be of the proper type
-                            visSourceFound = visSourceFound * _visTypes.Count() / 15;
-
-                            // TODO: modify by lifelong value of source?
-                            log.Add("Looking for vis source worth " + (visSourceFound * dueDateDesire).ToString("0.00"));
-                            alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
+                            // we can get what we want in one season, go ahead and do it
+                            log.Add("Extracting vis worth " + (dueDateDesire).ToString("0.00"));
+                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, dueDateDesire));
                         }
-                        // TODO: consider the value of getting better at the vis search skills first?
+                        else
+                        {
+                            // we are in the multi-season-to-fulfill scenario
+                            double desire = currentRate * dueDateDesire / _total;
+                            log.Add("Extracting vis worth " + (desire).ToString("0.00"));
+                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, desire));
+
+                            // the difference between the desire of starting now
+                            // and the desire of starting after gaining experience
+                            // is the effective value of practicing here
+                            IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractArts, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
+                            helper.ModifyActionList(character, alreadyConsidered, log);
+                        }
                     }
                 }
-                // consider the value of looking for a new aura
-                double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
-                areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+                // determine current rate of automatic accrual of vis of the desired type
+                double annualGain =
+                    mage.KnownAuras.SelectMany(a => a.VisSources).Where(v => _visTypes.Contains(v.Art)).Select(v => v.AnnualAmount).Sum();
+                if (annualGain == 0 || (DueDate != null && (annualGain * DueDate / 4) < _total))
+                {
+                    // we're not getting vis fast enough, so we need to find a new source
+                    // consider the value of searching for new vis sites in current auras
+                    // determine average vis source found
+                    double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
+                    magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+                    if (magicLore > 0)
+                    {
+                        foreach (Aura aura in mage.KnownAuras)
+                        {
+                            double visSourceFound = Math.Sqrt(2.5 * magicLore * aura.Strength);
+                            visSourceFound -= aura.VisSources.Select(v => v.AnnualAmount).Sum();
+                            if (visSourceFound > 0)
+                            {
+                                // modify by chance vis will be of the proper type
+                                visSourceFound = visSourceFound * _visTypes.Count() / 15;
 
-                double auraFound = Math.Sqrt(2.5 * areaLore / (mage.KnownAuras.Count() + 1));
-                double visFromAura = Math.Sqrt(2.5 * magicLore * auraFound) * _visTypes.Count() / 15;
-                dueDateDesire = dueDateDesire * visFromAura / 2;
-                log.Add("Looking for aura (to find a vis source in) worth " + (dueDateDesire).ToString("0.00"));
-                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
+                                // TODO: modify by lifelong value of source?
+                                log.Add("Looking for vis source worth " + (visSourceFound * dueDateDesire).ToString("0.00"));
+                                alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, visSourceFound * dueDateDesire));
+                            }
+                            // TODO: consider the value of getting better at the vis search skills first?
+                        }
+                    }
+                    else
+                    {
+                        // consider increasing skills to be able to find vis
+                        List<Ability> visSourceAbilities = new List<Ability>();
+                        visSourceAbilities.Add(MagicArts.Intellego);
+                        visSourceAbilities.Add(MagicArts.Vim);
+                        visSourceAbilities.Add(Abilities.MagicLore);
+                        AbilityScoreCondition condition =
+                            new AbilityScoreCondition(visSourceAbilities, 2, dueDateDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                        condition.ModifyActionList(character, alreadyConsidered, log);
+                    }
+                    // consider the value of looking for a new aura
+                    double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+                    areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+                    if (areaLore > 0 && magicLore > 0)
+                    {
+                        double auraFound = Math.Sqrt(2.5 * areaLore / (mage.KnownAuras.Count() + 1));
+                        double visFromAura = Math.Sqrt(2.5 * magicLore * auraFound) * _visTypes.Count() / 15;
+                        dueDateDesire = dueDateDesire * visFromAura / 2;
+                        log.Add("Looking for aura (to find a vis source in) worth " + (dueDateDesire).ToString("0.00"));
+                        alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
+                    }
+                }
             }
         }
 
@@ -679,10 +734,15 @@ namespace WizardMonks
             }
             _labScore = new LabScoreGoal(_abilitiesRequired, attributes, spell.Level, desire, tier, labScoreDueDate);
         }
- 
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            _labScore.ModifyVisNeeds(character, desires);
+        }
+
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = Desire / (Tier + 1);
+            double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
                 if (DueDate == 0)
@@ -690,45 +750,47 @@ namespace WizardMonks
                     log.Add("Not enough time to invent spell");
                     return;
                 }
-                desire /= (double)DueDate;
+                dueDateDesire /= (double)DueDate;
             }
-
-            if (!_labScore.IsComplete(character))
+            if (dueDateDesire > 0.1)
             {
-                _labScore.ModifyActionList(character, alreadyConsidered, log);
-            }
-            else
-            {
-                double level = _spell.Level;
-                // Now we need to consider both the value of starting to invent the spell now
-                // and the value of instead learning more before doing so.
-                // As a first pass, value the portion of the spell inventable this season
-                Magus mage = (Magus)character;
-                double extraTotal = mage.GetLabTotal(_spell.BaseArts, Activity.InventSpells) - level;
-                if (extraTotal <= 0)
+                if (!_labScore.IsComplete(character))
                 {
-                    // This should not happen
                     _labScore.ModifyActionList(character, alreadyConsidered, log);
-                }
-                if (extraTotal >= level)
-                {
-                    // there's no reason to consider adding to abilities for this spell
-                    // TODO: eventually, we should consider the fact that the extra learning
-                    // could allow one to learn more spells in a season
-                    log.Add("Inventing this spell worth " + desire.ToString("0.00"));
-                    alreadyConsidered.Add(new InventSpell(_spell, Abilities.MagicTheory, desire));
                 }
                 else
                 {
-                    // we are in the multi-season-to-invent scenario
-                    desire = extraTotal * desire / level;
-                    alreadyConsidered.Add(new InventSpell(_spell, Abilities.MagicTheory, desire));
+                    double level = _spell.Level;
+                    // Now we need to consider both the value of starting to invent the spell now
+                    // and the value of instead learning more before doing so.
+                    // As a first pass, value the portion of the spell inventable this season
+                    Magus mage = (Magus)character;
+                    double extraTotal = mage.GetLabTotal(_spell.BaseArts, Activity.InventSpells) - level;
+                    if (extraTotal <= 0)
+                    {
+                        // This should not happen
+                        _labScore.ModifyActionList(character, alreadyConsidered, log);
+                    }
+                    if (extraTotal >= level)
+                    {
+                        // there's no reason to consider adding to abilities for this spell
+                        // TODO: eventually, we should consider the fact that the extra learning
+                        // could allow one to learn more spells in a season
+                        log.Add("Inventing this spell worth " + dueDateDesire.ToString("0.00"));
+                        alreadyConsidered.Add(new InventSpell(_spell, Abilities.MagicTheory, dueDateDesire));
+                    }
+                    else
+                    {
+                        // we are in the multi-season-to-invent scenario
+                        dueDateDesire = extraTotal * dueDateDesire / level;
+                        alreadyConsidered.Add(new InventSpell(_spell, Abilities.MagicTheory, dueDateDesire));
 
-                    // the difference between the desire of starting now
-                    // and the desire of starting after practice
-                    // is the effective value of practicing here
-                    IncreaseAbilitiesVersusLevelHelper helper = new IncreaseAbilitiesVersusLevelHelper(_abilitiesRequired, desire, extraTotal, level, (byte)(Tier + 1));
-                    helper.ModifyActionList(character, alreadyConsidered, log);
+                        // the difference between the desire of starting now
+                        // and the desire of starting after practice
+                        // is the effective value of practicing here
+                        IncreaseAbilitiesVersusLevelHelper helper = new IncreaseAbilitiesVersusLevelHelper(_abilitiesRequired, dueDateDesire, extraTotal, level, (byte)(Tier + 1));
+                        helper.ModifyActionList(character, alreadyConsidered, log);
+                    }
                 }
             }
         }
@@ -778,7 +840,14 @@ namespace WizardMonks
             // we need a lab to create a longevity ritual
             _hasLabCondition = new HasLabCondition(desire, tier, dueDate == null || dueDate <= 3 ? null : dueDate - 3);
         }
- 
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            double visNeed = character.SeasonalAge / 20.0;
+            VisCondition visCondition = new VisCondition(_artsRequired, visNeed, Desire, Tier, DueDate == null ? null : DueDate - 1);
+            visCondition.ModifyVisNeeds(character, desires);
+        }
+
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             if (character.GetType() == typeof(Magus))
@@ -850,6 +919,14 @@ namespace WizardMonks
                 return DueDate != 0;
             }
             return true;
+        }
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            foreach (AbilityScoreCondition artCondition in _artRequirements)
+            {
+                artCondition.ModifyVisNeeds(character, desires);
+            }
         }
 
         public HasApprenticeCondition(double desire, byte tier, uint? dueDate = null)

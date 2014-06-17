@@ -91,7 +91,7 @@ namespace WizardMonks
         void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
         bool IsComplete(Character character);
         bool DecrementDueDate();
-        void ModifyVisNeeds(VisDesire[] desires);
+        void ModifyVisNeeds(Character character, VisDesire[] desires);
     }
 
     #region Basic (1-tier) Goals
@@ -140,7 +140,7 @@ namespace WizardMonks
             _total = total;
         }
 
-        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        public override void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
             if (!IsComplete(character))
             {

@@ -273,7 +273,7 @@ namespace WizardMonks
             desires[14] = new VisDesire(MagicArts.Vim, this.GetVisCount(MagicArts.Vim));
             foreach (IGoal goal in _goals)
             {
-                goal.ModifyVisNeeds(desires);
+                goal.ModifyVisNeeds(this, desires);
             }
 
             return new VisDesires(this, desires);

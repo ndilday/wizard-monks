@@ -40,8 +40,24 @@ namespace WizardMonks
         }
     }
 
-    public class BookDesires
+    public class BookDesire
     {
+        public Ability Ability { get; private set; }
+        public double MinimumLevel { get; private set; }
+    }
+
+    public class CharacterDesires
+    {
+        VisDesire[] _visDesires;
+        Dictionary<Ability, BookDesire> _bookDesires;
+        Character _character;
+
+        public CharacterDesires(Character character, VisDesire[] visDesires, IEnumerable<BookDesire> booksDesired)
+        {
+            _character = character;
+            _visDesires = visDesires;
+            _bookDesires = booksDesired.ToDictionary(l => l.Ability);
+        }
     }
 
     public static class Economy

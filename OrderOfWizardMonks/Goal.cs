@@ -18,8 +18,8 @@ namespace WizardMonks
                 {
                     // TODO: it should probably be an error case for a goal to still be here
                     // for now, ignore
-                    //List<string> dummy = new List<string>();
-                    goal.ModifyActionList(this, actions, Log);
+                    List<string> dummy = new List<string>();
+                    goal.ModifyActionList(this, actions, dummy);
                 }
             }
             Log.AddRange(actions.Log());
@@ -92,6 +92,7 @@ namespace WizardMonks
         bool IsComplete(Character character);
         bool DecrementDueDate();
         void ModifyVisNeeds(Character character, VisDesire[] desires);
+        IList<BookDesire> GetBookNeeds(Character character);
     }
 
     #region Basic (1-tier) Goals
@@ -112,6 +113,7 @@ namespace WizardMonks
         public abstract bool IsComplete(Character character);
         public abstract void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
         public abstract void ModifyVisNeeds(Character character, VisDesire[] desires);
+        public abstract IList<BookDesire> GetBookNeeds(Character character);
         public BaseGoal(double desire, byte tier = 0, uint? dueDate = null)
         {
             DueDate = dueDate;
@@ -156,6 +158,25 @@ namespace WizardMonks
                     }
                 }
             }
+        }
+
+        public override IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if(IsComplete(character))
+            {
+                return null;
+            }
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            double abilityCount = _abilities.Count;
+            foreach (Ability ability in _abilities)
+            {
+                // as a first pass at figuring out how big of a book to require,
+                // start by taking the distance between the current skill and the target
+                // total and divide by the number of skills involved
+                double minLevel = (_total - character.GetAbility(ability).Value) / abilityCount;
+                bookDesires.Add(new BookDesire(ability, minLevel));
+            }
+            return bookDesires;
         }
 
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
@@ -387,7 +408,22 @@ namespace WizardMonks
             return true;
         }
 
-        public void ModifyVisNeeds(Character character, VisDesire[] desires){}
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            if (!_minScore.IsComplete(character))
+            {
+                _minScore.ModifyVisNeeds(character, desires);
+            }
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if (!_minScore.IsComplete(character))
+            {
+                return _minScore.GetBookNeeds(character);
+            }
+            return null;
+        }
 
         public HasCovenantCondition(double value, byte tier, uint? dueDate = null)
         {
@@ -467,7 +503,44 @@ namespace WizardMonks
             return true;
         }
 
-        public void ModifyVisNeeds(Character character, VisDesire[] desires) { }
+        public void ModifyVisNeeds(Character character, VisDesire[] desires) 
+        {
+            if (!_hasCovenant.IsComplete(character))
+            {
+                _hasCovenant.ModifyVisNeeds(character, desires);
+            }
+            if (!_mtCondition.IsComplete(character))
+            {
+                _mtCondition.ModifyVisNeeds(character, desires);
+            }
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if(!IsComplete(character))
+            {
+                List<BookDesire> bookDesires = new List<BookDesire>();
+                IList<BookDesire> bookNeeds;
+                if (!_hasCovenant.IsComplete(character))
+                {
+                    bookNeeds = _hasCovenant.GetBookNeeds(character);
+                    if (bookNeeds != null)
+                    {
+                        bookDesires.AddRange(bookNeeds);
+                    }
+                }
+                if (!_mtCondition.IsComplete(character))
+                {
+                    bookNeeds = _mtCondition.GetBookNeeds(character);
+                    if (bookNeeds != null)
+                    {
+                        bookDesires.AddRange(bookNeeds);
+                    }
+                }
+                return bookDesires;
+            }
+            return null;
+        }
 
         public HasLabCondition(double value, byte tier, uint? dueDate = null)
         {
@@ -521,7 +594,7 @@ namespace WizardMonks
         HasLabCondition _hasLab;
 
         List<Ability> _visTypes;
-        List<Ability> _extractArts;
+        List<Ability> _extractAbilities;
         double _total;
         bool _isVimSufficient;
 
@@ -535,10 +608,10 @@ namespace WizardMonks
             Tier = tier;
             Desire = desire;
 
-            _extractArts = new List<Ability>();
-            _extractArts.Add(MagicArts.Creo);
-            _extractArts.Add(MagicArts.Vim);
-            _extractArts.Add(Abilities.MagicTheory);
+            _extractAbilities = new List<Ability>();
+            _extractAbilities.Add(MagicArts.Creo);
+            _extractAbilities.Add(MagicArts.Vim);
+            _extractAbilities.Add(Abilities.MagicTheory);
             _visTypes = visTypes;
             _total = total;
             _isVimSufficient = visTypes.Where(v => v == MagicArts.Vim).Any();
@@ -559,10 +632,35 @@ namespace WizardMonks
 
         public void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
+            if (!_hasLab.IsComplete(character))
+            {
+                _hasLab.ModifyVisNeeds(character, desires);
+            }
             foreach (Ability ability in _visTypes)
             {
                 desires[ability.AbilityId % 300].Quantity += _total;
             }
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            if (!_hasLab.IsComplete(character))
+            {
+                var bookNeeds = _hasLab.GetBookNeeds(character);
+                if (bookNeeds != null)
+                {
+                    bookDesires.AddRange(bookNeeds);
+                }
+            }
+            if (_isVimSufficient && !IsComplete(character))
+            {
+                foreach (Ability ability in _extractAbilities)
+                {
+                    bookDesires.Add(new BookDesire(ability, character.GetAbility(ability).Value));
+                }
+            }
+            return bookDesires;
         }
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
@@ -613,7 +711,7 @@ namespace WizardMonks
                             // the difference between the desire of starting now
                             // and the desire of starting after gaining experience
                             // is the effective value of practicing here
-                            IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractArts, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
+                            IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
                             helper.ModifyActionList(character, alreadyConsidered, log);
                         }
                     }
@@ -740,6 +838,11 @@ namespace WizardMonks
             _labScore.ModifyVisNeeds(character, desires);
         }
 
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            return _labScore.GetBookNeeds(character);
+        }
+
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             double dueDateDesire = Desire / (Tier + 1);
@@ -848,6 +951,31 @@ namespace WizardMonks
             visCondition.ModifyVisNeeds(character, desires);
         }
 
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if(!IsComplete(character))
+            {
+                List<BookDesire> booksDesired = new List<BookDesire>();
+                var bookNeeds = _hasLabCondition.GetBookNeeds(character);
+                if (bookNeeds != null)
+                {
+                    booksDesired.AddRange(bookNeeds);
+                }
+                double visNeed = character.SeasonalAge / 20.0;
+                VisCondition visCondition = new VisCondition(_artsRequired, visNeed, Desire, Tier, DueDate == null ? null : DueDate - 1);
+                if (!visCondition.IsComplete(character))
+                {
+                    bookNeeds = visCondition.GetBookNeeds(character);
+                    if (bookNeeds != null)
+                    {
+                        booksDesired.AddRange(bookNeeds);
+                    }
+                }
+                return booksDesired;
+            }
+            return null;
+        }
+
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             if (character.GetType() == typeof(Magus))
@@ -923,10 +1051,31 @@ namespace WizardMonks
 
         public void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
-            foreach (AbilityScoreCondition artCondition in _artRequirements)
+            if (!IsComplete(character))
             {
-                artCondition.ModifyVisNeeds(character, desires);
+                foreach (AbilityScoreCondition artCondition in _artRequirements)
+                {
+                    artCondition.ModifyVisNeeds(character, desires);
+                }
             }
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if (!IsComplete(character))
+            {
+                List<BookDesire> bookDesires = new List<BookDesire>();
+                foreach (AbilityScoreCondition artCondition in _artRequirements)
+                {
+                    var bookNeeds = artCondition.GetBookNeeds(character);
+                    if (bookNeeds != null)
+                    {
+                        bookDesires.AddRange(bookNeeds);
+                    }
+                }
+                return bookDesires;
+            }
+            return null;
         }
 
         public HasApprenticeCondition(double desire, byte tier, uint? dueDate = null)

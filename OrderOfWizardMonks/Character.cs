@@ -328,7 +328,12 @@ namespace WizardMonks
         #region Book Functions
         public virtual bool ValidToRead(IBook book)
         {
-            return book.Author != this && !this._booksRead.Contains(book);
+            return book.Author != this && (!this._booksRead.Contains(book) || (book.Level != 1000 && GetAbility(book.Topic).Value < book.Level));
+        }
+
+        public virtual IEnumerable<IBook> GetUnneededBooksFromCollection()
+        {
+            return _booksOwned.Where(b => b.Author == this || (_booksRead.Contains(b) && b.Level == 1000) || (b.Level != 1000 && GetAbility(b.Topic).Value >= b.Level));
         }
 
         public virtual void AddBookToCollection(IBook book)
@@ -375,7 +380,7 @@ namespace WizardMonks
             
             double expValue = charAbility.GetExperienceUntilLevel(book.Level);
             double bookSeasons = expValue / book.Quality;
-            return RateSeasonalExperienceGain(book.Topic, book.Quality) / bookSeasons;
+            return RateSeasonalExperienceGain(book.Topic, book.Quality) * bookSeasons;
         }
 
         public virtual void ReadBook(IBook book)
@@ -610,6 +615,10 @@ namespace WizardMonks
         /// <returns>the season equivalence of this gain</returns>
         protected virtual double RateSeasonalExperienceGain(Ability ability, double gain)
         {
+            if (MagicArts.IsArt(ability))
+            {
+                return 0;
+            }
             return gain / 4;
         }
         #endregion

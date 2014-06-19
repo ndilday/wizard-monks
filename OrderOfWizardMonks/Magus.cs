@@ -27,6 +27,7 @@ namespace WizardMonks
         private Spell _partialSpell;
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
+        private MagusTradingDesires _tradeDesires;
         #endregion
 
         #region Public Properties
@@ -183,6 +184,25 @@ namespace WizardMonks
                 return base.RateSummaAgainstBestBook(bestBook, ability);
             }
         }
+
+        private List<BookDesire> GetBookDesires()
+        {
+            if (GetAbility(_writingAbility).Value >= 1.0 && GetAbility(_writingLanguage).Value >= 4.0)
+            {
+                List<BookDesire> bookDesires = new List<BookDesire>();
+                IList<BookDesire> bookNeeds;
+                foreach (IGoal goal in _goals)
+                {
+                    bookNeeds = goal.GetBookNeeds(this);
+                    if (bookNeeds != null)
+                    {
+                        bookDesires.AddRange(bookNeeds);
+                    }
+                }
+                return bookDesires;
+            }
+            return new List<BookDesire>();
+        }
         #endregion
 
         #region Goal/Preference Functions
@@ -197,33 +217,127 @@ namespace WizardMonks
         /// <returns>the vis equivalence of this gain</returns>
         protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
-            double distillVisRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+            if (!MagicArts.IsArt(ability))
+            {
+                return base.RateSeasonalExperienceGain(ability, gain);
+            }
+            double baseDistillVisRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+            double distillVisRate = baseDistillVisRate;
             if (MagicArts.IsTechnique(ability))
             {
-                distillVisRate /= 4;
+                distillVisRate /= 4.0;
             }
             else if (MagicArts.IsForm(ability) && ability != MagicArts.Vim)
             {
-                distillVisRate /= 2;
+                distillVisRate /= 2.0;
             }
 
             CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsedPerStudySeason = 0.5 + (charAbility.Value / 10.0);
+            double visUsedPerStudySeason = 0.5 + ((charAbility.Value + (charAbility.GetValueGain(gain)/2)) / 10.0);
             // the gain per season depends on how the character views vis
-            double visNeeded = gain * visUsedPerStudySeason;
+            double studySeasons = gain / 6.0;
+            double visNeeded = studySeasons * visUsedPerStudySeason;
             // compare to the number of seasons we would need to extract the vis
             // plus the number of seasons we would need to study the extracted vis
-            // this effectively means that a gain's base value is twice its vis cost
             double extractTime = visNeeded / distillVisRate;
-            // exposure should get rated according to the visUse of the preferred exposure choice
-            // rather than the visUse of the base ability
-            double extractVisUsePer = (GetAbility(Abilities.MagicTheory).Value / 10.0) + 0.5;
-            double visValueOfExposure = extractTime * 2 * extractVisUsePer;
-            return (2 * visNeeded) - visValueOfExposure;
+            double totalVisEquivalent = (extractTime + studySeasons) * baseDistillVisRate;
+
+            // credit back the value of the exposure gained in the process of distilling
+            double exposureGained = 2.0 * extractTime;
+            double exposureSeasonsOfVis = exposureGained / 6.0;
+            CharacterAbilityBase vim = GetAbility(MagicArts.Vim);
+            CharacterAbilityBase creo = GetAbility(MagicArts.Creo);
+            CharacterAbilityBase exposureAbility = creo.Value < vim.Value ? creo : vim;
+            double visValueOfExposure = 0.5 + ((exposureAbility.Value + (exposureAbility.GetValueGain(exposureGained)/2)) / 10.0) * exposureSeasonsOfVis;
+            return totalVisEquivalent - visValueOfExposure;
         }
 
+        protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
+        {
+            List<BookForTrade> list = new List<BookForTrade>();
+            double distillRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+            foreach (IBook book in books)
+            {
+                if (book.Level == 1000)
+                {
+                    list.Add(new BookForTrade(book, distillRate));
+                }
+                else
+                {
+                    double writeRate = GetAbility(_writingLanguage).Value + _attributes[(int)AttributeType.Communication].Value;
+                    double seasons = book.Level / writeRate;
+                    if (!MagicArts.IsArt(book.Topic))
+                    {
+                        seasons *= 5;
+                    }
+                    list.Add(new BookForTrade(book, distillRate * seasons));
+                }
+            }
+            return list;
+        }
+        
         public override void ReprioritizeGoals()
         {
+        }
+        
+        public MagusTradingDesires GetTradingDesires()
+        {
+            _tradeDesires = new MagusTradingDesires(
+                this,
+                GetVisDesires(),
+                GetBookDesires().Distinct(),
+                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection())
+            );
+            return _tradeDesires;
+        }
+
+        public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
+        {
+            List<VisTradeOffer> offers = new List<VisTradeOffer>();
+            foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
+            {
+                if (tradeDesires.Mage == this)
+                {
+                    continue;
+                }
+                var offersGenerated = _tradeDesires.GenerateVisOffers(tradeDesires);
+                if (offersGenerated != null)
+                {
+                    offers.AddRange(offersGenerated);
+                }
+            }
+            // now we have to determine which offers to accept
+            // as a first pass at an algorithm, 
+            // we'll sort according to amount of vis needed, 
+            // and attempt to fulfill trades on the vis type we need the most of
+
+            // the front of the desires list should be the type we most want
+            // the front of the stocks list should be what we most want to give up in trade
+            var prioritizedVisDesires = _tradeDesires.VisDesires.Where(v => v.Quantity > 0).OrderByDescending(v => v.Quantity);
+            var prioritizedVisStocks = _tradeDesires.VisDesires.Where(v => v.Quantity < 0).OrderBy(v => v.Quantity);
+            foreach (VisDesire desire in prioritizedVisDesires)
+            {
+                foreach (VisDesire stock in prioritizedVisStocks)
+                {
+                    var bestOffers = offers.Where(o => o.Bid.Art == stock.Art && o.Ask.Art == desire.Art).OrderBy(o => o.Ask.Quantity);
+                    if (bestOffers.Any())
+                    {
+                        foreach (VisTradeOffer offer in bestOffers)
+                        {
+                            if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
+                            {
+                                Log.Add("Executing vis trade with " + offer.Mage.Name);
+                                Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
+                                Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                                offer.Execute();
+                                GainVis(offer.Ask.Art, offer.Ask.Quantity);
+                                UseVis(offer.Bid.Art, offer.Bid.Quantity);
+                                offers.Remove(offer);
+                            }
+                        }
+                    }
+                }
+            }
         }
         #endregion
 
@@ -253,30 +367,31 @@ namespace WizardMonks
             return total;
         }
 
-        public VisDesires GetVisDesires()
+        private VisDesire[] GetVisDesires()
         {
+            // start by making all of the character's vis stockpiles available
             VisDesire[] desires = new VisDesire[15];
-            desires[0] = new VisDesire(MagicArts.Creo, this.GetVisCount(MagicArts.Creo));
-            desires[1] = new VisDesire(MagicArts.Intellego, this.GetVisCount(MagicArts.Intellego));
-            desires[2] = new VisDesire(MagicArts.Muto, this.GetVisCount(MagicArts.Muto));
-            desires[3] = new VisDesire(MagicArts.Perdo, this.GetVisCount(MagicArts.Perdo));
-            desires[4] = new VisDesire(MagicArts.Rego, this.GetVisCount(MagicArts.Rego));
-            desires[5] = new VisDesire(MagicArts.Animal, this.GetVisCount(MagicArts.Animal));
-            desires[6] = new VisDesire(MagicArts.Aquam, this.GetVisCount(MagicArts.Aquam));
-            desires[7] = new VisDesire(MagicArts.Auram, this.GetVisCount(MagicArts.Auram));
-            desires[8] = new VisDesire(MagicArts.Corpus, this.GetVisCount(MagicArts.Corpus));
-            desires[9] = new VisDesire(MagicArts.Herbam, this.GetVisCount(MagicArts.Herbam));
-            desires[10] = new VisDesire(MagicArts.Ignem, this.GetVisCount(MagicArts.Ignem));
-            desires[11] = new VisDesire(MagicArts.Imaginem, this.GetVisCount(MagicArts.Imaginem));
-            desires[12] = new VisDesire(MagicArts.Mentem, this.GetVisCount(MagicArts.Mentem));
-            desires[13] = new VisDesire(MagicArts.Terram, this.GetVisCount(MagicArts.Terram));
-            desires[14] = new VisDesire(MagicArts.Vim, this.GetVisCount(MagicArts.Vim));
+            desires[0] = new VisDesire(MagicArts.Creo, -this.GetVisCount(MagicArts.Creo));
+            desires[1] = new VisDesire(MagicArts.Intellego, -this.GetVisCount(MagicArts.Intellego));
+            desires[2] = new VisDesire(MagicArts.Muto, -this.GetVisCount(MagicArts.Muto));
+            desires[3] = new VisDesire(MagicArts.Perdo, -this.GetVisCount(MagicArts.Perdo));
+            desires[4] = new VisDesire(MagicArts.Rego, -this.GetVisCount(MagicArts.Rego));
+            desires[5] = new VisDesire(MagicArts.Animal, -this.GetVisCount(MagicArts.Animal));
+            desires[6] = new VisDesire(MagicArts.Aquam, -this.GetVisCount(MagicArts.Aquam));
+            desires[7] = new VisDesire(MagicArts.Auram, -this.GetVisCount(MagicArts.Auram));
+            desires[8] = new VisDesire(MagicArts.Corpus, -this.GetVisCount(MagicArts.Corpus));
+            desires[9] = new VisDesire(MagicArts.Herbam, -this.GetVisCount(MagicArts.Herbam));
+            desires[10] = new VisDesire(MagicArts.Ignem, -this.GetVisCount(MagicArts.Ignem));
+            desires[11] = new VisDesire(MagicArts.Imaginem, -this.GetVisCount(MagicArts.Imaginem));
+            desires[12] = new VisDesire(MagicArts.Mentem, -this.GetVisCount(MagicArts.Mentem));
+            desires[13] = new VisDesire(MagicArts.Terram, -this.GetVisCount(MagicArts.Terram));
+            desires[14] = new VisDesire(MagicArts.Vim, -this.GetVisCount(MagicArts.Vim));
             foreach (IGoal goal in _goals)
             {
                 goal.ModifyVisNeeds(this, desires);
             }
 
-            return new VisDesires(this, desires);
+            return desires;
         }
 
         public double UseVis(Ability visType, double amount)
@@ -299,6 +414,23 @@ namespace WizardMonks
                 amount -= covVis;
                 Covenant.RemoveVis(visType, covVis);
                 _visStock[visType] -= amount;
+            }
+            return _visStock[visType];
+        }
+
+        public double GainVis(Ability visType, double amount)
+        {
+            if (!MagicArts.IsArt(visType))
+            {
+                throw new ArgumentException("Only magic arts have vis!");
+            }
+            if (_visStock.ContainsKey(visType))
+            {
+                _visStock[visType] += amount;
+            }
+            else
+            {
+                _visStock[visType] = amount;
             }
             return _visStock[visType];
         }

@@ -125,9 +125,9 @@ namespace SkillViewer
             //{
             //    mage.Advance();
             //}
+            _log.Add("Advancing Season");
             Parallel.ForEach(_magusArray.Where(m => m != null), character =>
                 {
-                    _log.Add("Advancing " + character.Name);
                     Task reportProgressTask = Task.Factory.StartNew(() =>
                         {
                             lstAdvance.DataSource = null;
@@ -137,7 +137,6 @@ namespace SkillViewer
                         TaskCreationOptions.None,
                         uiScheduler);
                     character.Advance();
-                    _log.Add("Done advancing " + character.Name);
                     reportProgressTask = Task.Factory.StartNew(() =>
                     {
                         lstAdvance.DataSource = null;
@@ -147,7 +146,16 @@ namespace SkillViewer
                         TaskCreationOptions.None,
                         uiScheduler);
                 } );
-
+            _log.Add("Done Advancing Season");
+            _log.Add("Considering vis trades");
+            var magiDesires = _magusArray.Where(m => m != null).Select(m => m.GetTradingDesires());
+            foreach (Magus mage in _magusArray)
+            {
+                if (mage == null) continue;
+                mage.EvaluateTradingDesires(magiDesires);
+                magiDesires = magiDesires.Where(d => d.Mage != mage);
+            }
+            _log.Add("Done considering vis trades");
             btnAdvance.Enabled = true;
         }
     }

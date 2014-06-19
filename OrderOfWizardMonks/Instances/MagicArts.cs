@@ -176,25 +176,25 @@ namespace WizardMonks.Instances
                     return perdo;
                 case 304:
                     return rego;
-                case 350:
+                case 305:
                     return animal;
-                case 351:
+                case 306:
                     return aquam;
-                case 352:
+                case 307:
                     return auram;
-                case 353:
+                case 308:
                     return corpus;
-                case 354:
+                case 309:
                     return herbam;
-                case 355:
+                case 310:
                     return ignem;
-                case 356:
+                case 311:
                     return imaginem;
-                case 357:
+                case 312:
                     return mentem;
-                case 358:
+                case 313:
                     return terram;
-                case 359:
+                case 314:
                     return vim;
                 default:
                     return null;

@@ -86,23 +86,15 @@ namespace WizardMonks
 
     public class BookTradeOffer
     {
+        public Magus Mage { get; private set; }
         public Ability VisArt { get; private set; }
         public double VisQuantity { get; private set; }
-        public IBook BookOffered { get; private set; }
         public IBook BookDesired { get; private set; }
-        public BookTradeOffer(Ability art, double quantity, IBook bookDesired)
+        public BookTradeOffer(Magus mage, Ability art, double quantity, IBook bookDesired)
         {
+            Mage = mage;
             VisArt = art;
             VisQuantity = quantity;
-            BookOffered = null;
-            BookDesired = bookDesired;
-        }
-
-        public BookTradeOffer(IBook bookOffered, IBook bookDesired)
-        {
-            VisArt = null;
-            VisQuantity = 0;
-            BookOffered = bookOffered;
             BookDesired = bookDesired;
         }
     }
@@ -130,8 +122,9 @@ namespace WizardMonks
             // do we want to try book for book trades?
         }
 
-        public IList<BookTradeOffer> GenerateBookOffers(MagusTradingDesires otherDesires)
+        public IList<BookTradeOffer> GenerateBuyBookOffers(MagusTradingDesires otherDesires)
         {
+            List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
             if (BookDesires.Any() && otherDesires.BooksForTrade.Any())
             {
                 // they have books, we want books
@@ -141,15 +134,51 @@ namespace WizardMonks
                     if (BookDesires.ContainsKey(bookForTrade.Book.Topic) && BookDesires[bookForTrade.Book.Topic].MinimumLevel < bookForTrade.Book.Level)
                     {
                         // evaluate the value of the book to us
-                        Mage.RateLifetimeBookValue(bookForTrade.Book);
+                        double bookVisValue = Mage.RateLifetimeBookValue(bookForTrade.Book);
+                        // TODO: improve pricing mechanics
+                        double price = bookVisValue + bookForTrade.MinimumPrice / 2;
+                        for (int i = 0; i < 15; i++)
+                        {
+                            if (-(VisDesires[i].Quantity) >= price && otherDesires.VisDesires[i].Quantity >= price)
+                            {
+                                // we can offer this sort of vis for the book
+                                bookTradeOffers.Add(new BookTradeOffer(otherDesires.Mage, VisDesires[i].Art, price, bookForTrade.Book));
+                            }
+                        }
                     }
                 }
             }
+            return bookTradeOffers;
+        }
+
+        public IList<BookTradeOffer> GenerateSellBookOffers(MagusTradingDesires otherDesires)
+        {
+            List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
             if (BooksForTrade.Any() && otherDesires.BookDesires.Any())
             {
                 // we have books, they want books
+                foreach (BookForTrade bookForTrade in BooksForTrade)
+                {
+                    // if we're interested in the topic of this book and it's of sufficient level
+                    if (otherDesires.BookDesires.ContainsKey(bookForTrade.Book.Topic) && 
+                        otherDesires.BookDesires[bookForTrade.Book.Topic].MinimumLevel < bookForTrade.Book.Level)
+                    {
+                        // evaluate the value of the book to them
+                        double bookVisValue = otherDesires.Mage.RateLifetimeBookValue(bookForTrade.Book);
+                        // TODO: improve pricing mechanics
+                        double price = bookVisValue + bookForTrade.MinimumPrice / 2;
+                        for (int i = 0; i < 15; i++)
+                        {
+                            if (-(otherDesires.VisDesires[i].Quantity) >= price && VisDesires[i].Quantity >= price)
+                            {
+                                // we can offer this sort of vis for the book
+                                bookTradeOffers.Add(new BookTradeOffer(otherDesires.Mage, VisDesires[i].Art, price, bookForTrade.Book));
+                            }
+                        }
+                    }
+                }
             }
-            return new List<BookTradeOffer>();
+            return bookTradeOffers;
         }
 
         private IList<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)

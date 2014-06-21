@@ -294,16 +294,31 @@ namespace WizardMonks
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
             List<VisTradeOffer> offers = new List<VisTradeOffer>();
+            List<BookTradeOffer> buyBookOffers = new List<BookTradeOffer>();
+            List<BookTradeOffer> sellBookOffers = new List<BookTradeOffer>();
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)
                 {
                     continue;
                 }
-                var offersGenerated = _tradeDesires.GenerateVisOffers(tradeDesires);
-                if (offersGenerated != null)
+
+                var bookBuyOffers = _tradeDesires.GenerateBuyBookOffers(tradeDesires);
+                if (bookBuyOffers != null)
                 {
-                    offers.AddRange(offersGenerated);
+                    buyBookOffers.AddRange(bookBuyOffers);
+                }
+
+                var bookSellOffers = _tradeDesires.GenerateSellBookOffers(tradeDesires);
+                if (bookSellOffers != null)
+                {
+                    sellBookOffers.AddRange(bookSellOffers);
+                }
+
+                var visOffersGenerated = _tradeDesires.GenerateVisOffers(tradeDesires);
+                if (visOffersGenerated != null)
+                {
+                    offers.AddRange(visOffersGenerated);
                 }
             }
             // now we have to determine which offers to accept

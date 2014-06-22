@@ -252,6 +252,7 @@ namespace WizardMonks
 
         public override int GetTractatiiLimit()
         {
+            if (Value < 2) return 0;
             return (int)Math.Floor(Value);
         }
     }

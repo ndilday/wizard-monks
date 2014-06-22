@@ -88,7 +88,7 @@ namespace WizardMonks
 
         public string Log()
         {
-            throw new NotImplementedException();
+            return "Reading " + Book.Title + " worth " + Desire.ToString("0.00");
         }
     }
 
@@ -235,18 +235,21 @@ namespace WizardMonks
     {
         public Ability Topic { get; private set; }
         public double Level { get; private set; }
+        public string Name { get; private set; }
 
-        public Writing(Ability topic, Ability exposure, double level, double desire)
+        public Writing(Ability topic, string name, Ability exposure, double level, double desire)
             : base(exposure, desire)
         {
             Topic = topic;
             Level = level;
             Action = Activity.WriteBook;
+            Name = name;
         }
 
         protected override void DoAction(Character character)
         {
-            character.WriteBook(Topic, Exposure, Level);
+            IBook book = character.WriteBook(Topic, Name, Exposure, Level);
+            character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.00"));
         }
 
         public override bool Matches(IAction action)

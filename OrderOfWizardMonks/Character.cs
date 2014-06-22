@@ -84,7 +84,8 @@ namespace WizardMonks
         {
             get
             {
-                return _booksOwned.Where(b => b.Author != this && b.Level > this.GetAbility(b.Topic).Value);
+                return _booksOwned.Where(b => b.Author != this && 
+                    ((b.Level == 1000 && !_booksRead.Contains(b)) || (b.Level != 1000 && b.Level > this.GetAbility(b.Topic).Value)));
             }
         }
         #endregion
@@ -341,6 +342,11 @@ namespace WizardMonks
             _booksOwned.Add(book);
         }
 
+        public virtual void RemoveBookFromCollection(IBook book)
+        {
+            _booksOwned.Remove(book);
+        }
+
         public virtual IEnumerable<IBook> GetBooksFromCollection(Ability ability)
         {
             return _booksOwned.Where(b => b.Topic == ability).OrderBy(b => b.Quality);
@@ -385,9 +391,10 @@ namespace WizardMonks
 
         public virtual void ReadBook(IBook book)
         {
+            Log.Add("Reading " + book.Title);
             CharacterAbilityBase ability = GetAbility(book.Topic);
             bool previouslyRead = _booksRead.Contains(book);
-            if (!previouslyRead || ability.Value < book.Level)
+            if (!previouslyRead || (book.Level != 1000 && ability.Value < book.Level))
             {
                 ability.AddExperience(book.Quality, book.Level);
             }
@@ -399,10 +406,10 @@ namespace WizardMonks
 
         public bool CanWriteTractatus(CharacterAbilityBase charAbility)
         {
-            return charAbility.GetTractatiiLimit() > _booksWritten.Where(b => b.Topic == charAbility.Ability && b.Level == 0).Count();
+            return charAbility.GetTractatiiLimit() > GetTractatiiWrittenOnTopic(charAbility.Ability);
         }
 
-        public IBook WriteBook(Ability topic, Ability exposureAbility, double desiredLevel = 0)
+        public IBook WriteBook(Ability topic, string name, Ability exposureAbility, double desiredLevel = 0)
         {
             // grant exposure experience
             List<Ability> abilityList = new List<Ability>(_writingAbilities);
@@ -410,15 +417,15 @@ namespace WizardMonks
             GetAbility(exposureAbility).AddExperience(2);
             
             // TODO: When should books moved from the owned list to the covenant library?
-            if (desiredLevel == 0)
+            if (desiredLevel == 1000)
             {
-                Tractatus t = WriteTractatus(topic);
+                Tractatus t = WriteTractatus(topic, name);
                 _booksOwned.Add(t);
                 return t;
             }
             else
             {
-                Summa s = WriteSumma(topic, desiredLevel);
+                Summa s = WriteSumma(topic, name, desiredLevel);
                 if (s != null)
                 {
                     _booksOwned.Add(s);
@@ -427,13 +434,14 @@ namespace WizardMonks
             }
         }
 
-        protected Tractatus WriteTractatus(Ability topic)
+        protected Tractatus WriteTractatus(Ability topic, string name)
         {
             Tractatus t = new Tractatus
             {
                 Author = this,
-                Quality = this.GetAttribute(AttributeType.Communication).Value + 3,
-                Topic = topic
+                Quality = this.GetAttribute(AttributeType.Communication).Value + 6,
+                Topic = topic,
+                Title = name
             };
             _booksWritten.Add(t);
             return t;
@@ -447,11 +455,11 @@ namespace WizardMonks
         /// <param name="topic"></param>
         /// <param name="desiredLevel"></param>
         /// <returns>the summa if it is completed, null otherwise</returns>
-        protected Summa WriteSumma(Ability topic, double desiredLevel)
+        protected Summa WriteSumma(Ability topic, string name, double desiredLevel)
         {
             Summa s;
             CharacterAbilityBase ability = GetAbility(topic);
-            Summa previousWork = _incompleteBooks.Where(b => b.Topic == topic && b.Level == desiredLevel).FirstOrDefault();
+            Summa previousWork = _incompleteBooks.Where(b => b.Title == name).FirstOrDefault();
             if (previousWork == null)
             {
                 double difference = (ability.Value / 2) - desiredLevel;
@@ -464,6 +472,7 @@ namespace WizardMonks
                     Author = this,
                     Level = desiredLevel,
                     Topic = topic,
+                    Title = name,
                     Quality = MagicArts.IsArt(ability.Ability) ?
                         this.GetAttribute(AttributeType.Communication).Value + difference + 6 :
                         this.GetAttribute(AttributeType.Communication).Value + (difference * 3) + 6
@@ -602,6 +611,16 @@ namespace WizardMonks
                 Book = t,
                 PerceivedValue = RateLifetimeBookValue(t)
             };
+        }
+
+        public bool HasWrittenBookWithTitle(string title)
+        {
+            return _booksWritten.Where(b => b.Title == title).Any();
+        }
+
+        public ushort GetTractatiiWrittenOnTopic(Ability topic)
+        {
+            return (ushort)_booksWritten.Where(b => b.Topic == topic && b.Level == 1000).Count();
         }
         #endregion
 

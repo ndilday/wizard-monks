@@ -28,6 +28,8 @@ namespace WizardMonks
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
         private MagusTradingDesires _tradeDesires;
+        //private List<WritingGoal> _summaGoals;
+        private List<TractatusGoal> _tractatusGoals;
         #endregion
 
         #region Public Properties
@@ -49,6 +51,7 @@ namespace WizardMonks
             Laboratory = null;
             _visStock = new Dictionary<Ability, double>();
             SpellList = new List<Spell>();
+            _tractatusGoals = new List<TractatusGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
             foreach (Ability art in MagicArts.GetEnumerator())
@@ -63,7 +66,7 @@ namespace WizardMonks
         {
             uint seasonsLeftToAging = 140 - SeasonalAge;
 
-            _goals.Add(new LongevityRitualGoal(100, 0, seasonsLeftToAging));
+            _goals.Add(new LongevityRitualGoal(this, 0, seasonsLeftToAging));
         }
         #endregion
 
@@ -280,6 +283,27 @@ namespace WizardMonks
         {
         }
         
+        private void AddWritingGoals(MagusTradingDesires tradingDesires)
+        {
+            foreach (BookDesire bookDesire in tradingDesires.BookDesires.Values)
+            {
+                CharacterAbilityBase charAbility = GetAbility(bookDesire.Ability);
+                if (!_tractatusGoals.Where(t => !t.IsComplete(this) && t.Topic == bookDesire.Ability).Any())
+                {
+                    // add tractatus goal to both goal list and writing goal list
+                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
+                    string name = Name + " " + bookDesire.Ability.AbilityName + " T" + previouslyWrittenCount.ToString();
+                    TractatusGoal tractGoal = new TractatusGoal(bookDesire.Ability, name, previouslyWrittenCount);
+                    _tractatusGoals.Add(tractGoal);
+                    _goals.Add(tractGoal);
+                }
+                if (charAbility.Value > bookDesire.CurrentLevel / 2.0)
+                {
+                    // add summa goal to both goal list and writing goal list
+                }
+            }
+        }
+
         public MagusTradingDesires GetTradingDesires()
         {
             _tradeDesires = new MagusTradingDesires(
@@ -294,14 +318,20 @@ namespace WizardMonks
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
             List<VisTradeOffer> offers = new List<VisTradeOffer>();
-            List<BookTradeOffer> buyBookOffers = new List<BookTradeOffer>();
-            List<BookTradeOffer> sellBookOffers = new List<BookTradeOffer>();
+            List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
+            List<BookVisOffer> buyBookOffers = new List<BookVisOffer>();
+            List<BookVisOffer> sellBookOffers = new List<BookVisOffer>();
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)
                 {
                     continue;
                 }
+
+                AddWritingGoals(tradeDesires);
+
+                var bookTrades = _tradeDesires.GenerateBookTradeOffers(tradeDesires);
+                bookTradeOffers.AddRange(bookTrades);
 
                 var bookBuyOffers = _tradeDesires.GenerateBuyBookOffers(tradeDesires);
                 if (bookBuyOffers != null)
@@ -321,6 +351,14 @@ namespace WizardMonks
                     offers.AddRange(visOffersGenerated);
                 }
             }
+
+            ProcessVisOffers(offers);
+            ProcessBookOffers(bookTradeOffers, buyBookOffers, sellBookOffers);
+            // figure out book for book
+        }
+
+        private void ProcessVisOffers(List<VisTradeOffer> offers)
+        {
             // now we have to determine which offers to accept
             // as a first pass at an algorithm, 
             // we'll sort according to amount of vis needed, 
@@ -351,6 +389,65 @@ namespace WizardMonks
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private void ProcessBookOffers(IEnumerable<BookTradeOffer> bookTradeOffers, IEnumerable<BookVisOffer> bookBuys, IEnumerable<BookVisOffer> bookSales)
+        {
+            var trades = bookTradeOffers.OrderBy(bto => bto.BookDesired.Quality);
+            while (trades.Any())
+            {
+                var tradeOffer = trades.First();
+                if (GetBooksFromCollection(tradeOffer.BookOffered.Topic).Contains(tradeOffer.BookOffered) &&
+                   tradeOffer.Mage.GetBooksFromCollection(tradeOffer.BookDesired.Topic).Contains(tradeOffer.BookDesired))
+                {
+                    Log.Add("Trading " + tradeOffer.BookOffered.Title + " to " + tradeOffer.Mage.Name);
+                    Log.Add("For " + tradeOffer.BookDesired.Title);
+                    AddBookToCollection(tradeOffer.BookDesired);
+                    tradeOffer.Mage.RemoveBookFromCollection(tradeOffer.BookDesired);
+                    RemoveBookFromCollection(tradeOffer.BookOffered);
+                    tradeOffer.Mage.AddBookToCollection(tradeOffer.BookOffered);
+                    bookSales = bookSales.Where(b => b.BookDesired != tradeOffer.BookOffered);
+                    bookBuys = bookBuys.Where(b => b.BookDesired != tradeOffer.BookDesired);
+                    trades = trades.Where(bto => bto.BookDesired != tradeOffer.BookDesired &&
+                                                 bto.BookOffered != tradeOffer.BookDesired)
+                                   .OrderBy(bto => bto.BookDesired.Quality);
+                }
+                else
+                {
+                    trades = trades.Where(t => t != tradeOffer).OrderBy(bto => bto.BookDesired.Quality);
+                }
+            }
+
+            var sales = bookSales.OrderBy(bto => bto.VisQuantity);
+            while (sales.Any() )
+            {
+                var sellOffer = sales.First();
+                if (sellOffer.Mage.GetVisCount(sellOffer.VisArt) >= sellOffer.VisQuantity)
+                {
+                    Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.Mage.Name);
+                    Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
+                    sellOffer.Mage.AddBookToCollection(sellOffer.BookDesired);
+                    RemoveBookFromCollection(sellOffer.BookDesired);
+                    sellOffer.Mage.UseVis(sellOffer.VisArt, sellOffer.VisQuantity);
+                    GainVis(sellOffer.VisArt, sellOffer.VisQuantity);
+                }
+                sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
+            }
+
+            var buys = bookSales.OrderBy(bto => bto.BookDesired.Quality);
+            while (buys.Any())
+            {
+                var buyOffer = buys.First();
+                if (GetVisCount(buyOffer.VisArt) >= buyOffer.VisQuantity)
+                {
+                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.Mage.Name);
+                    Log.Add("for " + buyOffer.VisQuantity.ToString("0.00") + " pawns of " + buyOffer.VisArt.AbilityName + " vis");
+                    buyOffer.Mage.RemoveBookFromCollection(buyOffer.BookDesired);
+                    AddBookToCollection(buyOffer.BookDesired);
+                    buyOffer.Mage.GainVis(buyOffer.VisArt, buyOffer.VisQuantity);
+                    UseVis(buyOffer.VisArt, buyOffer.VisQuantity);
                 }
             }
         }

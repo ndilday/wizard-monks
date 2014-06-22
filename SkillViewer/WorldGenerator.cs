@@ -147,7 +147,7 @@ namespace SkillViewer
                         uiScheduler);
                 } );
             _log.Add("Done Advancing Season");
-            _log.Add("Considering vis trades");
+            _log.Add("Considering vis and book trades");
             var magiDesires = _magusArray.Where(m => m != null).Select(m => m.GetTradingDesires());
             foreach (Magus mage in _magusArray)
             {
@@ -155,7 +155,7 @@ namespace SkillViewer
                 mage.EvaluateTradingDesires(magiDesires);
                 magiDesires = magiDesires.Where(d => d.Mage != mage);
             }
-            _log.Add("Done considering vis trades");
+            _log.Add("Done considering vis and book trades");
             btnAdvance.Enabled = true;
         }
     }

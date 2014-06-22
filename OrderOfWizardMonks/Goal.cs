@@ -86,12 +86,14 @@ namespace WizardMonks
     {
         uint? DueDate { get; }
         byte Tier { get; }
-        double Desire { get; }
+        double Desire { get; set; }
 
         void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log);
         bool IsComplete(Character character);
         bool DecrementDueDate();
         void ModifyVisNeeds(Character character, VisDesire[] desires);
+        // TODO: add a boolean to Goals to cache completeness
+        // probably should not cache in reversable cases, i.e. labs
         IList<BookDesire> GetBookNeeds(Character character);
     }
 
@@ -100,7 +102,7 @@ namespace WizardMonks
     {
         public uint? DueDate {get; private set;}
         public byte Tier {get; private set;}
-        public double Desire {get; private set;}
+        public double Desire {get; set;}
         public virtual bool DecrementDueDate()
         {
             if(DueDate != null)
@@ -170,11 +172,9 @@ namespace WizardMonks
             double abilityCount = _abilities.Count;
             foreach (Ability ability in _abilities)
             {
-                // as a first pass at figuring out how big of a book to require,
-                // start by taking the distance between the current skill and the target
-                // total and divide by the number of skills involved
-                double minLevel = (_total - character.GetAbility(ability).Value) / abilityCount;
-                bookDesires.Add(new BookDesire(ability, minLevel));
+                double currentLevel = character.GetAbility(ability).Value;
+                //double minLevel = ((_total - currentLevel) / abilityCount) + currentLevel;
+                bookDesires.Add(new BookDesire(ability, currentLevel));
             }
             return bookDesires;
         }
@@ -191,7 +191,7 @@ namespace WizardMonks
                     return;
                 }
             }
-            if (dueDateDesire > 0.1)
+            if (dueDateDesire > 0.01)
             {
                 IEnumerable<IBook> readableBooks = character.ReadableBooks;
                 foreach (Ability ability in _abilities)
@@ -235,7 +235,7 @@ namespace WizardMonks
                 alreadyConsidered.Add(visStudy);
                 // TODO: how do we decrement the cost of the vis?
             }
-            else if(baseDesire > 0.1 && (DueDate == null || DueDate > 1))
+            else if(baseDesire > 0.01 && (DueDate == null || DueDate > 1))
             {
                 // only try to extract the vis now if there's sufficient time to do so
                 List<Ability> visType = new List<Ability>();
@@ -316,6 +316,117 @@ namespace WizardMonks
     #endregion
 
     #region Complex Goals
+    class TractatusGoal : IGoal
+    {
+        // TODO: for now, writing goals are going to assume that 
+        // the ability to write the book in question is already in place
+        private string _name;
+        private ushort _previouslyWritten;
+        private bool _isArt;
+
+        private AbilityScoreCondition _abilityScoreCondition;
+        private AbilityScoreCondition _writingAbilityCondition;
+        private AbilityScoreCondition _languageAbilityCondition;
+
+        public Ability Topic { get; private set; }
+        public double Desire { get; set; }
+        public byte Tier { get; private set; }
+        public uint? DueDate { get; private set; }
+
+        public TractatusGoal(Ability topic, string name, ushort writtenCount, byte tier = 0, uint? dueDate = null)
+        {
+            Topic = topic;
+            Tier = tier;
+            DueDate = dueDate;
+
+            _name = name;
+            _previouslyWritten = writtenCount;
+            _isArt = MagicArts.IsArt(topic);
+
+            _writingAbilityCondition = new AbilityScoreCondition(Abilities.ArtesLiberales, 1, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 3);
+            _languageAbilityCondition = new AbilityScoreCondition(Abilities.Latin, 5, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 2);
+            double scoreNeeded = MagicArts.IsArt(topic) ? 5 * writtenCount + 5 : writtenCount + 1;
+            if(scoreNeeded < 2)
+            {
+                scoreNeeded = 2;
+            }
+            _abilityScoreCondition = new AbilityScoreCondition(topic, scoreNeeded, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 1);
+        }
+
+        public bool IsComplete(Character character)
+        {
+            return character.HasWrittenBookWithTitle(_name);
+        }
+
+        public bool DecrementDueDate()
+        {
+            if (DueDate != null)
+            {
+                return
+                    _abilityScoreCondition.DecrementDueDate() &&
+                    _languageAbilityCondition.DecrementDueDate() &&
+                    _writingAbilityCondition.DecrementDueDate() &&
+                    --DueDate != 0;
+            }
+            return true;
+        }
+
+        public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double desire = CalculateDesire(character);
+            bool alDone = _writingAbilityCondition.IsComplete(character);
+            bool latinDone = _languageAbilityCondition.IsComplete(character);
+            bool abilityDone = _abilityScoreCondition.IsComplete(character);
+            if (!alDone)
+            {
+                _writingAbilityCondition.Desire = desire;
+                _writingAbilityCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (!latinDone)
+            {
+                _languageAbilityCondition.Desire = desire;
+                _languageAbilityCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (!abilityDone)
+            {
+                _abilityScoreCondition.Desire = desire;
+                _abilityScoreCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (abilityDone && latinDone && alDone)
+            {
+                alreadyConsidered.Add(new Writing(Topic, _name, Topic, 1000, desire));
+            }
+        }
+
+        private double CalculateDesire(Character character)
+        {
+            double quality = character.GetAttribute(AttributeType.Communication).Value + 6;
+            if (_isArt)
+            {
+                // for now, assume a reader of skill 5, so 1 pawn of vis/season
+                return quality / 6;
+            }
+            else
+            {
+                return quality / 4;
+            }
+        }
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            _abilityScoreCondition.ModifyVisNeeds(character, desires);
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if(IsComplete(character))
+            {
+                return null;
+            }
+            return _abilityScoreCondition.GetBookNeeds(character);
+        }
+    }
+    
     class LabScoreGoal : CharacteristicAbilityScoreCondition
     {
         private HasLabCondition _hasLabCondition;
@@ -395,7 +506,7 @@ namespace WizardMonks
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public bool DecrementDueDate()
         {
@@ -450,16 +561,16 @@ namespace WizardMonks
                 dueDateDesire /= (double)DueDate;
             }
 
-            if (!_minScore.IsComplete(character) && dueDateDesire > 0.1)
+            if (!_minScore.IsComplete(character) && dueDateDesire > 0.01)
             {
                 _minScore.ModifyActionList(character, alreadyConsidered, log);
             }
-            else if(dueDateDesire > 0.1)
+            else if(dueDateDesire > 0.01)
             {
                 log.Add("Looking for an aura worth " + (dueDateDesire).ToString("0.00"));
                 alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
                 // consider the incremental improvement of increasing skills
-                if (dueDateDesire > 0.1)
+                if (dueDateDesire > 0.01)
                 {
                     double artTotal = character.GetAbility(MagicArts.Intellego).Value + character.GetAbility(MagicArts.Vim).Value;
                     List<Ability> artHelper = new List<Ability>();
@@ -489,7 +600,7 @@ namespace WizardMonks
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public bool DecrementDueDate()
         {
@@ -563,7 +674,7 @@ namespace WizardMonks
                 }
                 dueDateDesire /= (double)DueDate;
             }
-            if (dueDateDesire > 0.1)
+            if (dueDateDesire > 0.01)
             {
                 bool hasCovenant = _hasCovenant.IsComplete(character);
                 bool hasMT = _mtCondition.IsComplete(character);
@@ -600,7 +711,7 @@ namespace WizardMonks
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public VisCondition(List<Ability> visTypes, double total, double desire, byte tier, uint? dueDate = null)
         {
@@ -675,7 +786,7 @@ namespace WizardMonks
                 }
                 dueDateDesire /= (double)DueDate;
             }
-            if (dueDateDesire > 0.1)
+            if (dueDateDesire > 0.01)
             {
                 Magus mage = (Magus)character;
                 bool hasLab = _hasLab.IsComplete(character);
@@ -794,7 +905,7 @@ namespace WizardMonks
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public bool DecrementDueDate()
         {
@@ -855,7 +966,7 @@ namespace WizardMonks
                 }
                 dueDateDesire /= (double)DueDate;
             }
-            if (dueDateDesire > 0.1)
+            if (dueDateDesire > 0.01)
             {
                 if (!_labScore.IsComplete(character))
                 {
@@ -912,7 +1023,7 @@ namespace WizardMonks
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public bool DecrementDueDate()
         {
@@ -925,11 +1036,11 @@ namespace WizardMonks
             return true;
         }
 
-        public LongevityRitualGoal(double desire, byte tier, uint? dueDate = null)
+        public LongevityRitualGoal(Magus mage, byte tier = 0, uint? dueDate = null)
         {
             DueDate = dueDate;
             Tier = tier;
-            Desire = desire;
+            Desire = CalculateDesire(mage);
             _abilitiesRequired = new List<Ability>();
             _abilitiesRequired.Add(MagicArts.Creo);
             _abilitiesRequired.Add(MagicArts.Vim);
@@ -941,7 +1052,17 @@ namespace WizardMonks
             attributes.Add(AttributeType.Intelligence);
 
             // we need a lab to create a longevity ritual
-            _hasLabCondition = new HasLabCondition(desire, tier, dueDate == null || dueDate <= 3 ? null : dueDate - 3);
+            _hasLabCondition = new HasLabCondition(Desire, tier, dueDate == null || dueDate <= 3 ? null : dueDate - 3);
+        }
+
+        private double CalculateDesire(Magus mage)
+        {
+            // the number of years added to life is a baseline
+            double lrLabTotal = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual);
+            double dvLabTotal = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+            return (lrLabTotal * dvLabTotal * 4.0 / 5.0) - (mage.SeasonalAge / 20.0);
+
+            // TODO: the warping probably ought to reduce value
         }
 
         public void ModifyVisNeeds(Character character, VisDesire[] desires)
@@ -980,6 +1101,8 @@ namespace WizardMonks
         {
             if (character.GetType() == typeof(Magus))
             {
+                Magus mage = (Magus)character;
+                Desire = CalculateDesire(mage);
                 double visNeed = character.SeasonalAge / 20.0;
                 VisCondition visCondition = new VisCondition(_artsRequired, visNeed, Desire, Tier, DueDate == null ? null : DueDate - 1);
 
@@ -992,6 +1115,7 @@ namespace WizardMonks
                 }
                 if (!labComplete)
                 {
+                    _hasLabCondition.Desire = Desire;
                     _hasLabCondition.ModifyActionList(character, alreadyConsidered, log);
                 }
                 if (visComplete && labComplete)
@@ -1007,11 +1131,19 @@ namespace WizardMonks
                         }
                         dueDateDesire /= (double)DueDate;
                     }
-                    log.Add("Performing longevity ritual worth " + dueDateDesire.ToString("0.00"));
-                    alreadyConsidered.Add(new LongevityRitual(Abilities.MagicTheory, dueDateDesire));
-                    double labTotal = ((Magus)character).GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual);
-                    IncreaseAbilitiesHelper helper = 
-                        new IncreaseAbilitiesHelper(_abilitiesRequired, Desire, labTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                    if (DueDate == null || DueDate < 4)
+                    {
+                        log.Add("Performing longevity ritual worth " + dueDateDesire.ToString("0.00"));
+                        alreadyConsidered.Add(new LongevityRitual(Abilities.MagicTheory, dueDateDesire));
+                    }
+                    double labTotalDesire = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) * 8 / (Tier + 1);
+                    if (DueDate != null)
+                    {
+                        labTotalDesire /= (double)DueDate;
+                    }
+                    // every point of lab total is effectively two years
+                    LongevityRitualAbilitiesHelper helper = 
+                        new LongevityRitualAbilitiesHelper(_abilitiesRequired, labTotalDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                     helper.ModifyActionList(character, alreadyConsidered, log);
                 }
             }
@@ -1030,7 +1162,7 @@ namespace WizardMonks
         #endregion
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; private set; }
+        public double Desire { get; set; }
 
         public bool DecrementDueDate()
         {
@@ -1171,7 +1303,7 @@ namespace WizardMonks
             BaseDueDate = baseDueDate;
         }
 
-        protected abstract double CalculateDesire(double increase, byte requiredTime = 1);
+        protected abstract double CalculateDesire(double increase);
 
         public virtual void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
@@ -1261,7 +1393,7 @@ namespace WizardMonks
                 // TODO: how do we decrement the cost of the vis?
             }
             // putting a limit here to how far the circular loop will go
-            else if (baseDesire >= 0.1)
+            else if (baseDesire >= 0.01)
             {
                 List<Ability> visType = new List<Ability>();
                 visType.Add(magicArt.Ability);
@@ -1287,9 +1419,9 @@ namespace WizardMonks
             _effectLevel = level;
         }
 
-        protected override double CalculateDesire(double increase, byte requiredTime = 1)
+        protected override double CalculateDesire(double increase)
         {
-            return (_currentGain + increase) * BaseDesire / (((_currentGain + increase) * requiredTime) + _effectLevel); 
+            return (_currentGain + increase) * BaseDesire / ((_currentGain + increase) + _effectLevel); 
         }
     }
 
@@ -1306,12 +1438,22 @@ namespace WizardMonks
             _currentTotal = currentTotal;
         }
 
-        protected override double CalculateDesire(double increase, byte requiredTime = 1)
+        protected override double CalculateDesire(double increase)
         {
-            if (_currentTotal == 0) return BaseDesire / (requiredTime + 1);
-            return (increase + _currentTotal) * BaseDesire / (_currentTotal * (requiredTime + 1));
+            if (_currentTotal == 0) return BaseDesire;
+            return (increase + _currentTotal) * BaseDesire / (2 * _currentTotal);
         }
     }
 
+    class LongevityRitualAbilitiesHelper : BaseHelper
+    {
+        public LongevityRitualAbilitiesHelper(List<Ability> abilities, double desirePerPoint, byte tier, uint? dueDate = null) 
+            : base(abilities, desirePerPoint, tier, dueDate){}
+
+        protected override double CalculateDesire(double increase)
+        {
+            return increase * BaseDesire;
+        }
+    }
     #endregion
 }

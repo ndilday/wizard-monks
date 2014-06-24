@@ -28,8 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -82,21 +81,52 @@
             this.AbilityName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Experience = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.isPuissantDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.isAffinityDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.experienceDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.abilityDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.characterAbilityBaseBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.txtAge = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
             this.txtWarp = new System.Windows.Forms.TextBox();
             this.label25 = new System.Windows.Forms.Label();
             this.lstLog = new System.Windows.Forms.ListBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.txtVimVis = new System.Windows.Forms.TextBox();
+            this.label26 = new System.Windows.Forms.Label();
+            this.txtTerramVis = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.txtMentemVis = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.txtImaginemVis = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
+            this.txtIgnemVis = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.txtHerbamVis = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.txtCorpusVis = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.txtAuramVis = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.txtAquamVis = new System.Windows.Forms.TextBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.txtAnimalVis = new System.Windows.Forms.TextBox();
+            this.label35 = new System.Windows.Forms.Label();
+            this.txtRegoVis = new System.Windows.Forms.TextBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.txtPerdoVis = new System.Windows.Forms.TextBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.txtMutoVis = new System.Windows.Forms.TextBox();
+            this.label38 = new System.Windows.Forms.Label();
+            this.txtIntellegoVis = new System.Windows.Forms.TextBox();
+            this.label39 = new System.Windows.Forms.Label();
+            this.txtCreoVis = new System.Windows.Forms.TextBox();
+            this.label40 = new System.Windows.Forms.Label();
+            this.dgvBooks = new System.Windows.Forms.DataGridView();
+            this.Title = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Topic = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Author = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Quality = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAbilities)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.characterAbilityBaseBindingSource)).BeginInit();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBooks)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -581,18 +611,11 @@
             // 
             this.dgvAbilities.AllowUserToAddRows = false;
             this.dgvAbilities.AllowUserToDeleteRows = false;
-            this.dgvAbilities.AutoGenerateColumns = false;
             this.dgvAbilities.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAbilities.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.AbilityName,
             this.Value,
-            this.Experience,
-            this.isPuissantDataGridViewCheckBoxColumn,
-            this.isAffinityDataGridViewCheckBoxColumn,
-            this.experienceDataGridViewTextBoxColumn,
-            this.nameDataGridViewTextBoxColumn,
-            this.abilityDataGridViewTextBoxColumn});
-            this.dgvAbilities.DataSource = this.characterAbilityBaseBindingSource;
+            this.Experience});
             this.dgvAbilities.Location = new System.Drawing.Point(12, 142);
             this.dgvAbilities.Name = "dgvAbilities";
             this.dgvAbilities.ReadOnly = true;
@@ -614,8 +637,8 @@
             // Value
             // 
             this.Value.DataPropertyName = "Value";
-            dataGridViewCellStyle2.Format = "0.00";
-            this.Value.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Format = "0.00";
+            this.Value.DefaultCellStyle = dataGridViewCellStyle1;
             this.Value.FillWeight = 15F;
             this.Value.HeaderText = "Level";
             this.Value.MaxInputLength = 2;
@@ -633,48 +656,9 @@
             this.Experience.ReadOnly = true;
             this.Experience.Width = 50;
             // 
-            // isPuissantDataGridViewCheckBoxColumn
-            // 
-            this.isPuissantDataGridViewCheckBoxColumn.DataPropertyName = "IsPuissant";
-            this.isPuissantDataGridViewCheckBoxColumn.HeaderText = "IsPuissant";
-            this.isPuissantDataGridViewCheckBoxColumn.Name = "isPuissantDataGridViewCheckBoxColumn";
-            this.isPuissantDataGridViewCheckBoxColumn.ReadOnly = true;
-            // 
-            // isAffinityDataGridViewCheckBoxColumn
-            // 
-            this.isAffinityDataGridViewCheckBoxColumn.DataPropertyName = "IsAffinity";
-            this.isAffinityDataGridViewCheckBoxColumn.HeaderText = "IsAffinity";
-            this.isAffinityDataGridViewCheckBoxColumn.Name = "isAffinityDataGridViewCheckBoxColumn";
-            this.isAffinityDataGridViewCheckBoxColumn.ReadOnly = true;
-            // 
-            // experienceDataGridViewTextBoxColumn
-            // 
-            this.experienceDataGridViewTextBoxColumn.DataPropertyName = "Experience";
-            this.experienceDataGridViewTextBoxColumn.HeaderText = "Experience";
-            this.experienceDataGridViewTextBoxColumn.Name = "experienceDataGridViewTextBoxColumn";
-            this.experienceDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
-            this.nameDataGridViewTextBoxColumn.HeaderText = "Name";
-            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // abilityDataGridViewTextBoxColumn
-            // 
-            this.abilityDataGridViewTextBoxColumn.DataPropertyName = "Ability";
-            this.abilityDataGridViewTextBoxColumn.HeaderText = "Ability";
-            this.abilityDataGridViewTextBoxColumn.Name = "abilityDataGridViewTextBoxColumn";
-            this.abilityDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // characterAbilityBaseBindingSource
-            // 
-            this.characterAbilityBaseBindingSource.DataSource = typeof(WizardMonks.CharacterAbilityBase);
-            // 
             // txtAge
             // 
-            this.txtAge.Location = new System.Drawing.Point(420, 22);
+            this.txtAge.Location = new System.Drawing.Point(555, 24);
             this.txtAge.MaxLength = 5;
             this.txtAge.Name = "txtAge";
             this.txtAge.ReadOnly = true;
@@ -684,7 +668,7 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(383, 25);
+            this.label24.Location = new System.Drawing.Point(518, 27);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(26, 13);
             this.label24.TabIndex = 21;
@@ -692,7 +676,7 @@
             // 
             // txtWarp
             // 
-            this.txtWarp.Location = new System.Drawing.Point(619, 22);
+            this.txtWarp.Location = new System.Drawing.Point(754, 24);
             this.txtWarp.MaxLength = 5;
             this.txtWarp.Name = "txtWarp";
             this.txtWarp.ReadOnly = true;
@@ -702,7 +686,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(561, 25);
+            this.label25.Location = new System.Drawing.Point(696, 27);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(47, 13);
             this.label25.TabIndex = 23;
@@ -711,16 +695,385 @@
             // lstLog
             // 
             this.lstLog.FormattingEnabled = true;
-            this.lstLog.Location = new System.Drawing.Point(380, 49);
+            this.lstLog.Location = new System.Drawing.Point(515, 51);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(281, 329);
+            this.lstLog.Size = new System.Drawing.Size(281, 576);
             this.lstLog.TabIndex = 25;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.txtVimVis);
+            this.groupBox3.Controls.Add(this.label26);
+            this.groupBox3.Controls.Add(this.txtTerramVis);
+            this.groupBox3.Controls.Add(this.label27);
+            this.groupBox3.Controls.Add(this.txtMentemVis);
+            this.groupBox3.Controls.Add(this.label28);
+            this.groupBox3.Controls.Add(this.txtImaginemVis);
+            this.groupBox3.Controls.Add(this.label29);
+            this.groupBox3.Controls.Add(this.txtIgnemVis);
+            this.groupBox3.Controls.Add(this.label30);
+            this.groupBox3.Controls.Add(this.txtHerbamVis);
+            this.groupBox3.Controls.Add(this.label31);
+            this.groupBox3.Controls.Add(this.txtCorpusVis);
+            this.groupBox3.Controls.Add(this.label32);
+            this.groupBox3.Controls.Add(this.txtAuramVis);
+            this.groupBox3.Controls.Add(this.label33);
+            this.groupBox3.Controls.Add(this.txtAquamVis);
+            this.groupBox3.Controls.Add(this.label34);
+            this.groupBox3.Controls.Add(this.txtAnimalVis);
+            this.groupBox3.Controls.Add(this.label35);
+            this.groupBox3.Controls.Add(this.txtRegoVis);
+            this.groupBox3.Controls.Add(this.label36);
+            this.groupBox3.Controls.Add(this.txtPerdoVis);
+            this.groupBox3.Controls.Add(this.label37);
+            this.groupBox3.Controls.Add(this.txtMutoVis);
+            this.groupBox3.Controls.Add(this.label38);
+            this.groupBox3.Controls.Add(this.txtIntellegoVis);
+            this.groupBox3.Controls.Add(this.label39);
+            this.groupBox3.Controls.Add(this.txtCreoVis);
+            this.groupBox3.Controls.Add(this.label40);
+            this.groupBox3.Location = new System.Drawing.Point(380, 5);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(112, 375);
+            this.groupBox3.TabIndex = 43;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Vis Stock";
+            // 
+            // txtVimVis
+            // 
+            this.txtVimVis.Location = new System.Drawing.Point(70, 343);
+            this.txtVimVis.MaxLength = 5;
+            this.txtVimVis.Name = "txtVimVis";
+            this.txtVimVis.ReadOnly = true;
+            this.txtVimVis.Size = new System.Drawing.Size(35, 20);
+            this.txtVimVis.TabIndex = 42;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(6, 346);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(24, 13);
+            this.label26.TabIndex = 41;
+            this.label26.Text = "Vim";
+            // 
+            // txtTerramVis
+            // 
+            this.txtTerramVis.Location = new System.Drawing.Point(70, 319);
+            this.txtTerramVis.MaxLength = 5;
+            this.txtTerramVis.Name = "txtTerramVis";
+            this.txtTerramVis.ReadOnly = true;
+            this.txtTerramVis.Size = new System.Drawing.Size(35, 20);
+            this.txtTerramVis.TabIndex = 40;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(6, 322);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(40, 13);
+            this.label27.TabIndex = 39;
+            this.label27.Text = "Terram";
+            // 
+            // txtMentemVis
+            // 
+            this.txtMentemVis.Location = new System.Drawing.Point(70, 296);
+            this.txtMentemVis.MaxLength = 5;
+            this.txtMentemVis.Name = "txtMentemVis";
+            this.txtMentemVis.ReadOnly = true;
+            this.txtMentemVis.Size = new System.Drawing.Size(35, 20);
+            this.txtMentemVis.TabIndex = 38;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(6, 299);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(45, 13);
+            this.label28.TabIndex = 37;
+            this.label28.Text = "Mentem";
+            // 
+            // txtImaginemVis
+            // 
+            this.txtImaginemVis.Location = new System.Drawing.Point(70, 273);
+            this.txtImaginemVis.MaxLength = 5;
+            this.txtImaginemVis.Name = "txtImaginemVis";
+            this.txtImaginemVis.ReadOnly = true;
+            this.txtImaginemVis.Size = new System.Drawing.Size(35, 20);
+            this.txtImaginemVis.TabIndex = 36;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(6, 276);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(52, 13);
+            this.label29.TabIndex = 35;
+            this.label29.Text = "Imaginem";
+            // 
+            // txtIgnemVis
+            // 
+            this.txtIgnemVis.Location = new System.Drawing.Point(70, 250);
+            this.txtIgnemVis.MaxLength = 5;
+            this.txtIgnemVis.Name = "txtIgnemVis";
+            this.txtIgnemVis.ReadOnly = true;
+            this.txtIgnemVis.Size = new System.Drawing.Size(35, 20);
+            this.txtIgnemVis.TabIndex = 34;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(6, 253);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(36, 13);
+            this.label30.TabIndex = 33;
+            this.label30.Text = "Ignem";
+            // 
+            // txtHerbamVis
+            // 
+            this.txtHerbamVis.Location = new System.Drawing.Point(70, 227);
+            this.txtHerbamVis.MaxLength = 5;
+            this.txtHerbamVis.Name = "txtHerbamVis";
+            this.txtHerbamVis.ReadOnly = true;
+            this.txtHerbamVis.Size = new System.Drawing.Size(35, 20);
+            this.txtHerbamVis.TabIndex = 32;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(6, 230);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(44, 13);
+            this.label31.TabIndex = 31;
+            this.label31.Text = "Herbam";
+            // 
+            // txtCorpusVis
+            // 
+            this.txtCorpusVis.Location = new System.Drawing.Point(70, 204);
+            this.txtCorpusVis.MaxLength = 5;
+            this.txtCorpusVis.Name = "txtCorpusVis";
+            this.txtCorpusVis.ReadOnly = true;
+            this.txtCorpusVis.Size = new System.Drawing.Size(35, 20);
+            this.txtCorpusVis.TabIndex = 30;
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(6, 207);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(40, 13);
+            this.label32.TabIndex = 29;
+            this.label32.Text = "Corpus";
+            // 
+            // txtAuramVis
+            // 
+            this.txtAuramVis.Location = new System.Drawing.Point(70, 181);
+            this.txtAuramVis.MaxLength = 5;
+            this.txtAuramVis.Name = "txtAuramVis";
+            this.txtAuramVis.ReadOnly = true;
+            this.txtAuramVis.Size = new System.Drawing.Size(35, 20);
+            this.txtAuramVis.TabIndex = 28;
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(6, 184);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(37, 13);
+            this.label33.TabIndex = 27;
+            this.label33.Text = "Auram";
+            // 
+            // txtAquamVis
+            // 
+            this.txtAquamVis.Location = new System.Drawing.Point(70, 157);
+            this.txtAquamVis.MaxLength = 5;
+            this.txtAquamVis.Name = "txtAquamVis";
+            this.txtAquamVis.ReadOnly = true;
+            this.txtAquamVis.Size = new System.Drawing.Size(35, 20);
+            this.txtAquamVis.TabIndex = 26;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(6, 160);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(40, 13);
+            this.label34.TabIndex = 25;
+            this.label34.Text = "Aquam";
+            // 
+            // txtAnimalVis
+            // 
+            this.txtAnimalVis.Location = new System.Drawing.Point(70, 133);
+            this.txtAnimalVis.MaxLength = 5;
+            this.txtAnimalVis.Name = "txtAnimalVis";
+            this.txtAnimalVis.ReadOnly = true;
+            this.txtAnimalVis.Size = new System.Drawing.Size(35, 20);
+            this.txtAnimalVis.TabIndex = 24;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(6, 136);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(38, 13);
+            this.label35.TabIndex = 23;
+            this.label35.Text = "Animal";
+            // 
+            // txtRegoVis
+            // 
+            this.txtRegoVis.Location = new System.Drawing.Point(70, 109);
+            this.txtRegoVis.MaxLength = 5;
+            this.txtRegoVis.Name = "txtRegoVis";
+            this.txtRegoVis.ReadOnly = true;
+            this.txtRegoVis.Size = new System.Drawing.Size(35, 20);
+            this.txtRegoVis.TabIndex = 22;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(6, 112);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(33, 13);
+            this.label36.TabIndex = 21;
+            this.label36.Text = "Rego";
+            // 
+            // txtPerdoVis
+            // 
+            this.txtPerdoVis.Location = new System.Drawing.Point(70, 86);
+            this.txtPerdoVis.MaxLength = 5;
+            this.txtPerdoVis.Name = "txtPerdoVis";
+            this.txtPerdoVis.ReadOnly = true;
+            this.txtPerdoVis.Size = new System.Drawing.Size(35, 20);
+            this.txtPerdoVis.TabIndex = 20;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(6, 89);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(35, 13);
+            this.label37.TabIndex = 19;
+            this.label37.Text = "Perdo";
+            // 
+            // txtMutoVis
+            // 
+            this.txtMutoVis.Location = new System.Drawing.Point(70, 63);
+            this.txtMutoVis.MaxLength = 5;
+            this.txtMutoVis.Name = "txtMutoVis";
+            this.txtMutoVis.ReadOnly = true;
+            this.txtMutoVis.Size = new System.Drawing.Size(35, 20);
+            this.txtMutoVis.TabIndex = 18;
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(6, 66);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(31, 13);
+            this.label38.TabIndex = 17;
+            this.label38.Text = "Muto";
+            // 
+            // txtIntellegoVis
+            // 
+            this.txtIntellegoVis.Location = new System.Drawing.Point(70, 40);
+            this.txtIntellegoVis.MaxLength = 5;
+            this.txtIntellegoVis.Name = "txtIntellegoVis";
+            this.txtIntellegoVis.ReadOnly = true;
+            this.txtIntellegoVis.Size = new System.Drawing.Size(35, 20);
+            this.txtIntellegoVis.TabIndex = 16;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(6, 43);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(47, 13);
+            this.label39.TabIndex = 15;
+            this.label39.Text = "Intellego";
+            // 
+            // txtCreoVis
+            // 
+            this.txtCreoVis.Location = new System.Drawing.Point(70, 17);
+            this.txtCreoVis.MaxLength = 5;
+            this.txtCreoVis.Name = "txtCreoVis";
+            this.txtCreoVis.ReadOnly = true;
+            this.txtCreoVis.Size = new System.Drawing.Size(35, 20);
+            this.txtCreoVis.TabIndex = 14;
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(6, 20);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(29, 13);
+            this.label40.TabIndex = 13;
+            this.label40.Text = "Creo";
+            // 
+            // dgvBooks
+            // 
+            this.dgvBooks.AllowUserToAddRows = false;
+            this.dgvBooks.AllowUserToDeleteRows = false;
+            this.dgvBooks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvBooks.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Title,
+            this.Topic,
+            this.Author,
+            this.Quality});
+            this.dgvBooks.Location = new System.Drawing.Point(12, 387);
+            this.dgvBooks.Name = "dgvBooks";
+            this.dgvBooks.ReadOnly = true;
+            this.dgvBooks.RowHeadersWidth = 4;
+            this.dgvBooks.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.dgvBooks.Size = new System.Drawing.Size(497, 240);
+            this.dgvBooks.TabIndex = 44;
+            // 
+            // Title
+            // 
+            this.Title.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Title.HeaderText = "Title";
+            this.Title.MaxInputLength = 100;
+            this.Title.MinimumWidth = 40;
+            this.Title.Name = "Title";
+            this.Title.ReadOnly = true;
+            this.Title.Width = 52;
+            // 
+            // Topic
+            // 
+            this.Topic.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Topic.HeaderText = "Topic";
+            this.Topic.MaxInputLength = 30;
+            this.Topic.MinimumWidth = 40;
+            this.Topic.Name = "Topic";
+            this.Topic.ReadOnly = true;
+            this.Topic.Width = 59;
+            // 
+            // Author
+            // 
+            this.Author.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Author.HeaderText = "Author";
+            this.Author.MaxInputLength = 50;
+            this.Author.MinimumWidth = 40;
+            this.Author.Name = "Author";
+            this.Author.ReadOnly = true;
+            this.Author.Width = 63;
+            // 
+            // Quality
+            // 
+            this.Quality.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.Quality.HeaderText = "Quality";
+            this.Quality.MaxInputLength = 3;
+            this.Quality.MinimumWidth = 40;
+            this.Quality.Name = "Quality";
+            this.Quality.ReadOnly = true;
+            this.Quality.Width = 64;
             // 
             // CharacterSheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 387);
+            this.ClientSize = new System.Drawing.Size(808, 632);
+            this.Controls.Add(this.dgvBooks);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.lstLog);
             this.Controls.Add(this.txtWarp);
             this.Controls.Add(this.label25);
@@ -736,7 +1089,9 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAbilities)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.characterAbilityBaseBindingSource)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBooks)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -793,7 +1148,6 @@
         private System.Windows.Forms.TextBox txtTerram;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.DataGridView dgvAbilities;
-        private System.Windows.Forms.BindingSource characterAbilityBaseBindingSource;
         private System.Windows.Forms.TextBox txtAge;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.TextBox txtWarp;
@@ -801,11 +1155,42 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn AbilityName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
         private System.Windows.Forms.DataGridViewTextBoxColumn Experience;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn isPuissantDataGridViewCheckBoxColumn;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn isAffinityDataGridViewCheckBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn experienceDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn abilityDataGridViewTextBoxColumn;
         private System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox txtVimVis;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.TextBox txtTerramVis;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TextBox txtMentemVis;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.TextBox txtImaginemVis;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.TextBox txtIgnemVis;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.TextBox txtHerbamVis;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.TextBox txtCorpusVis;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.TextBox txtAuramVis;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.TextBox txtAquamVis;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.TextBox txtAnimalVis;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.TextBox txtRegoVis;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.TextBox txtPerdoVis;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.TextBox txtMutoVis;
+        private System.Windows.Forms.Label label38;
+        private System.Windows.Forms.TextBox txtIntellegoVis;
+        private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.TextBox txtCreoVis;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.DataGridView dgvBooks;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Title;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Topic;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Author;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Quality;
     }
 }

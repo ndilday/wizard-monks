@@ -25,6 +25,8 @@ namespace SkillViewer
             DisplayCharacteristics();
             DisplayArts();
             DisplayAbilities();
+            DisplayBooks();
+            DisplayVis();
             DisplayMisc();
             lstLog.DataSource = _character.Log;
         }
@@ -68,7 +70,32 @@ namespace SkillViewer
 
         private void DisplayAbilities()
         {
-            dgvAbilities.DataSource = _character.GetAbilities().Where(a => !MagicArts.IsArt(a.Ability)).ToList();
+            dgvAbilities.DataSource = _character.GetAbilities().Where(a => !MagicArts.IsArt(a.Ability)).OrderBy(a => a.Ability.AbilityName).ToList();
+        }
+
+        private void DisplayBooks()
+        {
+            dgvBooks.DataSource = _character.Books;
+        }
+
+        private void DisplayVis()
+        {
+            Magus mage = (Magus)_character;
+            txtCreoVis.Text = mage.GetVisCount(MagicArts.Creo).ToString(FORMAT_STRING);
+            txtIntellegoVis.Text = mage.GetVisCount(MagicArts.Intellego).ToString(FORMAT_STRING);
+            txtMutoVis.Text = mage.GetVisCount(MagicArts.Muto).ToString(FORMAT_STRING);
+            txtPerdoVis.Text = mage.GetVisCount(MagicArts.Perdo).ToString(FORMAT_STRING);
+            txtRegoVis.Text = mage.GetVisCount(MagicArts.Rego).ToString(FORMAT_STRING);
+            txtAnimalVis.Text = mage.GetVisCount(MagicArts.Animal).ToString(FORMAT_STRING);
+            txtAquamVis.Text = mage.GetVisCount(MagicArts.Aquam).ToString(FORMAT_STRING);
+            txtAuramVis.Text = mage.GetVisCount(MagicArts.Auram).ToString(FORMAT_STRING);
+            txtCorpusVis.Text = mage.GetVisCount(MagicArts.Corpus).ToString(FORMAT_STRING);
+            txtHerbamVis.Text = mage.GetVisCount(MagicArts.Herbam).ToString(FORMAT_STRING);
+            txtIgnemVis.Text = mage.GetVisCount(MagicArts.Ignem).ToString(FORMAT_STRING);
+            txtImaginemVis.Text = mage.GetVisCount(MagicArts.Imaginem).ToString(FORMAT_STRING);
+            txtMentemVis.Text = mage.GetVisCount(MagicArts.Mentem).ToString(FORMAT_STRING);
+            txtTerramVis.Text = mage.GetVisCount(MagicArts.Terram).ToString(FORMAT_STRING);
+            txtVimVis.Text = mage.GetVisCount(MagicArts.Vim).ToString(FORMAT_STRING);
         }
     }
 }

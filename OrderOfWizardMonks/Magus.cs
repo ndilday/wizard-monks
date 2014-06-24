@@ -217,7 +217,7 @@ namespace WizardMonks
         /// </summary>
         /// <param name="ability"></param>
         /// <param name="gain"></param>
-        /// <returns>the vis equivalence of this gain</returns>
+        /// <returns>the vis equivalence (vis savings) of this gain relative to vis study</returns>
         protected override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             if (!MagicArts.IsArt(ability))

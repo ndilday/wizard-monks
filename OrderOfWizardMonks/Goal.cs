@@ -19,7 +19,7 @@ namespace WizardMonks
                     // TODO: it should probably be an error case for a goal to still be here
                     // for now, ignore
                     List<string> dummy = new List<string>();
-                    goal.ModifyActionList(this, actions, dummy);
+                    goal.ModifyActionList(this, actions, Log);
                 }
             }
             Log.AddRange(actions.Log());
@@ -196,8 +196,9 @@ namespace WizardMonks
                 IEnumerable<IBook> readableBooks = character.ReadableBooks;
                 foreach (Ability ability in _abilities)
                 {
-                    // Handle Reading
                     CharacterAbilityBase charAbility = character.GetAbility(ability);
+
+                    // Handle Reading
                     var topicalBooks = readableBooks.Where(b => b.Topic == ability);
                     AddReading(character, alreadyConsidered, topicalBooks, remainingTotal, dueDateDesire);
 

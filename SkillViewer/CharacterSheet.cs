@@ -70,11 +70,13 @@ namespace SkillViewer
 
         private void DisplayAbilities()
         {
+            dgvAbilities.AutoGenerateColumns = false;
             dgvAbilities.DataSource = _character.GetAbilities().Where(a => !MagicArts.IsArt(a.Ability)).OrderBy(a => a.Ability.AbilityName).ToList();
         }
 
         private void DisplayBooks()
         {
+            dgvBooks.AutoGenerateColumns = false;
             dgvBooks.DataSource = _character.Books;
         }
 

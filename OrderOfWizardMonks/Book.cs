@@ -12,8 +12,22 @@ namespace WizardMonks
 	public class IBook
 	{
         public string Title { get; set; }
-		public Character Author { get; set; }
+        public Character Author { get; set; }
+        public string AuthorName
+        {
+            get
+            {
+                return Author.Name;
+            }
+        }
 		public Ability Topic { get; set; }
+        public string TopicName
+        {
+            get
+            {
+                return Topic.AbilityName;
+            }
+        }
 		public double Quality { get; set; }
 		public virtual double Level { get; set; }
 	}

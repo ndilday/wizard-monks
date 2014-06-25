@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using WizardMonks;
+
 namespace WizardMonks.Test
 {
     [TestClass]

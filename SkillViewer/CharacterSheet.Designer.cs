@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -637,8 +637,8 @@
             // Value
             // 
             this.Value.DataPropertyName = "Value";
-            dataGridViewCellStyle1.Format = "0.00";
-            this.Value.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Format = "0.00";
+            this.Value.DefaultCellStyle = dataGridViewCellStyle5;
             this.Value.FillWeight = 15F;
             this.Value.HeaderText = "Level";
             this.Value.MaxInputLength = 2;
@@ -1013,12 +1013,14 @@
             // 
             this.dgvBooks.AllowUserToAddRows = false;
             this.dgvBooks.AllowUserToDeleteRows = false;
+            this.dgvBooks.AllowUserToResizeRows = false;
             this.dgvBooks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvBooks.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Title,
             this.Topic,
             this.Author,
             this.Quality});
+            this.dgvBooks.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dgvBooks.Location = new System.Drawing.Point(12, 387);
             this.dgvBooks.Name = "dgvBooks";
             this.dgvBooks.ReadOnly = true;
@@ -1030,42 +1032,46 @@
             // Title
             // 
             this.Title.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Title.DataPropertyName = "Title";
             this.Title.HeaderText = "Title";
             this.Title.MaxInputLength = 100;
             this.Title.MinimumWidth = 40;
             this.Title.Name = "Title";
             this.Title.ReadOnly = true;
-            this.Title.Width = 52;
+            this.Title.Width = 200;
             // 
             // Topic
             // 
             this.Topic.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Topic.DataPropertyName = "TopicName";
             this.Topic.HeaderText = "Topic";
             this.Topic.MaxInputLength = 30;
             this.Topic.MinimumWidth = 40;
             this.Topic.Name = "Topic";
             this.Topic.ReadOnly = true;
-            this.Topic.Width = 59;
+            this.Topic.Width = 100;
             // 
             // Author
             // 
             this.Author.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Author.DataPropertyName = "AuthorName";
             this.Author.HeaderText = "Author";
             this.Author.MaxInputLength = 50;
             this.Author.MinimumWidth = 40;
             this.Author.Name = "Author";
             this.Author.ReadOnly = true;
-            this.Author.Width = 63;
+            this.Author.Width = 100;
             // 
             // Quality
             // 
             this.Quality.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.Quality.DataPropertyName = "Quality";
             this.Quality.HeaderText = "Quality";
             this.Quality.MaxInputLength = 3;
             this.Quality.MinimumWidth = 40;
             this.Quality.Name = "Quality";
             this.Quality.ReadOnly = true;
-            this.Quality.Width = 64;
+            this.Quality.Width = 40;
             // 
             // CharacterSheet
             // 

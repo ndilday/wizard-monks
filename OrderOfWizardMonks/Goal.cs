@@ -254,7 +254,7 @@ namespace WizardMonks
             return GetRemainingTotal(character) <= 0;
         }
 
-        protected virtual double GetRemainingTotal(Character character)
+        public virtual double GetRemainingTotal(Character character)
         {
             double currentTotal = 0;
             foreach (Ability ability in _abilities)
@@ -294,7 +294,7 @@ namespace WizardMonks
             _attributes = attributes;
         }
 
-        protected override double GetRemainingTotal(Character character)
+        public override double GetRemainingTotal(Character character)
         {
             double currentTotal = 0;
             foreach (Ability ability in _abilities)
@@ -311,7 +311,48 @@ namespace WizardMonks
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             base.ModifyActionList(character, alreadyConsidered, log);
-            // TODO: consider CrVi spells that increase statistics
+            // TODO: consider Cr Co/Me spells that increase statistics
+            foreach (AttributeType attribute in _attributes)
+            {
+                double currentAttribute = character.GetAttribute(attribute).Value;
+                if (currentAttribute < 5)
+                {
+                    ArtPair artPair;
+                    if (attribute == AttributeType.Dexterity || attribute == AttributeType.Quickness ||
+                        attribute == AttributeType.Stamina || attribute == AttributeType.Strength)
+                    {
+                        artPair = MagicArtPairs.CrCo;
+                    }
+                    else
+                    {
+                        artPair = MagicArtPairs.CrMe;
+                    }
+
+                    double total = 30;
+                    if (currentAttribute > 0)
+                    {
+                        total = 35;
+                    }
+                    if (currentAttribute > 1)
+                    {
+                        total = 40;
+                    }
+                    if (currentAttribute > 2)
+                    {
+                        total = 45;
+                    }
+                    if (currentAttribute > 3)
+                    {
+                        total = 50;
+                    }
+                    if (currentAttribute > 4)
+                    {
+                        total = 55;
+                    }
+                    LabScoreGoal labScoreGoal = new LabScoreGoal(artPair, Activity.InventSpells, total, Desire, (byte)(Tier + 1), DueDate == null ? null: DueDate - 1);
+                }
+            }
+
         }
     }
     #endregion
@@ -428,74 +469,100 @@ namespace WizardMonks
         }
     }
     
-    class LabScoreGoal : CharacteristicAbilityScoreCondition
+    class LabScoreGoal : IGoal
     {
         private HasLabCondition _hasLabCondition;
+        private CharacteristicAbilityScoreCondition _attributeAbilityScore;
+        private double _total;
+        Activity _labWorkType;
+        private ArtPair _artPair;
 
-        public LabScoreGoal(List<Ability> abilities, List<AttributeType> attributes, double total, double desire, byte tier, uint? dueDate = null)
-            : base(abilities, attributes, total, desire, tier, dueDate)
+        public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
+        public double Desire { get; set; }
+
+        public LabScoreGoal(ArtPair artPair, Activity labWorkType, double total, double desire, byte tier, uint? dueDate = null)
         {
             _hasLabCondition = new HasLabCondition(desire, tier, dueDate);
+            List<AttributeType> attributes = new List<AttributeType>();
+            List<Ability> abilities = new List<Ability>();
+            abilities.Add(artPair.Technique);
+            abilities.Add(artPair.Form);
+            abilities.Add(Abilities.MagicTheory);
+            attributes.Add(AttributeType.Intelligence);
+            _attributeAbilityScore = new CharacteristicAbilityScoreCondition(abilities, attributes, total, desire, (byte)(tier + 1), dueDate);
+            DueDate = dueDate;
+            Tier = tier;
+            Desire = desire;
+            _total = total;
+            _labWorkType = labWorkType;
+            _artPair = artPair;
         }
 
-        public override bool DecrementDueDate()
+        public bool DecrementDueDate()
         {
-            if (DueDate != null )
+            if (DueDate != null)
             {
-                if (!_hasLabCondition.DecrementDueDate()) return false;
-                return base.DecrementDueDate();
+                if (!_hasLabCondition.DecrementDueDate() || !_attributeAbilityScore.DecrementDueDate()) return false;
+                DueDate--;
+                return DueDate != 0;
             }
             return true;
         }
 
-        protected override double GetRemainingTotal(Character character)
+        public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double currentTotal = 0;
-            foreach (Ability ability in _abilities)
-            {
-                currentTotal += character.GetAbility(ability).Value;
-            }
-            foreach (AttributeType attribute in _attributes)
-            {
-                currentTotal += character.GetAttribute(attribute).Value;
-            }
-            if(character.GetType() == typeof(Magus))
-            {
-                Magus mage = (Magus)character;
-                currentTotal += mage.Laboratory.Quality;
-                foreach (Ability ability in _abilities)
-                {
-                    if (mage.Laboratory.ArtModifiers.ContainsKey(ability))
-                    {
-                        currentTotal += mage.Laboratory.ArtModifiers[ability];
-                    }
-                }
-                // TODO: we probably need to take activity type into account, 
-                // or that needs to be taken into account in setting the total of this object
-            }
-            return _total - currentTotal;
-        }
-
-        public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
-        {
+            Magus mage = (Magus)character;
             if (!_hasLabCondition.IsComplete(character))
             {
                 _hasLabCondition.ModifyActionList(character, alreadyConsidered, log);
             }
-            else
+            else if(!_attributeAbilityScore.IsComplete(character))
             {
-                base.ModifyActionList(character, alreadyConsidered, log);
-
-                // TODO: consider aura search
-                // TODO: consider laboratory refinements
-                // TODO: consider taking an apprentice
-                // TODO: consider finding a familiar
+                _attributeAbilityScore.ModifyActionList(character, alreadyConsidered, log);
             }
+            
+            // TODO: consider aura search
+            double greatestAura = character.KnownAuras.Select(a => a.Strength).Max();
+            double currentAura = mage.Covenant.Aura.Strength;
+            if (greatestAura > currentAura)
+            {
+                if (mage.Laboratory == null)
+                {
+                    // just move the covenant right now
+
+                }
+            }
+
+            // TODO: consider chance of a new aura being bigger
+
+            // TODO: consider laboratory refinements
+            // TODO: consider taking an apprentice
+            // TODO: consider finding a familiar
         }
 
-        public override bool IsComplete(Character character)
+        public bool IsComplete(Character character)
         {
-            return _hasLabCondition.IsComplete(character) && GetRemainingTotal(character) <= 0;
+            if (character.GetType() != typeof(Magus))
+            {
+                throw new ArgumentException("Only magi have lab totals!");
+            }
+            Magus mage = (Magus)character;
+            return _hasLabCondition.IsComplete(character) && mage.GetLabTotal(_artPair, _labWorkType) >= _total;
+        }
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            _hasLabCondition.ModifyVisNeeds(character, desires);
+            _attributeAbilityScore.ModifyVisNeeds(character, desires);
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            bookDesires.AddRange(_hasLabCondition.GetBookNeeds(character));
+            bookDesires.AddRange(_attributeAbilityScore.GetBookNeeds(character));
+            return bookDesires;
         }
     }
 
@@ -942,7 +1009,7 @@ namespace WizardMonks
             {
                 // TODO: throw error?
             }
-            _labScore = new LabScoreGoal(_abilitiesRequired, attributes, spell.Level, desire, tier, labScoreDueDate);
+            _labScore = new LabScoreGoal(spell.BaseArts, Activity.InventSpells, spell.Level, desire, tier, labScoreDueDate);
         }
 
         public void ModifyVisNeeds(Character character, VisDesire[] desires)

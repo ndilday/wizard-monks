@@ -38,9 +38,21 @@ namespace WizardMonks
             }
         }
 
+        public void RemoveMagus(Magus mage)
+        {
+            if (_magi.Contains(mage))
+            {
+                _magi.Remove(mage);
+            }
+        }
+
         public void AddBook(IBook book)
         {
-            _library.Add(book);
+            // TODO: handle book duplicates
+            if (!_library.Contains(book))
+            {
+                _library.Add(book);
+            }
         }
 
 

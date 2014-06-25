@@ -414,8 +414,9 @@ namespace WizardMonks
         {
             // add bonus to area lore equal to casting total div 5?
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
-            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+            areaLore += mage.GetAttribute(AttributeType.Perception).Value;
             areaLore += mage.GetAbility(Abilities.FolkLore).Value;
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
             double roll = Die.Instance.RollDouble() * areaLore;
             if (roll > 1)
             {

@@ -87,6 +87,10 @@ namespace WizardMonks
         #region Covenant Functions
         public void Join(Covenant covenant)
         {
+            if (Covenant != null)
+            {
+                Covenant.RemoveMagus(this);
+            }
             Covenant = covenant;
             covenant.AddMagus(this);
         }

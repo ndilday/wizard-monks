@@ -355,6 +355,7 @@ namespace WizardMonks
             // add bonus to area lore equal to casting total div 10?
             // TODO: once spells are implemented, increase finding chances based on aura-detection spells
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+            areaLore += mage.GetAttribute(AttributeType.Perception).Value;
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             double roll = Die.Instance.RollDouble() * 5;
 
@@ -456,6 +457,7 @@ namespace WizardMonks
                 // add bonus to area lore equal to casting total div 5?
                 // TODO: once spells are implemented, increase finding chances based on aura-detection spells
                 double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
+                magicLore += mage.GetAttribute(AttributeType.Perception).Value;
                 magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
                 double roll = Die.Instance.RollDouble() * 5;
 
@@ -820,10 +822,19 @@ namespace WizardMonks
 
     public class BuildLaboratory : ExposingMageAction
     {
+        private Aura _aura;
+
         public BuildLaboratory(Ability exposure, double desire)
             : base(exposure, desire)
         {
             Action = Activity.BuildLaboratory;
+        }
+
+        public BuildLaboratory(Aura aura, Ability exposure, double desire)
+            : base(exposure, desire)
+        {
+            Action = Activity.BuildLaboratory;
+            _aura = aura;
         }
 
         protected override void DoMageAction(Magus mage)
@@ -831,7 +842,14 @@ namespace WizardMonks
             // TODO: build size
             // TODO: pre-existing conditions
             mage.Log.Add("Built laboratory");
-            mage.BuildLaboratory();
+            if (_aura == null)
+            {
+                mage.BuildLaboratory();
+            }
+            else
+            {
+                mage.BuildLaboratory(_aura);
+            }
         }
 
         public override bool Matches(IAction action)

@@ -578,7 +578,12 @@ namespace WizardMonks
         public void BuildLaboratory()
         {
             // TODO: flesh out laboratory specialization
-            Laboratory = new Laboratory(this, 0);
+            Laboratory = new Laboratory(this, Covenant.Aura, 0);
+        }
+
+        public void BuildLaboratory(Aura aura)
+        {
+            Laboratory = new Laboratory(this, aura, 0);
         }
 
         public void RefineLaboratory()

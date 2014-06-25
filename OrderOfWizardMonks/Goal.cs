@@ -190,6 +190,7 @@ namespace WizardMonks
                     log.Add("Ability Condition failed!");
                     return;
                 }
+                dueDateDesire /= (double)DueDate;
             }
             if (dueDateDesire > 0.01)
             {
@@ -349,7 +350,8 @@ namespace WizardMonks
                     {
                         total = 55;
                     }
-                    LabScoreGoal labScoreGoal = new LabScoreGoal(artPair, Activity.InventSpells, total, Desire, (byte)(Tier + 1), DueDate == null ? null: DueDate - 1);
+                    // TODO: see if the mage already knows a ritual of sufficient strength
+                    // If not, consider the value of such a ritual
                 }
             }
 
@@ -513,6 +515,21 @@ namespace WizardMonks
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             Magus mage = (Magus)character;
+            double remainingTotal = _total - mage.GetLabTotal(_artPair, _labWorkType);
+            double dueDateDesire = Desire / (Tier + 1);
+            if (DueDate != null)
+            {
+                if (DueDate == 0)
+                {
+                    log.Add("Ability Condition failed!");
+                    return;
+                }
+                dueDateDesire /= (double)DueDate;
+            }
+
+            // consider aura search
+            HandleAuraSearch(mage, alreadyConsidered, log, remainingTotal, dueDateDesire);
+
             if (!_hasLabCondition.IsComplete(character))
             {
                 _hasLabCondition.ModifyActionList(character, alreadyConsidered, log);
@@ -521,24 +538,41 @@ namespace WizardMonks
             {
                 _attributeAbilityScore.ModifyActionList(character, alreadyConsidered, log);
             }
-            
-            // TODO: consider aura search
-            double greatestAura = character.KnownAuras.Select(a => a.Strength).Max();
-            double currentAura = mage.Covenant.Aura.Strength;
-            if (greatestAura > currentAura)
-            {
-                if (mage.Laboratory == null)
-                {
-                    // just move the covenant right now
-
-                }
-            }
-
-            // TODO: consider chance of a new aura being bigger
 
             // TODO: consider laboratory refinements
             // TODO: consider taking an apprentice
             // TODO: consider finding a familiar
+        }
+
+        private void HandleAuraSearch(Magus mage, ConsideredActions alreadyConsidered, IList<string> log, double remainingTotal, double dueDateDesire)
+        {
+            double greatestAura = mage.KnownAuras.Select(a => a.Strength).Max();
+            double currentAura = mage.Covenant.Aura.Strength;
+            if (greatestAura > currentAura)
+            {
+                Aura bestAura = mage.KnownAuras.Where(a => a.Strength == greatestAura).First();
+                if (!_hasLabCondition.IsComplete(mage))
+                {
+                    // just move the covenant right now
+                    log.Add("Since no lab built, moving to better aura.");
+                    mage.FoundCovenant(bestAura);
+                }
+                else
+                {
+                    // how do we want to rate the value of moving and having to build a new lab?
+                    // it seems like basically the same as any other single-month activity
+                    double gain = greatestAura - currentAura;
+                    double desire = dueDateDesire * gain / remainingTotal;
+                    log.Add("Moving to new aura (to boost lab total) worth " + dueDateDesire.ToString("0.00"));
+                    alreadyConsidered.Add(new BuildLaboratory(bestAura, Abilities.MagicTheory, desire));
+                }
+            }
+            else
+            {
+                // consider finding a new aura
+                IncreaseAuraHelper helper = new IncreaseAuraHelper(Desire / remainingTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                helper.ModifyActionList(mage, alreadyConsidered, log);
+            }
         }
 
         public bool IsComplete(Character character)
@@ -644,13 +678,13 @@ namespace WizardMonks
                     List<Ability> artHelper = new List<Ability>();
                     artHelper.Add(MagicArts.Intellego);
                     artHelper.Add(MagicArts.Vim);
-                    IncreaseAbilitiesHelper helper = 
-                        new IncreaseAbilitiesHelper(artHelper, Desire / 10, artTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                    IncreaseAbilitiesForVisHelper helper = 
+                        new IncreaseAbilitiesForVisHelper(artHelper, Desire / 10, artTotal, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                     helper.ModifyActionList(character, alreadyConsidered, log);
                     List<Ability> al = new List<Ability>();
                     al.Add(Abilities.AreaLore);
-                    IncreaseAbilitiesHelper helper2 =
-                        new IncreaseAbilitiesHelper(al, Desire / 2, character.GetAbility(Abilities.AreaLore).Value, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                    IncreaseAbilitiesForVisHelper helper2 =
+                        new IncreaseAbilitiesForVisHelper(al, Desire / 2, character.GetAbility(Abilities.AreaLore).Value, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                 }
             }
         }
@@ -890,7 +924,7 @@ namespace WizardMonks
                             // the difference between the desire of starting now
                             // and the desire of starting after gaining experience
                             // is the effective value of practicing here
-                            IncreaseAbilitiesHelper helper = new IncreaseAbilitiesHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
+                            IncreaseAbilitiesForVisHelper helper = new IncreaseAbilitiesForVisHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
                             helper.ModifyActionList(character, alreadyConsidered, log);
                         }
                     }
@@ -904,6 +938,7 @@ namespace WizardMonks
                     // consider the value of searching for new vis sites in current auras
                     // determine average vis source found
                     double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
+                    magicLore += mage.GetAttribute(AttributeType.Perception).Value;
                     magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
                     if (magicLore > 0)
                     {
@@ -936,6 +971,7 @@ namespace WizardMonks
                     }
                     // consider the value of looking for a new aura
                     double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+                    areaLore += mage.GetAttribute(AttributeType.Perception).Value;
                     areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
                     if (areaLore > 0 && magicLore > 0)
                     {
@@ -967,7 +1003,7 @@ namespace WizardMonks
 
     class InventSpellGoal : IGoal
     {
-        private LabScoreGoal _labScore;
+        private LabScoreGoal _labScoreGoal;
         private List<Ability> _abilitiesRequired;
         private Spell _spell;
 
@@ -979,7 +1015,7 @@ namespace WizardMonks
         {
             if (DueDate != null)
             {
-                if(!_labScore.DecrementDueDate()) return false;
+                if(!_labScoreGoal.DecrementDueDate()) return false;
                 DueDate--;
                 return DueDate != 0;
             }
@@ -992,10 +1028,6 @@ namespace WizardMonks
             Tier = tier;
             Desire = desire;
             _spell = spell;
-            _abilitiesRequired = new List<Ability>();
-            _abilitiesRequired.Add(spell.BaseArts.Technique);
-            _abilitiesRequired.Add(spell.BaseArts.Form);
-            _abilitiesRequired.Add(Abilities.MagicTheory);
             List<AttributeType> attributes = new List<AttributeType>();
             attributes.Add(AttributeType.Intelligence);
 
@@ -1009,17 +1041,17 @@ namespace WizardMonks
             {
                 // TODO: throw error?
             }
-            _labScore = new LabScoreGoal(spell.BaseArts, Activity.InventSpells, spell.Level, desire, tier, labScoreDueDate);
+            _labScoreGoal = new LabScoreGoal(spell.BaseArts, Activity.InventSpells, spell.Level, desire, tier, labScoreDueDate);
         }
 
         public void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
-            _labScore.ModifyVisNeeds(character, desires);
+            _labScoreGoal.ModifyVisNeeds(character, desires);
         }
 
         public IList<BookDesire> GetBookNeeds(Character character)
         {
-            return _labScore.GetBookNeeds(character);
+            return _labScoreGoal.GetBookNeeds(character);
         }
 
         public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
@@ -1036,9 +1068,9 @@ namespace WizardMonks
             }
             if (dueDateDesire > 0.01)
             {
-                if (!_labScore.IsComplete(character))
+                if (!_labScoreGoal.IsComplete(character))
                 {
-                    _labScore.ModifyActionList(character, alreadyConsidered, log);
+                    _labScoreGoal.ModifyActionList(character, alreadyConsidered, log);
                 }
                 else
                 {
@@ -1051,7 +1083,7 @@ namespace WizardMonks
                     if (extraTotal <= 0)
                     {
                         // This should not happen
-                        _labScore.ModifyActionList(character, alreadyConsidered, log);
+                        _labScoreGoal.ModifyActionList(character, alreadyConsidered, log);
                     }
                     if (extraTotal >= level)
                     {
@@ -1070,7 +1102,7 @@ namespace WizardMonks
                         // the difference between the desire of starting now
                         // and the desire of starting after practice
                         // is the effective value of practicing here
-                        IncreaseAbilitiesVersusLevelHelper helper = new IncreaseAbilitiesVersusLevelHelper(_abilitiesRequired, dueDateDesire, extraTotal, level, (byte)(Tier + 1));
+                        IncreaseLabTotalVersusEffectLevelHelper helper = new IncreaseLabTotalVersusEffectLevelHelper(_spell.BaseArts, dueDateDesire, extraTotal, level, (byte)(Tier + 1));
                         helper.ModifyActionList(character, alreadyConsidered, log);
                     }
                 }
@@ -1204,14 +1236,14 @@ namespace WizardMonks
                         log.Add("Performing longevity ritual worth " + dueDateDesire.ToString("0.00"));
                         alreadyConsidered.Add(new LongevityRitual(Abilities.MagicTheory, dueDateDesire));
                     }
-                    double labTotalDesire = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) * 8 / (Tier + 1);
+                    double labTotalDesire = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) * 8;
                     if (DueDate != null)
                     {
                         labTotalDesire /= (double)DueDate;
                     }
                     // every point of lab total is effectively two years
                     LongevityRitualAbilitiesHelper helper = 
-                        new LongevityRitualAbilitiesHelper(_abilitiesRequired, labTotalDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                        new LongevityRitualAbilitiesHelper(labTotalDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                     helper.ModifyActionList(character, alreadyConsidered, log);
                 }
             }
@@ -1361,11 +1393,18 @@ namespace WizardMonks
         public double BaseDesire { get; private set; }
         public uint? BaseDueDate { get; private set; }
         public byte BaseTier { get; private set; }
-        public List<Ability> Abilities { get; private set; }
+        protected List<Ability> _abilities { get; set; }
 
         public BaseHelper(List<Ability> abilities, double baseDesire, byte tier, uint? baseDueDate = null)
         {
-            Abilities = abilities;
+            _abilities = abilities;
+            BaseDesire = baseDesire;
+            BaseTier = tier;
+            BaseDueDate = baseDueDate;
+        }
+
+        protected BaseHelper(double baseDesire, byte tier, uint? baseDueDate = null)
+        {
             BaseDesire = baseDesire;
             BaseTier = tier;
             BaseDueDate = baseDueDate;
@@ -1380,7 +1419,7 @@ namespace WizardMonks
                 return;
             }
             IEnumerable<IBook> readableBooks = character.ReadableBooks;
-            foreach (Ability ability in Abilities)
+            foreach (Ability ability in _abilities)
             {
                 // Handle Reading
                 CharacterAbilityBase charAbility = character.GetAbility(ability);
@@ -1403,7 +1442,7 @@ namespace WizardMonks
             }
         }
 
-        private void HandlePractice(Character character, ConsideredActions alreadyConsidered, IList<string> log, Ability ability)
+        protected void HandlePractice(Character character, ConsideredActions alreadyConsidered, IList<string> log, Ability ability)
         {
             // Handle Practice
             // For now, assume 4pt practice on everything
@@ -1420,7 +1459,7 @@ namespace WizardMonks
             alreadyConsidered.Add(practiceAction);
         }
 
-        private void HandleReading(Character character, ConsideredActions alreadyConsidered, IEnumerable<IBook> topicalBooks)
+        protected void HandleReading(Character character, ConsideredActions alreadyConsidered, IEnumerable<IBook> topicalBooks)
         {
             if (topicalBooks.Any())
             {
@@ -1441,7 +1480,7 @@ namespace WizardMonks
             }
         }
     
-        private void HandleVisUse(Magus mage, CharacterAbilityBase magicArt, ConsideredActions alreadyConsidered, IList<string> log)
+        protected void HandleVisUse(Magus mage, CharacterAbilityBase magicArt, ConsideredActions alreadyConsidered, IList<string> log)
         {
             // see if the mage has enough vis of this type
             double stockpile = mage.GetVisCount(magicArt.Ability);
@@ -1471,36 +1510,15 @@ namespace WizardMonks
             }
         }
     }
-    
-    /// <summary>
-    /// This is a specialized goal-like object used to figure out 
-    /// the value of increasing abilities relative to a certain lab spell/effect.
-    /// </summary>
-    class IncreaseAbilitiesVersusLevelHelper : BaseHelper
-    {
-        private double _currentGain;
-        private double _effectLevel;
-        public IncreaseAbilitiesVersusLevelHelper(List<Ability> abilities, double desire, double currentRate, double level, byte tier, uint? dueDate = null) 
-            : base(abilities, desire, tier, dueDate)
-        {
-            _currentGain = currentRate;
-            _effectLevel = level;
-        }
-
-        protected override double CalculateDesire(double increase)
-        {
-            return (_currentGain + increase) * BaseDesire / ((_currentGain + increase) + _effectLevel); 
-        }
-    }
 
     /// <summary>
     /// This is a specialized goal-like object used to figure out
     /// the value of increasing abilities relative to a certain lab total
     /// </summary>
-    class IncreaseAbilitiesHelper : BaseHelper
+    class IncreaseAbilitiesForVisHelper : BaseHelper
     {
         private double _currentTotal;
-        public IncreaseAbilitiesHelper(List<Ability> abilities, double desire, double currentTotal, byte tier, uint? dueDate = null) 
+        public IncreaseAbilitiesForVisHelper(List<Ability> abilities, double desire, double currentTotal, byte tier, uint? dueDate = null) 
             : base(abilities, desire, tier, dueDate)
         {
             _currentTotal = currentTotal;
@@ -1513,14 +1531,191 @@ namespace WizardMonks
         }
     }
 
-    class LongevityRitualAbilitiesHelper : BaseHelper
+    /// <summary>
+    /// IncreaseLabTotalHelper assumes that a laboratory has already been built
+    /// </summary>
+    class IncreaseLabTotalHelper : BaseHelper
     {
-        public LongevityRitualAbilitiesHelper(List<Ability> abilities, double desirePerPoint, byte tier, uint? dueDate = null) 
-            : base(abilities, desirePerPoint, tier, dueDate){}
+        public IncreaseLabTotalHelper(ArtPair artPair, double desirePerPoint, byte tier, uint? dueDate = null)
+            : base(desirePerPoint, tier, dueDate)
+        {
+            List<Ability> abilities = new List<Ability>();
+            abilities.Add(Abilities.MagicTheory);
+            abilities.Add(artPair.Technique);
+            abilities.Add(artPair.Form);
+            _abilities = abilities;
+        }
 
         protected override double CalculateDesire(double increase)
         {
-            return increase * BaseDesire;
+            return BaseDesire * increase;
+        }
+
+        public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            if (BaseDueDate != null && BaseDueDate == 0)
+            {
+                return;
+            }
+            IEnumerable<IBook> readableBooks = character.ReadableBooks;
+            foreach (Ability ability in _abilities)
+            {
+                // Handle Reading
+                CharacterAbilityBase charAbility = character.GetAbility(ability);
+                var topicalBooks = readableBooks.Where(b => b.Topic == ability);
+                HandleReading(character, alreadyConsidered, topicalBooks);
+
+                // Handle Practice
+                if (!MagicArts.IsArt(ability))
+                {
+                    HandlePractice(character, alreadyConsidered, log, ability);
+                }
+                else if (character.GetType() == typeof(Magus))
+                {
+                    Magus mage = (Magus)character;
+                    HandleVisUse(mage, charAbility, alreadyConsidered, log);
+                    HandleAuras(mage, alreadyConsidered, log);
+                }
+            }
+        }
+
+        private void HandleAuras(Magus mage, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double greatestAura = mage.KnownAuras.Select(a => a.Strength).Max();
+            double currentAura = mage.Covenant.Aura.Strength;
+            if (greatestAura > currentAura)
+            {
+                Aura bestAura = mage.KnownAuras.Where(a => a.Strength == greatestAura).First();
+                if (mage.Laboratory == null)
+                {
+                    // just move the covenant right now
+                    log.Add("Since no lab built, moving to better aura.");
+                    mage.FoundCovenant(bestAura);
+                }
+                else
+                {
+                    // how do we want to rate the value of moving and having to build a new lab?
+                    // it seems like basically the same as any other single-month activity
+                    double gain = greatestAura - currentAura;
+                    double dueDateDesire = CalculateDesire(gain) / (BaseTier + 1);
+                    if (BaseDueDate != null)
+                    {
+                        if (BaseDueDate == 0)
+                        {
+                            return;
+                        }
+                        dueDateDesire /= (double)(BaseDueDate - 1);
+                    }
+                    log.Add("Moving to new aura (to boost lab total) worth " + dueDateDesire.ToString("0.00"));
+                    alreadyConsidered.Add(new BuildLaboratory(bestAura, Abilities.MagicTheory, dueDateDesire));
+                }
+            }
+            else
+            {
+                double auraCount = mage.KnownAuras.Count;
+                double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+                areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+                areaLore += mage.GetAttribute(AttributeType.Perception).Value;
+                double probOfBetter = 1 - (currentAura * currentAura * auraCount / (5 * areaLore));
+                double maxAura = Math.Sqrt(5.0 * areaLore / auraCount);
+                double averageGain = maxAura * probOfBetter / 2.0;
+
+                double dueDateDesire = CalculateDesire(averageGain) / (BaseTier + 1);
+                if (BaseDueDate != null)
+                {
+                    if (BaseDueDate == 0)
+                    {
+                        return;
+                    }
+                    dueDateDesire /= (double)(BaseDueDate - 1);
+                }
+
+                if (probOfBetter > 0)
+                {
+                    log.Add("Finding a better aura to build a lab in worth " + dueDateDesire.ToString("0.00"));
+                    alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
+                }
+            }
+        }
+    }
+
+    class LongevityRitualAbilitiesHelper : IncreaseLabTotalHelper
+    {
+        public LongevityRitualAbilitiesHelper(double desirePerPoint, byte tier, uint? dueDate = null) 
+            : base(MagicArtPairs.CrVi, desirePerPoint, tier, dueDate){}
+
+        protected override double CalculateDesire(double increase)
+        {
+            // for purposes of the longevity ritual, each season that we tarry
+            // means that we'll pay slightly more vis
+            // when we finally get around to the actual LR
+            return (increase * BaseDesire) - (BaseTier * 0.05);
+        }
+    }
+
+    /// <summary>
+    /// This is a specialized goal-like object used to figure out 
+    /// the value of increasing abilities relative to a certain lab spell/effect.
+    /// </summary>
+    class IncreaseLabTotalVersusEffectLevelHelper : IncreaseLabTotalHelper
+    {
+        private double _currentGain;
+        private double _effectLevel;
+        public IncreaseLabTotalVersusEffectLevelHelper(ArtPair artPair, double desire, double currentRate, double level, byte tier, uint? dueDate = null)
+            : base(artPair, desire, tier, dueDate)
+        {
+            _currentGain = currentRate;
+            _effectLevel = level;
+        }
+
+        protected override double CalculateDesire(double increase)
+        {
+            return (_currentGain + increase) * BaseDesire / ((_currentGain + increase) + _effectLevel);
+        }
+    }
+
+    class IncreaseAuraHelper
+    {
+        public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
+        private double _desirePerPoint;
+        private double _remainingTotal;
+
+        public IncreaseAuraHelper(double desirePerPoint, byte tier, uint? dueDate = null)
+        {
+            DueDate = dueDate;
+            Tier = tier;
+            _desirePerPoint = desirePerPoint;
+        }
+
+        public void ModifyActionList(Magus mage, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double dueDateDesire = _desirePerPoint / (Tier + 1);
+            if (DueDate != null)
+            {
+                if (DueDate == 0)
+                {
+                    log.Add("Has Covenant Condition failed");
+                    return;
+                }
+                dueDateDesire /= (double)DueDate;
+            }
+
+            double currentAura = mage.Covenant.Aura.Strength;
+            double auraCount = mage.KnownAuras.Count;
+            double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+            areaLore += mage.GetAttribute(AttributeType.Perception).Value;
+            double probOfBetter = 1 - (currentAura * currentAura * auraCount / (5 * areaLore));
+            double maxAura = Math.Sqrt(5.0 * areaLore / auraCount);
+            double averageGain = maxAura * probOfBetter / 2.0;
+            
+            if (probOfBetter > 0)
+            {
+                double desire = dueDateDesire * averageGain / _remainingTotal;
+                log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.00"));
+                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+            }
         }
     }
     #endregion

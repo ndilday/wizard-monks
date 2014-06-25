@@ -35,15 +35,16 @@ namespace WizardMonks
 
         private List<Feature> _features;
         private Magus _owner;
-
+        private Aura _aura;
         private double _availableRefinement;
 
-        public Laboratory(Magus owner, double size) : base()
+        public Laboratory(Magus owner, Aura aura, double size) : base()
         {
             _features = new List<Feature>();
             _owner = owner;
             Size = size;
             _availableRefinement = size;
+            _aura = aura;
         }
 
         public double GetModifier(ArtPair artPair, Activity activity)
@@ -61,6 +62,7 @@ namespace WizardMonks
             {
                 totalModifier += ActivityModifiers[activity];
             }
+            totalModifier += _aura.Strength;
             return totalModifier;
         }
 

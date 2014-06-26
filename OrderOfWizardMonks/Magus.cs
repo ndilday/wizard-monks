@@ -363,6 +363,7 @@ namespace WizardMonks
 
         private void ProcessVisOffers(List<VisTradeOffer> offers)
         {
+            IEnumerable<VisTradeOffer> internalOffers = offers;
             // now we have to determine which offers to accept
             // as a first pass at an algorithm, 
             // we'll sort according to amount of vis needed, 
@@ -370,31 +371,36 @@ namespace WizardMonks
 
             // the front of the desires list should be the type we most want
             // the front of the stocks list should be what we most want to give up in trade
-            var prioritizedVisDesires = _tradeDesires.VisDesires.Where(v => v.Quantity > 0).OrderByDescending(v => v.Quantity);
-            var prioritizedVisStocks = _tradeDesires.VisDesires.Where(v => v.Quantity < 0).OrderBy(v => v.Quantity);
-            foreach (VisDesire desire in prioritizedVisDesires)
+            do
             {
-                foreach (VisDesire stock in prioritizedVisStocks)
+                var prioritizedVisDesires = _tradeDesires.VisDesires.Where(v => v.Quantity > 0).OrderByDescending(v => v.Quantity);
+                var prioritizedVisStocks = _tradeDesires.VisDesires.Where(v => v.Quantity < 0).OrderBy(v => v.Quantity);
+                var mostDesired = prioritizedVisDesires.FirstOrDefault();
+                var mostOverstocked = prioritizedVisStocks.FirstOrDefault();
+                var bestOffers = from offer in internalOffers
+                                 join visDesire in _tradeDesires.VisDesires on offer.Ask.Art equals visDesire.Art
+                                 join visStock in _tradeDesires.VisDesires on offer.Bid.Art equals visStock.Art
+                                 orderby visDesire.Quantity descending, visStock.Quantity, offer.Ask.Quantity
+                                 select offer;
+                if (bestOffers.Any())
                 {
-                    var bestOffers = offers.Where(o => o.Bid.Art == stock.Art && o.Ask.Art == desire.Art).OrderBy(o => o.Ask.Quantity);
-                    if (bestOffers.Any())
+                    var offer = bestOffers.First();
+                    if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
                     {
-                        foreach (VisTradeOffer offer in bestOffers)
-                        {
-                            if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
-                            {
-                                Log.Add("Executing vis trade with " + offer.Mage.Name);
-                                Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
-                                Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
-                                offer.Execute();
-                                GainVis(offer.Ask.Art, offer.Ask.Quantity);
-                                UseVis(offer.Bid.Art, offer.Bid.Quantity);
-                                offers.Remove(offer);
-                            }
-                        }
+                        Log.Add("Executing vis trade with " + offer.Mage.Name);
+                        Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
+                        Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                        offer.Execute();
+                        offers.Remove(offer);
+                        GainVis(offer.Ask.Art, offer.Ask.Quantity);
+                        mostDesired.Quantity -= offer.Ask.Quantity;
+                        internalOffers = internalOffers.Where(o => o.Ask.Art != mostDesired.Art || o.Ask.Quantity <= mostDesired.Quantity);
+                        UseVis(offer.Bid.Art, offer.Bid.Quantity);
+                        mostOverstocked.Quantity += offer.Bid.Quantity;
+                        internalOffers = internalOffers.Where(o => o.Bid.Art != mostOverstocked.Art || o.Bid.Quantity <= Math.Abs(mostOverstocked.Quantity));
                     }
                 }
-            }
+            } while (internalOffers.Any());
         }
 
         private void ProcessBookOffers(IEnumerable<BookTradeOffer> bookTradeOffers, IEnumerable<BookVisOffer> bookBuys, IEnumerable<BookVisOffer> bookSales)
@@ -505,6 +511,10 @@ namespace WizardMonks
             foreach (IGoal goal in _goals)
             {
                 goal.ModifyVisNeeds(this, desires);
+            }
+            foreach (VisDesire desire in desires)
+            {
+                desire.Quantity = Math.Truncate(desire.Quantity * 2.0) / 2.0;
             }
 
             return desires;

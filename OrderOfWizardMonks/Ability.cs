@@ -19,6 +19,8 @@ namespace WizardMonks
         [DataMember]
 		Martial,
         [DataMember]
+        Mystery,
+        [DataMember]
 		Social,
         [DataMember]
 		Supernatural,

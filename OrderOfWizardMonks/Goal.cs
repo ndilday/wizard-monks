@@ -1004,7 +1004,6 @@ namespace WizardMonks
     class InventSpellGoal : IGoal
     {
         private LabScoreGoal _labScoreGoal;
-        private List<Ability> _abilitiesRequired;
         private Spell _spell;
 
         public uint? DueDate { get; private set; }
@@ -1310,7 +1309,7 @@ namespace WizardMonks
             return null;
         }
 
-        public HasApprenticeCondition(double desire, byte tier, uint? dueDate = null)
+        public HasApprenticeCondition(double desire = 1, byte tier = 0, uint? dueDate = null)
         {
             DueDate = dueDate;
             Tier = tier;
@@ -1679,7 +1678,6 @@ namespace WizardMonks
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
         private double _desirePerPoint;
-        private double _remainingTotal;
 
         public IncreaseAuraHelper(double desirePerPoint, byte tier, uint? dueDate = null)
         {
@@ -1712,7 +1710,7 @@ namespace WizardMonks
             
             if (probOfBetter > 0)
             {
-                double desire = dueDateDesire * averageGain / _remainingTotal;
+                double desire = dueDateDesire * averageGain;
                 log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.00"));
                 alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
             }

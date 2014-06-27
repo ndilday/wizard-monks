@@ -54,11 +54,17 @@ namespace WizardMonks.Instances
 
         public static void BuildBjornaer()
         {
-            List<Ability> abilityList = new List<Ability>();
-            abilityList.Add(MagicArts.Animal);
-            AbilityScoreCondition goal = new AbilityScoreCondition(abilityList, 20, 10);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Animal, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
+
+            HasApprenticeCondition apprentice = new HasApprenticeCondition();
+            goals.Add(apprentice);
+
+            goal = new AbilityScoreCondition(Abilities.BjornaerLore, 5, 1.01);
+            goals.Add(goal);
+
+            goal = new AbilityScoreCondition(Abilities.Heartbeast, 5, 1.02);
 
             Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Bjornaer.Name = "Bjornaer";
@@ -74,13 +80,13 @@ namespace WizardMonks.Instances
 
             Bjornaer.GetAbility(MagicArts.Creo).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Intellego).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Muto).AddExperience(55);
+            Bjornaer.GetAbility(MagicArts.Muto).AddExperience(15);
             Bjornaer.GetAbility(MagicArts.Perdo).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Rego).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Animal).AddExperience(55);
+            Bjornaer.GetAbility(MagicArts.Animal).AddExperience(15);
             Bjornaer.GetAbility(MagicArts.Aquam).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Auram).AddExperience(0);
-            Bjornaer.GetAbility(MagicArts.Corpus).AddExperience(55);
+            Bjornaer.GetAbility(MagicArts.Corpus).AddExperience(15);
             Bjornaer.GetAbility(MagicArts.Herbam).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Ignem).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Imaginem).AddExperience(0);
@@ -91,17 +97,22 @@ namespace WizardMonks.Instances
             Bjornaer.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Bjornaer.GetAbility(Abilities.English).AddExperience(75);
             Bjornaer.GetAbility(Abilities.Etiquette).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.Latin).AddExperience(30);
+            Bjornaer.GetAbility(Abilities.Latin).AddExperience(50);
             Bjornaer.GetAbility(Abilities.MagicTheory).AddExperience(30);
             Bjornaer.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Bjornaer.GetAbility(Abilities.Penetration).AddExperience(0);
             Bjornaer.GetAbility(Abilities.Concentration).AddExperience(0);
+            Bjornaer.GetAbility(Abilities.Heartbeast).AddExperience(30);
+            Bjornaer.GetAbility(Abilities.BjornaerLore).AddExperience(75);
         }
 
         public static void BuildBonisagus()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 10, 10);
+            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 10, 1);
             List<IGoal> goals = new List<IGoal>();
+            goals.Add(goal);
+
+            HasApprenticeCondition apprentice = new HasApprenticeCondition();
             goals.Add(goal);
 
             Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -144,15 +155,18 @@ namespace WizardMonks.Instances
 
         public static void BuildCriamon()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 6);
+            AbilityScoreCondition goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
             
-            goal = new AbilityScoreCondition(Abilities.AreaLore, 5, 50);
+            goal = new AbilityScoreCondition(Abilities.EnigmaticWisdom, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 40);
+            goal = new AbilityScoreCondition(Abilities.CriamonLore, 5, 1);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Criamon.Name = "Criamon";
@@ -189,7 +203,9 @@ namespace WizardMonks.Instances
             Criamon.GetAbility(Abilities.MagicTheory).AddExperience(50);
             Criamon.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Criamon.GetAbility(Abilities.Penetration).AddExperience(0);
-            Criamon.GetAbility(Abilities.Concentration).AddExperience(75);
+            Criamon.GetAbility(Abilities.Concentration).AddExperience(30);
+            Criamon.GetAbility(Abilities.EnigmaticWisdom).AddExperience(15);
+            Criamon.GetAbility(Abilities.CriamonLore).AddExperience(30);
         }
 
         public static void BuildDiedne()
@@ -198,44 +214,47 @@ namespace WizardMonks.Instances
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 1.05);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 1.05);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 1.05);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 1.05);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Animal, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Animal, 5, 1.05);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Aquam, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Aquam, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Corpus, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Corpus, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Herbam, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Herbam, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Ignem, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Ignem, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Imaginem, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Imaginem, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Mentem, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Mentem, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Terram, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Terram, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Vim, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Vim, 5, 1);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Diedne.Name = "Diedne";
@@ -277,15 +296,18 @@ namespace WizardMonks.Instances
 
         public static void BuildFlambeau()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Ignem, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Ignem, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 1);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Flambeau.Name = "Flambeau";
@@ -327,15 +349,18 @@ namespace WizardMonks.Instances
 
         public static void BuildGuernicus()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Terram, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Terram, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.CodeOfHermes, 5, 1.5);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.MagicTheory, 5, 1);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Guernicus.Name = "Guernicus";
@@ -371,21 +396,27 @@ namespace WizardMonks.Instances
             Guernicus.GetAbility(Abilities.Latin).AddExperience(75);
             Guernicus.GetAbility(Abilities.MagicTheory).AddExperience(50);
             Guernicus.GetAbility(Abilities.ParmaMagica).AddExperience(5);
-            Guernicus.GetAbility(Abilities.Penetration).AddExperience(5);
+            Guernicus.GetAbility(Abilities.CodeOfHermes).AddExperience(5);
             Guernicus.GetAbility(Abilities.Concentration).AddExperience(5);
         }
 
         public static void BuildJerbiton()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Imaginem, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Imaginem, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.ArtesLiberales, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.Etiquette, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.Etiquette, 5, 1);
             goals.Add(goal);
+
+            goal = new AbilityScoreCondition(Abilities.Finesse, 5, 1.01);
+            goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Jerbiton.Name = "Jerbiton";
@@ -422,17 +453,20 @@ namespace WizardMonks.Instances
             Jerbiton.GetAbility(Abilities.MagicTheory).AddExperience(30);
             Jerbiton.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Jerbiton.GetAbility(Abilities.Penetration).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.Concentration).AddExperience(15);
+            Jerbiton.GetAbility(Abilities.Finesse).AddExperience(15);
         }
 
         public static void BuildMercere()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Mentem, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Mentem, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
             goal = new AbilityScoreCondition(Abilities.Etiquette, 5, 5);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Mercere.Name = "Mercere";
@@ -474,26 +508,26 @@ namespace WizardMonks.Instances
 
         public static void BuildMerinita()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Herbam, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Herbam, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Animal, 15, 5);
+            goal = new AbilityScoreCondition(MagicArts.Animal, 15, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Creo, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Creo, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 1);
             goals.Add(goal);
 
             Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -508,11 +542,11 @@ namespace WizardMonks.Instances
             Merinita.GetAttribute(AttributeType.Presence).BaseValue = 3;
             Merinita.GetAttribute(AttributeType.Perception).BaseValue = 0;
 
-            Merinita.GetAbility(MagicArts.Creo).AddExperience(15);
+            Merinita.GetAbility(MagicArts.Creo).AddExperience(10);
             Merinita.GetAbility(MagicArts.Intellego).AddExperience(15);
             Merinita.GetAbility(MagicArts.Muto).AddExperience(15);
             Merinita.GetAbility(MagicArts.Perdo).AddExperience(10);
-            Merinita.GetAbility(MagicArts.Rego).AddExperience(15);
+            Merinita.GetAbility(MagicArts.Rego).AddExperience(10);
             Merinita.GetAbility(MagicArts.Animal).AddExperience(0);
             Merinita.GetAbility(MagicArts.Aquam).AddExperience(0);
             Merinita.GetAbility(MagicArts.Auram).AddExperience(0);
@@ -523,15 +557,15 @@ namespace WizardMonks.Instances
             Merinita.GetAbility(MagicArts.Mentem).AddExperience(0);
             Merinita.GetAbility(MagicArts.Terram).AddExperience(15);
             Merinita.GetAbility(MagicArts.Vim).AddExperience(0);
-            Merinita.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Merinita.GetAbility(Abilities.AreaLore).AddExperience(15);
             Merinita.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Merinita.GetAbility(Abilities.English).AddExperience(75);
             Merinita.GetAbility(Abilities.Etiquette).AddExperience(15);
             Merinita.GetAbility(Abilities.Latin).AddExperience(50);
             Merinita.GetAbility(Abilities.MagicTheory).AddExperience(15);
-            Merinita.GetAbility(Abilities.ParmaMagica).AddExperience(15);
+            Merinita.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Merinita.GetAbility(Abilities.Penetration).AddExperience(0);
-            Merinita.GetAbility(Abilities.Concentration).AddExperience(15);
+            Merinita.GetAbility(Abilities.MerinitaLore).AddExperience(50);
         }
 
         public static void BuildTremere()
@@ -540,10 +574,10 @@ namespace WizardMonks.Instances
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.ParmaMagica, 5, 1);
             goals.Add(goal);
 
             Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
@@ -586,18 +620,21 @@ namespace WizardMonks.Instances
 
         public static void BuildTytalus()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Rego, 20, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Rego, 20, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Mentem, 10, 5);
+            goal = new AbilityScoreCondition(MagicArts.Mentem, 10, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.Penetration, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(Abilities.Finesse, 5, 5);
+            goal = new AbilityScoreCondition(Abilities.Finesse, 5, 1);
             goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Tytalus.Name = "Tytalus";
@@ -639,21 +676,30 @@ namespace WizardMonks.Instances
 
         public static void BuildVerditius()
         {
-            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 5);
+            AbilityScoreCondition goal = new AbilityScoreCondition(MagicArts.Intellego, 5, 1);
             List<IGoal> goals = new List<IGoal>();
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Muto, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Perdo, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 5);
+            goal = new AbilityScoreCondition(MagicArts.Rego, 5, 1);
             goals.Add(goal);
 
-            goal = new AbilityScoreCondition(MagicArts.Terram, 20, 5);
+            goal = new AbilityScoreCondition(MagicArts.Terram, 20, 1);
             goals.Add(goal);
+
+            goal = new AbilityScoreCondition(Abilities.Philosophae, 4, 1);
+            goals.Add(goal);
+
+            goal = new AbilityScoreCondition(Abilities.Craft, 5, 1);
+            goals.Add(goal);
+
+            HasApprenticeCondition app = new HasApprenticeCondition();
+            goals.Add(app);
 
             Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Verditius.Name = "Verditius";
@@ -688,9 +734,10 @@ namespace WizardMonks.Instances
             Verditius.GetAbility(Abilities.Etiquette).AddExperience(30);
             Verditius.GetAbility(Abilities.Latin).AddExperience(75);
             Verditius.GetAbility(Abilities.MagicTheory).AddExperience(30);
-            Verditius.GetAbility(Abilities.ParmaMagica).AddExperience(15);
-            Verditius.GetAbility(Abilities.Penetration).AddExperience(15);
-            Verditius.GetAbility(Abilities.Concentration).AddExperience(15);
+            Verditius.GetAbility(Abilities.ParmaMagica).AddExperience(5);
+            Verditius.GetAbility(Abilities.Penetration).AddExperience(5);
+            Verditius.GetAbility(Abilities.Craft).AddExperience(30);
+            Verditius.GetAbility(Abilities.Philosophae).AddExperience(5);
         }
     }
 }

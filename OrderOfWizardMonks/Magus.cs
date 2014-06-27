@@ -391,13 +391,17 @@ namespace WizardMonks
                         Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
                         Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
                         offer.Execute();
-                        offers.Remove(offer);
+                        internalOffers = internalOffers.Where(o => o != offer);
                         GainVis(offer.Ask.Art, offer.Ask.Quantity);
                         mostDesired.Quantity -= offer.Ask.Quantity;
                         internalOffers = internalOffers.Where(o => o.Ask.Art != mostDesired.Art || o.Ask.Quantity <= mostDesired.Quantity);
                         UseVis(offer.Bid.Art, offer.Bid.Quantity);
                         mostOverstocked.Quantity += offer.Bid.Quantity;
                         internalOffers = internalOffers.Where(o => o.Bid.Art != mostOverstocked.Art || o.Bid.Quantity <= Math.Abs(mostOverstocked.Quantity));
+                    }
+                    else
+                    {
+                        internalOffers = internalOffers.Where(o => o != offer);
                     }
                 }
             } while (internalOffers.Any());
@@ -459,6 +463,7 @@ namespace WizardMonks
                     buyOffer.Mage.GainVis(buyOffer.VisArt, buyOffer.VisQuantity);
                     UseVis(buyOffer.VisArt, buyOffer.VisQuantity);
                 }
+                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
             }
         }
         #endregion
@@ -526,19 +531,22 @@ namespace WizardMonks
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            if (_visStock[visType] + Covenant.GetVis(visType) < amount)
+            if (_visStock[visType] + (Covenant == null ? 0 : Covenant.GetVis(visType)) < amount)
             {
                 throw new ArgumentException("Insufficient vis available!");
             }
-            double covVis = Covenant.GetVis(visType);
+            double covVis = Covenant == null ? 0 : Covenant.GetVis(visType);
             if (covVis >= amount)
             {
                 Covenant.RemoveVis(visType, amount);
             }
             else
             {
-                amount -= covVis;
-                Covenant.RemoveVis(visType, covVis);
+                if (Covenant != null)
+                {
+                    amount -= covVis;
+                    Covenant.RemoveVis(visType, covVis);
+                }
                 _visStock[visType] -= amount;
             }
             return _visStock[visType];

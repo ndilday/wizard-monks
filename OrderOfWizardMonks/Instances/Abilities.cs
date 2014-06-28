@@ -57,12 +57,12 @@ namespace WizardMonks.Instances
 
             Warping = new Ability(-1, AbilityType.Arcane, "Warping");
 
-            EnigmaticWisdom = new Ability(300, AbilityType.Mystery, "Enigmatic Wisdom");
-            CriamonLore = new Ability(150, AbilityType.General, "Criamon Lore");
-            Heartbeast = new Ability(301, AbilityType.Mystery, "Heartbeast");
-            BjornaerLore = new Ability(151, AbilityType.General, "Bjornaer Lore");
-            MerinitaLore = new Ability(152, AbilityType.General, "Merinita Lore");
-            VerditiusLore = new Ability(153, AbilityType.General, "Verditius Lore");
+            EnigmaticWisdom = new Ability(150, AbilityType.Supernatural, "Enigmatic Wisdom");
+            CriamonLore = new Ability(50, AbilityType.General, "Criamon Lore");
+            Heartbeast = new Ability(151, AbilityType.Supernatural, "Heartbeast");
+            BjornaerLore = new Ability(51, AbilityType.General, "Bjornaer Lore");
+            MerinitaLore = new Ability(52, AbilityType.General, "Merinita Lore");
+            VerditiusLore = new Ability(53, AbilityType.General, "Verditius Lore");
         }
 
         public static IEnumerable<Ability> GetEnumerator()

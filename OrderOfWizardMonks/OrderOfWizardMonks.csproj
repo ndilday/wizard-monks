@@ -74,6 +74,7 @@
     <Compile Include="Book.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Goal.cs" />
+    <Compile Include="GoalHelpers.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />
     <Compile Include="Covenant.cs" />
     <Compile Include="Dice.cs" />

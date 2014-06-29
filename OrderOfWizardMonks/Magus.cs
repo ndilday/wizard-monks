@@ -325,6 +325,11 @@ namespace WizardMonks
                         Log.Add("Executing vis trade with " + offer.Mage.Name);
                         Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
                         Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                        offer.Mage.Log.Add("Executing vis trade with " + Name);
+                        offer.Mage.Log.Add("Trading " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                        offer.Mage.Log.Add("for " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
+                        
+                        
                         offer.Execute();
                         internalOffers = internalOffers.Where(o => o != offer);
                         GainVis(offer.Ask.Art, offer.Ask.Quantity);
@@ -353,6 +358,9 @@ namespace WizardMonks
                 {
                     Log.Add("Trading " + tradeOffer.BookOffered.Title + " to " + tradeOffer.Mage.Name);
                     Log.Add("For " + tradeOffer.BookDesired.Title);
+                    tradeOffer.Mage.Log.Add("Trading " + tradeOffer.BookDesired.Title + " to " + Name);
+                    tradeOffer.Mage.Log.Add("For " + tradeOffer.BookOffered.Title);
+
                     AddBookToCollection(tradeOffer.BookDesired);
                     tradeOffer.Mage.RemoveBookFromCollection(tradeOffer.BookDesired);
                     RemoveBookFromCollection(tradeOffer.BookOffered);
@@ -377,6 +385,9 @@ namespace WizardMonks
                 {
                     Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.Mage.Name);
                     Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
+                    sellOffer.Mage.Log.Add("Buying " + sellOffer.BookDesired.Title + " from " + Name);
+                    sellOffer.Mage.Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
+
                     sellOffer.Mage.AddBookToCollection(sellOffer.BookDesired);
                     RemoveBookFromCollection(sellOffer.BookDesired);
                     sellOffer.Mage.UseVis(sellOffer.VisArt, sellOffer.VisQuantity);
@@ -393,6 +404,9 @@ namespace WizardMonks
                 {
                     Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.Mage.Name);
                     Log.Add("for " + buyOffer.VisQuantity.ToString("0.00") + " pawns of " + buyOffer.VisArt.AbilityName + " vis");
+                    buyOffer.Mage.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
+                    buyOffer.Mage.Log.Add("for " + buyOffer.VisQuantity.ToString("0.00") + " pawns of " + buyOffer.VisArt.AbilityName + " vis");
+
                     buyOffer.Mage.RemoveBookFromCollection(buyOffer.BookDesired);
                     AddBookToCollection(buyOffer.BookDesired);
                     buyOffer.Mage.GainVis(buyOffer.VisArt, buyOffer.VisQuantity);

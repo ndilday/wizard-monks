@@ -519,7 +519,7 @@ namespace WizardMonks
         /// <param name="ability"></param>
         /// <param name="gain"></param>
         /// <returns>the season equivalence of this gain</returns>
-        protected virtual double RateSeasonalExperienceGain(Ability ability, double gain)
+        public virtual double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             if (MagicArts.IsArt(ability))
             {

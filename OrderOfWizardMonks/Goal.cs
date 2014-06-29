@@ -489,7 +489,115 @@ namespace WizardMonks
             return _abilityScoreCondition.GetBookNeeds(character);
         }
     }
-    
+
+    class SummaGoal : IGoal
+    {
+        // TODO: for now, writing goals are going to assume that 
+        // the ability to write the book in question is already in place
+        private string _name;
+        private bool _isArt;
+
+        private AbilityScoreCondition _abilityScoreCondition;
+        private AbilityScoreCondition _writingAbilityCondition;
+        private AbilityScoreCondition _languageAbilityCondition;
+
+        public Ability Topic { get; private set; }
+        public double Desire { get; set; }
+        public byte Tier { get; private set; }
+        public uint? DueDate { get; private set; }
+        public double Level { get; private set; }
+
+        public SummaGoal(Ability topic, double level, string name, byte tier = 0, uint? dueDate = null)
+        {
+            Topic = topic;
+            Tier = tier;
+            DueDate = dueDate;
+            Level = level;
+
+            _name = name;
+            _isArt = MagicArts.IsArt(topic);
+
+            _writingAbilityCondition = new AbilityScoreCondition(Abilities.ArtesLiberales, 1, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 3);
+            _languageAbilityCondition = new AbilityScoreCondition(Abilities.Latin, 5, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 2);
+            double scoreNeeded = level * 2.0;
+            if(scoreNeeded < 2)
+            {
+                scoreNeeded = 2;
+            }
+            _abilityScoreCondition = new AbilityScoreCondition(topic, scoreNeeded, 0, (byte)(tier + 1), dueDate == null ? null : dueDate - 1);
+        }
+
+        public bool IsComplete(Character character)
+        {
+            return character.HasWrittenBookWithTitle(_name);
+        }
+
+        public bool DecrementDueDate()
+        {
+            if (DueDate != null)
+            {
+                return
+                    _abilityScoreCondition.DecrementDueDate() &&
+                    _languageAbilityCondition.DecrementDueDate() &&
+                    _writingAbilityCondition.DecrementDueDate() &&
+                    --DueDate != 0;
+            }
+            return true;
+        }
+
+        public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double desire = CalculateDesire(character);
+            bool alDone = _writingAbilityCondition.IsComplete(character);
+            bool latinDone = _languageAbilityCondition.IsComplete(character);
+            bool abilityDone = _abilityScoreCondition.IsComplete(character);
+            if (!alDone)
+            {
+                _writingAbilityCondition.Desire = desire;
+                _writingAbilityCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (!latinDone)
+            {
+                _languageAbilityCondition.Desire = desire;
+                _languageAbilityCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (!abilityDone)
+            {
+                _abilityScoreCondition.Desire = desire;
+                _abilityScoreCondition.ModifyActionList(character, alreadyConsidered, log);
+            }
+            if (abilityDone && latinDone && alDone)
+            {
+                alreadyConsidered.Add(new Writing(Topic, _name, Abilities.Latin, Level, desire));
+            }
+        }
+
+        private double CalculateDesire(Character character)
+        {
+            double quality = character.GetAttribute(AttributeType.Communication).Value + 6;
+            // assuming someone half as skilled as the book provides
+            double expValue = Level * (Level + 1) / 4.0;
+            double bookSeasons = expValue / quality;
+            double value =  character.RateSeasonalExperienceGain(Topic, quality) * bookSeasons;
+            double seasons = Level / (character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Latin).Value);
+            return value / seasons;
+        }
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            _abilityScoreCondition.ModifyVisNeeds(character, desires);
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            if(IsComplete(character))
+            {
+                return null;
+            }
+            return _abilityScoreCondition.GetBookNeeds(character);
+        }
+    }
+
     class LabScoreGoal : IGoal
     {
         private HasLabCondition _hasLabCondition;

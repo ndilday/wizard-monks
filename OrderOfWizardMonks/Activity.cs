@@ -264,7 +264,11 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Writing on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
+            if (Level == 1000)
+            {
+                return "Writing tractatus on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
+            }
+            return "Writing summa on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
         }
     }
 

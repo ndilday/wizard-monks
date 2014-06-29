@@ -146,7 +146,9 @@ namespace WizardMonks
                     {
                         if (BookDesires.ContainsKey(theirBook.Book.Topic) &&
                             Mage.ValidToRead(theirBook.Book) &&
-                            theirBook.Book.Quality == book.Book.Quality)
+                            theirBook.Book.Quality == book.Book.Quality &&
+                            theirBook.Book.Level <= book.Book.Level + 1.0 &&
+                            theirBook.Book.Level >= book.Book.Level - 1.0)
                         {
                             tradeList.Add(new BookTradeOffer(tradeDesires.Mage, book.Book, theirBook.Book));
                         }

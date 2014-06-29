@@ -28,7 +28,7 @@ namespace WizardMonks
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
         private MagusTradingDesires _tradeDesires;
-        //private List<WritingGoal> _summaGoals;
+        private List<SummaGoal> _summaGoals;
         private List<TractatusGoal> _tractatusGoals;
         #endregion
 
@@ -52,6 +52,7 @@ namespace WizardMonks
             _visStock = new Dictionary<Ability, double>();
             SpellList = new List<Spell>();
             _tractatusGoals = new List<TractatusGoal>();
+            _summaGoals = new List<SummaGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
             foreach (Ability art in MagicArts.GetEnumerator())
@@ -144,7 +145,7 @@ namespace WizardMonks
         /// <param name="ability"></param>
         /// <param name="gain"></param>
         /// <returns>the vis equivalence (vis savings) of this gain relative to vis study</returns>
-        protected override double RateSeasonalExperienceGain(Ability ability, double gain)
+        public override double RateSeasonalExperienceGain(Ability ability, double gain)
         {
             if (!MagicArts.IsArt(ability))
             {
@@ -226,9 +227,14 @@ namespace WizardMonks
                     _tractatusGoals.Add(tractGoal);
                     _goals.Add(tractGoal);
                 }
-                if (charAbility.Value > bookDesire.CurrentLevel / 2.0)
+                // don't add a summa goal if we already have one for this topic in progress
+                if (charAbility.Value > (bookDesire.CurrentLevel * 2.0) + 2 && !_summaGoals.Where(s => !s.IsComplete(this) && s.Topic == charAbility.Ability).Any())
                 {
                     // add summa goal to both goal list and writing goal list
+                    string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
+                    SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, charAbility.Value / 2.0, name);
+                    _goals.Add(summaGoal);
+                    _summaGoals.Add(summaGoal);
                 }
             }
         }

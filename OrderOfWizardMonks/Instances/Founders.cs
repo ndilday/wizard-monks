@@ -68,6 +68,7 @@ namespace WizardMonks.Instances
 
             Bjornaer = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Bjornaer.Name = "Bjornaer";
+            Bjornaer.House = Houses.Bjornaer;
 
             Bjornaer.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Bjornaer.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -117,6 +118,7 @@ namespace WizardMonks.Instances
 
             Bonisgaus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Bonisgaus.Name = "Bonisagus";
+            Bonisgaus.House = Houses.Bonisagus;
 
             Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -170,6 +172,7 @@ namespace WizardMonks.Instances
 
             Criamon = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Criamon.Name = "Criamon";
+            Criamon.House = Houses.Criamon;
 
             Criamon.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Criamon.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -258,6 +261,7 @@ namespace WizardMonks.Instances
 
             Diedne = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Diedne.Name = "Diedne";
+            Diedne.House = Houses.Diedne;
 
             Diedne.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Diedne.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -311,6 +315,7 @@ namespace WizardMonks.Instances
 
             Flambeau = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Flambeau.Name = "Flambeau";
+            Flambeau.House = Houses.Flambeau;
 
             Flambeau.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Flambeau.GetAttribute(AttributeType.Strength).BaseValue = 2;
@@ -364,6 +369,7 @@ namespace WizardMonks.Instances
 
             Guernicus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Guernicus.Name = "Guernicus";
+            Guernicus.House = Houses.Guernicus;
 
             Guernicus.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Guernicus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -420,6 +426,7 @@ namespace WizardMonks.Instances
 
             Jerbiton = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Jerbiton.Name = "Jerbiton";
+            Jerbiton.House = Houses.Jerbiton;
 
             Jerbiton.GetAttribute(AttributeType.Stamina).BaseValue = -1;
             Jerbiton.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -470,6 +477,7 @@ namespace WizardMonks.Instances
 
             Mercere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Mercere.Name = "Mercere";
+            Mercere.House = Houses.Mercere;
 
             Mercere.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Mercere.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -532,6 +540,7 @@ namespace WizardMonks.Instances
 
             Merinita = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Merinita.Name = "Merinita";
+            Merinita.House = Houses.Merinita;
 
             Merinita.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Merinita.GetAttribute(AttributeType.Strength).BaseValue = -1;
@@ -582,6 +591,7 @@ namespace WizardMonks.Instances
 
             Tremere = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Tremere.Name = "Tremere";
+            Tremere.House = Houses.Tremere;
 
             Tremere.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Tremere.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -638,6 +648,7 @@ namespace WizardMonks.Instances
 
             Tytalus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Tytalus.Name = "Tytalus";
+            Tytalus.House = Houses.Tytalus;
 
             Tytalus.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Tytalus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -703,6 +714,7 @@ namespace WizardMonks.Instances
 
             Verditius = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, goals, 80);
             Verditius.Name = "Verditius";
+            Verditius.House = Houses.Verditius;
 
             Verditius.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Verditius.GetAttribute(AttributeType.Strength).BaseValue = 0;

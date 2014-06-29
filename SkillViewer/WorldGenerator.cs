@@ -23,6 +23,7 @@ namespace SkillViewer
         private Ability _areaLore;
         private Die _die = new Die();
         private List<string> _log;
+        private Random _rand = new Random();
 
         public WorldGenerator()
         {
@@ -148,12 +149,12 @@ namespace SkillViewer
                 } );
             _log.Add("Done Advancing Season");
             _log.Add("Considering vis and book trades");
-            var magiDesires = _magusArray.Where(m => m != null).Select(m => m.GetTradingDesires());
-            foreach (Magus mage in _magusArray)
+            var magiDesires = _magusArray.Where(m => m != null).Select(m => m.GenerateTradingDesires()).ToList();
+            foreach (Magus mage in _magusArray.OrderBy(m => _rand.NextDouble()))
             {
                 if (mage == null) continue;
                 mage.EvaluateTradingDesires(magiDesires);
-                magiDesires = magiDesires.Where(d => d.Mage != mage);
+                magiDesires = magiDesires.Where(d => d.Mage != mage).ToList();
             }
             _log.Add("Done considering vis and book trades");
             btnAdvance.Enabled = true;

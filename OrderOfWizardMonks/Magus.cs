@@ -36,7 +36,7 @@ namespace WizardMonks
         public Magus Apprentice { get; private set; }
         public Laboratory Laboratory { get; private set; }
         public List<Spell> SpellList { get; private set; }
-        public Houses House { get; private set; }
+        public Houses House { get; set; }
         public Covenant Covenant { get; private set; }
         public Arts Arts { get; private set; }
         #endregion
@@ -211,6 +211,9 @@ namespace WizardMonks
         
         private void AddWritingGoals(MagusTradingDesires tradingDesires)
         {
+            // TODO: right now, this logic is causing characters to start trying to learn skills
+            // they have no interest in so that they can write a book to sell off
+            // this may not be inherently wrong, but it should certainly be the case that more attractive choices always exist
             foreach (BookDesire bookDesire in tradingDesires.BookDesires.Values)
             {
                 CharacterAbilityBase charAbility = GetAbility(bookDesire.Ability);
@@ -230,7 +233,7 @@ namespace WizardMonks
             }
         }
 
-        public MagusTradingDesires GetTradingDesires()
+        public MagusTradingDesires GenerateTradingDesires()
         {
             _tradeDesires = new MagusTradingDesires(
                 this,
@@ -238,6 +241,10 @@ namespace WizardMonks
                 GetBookDesires().Distinct(),
                 EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection())
             );
+            if (_tradeDesires == null)
+            {
+                throw new NullReferenceException();
+            }
             return _tradeDesires;
         }
 
@@ -356,7 +363,7 @@ namespace WizardMonks
                 }
             }
 
-            var sales = bookSales.OrderBy(bto => bto.VisQuantity);
+            var sales = bookSales.OrderByDescending(bto => bto.VisQuantity);
             while (sales.Any() )
             {
                 var sellOffer = sales.First();
@@ -372,7 +379,7 @@ namespace WizardMonks
                 sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
             }
 
-            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality);
+            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisQuantity);
             while (buys.Any())
             {
                 var buyOffer = buys.First();

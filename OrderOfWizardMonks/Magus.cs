@@ -114,84 +114,6 @@ namespace WizardMonks
             return books;
         }
 
-        public override EvaluatedBook RateBestBookToWrite()
-        {
-            EvaluatedBook bestBook = base.RateBestBookToWrite();
-            foreach (Ability art in MagicArts.GetEnumerator())
-            {
-                bestBook = RateAgainstBestBook(bestBook, Arts.GetAbility(art));
-            }
-            return bestBook;
-        }
-
-        protected override EvaluatedBook RateSummaAgainstBestBook(EvaluatedBook bestBook, CharacterAbilityBase ability)
-        {
-            if (MagicArts.IsArt(ability.Ability))
-            {
-                // calculate summa value
-                // TODO: how to decide what audience the magus is writing for?
-                // when art > 10, magus will write a /2 book
-                // when art >=20, magus will write a /4 book
-                if (ability.Value >= 10)
-                {
-                    // start with no q/l switching
-                    CharacterAbilityBase theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
-                    theoreticalPurchaser.AddExperience(ability.Experience / 2);
-                    
-                    Summa s = new Summa
-                    {
-                        Quality = GetAttribute(AttributeType.Communication).Value + 6,
-                        Level = ability.Value / 2.0,
-                        Topic = ability.Ability
-                    };
-                   
-                    double value = RateLifetimeBookValue(s, theoreticalPurchaser);
-                    if (value > bestBook.PerceivedValue)
-                    {
-                        bestBook = new EvaluatedBook
-                        {
-                            Book = s,
-                            PerceivedValue = value
-                        };
-                    }
-                }
-                if (ability.Value >= 20)
-                {
-                    // start with no q/l switching
-                    CharacterAbilityBase theoreticalPurchaser = new AcceleratedAbility(ability.Ability);
-                    theoreticalPurchaser.AddExperience(ability.Experience / 4);
-
-                    double qualityAdd = ability.Value / 4;
-                    if (qualityAdd > (GetAttribute(AttributeType.Communication).Value + 6))
-                    {
-                        qualityAdd = GetAttribute(AttributeType.Communication).Value + 6;
-                    }
-
-                    Summa s = new Summa
-                    {
-                        Quality = GetAttribute(AttributeType.Communication).Value + 6 + qualityAdd,
-                        Level = (ability.Value / 2.0) - qualityAdd,
-                        Topic = ability.Ability
-                    };
-                    double seasonsNeeded = s.GetWritingPointsNeeded() / (GetAttribute(AttributeType.Communication).Value + GetAbility(_writingAbility).Value);
-                    double value = RateLifetimeBookValue(s, theoreticalPurchaser) / seasonsNeeded;
-                    if (value > bestBook.PerceivedValue)
-                    {
-                        bestBook = new EvaluatedBook
-                        {
-                            Book = s,
-                            PerceivedValue = value
-                        };
-                    }
-                }
-                return bestBook;
-            }
-            else
-            {
-                return base.RateSummaAgainstBestBook(bestBook, ability);
-            }
-        }
-
         private List<BookDesire> GetBookDesires()
         {
             if (GetAbility(_writingAbility).Value >= 1.0 && GetAbility(_writingLanguage).Value >= 4.0)
@@ -262,7 +184,7 @@ namespace WizardMonks
         protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
         {
             List<BookForTrade> list = new List<BookForTrade>();
-            double distillRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+            double distillRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
             foreach (IBook book in books)
             {
                 if (book.Level == 1000)
@@ -375,8 +297,6 @@ namespace WizardMonks
             {
                 var prioritizedVisDesires = _tradeDesires.VisDesires.Where(v => v.Quantity > 0).OrderByDescending(v => v.Quantity);
                 var prioritizedVisStocks = _tradeDesires.VisDesires.Where(v => v.Quantity < 0).OrderBy(v => v.Quantity);
-                var mostDesired = prioritizedVisDesires.FirstOrDefault();
-                var mostOverstocked = prioritizedVisStocks.FirstOrDefault();
                 var bestOffers = from offer in internalOffers
                                  join visDesire in _tradeDesires.VisDesires on offer.Ask.Art equals visDesire.Art
                                  join visStock in _tradeDesires.VisDesires on offer.Bid.Art equals visStock.Art
@@ -385,6 +305,8 @@ namespace WizardMonks
                 if (bestOffers.Any())
                 {
                     var offer = bestOffers.First();
+                    VisDesire mostDesired = _tradeDesires.VisDesires[offer.Ask.Art.AbilityId % 300];
+                    VisDesire mostOverstocked = _tradeDesires.VisDesires[offer.Bid.Art.AbilityId % 300];
                     if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
                     {
                         Log.Add("Executing vis trade with " + offer.Mage.Name);
@@ -450,7 +372,7 @@ namespace WizardMonks
                 sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
             }
 
-            var buys = bookSales.OrderBy(bto => bto.BookDesired.Quality);
+            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality);
             while (buys.Any())
             {
                 var buyOffer = buys.First();

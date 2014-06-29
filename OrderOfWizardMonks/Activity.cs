@@ -749,7 +749,7 @@ namespace WizardMonks
             // add experience
             ushort roll = Die.Instance.RollExplodingDie();
             character.Log.Add("Studying " + visNeeded.ToString("0.00") + " pawns of " + Art.AbilityName + " vis.");
-            character.Log.Add("Gainewd " + roll + " experience.");
+            character.Log.Add("Gained " + roll + " experience.");
             charAbility.AddExperience(roll);
         }
 

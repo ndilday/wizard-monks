@@ -19,7 +19,7 @@ namespace WizardMonks
                     // TODO: it should probably be an error case for a goal to still be here
                     // for now, ignore
                     List<string> dummy = new List<string>();
-                    goal.ModifyActionList(this, actions, Log);
+                    goal.ModifyActionList(this, actions, dummy);
                 }
             }
             Log.AddRange(actions.Log());
@@ -164,7 +164,7 @@ namespace WizardMonks
 
         public override IList<BookDesire> GetBookNeeds(Character character)
         {
-            if(IsComplete(character))
+            if (IsComplete(character) || IsCompletable(character))
             {
                 return null;
             }
@@ -177,6 +177,19 @@ namespace WizardMonks
                 bookDesires.Add(new BookDesire(ability, currentLevel));
             }
             return bookDesires;
+        }
+
+        private bool IsCompletable(Character character)
+        {
+            // see if the current resources the character posesses are sufficient to reach the goal
+            // for now, this will be: are all the books available to the character sufficient?
+            double runningTotal = 0;
+            foreach (Ability ability in _abilities)
+            {
+                runningTotal += character.GetAbilityMaximumFromReading(ability);
+            }
+
+            return runningTotal >= _total;
         }
 
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)

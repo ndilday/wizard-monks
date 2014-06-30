@@ -74,5 +74,18 @@ namespace WizardMonks
             Strength = strength;
             VisSources = new List<VisSource>();
         }
+
+        public double GetAverageVisSourceSize(double magicLoreRoll)
+        {
+            // roll that would give current vis sources = sqrt(ml * aura) * 2/3 * 0-5 ^ 1.5
+            // divide the area between that point and the max (5) by 5 to get the average gain
+            // the 0-5 for the current vis count is:
+            // current ^ 2 / aura * ml
+            double currentVis = VisSources.Select(v => v.AnnualAmount).Sum();
+            double currentRoll = Math.Pow(currentVis, 2) / (magicLoreRoll * Strength);
+            double multiplier = Math.Sqrt(magicLoreRoll * Strength) * 2 / 3;
+            double areaUnder = (11.180339887498948482045868343656 - Math.Pow(currentRoll, 1.5)) * multiplier;
+            return areaUnder / 5;
+        }
     }
 }

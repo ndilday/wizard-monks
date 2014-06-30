@@ -103,13 +103,13 @@ namespace WizardMonks
             // see if the mage has enough vis of this type
             double stockpile = mage.GetVisCount(magicArt.Ability);
             double visNeed = 0.5 + (magicArt.Value / 10.0);
-            double increase = magicArt.GetValueGain(6);
+            double increase = magicArt.GetValueGain(mage.VisStudyRate);
             double baseDesire = CalculateDesire(increase) / (BaseTier + 1);
             if (BaseDueDate != null)
             {
                 baseDesire /= (double)BaseDueDate;
             }
-            // if so, assume vis will return an average of 6XP
+            // if so, assume vis will return an average of 6XP + aura
             if (stockpile > visNeed)
             {
                 log.Add("Studying vis for " + magicArt.Ability.AbilityName + " worth " + baseDesire.ToString("0.00"));
@@ -155,13 +155,13 @@ namespace WizardMonks
         }
     }
 
-    class IncreseAbilitiesForVisSearchHelper : IncreaseAbilitiesForVisHelper
+    class IncreaseAbilitiesForVisSearchHelper : IncreaseAbilitiesForVisHelper
     {
         protected double _currentML;
         protected double _aura;
         private double _currentGain;
 
-        public IncreseAbilitiesForVisSearchHelper(double desire, double currentVis, double currentML, double aura, byte tier, uint? dueDate = null)
+        public IncreaseAbilitiesForVisSearchHelper(double desire, double currentVis, double currentML, double aura, byte tier, uint? dueDate = null)
             : base(desire, currentVis, tier, dueDate)
         {
             _abilities = new List<Ability>();
@@ -180,6 +180,7 @@ namespace WizardMonks
 
         private double GetAverageVisSize(double magicLoreTotal)
         {
+            // TODO: we should use the aura implementation of this logic, instead
             double currentRoll = Math.Pow(_currentTotal, 2) / (_currentML * _aura);
             double multiplier = Math.Sqrt(_currentML * _aura) * 2 / 3;
             return (11.180339887498948482045868343656 - Math.Pow(currentRoll, 1.5)) * multiplier / 5.0;

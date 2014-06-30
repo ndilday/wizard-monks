@@ -249,7 +249,14 @@ namespace WizardMonks
         protected override void DoAction(Character character)
         {
             IBook book = character.WriteBook(Topic, Name, Exposure, Level);
-            character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.00"));
+            if (book != null)
+            {
+                character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.00"));
+            }
+            else
+            {
+                character.Log.Add("Worked on " + Name);
+            }
         }
 
         public override bool Matches(IAction action)

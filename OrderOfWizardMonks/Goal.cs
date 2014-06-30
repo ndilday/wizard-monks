@@ -150,12 +150,12 @@ namespace WizardMonks
             {
                 foreach (Ability ability in _abilities)
                 {
-                    if (MagicArts.IsArt(ability))
+                    if (MagicArts.IsArt(ability)  && character.GetType() == typeof(Magus))
                     {
                         CharacterAbilityBase charAbility = character.GetAbility(ability);
                         double experienceNeeded = charAbility.GetExperienceUntilLevel(_total);
                         double visPer = 0.5 + (charAbility.Value + _total) / 20.0;
-                        double visNeeded = experienceNeeded * visPer / 6;
+                        double visNeeded = experienceNeeded * visPer / ((Magus)(character)).VisStudyRate;
                         desires[charAbility.Ability.AbilityId % 300].Quantity += visNeeded;
                     }
                 }
@@ -242,8 +242,8 @@ namespace WizardMonks
             // see if the mage has enough vis of this type
             double stockpile = mage.GetVisCount(charAbility.Ability);
             double visNeed = 0.5 + (charAbility.Value / 10.0);
-            double baseDesire = desire * charAbility.GetValueGain(6) / remainingTotal;
-            // if so, assume vis will return an average of 6XP
+            double baseDesire = desire * charAbility.GetValueGain(mage.VisStudyRate) / remainingTotal;
+            // if so, assume vis will return an average of 6XP + aura
             if (stockpile > visNeed)
             {
                 log.Add("Studying vis for " + charAbility.Ability.AbilityName + " worth " + baseDesire.ToString("0.00"));
@@ -259,9 +259,6 @@ namespace WizardMonks
                 VisCondition visCondition = new VisCondition(visType, visNeed - stockpile, baseDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                 visCondition.ModifyActionList(mage, alreadyConsidered, log);
             }
-            
-                // TODO: consider the value of looking for another aura
-                // TODO: consider the value of looking for vis sites
         }
 
         public override bool IsComplete(Character character)
@@ -462,7 +459,7 @@ namespace WizardMonks
             if (_isArt)
             {
                 // for now, assume a reader of skill 5, so 1 pawn of vis/season
-                return quality / 6;
+                return quality / ((Magus)character).VisStudyRate;
             }
             else
             {
@@ -580,6 +577,10 @@ namespace WizardMonks
             double bookSeasons = expValue / quality;
             double value =  character.RateSeasonalExperienceGain(Topic, quality) * bookSeasons;
             double seasons = Level / (character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Latin).Value);
+            if (!_isArt)
+            {
+                seasons *= 5;
+            }
             return value / seasons;
         }
 
@@ -1033,6 +1034,8 @@ namespace WizardMonks
                             // the difference between the desire of starting now
                             // and the desire of starting after gaining experience
                             // is the effective value of practicing here
+
+                            // TODO: this should really be a lab total increse, yes?
                             IncreaseAbilitiesForVisHelper helper = new IncreaseAbilitiesForVisHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
                             helper.ModifyActionList(character, alreadyConsidered, log);
                         }
@@ -1057,15 +1060,7 @@ namespace WizardMonks
                     {
                         foreach (Aura aura in mage.KnownAuras)
                         {
-                            // roll that would give current vis sources = sqrt(ml * aura) * 2/3 * 0-5 ^ 1.5
-                            // divide the area between that point and the max (5) by 5 to get the average gain
-                            // the 0-5 for the current vis count is:
-                            // current ^ 2 / aura * ml
-                            double currentVis = aura.VisSources.Select(v => v.AnnualAmount).Sum();
-                            double currentRoll = Math.Pow(currentVis, 2) / (magicLore * aura.Strength);
-                            double multiplier = Math.Sqrt(magicLore * aura.Strength) * 2 / 3;
-                            double areaUnder = (11.180339887498948482045868343656 - Math.Pow(currentRoll, 1.5)) * multiplier;
-                            double averageFind = areaUnder / 5;
+                            double averageFind = aura.GetAverageVisSourceSize(magicLore);
                             if (averageFind > 0)
                             {
                                 // modify by chance vis will be of the proper type
@@ -1075,9 +1070,10 @@ namespace WizardMonks
                                 log.Add("Looking for vis source worth " + (desire * dueDateDesire).ToString("0.00"));
                                 alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, desire * dueDateDesire));
                             }
-                            // TODO: consider the value of getting better at the vis search skills first?
-                            IncreseAbilitiesForVisSearchHelper helper =
-                                new IncreseAbilitiesForVisSearchHelper(Desire, currentVis, magicLore, aura.Strength, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                            // consider the value of getting better at the vis search skills first
+                            double currentVis = aura.VisSources.Select(v => v.AnnualAmount).Sum();
+                            IncreaseAbilitiesForVisSearchHelper helper =
+                                new IncreaseAbilitiesForVisSearchHelper(Desire, currentVis, magicLore, aura.Strength, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                             helper.ModifyActionList(character, alreadyConsidered, log);
                         }
                     }
@@ -1098,8 +1094,10 @@ namespace WizardMonks
                     areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
                     if (areaLore > 0 && magicLore > 0)
                     {
-                        double auraFound = Math.Sqrt(2.5 * areaLore / (mage.KnownAuras.Count() + 1));
-                        double visFromAura = Math.Sqrt(2.5 * magicLore * auraFound) * _visTypes.Count() / 15;
+                        double auraFound = mage.GetAverageAuraFound();
+                        double multiplier = Math.Sqrt(magicLore * auraFound) * 2 / 3;
+                        double areaUnder = 11.180339887498948482045868343656 * multiplier;
+                        double visFromAura = areaUnder * _visTypes.Count() / 75;
                         dueDateDesire = dueDateDesire * visFromAura / 2;
                         log.Add("Looking for aura (to find a vis source in) worth " + (dueDateDesire).ToString("0.00"));
                         alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));

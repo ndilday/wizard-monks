@@ -39,6 +39,7 @@ namespace WizardMonks
         public Houses House { get; set; }
         public Covenant Covenant { get; private set; }
         public Arts Arts { get; private set; }
+        public double VisStudyRate { get; private set; }
         #endregion
 
         #region Initialization Functions
@@ -55,6 +56,7 @@ namespace WizardMonks
             _summaGoals = new List<SummaGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
+            VisStudyRate = 6;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 _visStock[art] = 0;
@@ -94,6 +96,7 @@ namespace WizardMonks
             }
             Covenant = covenant;
             covenant.AddMagus(this);
+            VisStudyRate = 6 + covenant.Aura.Strength;
         }
 
         public Covenant FoundCovenant(Aura aura)
@@ -165,7 +168,7 @@ namespace WizardMonks
             CharacterAbilityBase charAbility = GetAbility(ability);
             double visUsedPerStudySeason = 0.5 + ((charAbility.Value + (charAbility.GetValueGain(gain)/2)) / 10.0);
             // the gain per season depends on how the character views vis
-            double studySeasons = gain / 6.0;
+            double studySeasons = gain / VisStudyRate;
             double visNeeded = studySeasons * visUsedPerStudySeason;
             // compare to the number of seasons we would need to extract the vis
             // plus the number of seasons we would need to study the extracted vis
@@ -174,7 +177,7 @@ namespace WizardMonks
 
             // credit back the value of the exposure gained in the process of distilling
             double exposureGained = 2.0 * extractTime;
-            double exposureSeasonsOfVis = exposureGained / 6.0;
+            double exposureSeasonsOfVis = exposureGained / VisStudyRate;
             CharacterAbilityBase vim = GetAbility(MagicArts.Vim);
             CharacterAbilityBase creo = GetAbility(MagicArts.Creo);
             CharacterAbilityBase exposureAbility = creo.Value < vim.Value ? creo : vim;
@@ -227,14 +230,26 @@ namespace WizardMonks
                     _tractatusGoals.Add(tractGoal);
                     _goals.Add(tractGoal);
                 }
+                double baseLevel = charAbility.Value / 2.0;
                 // don't add a summa goal if we already have one for this topic in progress
-                if (charAbility.Value > (bookDesire.CurrentLevel * 2.0) + 2 && !_summaGoals.Where(s => !s.IsComplete(this) && s.Topic == charAbility.Ability).Any())
+                if (baseLevel - 1 > bookDesire.CurrentLevel && !_summaGoals.Where(s => !s.IsComplete(this) && s.Topic == charAbility.Ability).Any())
                 {
-                    // add summa goal to both goal list and writing goal list
-                    string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
-                    SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, charAbility.Value / 2.0, name);
-                    _goals.Add(summaGoal);
-                    _summaGoals.Add(summaGoal);
+                    // try to constrain the level of the summa to be something doable in an efficient period of time
+                    double rate = _attributes[(int)AttributeType.Communication].Value + GetAbility(_writingLanguage).Value;
+                    double writingPointsNeeded = MagicArts.IsArt(charAbility.Ability) ? bookDesire.CurrentLevel + 1 : bookDesire.CurrentLevel * 5 + 5;
+                    double efficientLevel = Math.Ceiling(writingPointsNeeded / rate) * rate;
+                    if (efficientLevel <= baseLevel)
+                    {
+                        // add summa goal to both goal list and writing goal list
+                        string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
+                        SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, efficientLevel, name);
+                        _goals.Add(summaGoal);
+                        _summaGoals.Add(summaGoal);
+                    }
+                    else
+                    {
+                        // do we want to have less efficient summae?
+                    }
                 }
             }
         }
@@ -423,6 +438,19 @@ namespace WizardMonks
             double techValue = Arts.GetAbility(artPair.Technique).Value;
             double formValue = Arts.GetAbility(artPair.Form).Value;
             return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
+        }
+
+        public double GetAverageAuraFound()
+        {
+            double auraCount = KnownAuras.Count;
+            double areaLore = GetAbility(Abilities.AreaLore).Value;
+            areaLore += GetCastingTotal(MagicArtPairs.InVi) / 10;
+            areaLore += GetAttribute(AttributeType.Perception).Value;
+
+            double minRoll = (auraCount + 1) / areaLore;
+            double multiplier = Math.Sqrt(areaLore / (auraCount + 1)) * 2 / 3;
+            double areaUnder = (11.180339887498948482045868343656 - Math.Pow(minRoll, 1.5)) * multiplier;
+            return areaUnder / 5;
         }
 
         protected void CheckTwilight()

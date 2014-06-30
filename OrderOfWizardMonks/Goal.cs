@@ -1098,7 +1098,7 @@ namespace WizardMonks
                         double multiplier = Math.Sqrt(magicLore * auraFound) * 2 / 3;
                         double areaUnder = 11.180339887498948482045868343656 * multiplier;
                         double visFromAura = areaUnder * _visTypes.Count() / 75;
-                        dueDateDesire = dueDateDesire * visFromAura / 2;
+                        dueDateDesire = dueDateDesire * visFromAura * (Tier + 1) / (Tier + 2);
                         log.Add("Looking for aura (to find a vis source in) worth " + (dueDateDesire).ToString("0.00"));
                         alreadyConsidered.Add(new FindAura(Abilities.AreaLore, dueDateDesire));
                     }

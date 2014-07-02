@@ -74,6 +74,7 @@ namespace WizardMonks
         protected Ability _writingAbility;
         protected Ability _writingLanguage;
         protected Ability _areaAbility;
+        protected List<IGoal> _goals;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
@@ -85,6 +86,8 @@ namespace WizardMonks
         protected readonly List<IBook> _booksOwned;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
+
+        private IAction _mandatoryAction;
         #endregion
 
         #region Events
@@ -111,9 +114,10 @@ namespace WizardMonks
             get
             {
                 return _booksOwned.Where(b => b.Author != this && 
-                    ((b.Level == 1000 && !_booksRead.Contains(b)) || (b.Level != 1000 && b.Level > this.GetAbility(b.Topic).Value)));
+                    ((!_booksRead.Contains(b)) || (b.Level != 1000 && b.Level > this.GetAbility(b.Topic).Value)));
             }
         }
+        public bool IsBeingTaught { get; private set; }
         #endregion
 
         public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseSeasonableAge = 20)
@@ -131,9 +135,11 @@ namespace WizardMonks
             Decrepitude = 0;
             CurrentSeason = Season.Spring;
             KnownAuras = new List<Aura>();
+            IsBeingTaught = false;
 
             _noAgingSeasons = 0;
             _baseAge = baseSeasonableAge;
+            _mandatoryAction = null;
 
             _abilityList = new Dictionary<int, CharacterAbilityBase>();
             _seasonList = new List<IAction>();
@@ -315,6 +321,45 @@ namespace WizardMonks
 
         #region Seasonal Functions
 
+        IAction DecideSeasonalActivity()
+        {
+            if (IsBeingTaught)
+            {
+                return _mandatoryAction;
+            }
+            else
+            {
+                ConsideredActions actions = new ConsideredActions();
+                foreach (IGoal goal in _goals)
+                {
+                    if (!goal.IsComplete(this))
+                    {
+                        // TODO: it should probably be an error case for a goal to still be here
+                        // for now, ignore
+                        List<string> dummy = new List<string>();
+                        goal.ModifyActionList(this, actions, dummy);
+                    }
+                }
+                Log.AddRange(actions.Log());
+                return actions.GetBestAction();
+            }
+        }
+
+        public virtual void ReprioritizeGoals()
+        {
+            foreach (IGoal goal in _goals)
+            {
+                if (!goal.IsComplete(this))
+                {
+                    if (!goal.DecrementDueDate())
+                    {
+                        Log.Add("Failed to achieve a goal");
+                        _goals.Remove(goal);
+                    }
+                }
+            }
+        }
+
         public virtual void CommitAction(IAction action)
         {
             _seasonList.Add(action);
@@ -353,6 +398,12 @@ namespace WizardMonks
             }
             ReprioritizeGoals();
         }
+
+        public virtual void PlanToBeTaught()
+        {
+            IsBeingTaught = true;
+            //_mandatoryAction =
+        }
         #endregion
 
         #region Book Functions
@@ -373,8 +424,8 @@ namespace WizardMonks
 
         public virtual IEnumerable<IBook> GetReadableBooksFromCollection(Ability ability)
         {
-            var books = _booksOwned.Where(b => !_booksRead.Contains(b));
-            return books.Where(b => b.Topic == ability && b.Author != this && b.Level > GetAbility(ability).Value);
+            
+            return ReadableBooks.Where(b => b.Topic == ability);
         }
 
         public virtual IEnumerable<IBook> GetUnneededBooksFromCollection()

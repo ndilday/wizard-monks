@@ -6,42 +6,6 @@ using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-    public partial class Character
-    {
-        protected List<IGoal> _goals;
-        IAction DecideSeasonalActivity()
-        {
-            ConsideredActions actions = new ConsideredActions();
-            foreach (IGoal goal in _goals)
-            {
-                if (!goal.IsComplete(this))
-                {
-                    // TODO: it should probably be an error case for a goal to still be here
-                    // for now, ignore
-                    List<string> dummy = new List<string>();
-                    goal.ModifyActionList(this, actions, dummy);
-                }
-            }
-            Log.AddRange(actions.Log());
-            return actions.GetBestAction();
-        }
-
-        public virtual void ReprioritizeGoals()
-        {
-            foreach (IGoal goal in _goals)
-            {
-                if (!goal.IsComplete(this))
-                {
-                    if (!goal.DecrementDueDate())
-                    {
-                        Log.Add("Failed to achieve a goal");
-                        _goals.Remove(goal);
-                    }
-                }
-            }
-        }
-    }
-
     public class ConsideredActions
     {
         Dictionary<Activity, IList<IAction>> ActionTypeMap = new Dictionary<Activity,IList<IAction>>();
@@ -1564,44 +1528,54 @@ namespace WizardMonks
         }
     }
 
-    class TeachingApprenticeGoal : IGoal
+    class TeachingApprenticeGoal : BaseGoal
     {
-        public uint? DueDate { get; private set; }
-        public byte Tier { get; private set; }
-        public double Desire { get; set; }
         public IEnumerable<Character> Students { get; private set; }
 
-        public TeachingApprenticeGoal(Character student, double desire, byte tier = 0, uint? dueDate = null)
+        public TeachingApprenticeGoal(Character student, double desire, byte tier = 0, uint? dueDate = null) : base(desire, tier, dueDate)
         {
             var students = new List<Character>();
             students.Add(student);
             Students = students;
-            Desire = desire;
-            Tier = tier;
-            DueDate = dueDate;
         }
 
-        public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double dueDateDesire = Desire / (double)(Tier + 1);
+            if(DueDate != null)
+            {
+                if (DueDate > 0)
+                {
+                    dueDateDesire /= (double)DueDate;
+                }
+                else
+                {
+                    character.Log.Add("Behind schedule on teaching!");
+                }
+            }
+            // TODO: figure out what to teach
+            Ability toTeach = null;
+            alreadyConsidered.Add(new Teach(Students.First(), toTeach, Abilities.Teaching, dueDateDesire));
+        }
+
+        public override bool IsComplete(Character character)
+        {
+            foreach (Character student in Students)
+            {
+                if (!student.IsBeingTaught)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public override void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
             throw new NotImplementedException();
         }
 
-        public bool IsComplete(Character character)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool DecrementDueDate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ModifyVisNeeds(Character character, VisDesire[] desires)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IList<BookDesire> GetBookNeeds(Character character)
+        public override IList<BookDesire> GetBookNeeds(Character character)
         {
             throw new NotImplementedException();
         }

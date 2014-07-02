@@ -632,15 +632,15 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(Topic).Value - Student.GetAbility(Topic).Value;
-            if (abilityDifference <= 0)
+            double experienceDifference = character.GetAbility(Topic).Experience - Student.GetAbility(Topic).Experience;
+            if (experienceDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
             }
             double amountTaught = 6 + character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Teaching).Value;
-            if (amountTaught > abilityDifference)
+            if (amountTaught > experienceDifference)
             {
-                amountTaught = abilityDifference;
+                amountTaught = experienceDifference;
             }
             Student.GetAbility(Topic).AddExperience(amountTaught);
         }

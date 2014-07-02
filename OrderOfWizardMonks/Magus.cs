@@ -57,6 +57,7 @@ namespace WizardMonks
             _partialSpell = null;
             _partialSpellProgress = 0;
             VisStudyRate = 6;
+            House = Houses.Apprentice;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 _visStock[art] = 0;
@@ -218,10 +219,12 @@ namespace WizardMonks
             // TODO: right now, this logic is causing characters to start trying to learn skills
             // they have no interest in so that they can write a book to sell off
             // this may not be inherently wrong, but it should certainly be the case that more attractive choices always exist
+            double comm = GetAttributeValue(AttributeType.Communication);
             foreach (BookDesire bookDesire in tradingDesires.BookDesires.Values)
             {
                 CharacterAbilityBase charAbility = GetAbility(bookDesire.Ability);
-                if (!_tractatusGoals.Where(t => !t.IsComplete(this) && t.Topic == bookDesire.Ability).Any())
+                bool isArt = MagicArts.IsArt(bookDesire.Ability);
+                if (!_tractatusGoals.Where(t => !t.IsComplete(this) && t.Topic == bookDesire.Ability).Any() && (isArt || comm > -2))
                 {
                     // add tractatus goal to both goal list and writing goal list
                     ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
@@ -235,20 +238,34 @@ namespace WizardMonks
                 if (baseLevel - 1 > bookDesire.CurrentLevel && !_summaGoals.Where(s => !s.IsComplete(this) && s.Topic == charAbility.Ability).Any())
                 {
                     // try to constrain the level of the summa to be something doable in an efficient period of time
-                    double rate = _attributes[(int)AttributeType.Communication].Value + GetAbility(_writingLanguage).Value;
-                    double writingPointsNeeded = MagicArts.IsArt(charAbility.Ability) ? bookDesire.CurrentLevel + 1 : bookDesire.CurrentLevel * 5 + 5;
+                    double rate = comm + GetAbility(_writingLanguage).Value;
+                    double writingPointsNeeded = isArt ? bookDesire.CurrentLevel + 1 : bookDesire.CurrentLevel * 5 + 5;
                     double efficientLevel = Math.Ceiling(writingPointsNeeded / rate) * rate;
-                    if (efficientLevel <= baseLevel)
+                    if (efficientLevel < baseLevel)
                     {
                         // add summa goal to both goal list and writing goal list
-                        string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
+                        string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + efficientLevel.ToString("0.00");
                         SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, efficientLevel, name);
                         _goals.Add(summaGoal);
                         _summaGoals.Add(summaGoal);
                     }
-                    else
+                    else if (writingPointsNeeded < rate)
                     {
-                        // do we want to have less efficient summae?
+                        // it's a one-season summa, may as well do it if it's better than practice
+                        // but we should make sure that it's worth at least two seasons of study
+                        double quality = comm + 6;
+                        double xpToLevel = baseLevel * (baseLevel + 1) / 2.0;
+                        if(!isArt)
+                        {
+                            xpToLevel *= 5;
+                        }
+                        if (xpToLevel >= 2 * quality && (isArt || quality > 4))
+                        {
+                            string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
+                            SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, baseLevel, name);
+                            _goals.Add(summaGoal);
+                            _summaGoals.Add(summaGoal);
+                        }
                     }
                 }
             }
@@ -652,6 +669,15 @@ namespace WizardMonks
         {
             // TODO: what sort of error checking should go here?
             Apprentice = apprentice;
+            // add a teaching goal for each year
+            for (byte i = 1; i < 16; i++)
+            {
+                uint dueDate = (uint)(i * 4);
+                IGoal teachingGoal = new TeachingApprenticeGoal(apprentice, 3, 0, dueDate);
+                _goals.Add(teachingGoal);
+            }
+            IGoal gauntletGoal = new GauntletGoal(apprentice, 3, 0, 60);
+            _goals.Add(gauntletGoal);
         }
 
         public void GauntletApprentice()

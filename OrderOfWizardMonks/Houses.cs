@@ -8,6 +8,7 @@ namespace WizardMonks
 	[Serializable]
 	public enum Houses
 	{
+        Apprentice,
 		Bjornaer,
 		Bonisagus,
 		Criamon,

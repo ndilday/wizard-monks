@@ -16,11 +16,19 @@ namespace WizardMonks.Instances
         public static Ability Penetration { get; private set; }
         public static Ability Etiquette { get; private set; }
         public static Ability AreaLore { get; private set; }
-        public static Ability FolkLore { get; private set; }
+        public static Ability Athletics { get; private set; }
+        public static Ability Awareness { get; private set; }
+        public static Ability Brawl { get; private set; }
+        public static Ability Charm { get; private set; }
+        public static Ability FolkKen { get; private set; }
+        public static Ability Guile { get; private set; }
         public static Ability MagicLore { get; private set; }
         public static Ability Concentration { get; private set; }
         public static Ability Teaching { get; private set; }
         public static Ability Scribing { get; private set; }
+        public static Ability Stealth { get; private set; }
+        public static Ability Survival { get; private set; }
+        public static Ability Swim { get; private set; }
         public static Ability Warping { get; private set; }
         public static Ability EnigmaticWisdom { get; private set; }
         public static Ability CriamonLore { get; private set; }
@@ -51,9 +59,17 @@ namespace WizardMonks.Instances
             Concentration = new Ability(2, AbilityType.General, "Concentration");
             Teaching = new Ability(3, AbilityType.General, "Teaching");
             Scribing = new Ability(4, AbilityType.General, "Scribing");
-            FolkLore = new Ability(5, AbilityType.General, "Folk Lore");
+            FolkKen = new Ability(5, AbilityType.General, "Folk Lore");
             MagicLore = new Ability(6, AbilityType.General, "Magic Lore");
             Craft = new Ability(7, AbilityType.General, "Craft");
+            Athletics = new Ability(8, AbilityType.General, "Athletics");
+            Awareness = new Ability(9, AbilityType.General, "Awareness");
+            Brawl = new Ability(10, AbilityType.General, "Brawl");
+            Charm = new Ability(11, AbilityType.General, "Charm");
+            Guile = new Ability(12, AbilityType.General, "Guile");
+            Stealth = new Ability(13, AbilityType.General, "Stealth");
+            Survival = new Ability(14, AbilityType.General, "Survival");
+            Swim = new Ability(15, AbilityType.General, "Swim");
 
             Warping = new Ability(-1, AbilityType.Arcane, "Warping");
 
@@ -78,9 +94,17 @@ namespace WizardMonks.Instances
             yield return CodeOfHermes;
             yield return Etiquette;
             yield return AreaLore;
-            yield return FolkLore;
-            yield return MagicLore;
+            yield return Athletics;
+            yield return Awareness;
+            yield return Brawl;
+            yield return Charm;
             yield return Craft;
+            yield return FolkKen;
+            yield return Guile;
+            yield return MagicLore;
+            yield return Stealth;
+            yield return Survival;
+            yield return Swim;
             yield return Concentration;
             yield return Teaching;
             yield return EnigmaticWisdom;

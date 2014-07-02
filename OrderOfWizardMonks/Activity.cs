@@ -31,6 +31,7 @@ namespace WizardMonks
 		BuildLaboratory,
 		RefineLaboratory,
 		FindApprentice,
+        GauntletApprentice,
         FindAura,
 		FindVisSource,
 		Sundry,
@@ -427,10 +428,10 @@ namespace WizardMonks
             // add bonus to area lore equal to casting total div 5?
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetAttribute(AttributeType.Perception).Value;
-            areaLore += mage.GetAbility(Abilities.FolkLore).Value;
-            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
-            double roll = Die.Instance.RollDouble() * areaLore;
-            if (roll > 1)
+            areaLore += mage.GetAbility(Abilities.FolkKen).Value;
+            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+            double roll = Math.Sqrt(Die.Instance.RollDouble() * areaLore);
+            if (roll > 2)
             {
                 mage.TakeApprentice(CharacterFactory.GenerateNewMagus());
             }
@@ -621,17 +622,17 @@ namespace WizardMonks
     {
         // TODO: enable multiple students
         public Character Student { get; private set; }
-        public Ability AbilityToTeach { get; private set; }
+        public Ability Topic { get; private set; }
         public Teach(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
         {
             Action = Activity.Teach;
             Student = student;
-            AbilityToTeach = abilityToTeach;
+            Topic = abilityToTeach;
         }
 
         protected override void DoAction(Character character)
         {
-            double abilityDifference = character.GetAbility(AbilityToTeach).Value - Student.GetAbility(AbilityToTeach).Value;
+            double abilityDifference = character.GetAbility(Topic).Value - Student.GetAbility(Topic).Value;
             if (abilityDifference <= 0)
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
@@ -641,7 +642,7 @@ namespace WizardMonks
             {
                 amountTaught = abilityDifference;
             }
-            Student.GetAbility(AbilityToTeach).AddExperience(amountTaught);
+            Student.GetAbility(Topic).AddExperience(amountTaught);
         }
 
         public override bool Matches(IAction action)
@@ -651,7 +652,7 @@ namespace WizardMonks
                 return false;
             }
             Teach teach = (Teach)action;
-            return teach.Student == this.Student && teach.AbilityToTeach == this.AbilityToTeach;
+            return teach.Student == this.Student && teach.Topic == this.Topic;
         }
 
         public override string Log()
@@ -759,9 +760,11 @@ namespace WizardMonks
 
             // add experience
             ushort roll = Die.Instance.RollExplodingDie();
+            double aura = mage.Covenant != null && mage.Covenant.Aura != null ? mage.Covenant.Aura.Strength : 0;
+            double gain = roll + aura;
             character.Log.Add("Studying " + visNeeded.ToString("0.00") + " pawns of " + Art.AbilityName + " vis.");
-            character.Log.Add("Gained " + roll + " experience.");
-            charAbility.AddExperience(roll);
+            character.Log.Add("Gained " + gain + " experience.");
+            charAbility.AddExperience(gain);
         }
 
         public override bool Matches(IAction action)
@@ -799,6 +802,26 @@ namespace WizardMonks
         }
 
         protected abstract void DoMageAction(Magus mage);
+    }
+
+    public class GauntletApprentice : ExposingMageAction
+    {
+        public GauntletApprentice(Ability exposure, double desire) : base(exposure, desire) { }
+
+        public override bool Matches(IAction action)
+        {
+            return action.Action == Activity.GauntletApprentice;
+        }
+
+        public override string Log()
+        {
+            return "Gauntleting apprentice worth " + Desire.ToString("0.00");
+        }
+
+        protected override void DoMageAction(Magus mage)
+        {
+            mage.GauntletApprentice();
+        }
     }
 
     [Serializable]

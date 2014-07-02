@@ -368,6 +368,41 @@ namespace WizardMonks
 
         }
     }
+
+    class GauntletGoal : BaseGoal
+    {
+        private Magus _apprentice;
+
+        public GauntletGoal(Magus apprentice, double desire, byte tier = 0, uint? dueDate = null) : base(desire, tier, dueDate)
+        {
+            _apprentice = apprentice;
+        }
+
+        public override bool IsComplete(Character character)
+        {
+            return character.GetType() == typeof(Magus) && ((Magus)(character)).Apprentice != _apprentice;
+        }
+
+        public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            double dueDateDesire = Desire / (Tier + 1);
+            if (DueDate != null && DueDate > 0)
+            {
+                dueDateDesire /= (double)DueDate;
+            }
+            alreadyConsidered.Add(new GauntletApprentice(Abilities.MagicTheory, dueDateDesire));
+        }
+
+        public override void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IList<BookDesire> GetBookNeeds(Character character)
+        {
+            throw new NotImplementedException();
+        }
+    }
     #endregion
 
     #region Complex Goals
@@ -728,15 +763,25 @@ namespace WizardMonks
         }
     }
 
-    // TODO: consider a base class for goals with pre-reqs
-
     class HasCovenantCondition : IGoal
     {
         private CharacteristicAbilityScoreCondition _minScore;
+        private double _desire;
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; set; }
+        public double Desire 
+        {
+            get
+            {
+                return _desire;
+            }
+            set
+            {
+                _desire = value;
+                _minScore.Desire = value;
+            }
+        }
 
         public bool DecrementDueDate()
         {
@@ -768,7 +813,7 @@ namespace WizardMonks
 
         public HasCovenantCondition(double value, byte tier, uint? dueDate = null)
         {
-            Desire = value;
+            _desire = value;
             DueDate = dueDate;
             Tier = tier;
             List<Ability> abilities = new List<Ability>();
@@ -809,10 +854,23 @@ namespace WizardMonks
     {
         private HasCovenantCondition _hasCovenant;
         private AbilityScoreCondition _mtCondition;
+        private double _desire;
 
         public uint? DueDate { get; private set; }
         public byte Tier { get; private set; }
-        public double Desire { get; set; }
+        public double Desire 
+        {
+            get
+            {
+                return _desire;
+            }
+            set
+            {
+                _desire = value;
+                _hasCovenant.Desire = value;
+                _mtCondition.Desire = value;
+            }
+        }
 
         public bool DecrementDueDate()
         {
@@ -867,7 +925,7 @@ namespace WizardMonks
 
         public HasLabCondition(double value, byte tier, uint? dueDate = null)
         {
-            Desire = value;
+            _desire = value;
             DueDate = dueDate;
             Tier = tier;
             _hasCovenant = new HasCovenantCondition(value, tier, dueDate == null ? null : dueDate - 2);
@@ -1503,6 +1561,49 @@ namespace WizardMonks
         {
             // TODO: there's nothing preventing a character from having multiple apprentices
             return character.GetType() == typeof(Magus) && ((Magus)character).Apprentice != null;
+        }
+    }
+
+    class TeachingApprenticeGoal : IGoal
+    {
+        public uint? DueDate { get; private set; }
+        public byte Tier { get; private set; }
+        public double Desire { get; set; }
+        public IEnumerable<Character> Students { get; private set; }
+
+        public TeachingApprenticeGoal(Character student, double desire, byte tier = 0, uint? dueDate = null)
+        {
+            var students = new List<Character>();
+            students.Add(student);
+            Students = students;
+            Desire = desire;
+            Tier = tier;
+            DueDate = dueDate;
+        }
+
+        public void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsComplete(Character character)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool DecrementDueDate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyVisNeeds(Character character, VisDesire[] desires)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<BookDesire> GetBookNeeds(Character character)
+        {
+            throw new NotImplementedException();
         }
     }
     #endregion

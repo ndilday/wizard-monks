@@ -40,6 +40,32 @@ namespace WizardMonks
         {
             return _attributes[(short)attributeType];
         }
+
+        public double GetAttributeValue(AttributeType attributeType)
+        {
+            double value = _attributes[(short)attributeType].Value;
+            // TODO: make less stair-step
+            if (SeasonalAge <= 28)
+            {
+                return value - 4.0;
+            }
+            else if (SeasonalAge <= 36)
+            {
+                return value - 3.0;
+            }
+            else if (SeasonalAge <= 44)
+            {
+                return value - 2.0;
+            }
+            else if (SeasonalAge <= 52)
+            {
+                return value - 1.0;
+            }
+            else
+            {
+                return value;
+            }
+        }
         #endregion
 
         #region Private Fields

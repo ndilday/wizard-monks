@@ -59,8 +59,8 @@ namespace SkillViewer
                 _magusCount++;
             }
             lstMembers.DataSource = _magusArray.Take(_magusCount).ToList();
-             _log = new List<string>();
-             lstAdvance.DataSource = _log;
+            _log = new List<string>();
+            lstAdvance.DataSource = _log;
         }
 
         public void InitializeFromFile()
@@ -147,9 +147,19 @@ namespace SkillViewer
                         TaskCreationOptions.None,
                         uiScheduler);
                 } );
+
+            // add any new apprentices found during the past season
+            var newApprentices = _magusArray.Where(m => m != null && m.Apprentice != null)
+                                            .Select(m => m.Apprentice)
+                                            .Where(a => !_magusArray.Contains(a));
+            foreach (Magus apprentice in newApprentices)
+            {
+                _magusArray[_magusCount] = apprentice;
+                _magusCount++;
+            }
             _log.Add("Done Advancing Season");
             _log.Add("Considering vis and book trades");
-            var magiDesires = _magusArray.Where(m => m != null).Select(m => m.GenerateTradingDesires()).ToList();
+            var magiDesires = _magusArray.Where(m => m != null && m.House != Houses.Apprentice).Select(m => m.GenerateTradingDesires()).ToList();
             foreach (Magus mage in _magusArray.OrderBy(m => _rand.NextDouble()))
             {
                 if (mage == null) continue;

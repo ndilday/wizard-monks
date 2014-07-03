@@ -117,7 +117,8 @@ namespace WizardMonks
                     ((!_booksRead.Contains(b)) || (b.Level != 1000 && b.Level > this.GetAbility(b.Topic).Value)));
             }
         }
-        public bool IsBeingTaught { get; private set; }
+        public bool IsCollaborating { get; private set; }
+        public bool WantsToFollow { get; protected set; }
         #endregion
 
         public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseSeasonableAge = 20)
@@ -135,7 +136,8 @@ namespace WizardMonks
             Decrepitude = 0;
             CurrentSeason = Season.Spring;
             KnownAuras = new List<Aura>();
-            IsBeingTaught = false;
+            IsCollaborating = false;
+            WantsToFollow = true;
 
             _noAgingSeasons = 0;
             _baseAge = baseSeasonableAge;
@@ -323,7 +325,7 @@ namespace WizardMonks
 
         IAction DecideSeasonalActivity()
         {
-            if (IsBeingTaught)
+            if (IsCollaborating)
             {
                 return _mandatoryAction;
             }
@@ -372,9 +374,41 @@ namespace WizardMonks
 
         public virtual void Advance()
         {
+            if (!IsCollaborating)
+            {
+                Log.Add("");
+                Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
+                IAction activity = DecideSeasonalActivity();
+                _seasonList.Add(activity);
+                activity.Act(this);
+                if (SeasonalAge >= 140)
+                {
+                    Age(LongevityRitual);
+                }
+                switch (CurrentSeason)
+                {
+                    case Season.Spring:
+                        CurrentSeason = Season.Summer;
+                        break;
+                    case Season.Summer:
+                        CurrentSeason = Season.Autumn;
+                        break;
+                    case Season.Autumn:
+                        CurrentSeason = Season.Winter;
+                        break;
+                    case Season.Winter:
+                        CurrentSeason = Season.Spring;
+                        break;
+                }
+            }
+            IsCollaborating = false;
+            ReprioritizeGoals();
+        }
+
+        internal virtual void Advance(IAction activity)
+        {
             Log.Add("");
             Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
-            IAction activity = DecideSeasonalActivity();
             _seasonList.Add(activity);
             activity.Act(this);
             if (SeasonalAge >= 140)
@@ -396,12 +430,12 @@ namespace WizardMonks
                     CurrentSeason = Season.Spring;
                     break;
             }
-            ReprioritizeGoals();
+            IsCollaborating = true;
         }
 
         public virtual void PlanToBeTaught()
         {
-            IsBeingTaught = true;
+            IsCollaborating = true;
             //_mandatoryAction =
         }
         #endregion

@@ -41,7 +41,6 @@ namespace WizardMonks
     #region IAction Classes
     public interface IAction
 	{
-		ushort? SeasonId { get; }
         Activity Action { get; }
         double Desire { get; set; }
         void Act(Character character);
@@ -59,8 +58,6 @@ namespace WizardMonks
         }
 
         public IBook Book { get; private set; }
-
-        public ushort? SeasonId { get; private set; }
 
         public Activity Action
         {
@@ -103,8 +100,6 @@ namespace WizardMonks
         }
 
         public Ability Ability { get; private set; }
-
-        public ushort? SeasonId { get; private set; }
 
         public virtual Activity Action
         {
@@ -169,7 +164,18 @@ namespace WizardMonks
     [Serializable]
     public class Learn : IAction
     {
-        public ushort? SeasonId { get; private set; }
+        private double _quality;
+        private double _maxLevel;
+        private Ability _topic;
+        private Character _teacher;
+
+        public Learn(double quality, double maxLevel, Ability topic, Character teacher)
+        {
+            _quality = quality;
+            _topic = topic;
+            _teacher = teacher;
+            _maxLevel = maxLevel;
+        }
 
         public Activity Action
         {
@@ -180,7 +186,7 @@ namespace WizardMonks
 
         public void Act(Character character)
         {
-            // TODO: currently this logic is over in teach; how do we get this to work?
+            character.GetAbility(_topic).AddExperience(_quality, _maxLevel);
         }
 
         public bool Matches(IAction action)
@@ -205,8 +211,6 @@ namespace WizardMonks
     public abstract class ExposingAction : IAction
     {
         public Ability Exposure { get; private set; }
-
-        public ushort? SeasonId { get; protected set; }
 
         public Activity Action { get; protected set; }
 
@@ -426,14 +430,14 @@ namespace WizardMonks
         private void MageApprenticeSearch(Magus mage)
         {
             // add bonus to area lore equal to casting total div 5?
-            double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
-            areaLore += mage.GetAttribute(AttributeType.Perception).Value;
-            areaLore += mage.GetAbility(Abilities.FolkKen).Value;
-            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
-            double roll = Math.Sqrt(Die.Instance.RollDouble() * areaLore);
-            if (roll > 2)
+            double folkKen = mage.GetAttribute(AttributeType.Perception).Value;
+            folkKen += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+            double roll = Die.Instance.RollExplodingDie() + folkKen;
+            if (roll > 12)
             {
-                mage.TakeApprentice(CharacterFactory.GenerateNewMagus());
+                mage.Log.Add("Apprentice found");
+                mage.TakeApprentice(CharacterFactory.GenerateNewApprentice());
+                mage.Apprentice.Name = "Apprentice filius " + mage.Name;
             }
             // TODO: gradual reduction in chance?
         }
@@ -620,6 +624,7 @@ namespace WizardMonks
     [Serializable]
     public class Teach : ExposingAction
     {
+        public bool Completed { get; private set; }
         // TODO: enable multiple students
         public Character Student { get; private set; }
         public Ability Topic { get; private set; }
@@ -628,6 +633,7 @@ namespace WizardMonks
             Action = Activity.Teach;
             Student = student;
             Topic = abilityToTeach;
+            Completed = false;
         }
 
         protected override void DoAction(Character character)
@@ -637,12 +643,9 @@ namespace WizardMonks
             {
                 throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
             }
-            double amountTaught = 6 + character.GetAttribute(AttributeType.Communication).Value + character.GetAbility(Abilities.Teaching).Value;
-            if (amountTaught > experienceDifference)
-            {
-                amountTaught = experienceDifference;
-            }
-            Student.GetAbility(Topic).AddExperience(amountTaught);
+            double quality = character.GetAbility(Abilities.Teaching).Value + character.GetAttributeValue(AttributeType.Communication) + 6;
+            Student.Advance(new Learn(quality, character.GetAbility(Topic).Value, Topic, character));
+            Completed = true;
         }
 
         public override bool Matches(IAction action)
@@ -709,8 +712,6 @@ namespace WizardMonks
     #region MageAction Classes
     public abstract class MageAction : IAction
     {
-        public ushort? SeasonId { get; protected set; }
-
         public Activity Action { get; protected set; }
 
         public double Desire { get; set; }

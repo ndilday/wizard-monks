@@ -359,12 +359,11 @@ namespace WizardMonks
 
         public override void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
-            throw new NotImplementedException();
         }
 
         public override IList<BookDesire> GetBookNeeds(Character character)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
     #endregion
@@ -1517,7 +1516,8 @@ namespace WizardMonks
                     }
                     desire /= (double)DueDate;
                 }
-                alreadyConsidered.Add(new FindApprentice(Abilities.Etiquette, desire));
+
+                alreadyConsidered.Add(new FindApprentice(MagicArts.Intellego, desire));
             }
         }
 
@@ -1530,6 +1530,7 @@ namespace WizardMonks
 
     class TeachingApprenticeGoal : BaseGoal
     {
+        private Teach _teachAction;
         public IEnumerable<Character> Students { get; private set; }
 
         public TeachingApprenticeGoal(Character student, double desire, byte tier = 0, uint? dueDate = null) : base(desire, tier, dueDate)
@@ -1553,31 +1554,40 @@ namespace WizardMonks
                     character.Log.Add("Behind schedule on teaching!");
                 }
             }
+            Magus mage = (Magus)character;
             // TODO: figure out what to teach
-            Ability toTeach = null;
-            alreadyConsidered.Add(new Teach(Students.First(), toTeach, Abilities.Teaching, dueDateDesire));
+            Ability ability = Abilities.MagicTheory;
+            double xpDiff = mage.GetAbility(ability).Experience - mage.Apprentice.GetAbility(ability).Experience;
+            double quality = mage.GetAttributeValue(AttributeType.Communication) + mage.GetAbility(Abilities.Teaching).Value + 6.0;
+            if (quality > xpDiff)
+            {
+                var arts = mage.GetAbilities().Where(a => MagicArts.IsArt(a.Ability)).OrderBy(a => a.Value);
+                foreach (CharacterAbilityBase art in arts)
+                {
+                    xpDiff = art.Experience - mage.Apprentice.GetAbility(art.Ability).Experience;
+                    if (quality <= xpDiff)
+                    {
+                        ability = art.Ability;
+                        break;
+                    }
+                }
+            }
+            _teachAction = new Teach(Students.First(), ability, Abilities.Teaching, dueDateDesire);
+            alreadyConsidered.Add(_teachAction);
         }
 
         public override bool IsComplete(Character character)
         {
-            foreach (Character student in Students)
-            {
-                if (!student.IsBeingTaught)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return  _teachAction != null && _teachAction.Completed;
         }
 
         public override void ModifyVisNeeds(Character character, VisDesire[] desires)
         {
-            throw new NotImplementedException();
         }
 
         public override IList<BookDesire> GetBookNeeds(Character character)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
     #endregion

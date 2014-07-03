@@ -127,26 +127,49 @@ namespace SkillViewer
             //    mage.Advance();
             //}
             _log.Add("Advancing Season");
-            Parallel.ForEach(_magusArray.Where(m => m != null), character =>
-                {
-                    Task reportProgressTask = Task.Factory.StartNew(() =>
-                        {
-                            lstAdvance.DataSource = null;
-                            lstAdvance.DataSource = _log;
-                        },
-                        CancellationToken.None,
-                        TaskCreationOptions.None,
-                        uiScheduler);
-                    character.Advance();
-                    reportProgressTask = Task.Factory.StartNew(() =>
+            Parallel.ForEach(_magusArray.Where(m => m != null && !m.WantsToFollow), character =>
+            {
+                Task reportProgressTask = Task.Factory.StartNew(() =>
                     {
                         lstAdvance.DataSource = null;
                         lstAdvance.DataSource = _log;
                     },
-                        CancellationToken.None,
-                        TaskCreationOptions.None,
-                        uiScheduler);
-                } );
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    uiScheduler);
+                character.Advance();
+                reportProgressTask = Task.Factory.StartNew(() =>
+                {
+                    lstAdvance.DataSource = null;
+                    lstAdvance.DataSource = _log;
+                },
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    uiScheduler);
+            } );
+
+            // TODO: handle collaboration
+            _log.Add("Handling collaboration");
+            Parallel.ForEach(_magusArray.Where(m => m != null && m.WantsToFollow), character =>
+            {
+                Task reportProgressTask = Task.Factory.StartNew(() =>
+                {
+                    lstAdvance.DataSource = null;
+                    lstAdvance.DataSource = _log;
+                },
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    uiScheduler);
+                character.Advance();
+                reportProgressTask = Task.Factory.StartNew(() =>
+                {
+                    lstAdvance.DataSource = null;
+                    lstAdvance.DataSource = _log;
+                },
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    uiScheduler);
+            });
 
             // add any new apprentices found during the past season
             var newApprentices = _magusArray.Where(m => m != null && m.Apprentice != null)
@@ -159,8 +182,9 @@ namespace SkillViewer
             }
             _log.Add("Done Advancing Season");
             _log.Add("Considering vis and book trades");
-            var magiDesires = _magusArray.Where(m => m != null && m.House != Houses.Apprentice).Select(m => m.GenerateTradingDesires()).ToList();
-            foreach (Magus mage in _magusArray.OrderBy(m => _rand.NextDouble()))
+            var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
+            var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
+            foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))
             {
                 if (mage == null) continue;
                 mage.EvaluateTradingDesires(magiDesires);

@@ -30,13 +30,25 @@ namespace WizardMonks
         private MagusTradingDesires _tradeDesires;
         private List<SummaGoal> _summaGoals;
         private List<TractatusGoal> _tractatusGoals;
+        private Houses _house;
         #endregion
 
         #region Public Properties
         public Magus Apprentice { get; private set; }
         public Laboratory Laboratory { get; private set; }
         public List<Spell> SpellList { get; private set; }
-        public Houses House { get; set; }
+        public Houses House
+        {
+            get
+            {
+                return _house;
+            }
+            set
+            {
+                _house = value;
+                WantsToFollow = false;
+            }
+        }
         public Covenant Covenant { get; private set; }
         public Arts Arts { get; private set; }
         public double VisStudyRate { get; private set; }
@@ -670,7 +682,7 @@ namespace WizardMonks
             // TODO: what sort of error checking should go here?
             Apprentice = apprentice;
             // add a teaching goal for each year
-            for (byte i = 1; i < 16; i++)
+            for (byte i = 2; i < 16; i++)
             {
                 uint dueDate = (uint)(i * 4);
                 IGoal teachingGoal = new TeachingApprenticeGoal(apprentice, 3, 0, dueDate);

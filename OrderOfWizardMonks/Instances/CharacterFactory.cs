@@ -35,7 +35,7 @@ namespace WizardMonks.Instances
             return magus;
         }
 
-        public static Magus GenerateNewMagus()
+        public static Magus GenerateNewApprentice()
         {
             Magus magus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
             NormalizeAttributes(magus);
@@ -90,6 +90,9 @@ namespace WizardMonks.Instances
             bool isAcademic = Die.Instance.RollSimpleDie() == 1;
             bool isMartial = Die.Instance.RollSimpleDie() <= 2;
             DistributeExperience(magus, extraXP, isAcademic, isMartial);
+
+            // TODO: how do we initialize the goals of this new apprentice?
+
             return magus;
         }
 

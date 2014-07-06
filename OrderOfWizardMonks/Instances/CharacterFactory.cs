@@ -92,6 +92,7 @@ namespace WizardMonks.Instances
             DistributeExperience(magus, extraXP, isAcademic, isMartial);
 
             // TODO: how do we initialize the goals of this new apprentice?
+            InitializeApprenticeGoals(magus);
 
             return magus;
         }
@@ -129,6 +130,10 @@ namespace WizardMonks.Instances
                 }
                 extraXP -= valueAdd;
             }
+        }
+
+        private static void InitializeApprenticeGoals(Magus magus)
+        {
         }
     }
 }

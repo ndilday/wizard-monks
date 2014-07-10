@@ -196,10 +196,7 @@ namespace WizardMonks
 
         static CrAnBases()
         {
-            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.PlainAnimalProduct, SpellArts.Creo|SpellArts.Animal, MagicArtPairs.CrAn, 5);
-            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.TreatedAnimalProduct, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 10);
-            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.ProcessedAnimalProduct, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 15);
-            CreateInsect = new SpellBase(TechniqueEffects.Create, FormEffects.Insect, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 5);
+            
         }
     }
 

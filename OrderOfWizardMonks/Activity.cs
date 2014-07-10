@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Core;
 using WizardMonks.Instances;
 
 namespace WizardMonks

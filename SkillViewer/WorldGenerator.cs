@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using WizardMonks;
+using WizardMonks.Core;
 using WizardMonks.Instances;
 using WorldSimulation;
 
@@ -15,7 +16,7 @@ namespace SkillViewer
 
     public partial class WorldGenerator : Form
     {
-        private Magus[] _magusArray = new Magus[100];
+        private Magus[] _magusArray = new Magus[40];
         private int _magusCount = 0;
         private Ability _latin;
         private Ability _magicTheory;

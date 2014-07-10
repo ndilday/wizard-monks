@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
+using WizardMonks.Core;
 using WizardMonks.Instances;
 
 namespace WizardMonks

@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using WizardMonks.Core;
+
 namespace WizardMonks.Test
 {
     [TestClass]

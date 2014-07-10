@@ -7,7 +7,29 @@ using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-    public enum Range
+    #region Spell Attributes
+    public abstract class SpellAttribute
+    {
+        public byte Level { get; private set; }
+        public bool NeedsRitual { get; private set; }
+
+        public SpellAttribute(byte level, bool needsRitual)
+        {
+            Level = level;
+            NeedsRitual = needsRitual;
+        }
+    }
+
+    public class EffectRange : SpellAttribute
+    {
+        public Ranges Range { get; private set; }
+        public EffectRange(Ranges range, byte level, bool needsRitual = false) : base(level, needsRitual)
+        {
+            Range = range;
+        }
+    }
+
+    public enum Ranges
     {
         Personal,
         Touch,
@@ -17,70 +39,52 @@ namespace WizardMonks
         Arcane
     }
 
-    public enum Duration
+    public class EffectDuration : SpellAttribute
+    {
+        public Durations Duration { get; private set; }
+        public EffectDuration(Durations duration, byte level, bool needsRitual = false) : base(level, needsRitual)
+        {
+            Duration = duration;
+        }
+    }
+
+    public enum Durations
     {
         Instantaneous,
         Concentration,
         Diameter,
         Sun,
-        Circle,
+        Ring,
         Moon,
         Year
     }
 
-    public enum Target
+    public class EffectTarget : SpellAttribute
+    {
+        public Targets Target { get; private set; }
+        public EffectTarget(Targets target, byte level, bool needsRitual = false)
+            : base(level, needsRitual)
+        {
+            Target = target;
+        }
+    }
+
+    public enum Targets
     {
         Individual,
+        Taste,
         Part,
+        Touch,
         Group,
-        Ring,
+        Smell,
+        Circle,
         Room,
         Structure,
-        Boundary
+        Hearing,
+        Boundary,
+        Sight
     }
-
-    public class Spell
-    {
-        public ArtPair BaseArts { get; private set; }
-
-        public Range Range { get; private set; }
-        public Duration Duration { get; private set; }
-        public Target Target { get; private set; }
-        public byte Base { get; private set; }
-        public byte Modifiers { get; private set; }
-        public bool IsRitual { get; private set; }
-
-        public SpellArts RequisiteTechniques { get; private set; }
-        public SpellArts RequisiteForms { get; private set; }
-        public string Name { get; private set; }
-
-        public double Level
-        {
-            get
-            {
-                int totalModifier = SpellModifiers.GetModifier(Duration) +
-                    SpellModifiers.GetModifier(Range) +
-                    SpellModifiers.GetModifier(Target);
-                if (Base + totalModifier > 5)
-                {
-                    return (Base + totalModifier - 4) * 5;
-                }
-                return Base + totalModifier;
-            }
-        }
-
-        public Spell(ArtPair artPair, Range range, Duration duration, Target target, byte baseLevel, byte modifiers, bool isRitual, string name)
-        {
-            BaseArts = artPair;
-            Range = range;
-            Duration = duration;
-            Target = target;
-            Base = baseLevel;
-            Modifiers = modifiers;
-            IsRitual = isRitual;
-            Name = name;
-        }
-    }
+    #endregion
 
     [Flags]
     public enum SpellArts
@@ -104,45 +108,71 @@ namespace WizardMonks
         Forms = 0x07FE
     }
 
-    public abstract class SpellBase
+    public class Spell
     {
-        public abstract SpellArts Arts {get;}
-        public abstract ArtPair ArtPair {get;}
+        public ArtPair BaseArts { get; private set; }
 
-        public ushort ID { get; protected set; }
-        public ushort Level { get; protected set; }
+        public EffectRange Range { get; private set; }
+        public EffectDuration Duration { get; private set; }
+        public EffectTarget Target { get; private set; }
+        public SpellBase Base { get; private set; }
+        public byte Modifiers { get; private set; }
+        public bool IsRitual { get; private set; }
+
+        public SpellArts RequisiteTechniques { get; private set; }
+        public SpellArts RequisiteForms { get; private set; }
+        public string Name { get; private set; }
+
+        public double Level
+        {
+            get
+            {
+                int totalModifier = Range.Level + Duration.Level + Target.Level;
+                if (Base.Level + totalModifier > 5)
+                {
+                    return (Base.Level + totalModifier - 4) * 5;
+                }
+                return Base.Level + totalModifier;
+            }
+        }
+
+        public Spell(EffectRange range, EffectDuration duration, EffectTarget target, SpellBase baseLevel, byte modifiers, bool isRitual, string name)
+        {
+            Range = range;
+            Duration = duration;
+            Target = target;
+            Base = baseLevel;
+            Modifiers = modifiers;
+            IsRitual = isRitual;
+            Name = name;
+        }
     }
 
-    public class CrAnSpellBase : SpellBase
+    public class SpellBase
     {
-        public override SpellArts Arts
-        {
-            get
-            {
-                return SpellArts.Creo | SpellArts.Animal;
-            }
-        }
+        public SpellArts Arts { get; private set; }
+        public ArtPair ArtPair { get; private set; }
 
-        public override ArtPair ArtPair
-        {
-            get
-            {
-                return MagicArtPairs.CrAn;
-            }
-        }
+        public TechniqueEffects TechniqueEffects { get; private set; }
+        public FormEffects FormEffects { get; private set; }
 
-        public CrAnSpellBase(byte id, byte level)
+        public ushort Level { get; protected set; }
+
+        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, byte level)
         {
-            ID = id;
+            TechniqueEffects = techniqueEffects;
+            FormEffects = formEffects;
             Level = level;
+            Arts = arts;
+            ArtPair = artPair;
         }
     }
 
     #region Animal Spells
     public static class CrAnBases
     {
-        public static readonly CrAnSpellBase CreateAnimalProduct;
-        public static readonly CrAnSpellBase CreateInsect;
+        public static readonly SpellBase CreateAnimalProduct;
+        public static readonly SpellBase CreateInsect;
         public const byte CreateAnimalCorpse = 10;
         public const byte CreateBird = 10;
         public const byte CreateReptile = 10;
@@ -166,8 +196,10 @@ namespace WizardMonks
 
         static CrAnBases()
         {
-            CreateAnimalProduct = new CrAnSpellBase(1, 5);
-            CreateInsect = new CrAnSpellBase(2, 5);
+            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.PlainAnimalProduct, SpellArts.Creo|SpellArts.Animal, MagicArtPairs.CrAn, 5);
+            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.TreatedAnimalProduct, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 10);
+            CreateAnimalProduct = new SpellBase(TechniqueEffects.Create, FormEffects.ProcessedAnimalProduct, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 15);
+            CreateInsect = new SpellBase(TechniqueEffects.Create, FormEffects.Insect, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 5);
         }
     }
 
@@ -190,15 +222,84 @@ namespace WizardMonks
     }
     #endregion
 
-    #region Vim Spells
-    public static class InViBases
+    [Flags]
+    public enum TechniqueEffects : long
     {
-        public const byte DetectAura = 1;
-        public const byte DetectVis = 1;
-        public const byte KnowAuraStrength = 2;
-        public const byte KnowRegioBoundaries = 3;
-        public const byte KnowVisAmount = 4;
-        public const byte KnowVisType = 4;
+        // Creo
+        RecoveryBonus = 0x0000000000000001,
+        Heal = 0x0000000000000002,
+        CureDisease = 0x0000000000000004,
+        Mature = 0x0000000000000008,
+        RestoreSense = 0x0000000000000010,
+        RestoreLimb = 0x0000000000000020,
+        IncreaseAttribute = 0x0000000000000040,
+        Create = 0x0000000000000080,
+        RaiseFromDead = 0x0000000000000100,
+        // Intellego
+        GetMentalImage = 0x0000000000001000,
+        SenseConsciousness = 0x0000000000002000,
+        GetGeneralInformation = 0x0000000000004000,
+        SenseDominantDrive = 0x0000000000008000,
+        GetSpecificAnswer = 0x0000000000010000,
+        LearnHistory = 0x0000000000020000,
+        SpeakWith = 0x0000000000040000,
+        ReadRecentMemories = 0x0000000000080000,
+        MindProbe = 0x0000000000100000,
+        MakeSensesUnhinderedBy = 0x0000000000200000,
+        // Muto
+        SuperficialChange = 0x0000000001000000,
+        MajorChange = 0x0000000002000000,
+        SubstancialChange = 0x0000000004000000,
+        MinorUnnaturalChange = 0x0000000008000000,
+        MajorUnnaturalChange = 0x0000000010000000,
+        ChangeToHuman = 0x0000000020000000,
+        ChangeToPlant = 0x0000000040000000,
+        // Perdo
+        SuperficialDamage = 0x0000001000000000,
+        Destroy = 0x0000002000000000,
+        Pain = 0x0000004000000000,
+        Fatigue = 0x0000008000000000,
+        Injure = 0x0000010000000000,
+        Wound = 0x0000020000000000,
+        Cripple = 0x0000040000000000,
+        Age = 0x0000080000000000,
+        DestroyLimb = 0x0000100000000000,
+        Kill = 0x0000200000000000,
+        DestroyProperty = 0x0000400000000000,
+        Reduce = 0x0000800000000000,
+        // Rego
+        Ward = 0x0001000000000000,
+        Manipulate = 0x0002000000000000,
+        PlantSuggestion = 0x0004000000000000,
+        Paralyze = 0x0008000000000000,
+        Control = 0x0010000000000000,
+        Calm = 0x0020000000000000
     }
-    #endregion
+
+    [Flags]
+    public enum FormEffects : long
+    {
+        // Animal
+        Animal = 0x0000000000000001,
+        Insect = 0x0000000000000002,
+        MagicAnimal = 0x0000000000000004,
+        PlainAnimalProduct = 0x0000000000000010,
+        TreatedAnimalProduct = 0x0000000000000020,
+        ProcessedAnimalProduct = 0x0000000000000040,
+        // Aquam
+        Water = 0x0000000000000100,
+        NaturalLiquid = 0x0000000000000200,
+        CorrosiveLiquid = 0x0000000000000400,
+        UnnaturalLiquid = 0x000000000000800,
+        VeryUnnaturalLiquid = 0x0000000000001000,
+        Poison = 0x0000000000002000,
+        Spring = 0x0000000000004000,
+        Geyser = 0x0000000000008000,
+        // Auram
+        MinorWeather = 0x0000000000100000,
+        NormalWeather = 0x0000000000200000,
+        SevereWeather = 0x0000000000400000,
+        VerySevereWeather = 0x0000000000800000,
+        DebilitatingAir = 0x0000000001000000,
+    }
 }

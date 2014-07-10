@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace WizardMonks
+namespace WizardMonks.Core
 {
     public class Multiton<K, T> where T: new()
     {

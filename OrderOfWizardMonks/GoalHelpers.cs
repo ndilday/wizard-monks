@@ -181,8 +181,8 @@ namespace WizardMonks
         private double GetAverageVisSize(double magicLoreTotal)
         {
             // TODO: we should use the aura implementation of this logic, instead
-            double currentRoll = Math.Pow(_currentTotal, 2) / (_currentML * _aura);
-            double multiplier = Math.Sqrt(_currentML * _aura) * 2 / 3;
+            double currentRoll = Math.Pow(_currentTotal, 2) / (magicLoreTotal * _aura);
+            double multiplier = Math.Sqrt(magicLoreTotal * _aura) * 2 / 3;
             return (11.180339887498948482045868343656 - Math.Pow(currentRoll, 1.5)) * multiplier / 5.0;
         }
     }

@@ -159,6 +159,10 @@ namespace WizardMonks
         public override void ModifyActionList(Character character, ConsideredActions alreadyConsidered, IList<string> log)
         {
             double remainingTotal = GetRemainingTotal(character);
+            if(remainingTotal <= 0)
+            {
+                return;
+            }
             double dueDateDesire = Desire / (Tier + 1);
             if (DueDate != null)
             {
@@ -169,7 +173,7 @@ namespace WizardMonks
                 }
                 dueDateDesire /= (double)DueDate;
             }
-            if (dueDateDesire > 0.01)
+            if (dueDateDesire > 0.01 && Tier <= 10)
             {
                 IEnumerable<IBook> readableBooks = character.ReadableBooks;
                 foreach (Ability ability in _abilities)
@@ -222,6 +226,11 @@ namespace WizardMonks
                 visType.Add(charAbility.Ability);
                 VisCondition visCondition = new VisCondition(visType, visNeed - stockpile, baseDesire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
                 visCondition.ModifyActionList(mage, alreadyConsidered, log);
+                if(baseDesire > 0.04 && (DueDate == null || DueDate > 4))
+                {
+                    // we have enough time and interest to consider finding a new aura and building a new lab in it
+
+                }
             }
         }
 
@@ -1098,17 +1107,16 @@ namespace WizardMonks
                             helper.ModifyActionList(character, alreadyConsidered, log);
                         }
                     }
-                    else
-                    {
-                        // consider increasing skills to be able to find vis
-                        List<Ability> visSourceAbilities = new List<Ability>();
-                        visSourceAbilities.Add(MagicArts.Intellego);
-                        visSourceAbilities.Add(MagicArts.Vim);
-                        visSourceAbilities.Add(Abilities.MagicLore);
-                        AbilityScoreCondition condition =
-                            new AbilityScoreCondition(visSourceAbilities, 2, Desire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
-                        condition.ModifyActionList(character, alreadyConsidered, log);
-                    }
+
+                    // consider increasing skills to be able to find vis
+                    List<Ability> visSourceAbilities = new List<Ability>();
+                    visSourceAbilities.Add(MagicArts.Intellego);
+                    visSourceAbilities.Add(MagicArts.Vim);
+                    visSourceAbilities.Add(Abilities.MagicLore);
+                    AbilityScoreCondition condition =
+                        new AbilityScoreCondition(visSourceAbilities, 2, Desire, (byte)(Tier + 1), DueDate == null ? null : DueDate - 1);
+                    condition.ModifyActionList(character, alreadyConsidered, log);
+
                     // consider the value of looking for a new aura
                     double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
                     areaLore += mage.GetAttribute(AttributeType.Perception).Value;
@@ -1259,7 +1267,6 @@ namespace WizardMonks
     class LongevityRitualGoal : IGoal
     {
         private HasLabCondition _hasLabCondition;
-        private List<Ability> _abilitiesRequired;
         private List<Ability> _artsRequired;
 
         public uint? DueDate { get; private set; }
@@ -1282,10 +1289,6 @@ namespace WizardMonks
             DueDate = dueDate;
             Tier = tier;
             Desire = CalculateDesire(mage);
-            _abilitiesRequired = new List<Ability>();
-            _abilitiesRequired.Add(MagicArts.Creo);
-            _abilitiesRequired.Add(MagicArts.Vim);
-            _abilitiesRequired.Add(Abilities.MagicTheory);
             _artsRequired = new List<Ability>();
             _artsRequired.Add(MagicArts.Creo);
             _artsRequired.Add(MagicArts.Vim);

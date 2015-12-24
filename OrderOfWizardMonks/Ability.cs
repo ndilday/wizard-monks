@@ -65,7 +65,12 @@ namespace WizardMonks
         {
             return _abilityId;
         }
-	}
+
+        public override string ToString()
+        {
+            return AbilityName;
+        }
+    }
 
     [DataContract]
     public class AbilityList

@@ -425,7 +425,8 @@ namespace WizardMonks
             while (sales.Any() )
             {
                 var sellOffer = sales.First();
-                if (sellOffer.Mage.GetVisCount(sellOffer.VisArt) >= sellOffer.VisQuantity)
+                if (GetBooksFromCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
+                    sellOffer.Mage.GetVisCount(sellOffer.VisArt) >= sellOffer.VisQuantity)
                 {
                     Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.Mage.Name);
                     Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
@@ -714,6 +715,13 @@ namespace WizardMonks
                 }
             }
             base.Advance();
+        }
+        #endregion
+
+        #region object Overrides
+        public override string ToString()
+        {
+            return this.Name + " ex " + this.House.ToString();
         }
         #endregion
     }

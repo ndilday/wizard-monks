@@ -21,7 +21,7 @@ namespace SkillViewer
         {
             _character = character;
             InitializeComponent();
-
+            this.Text = _character.ToString() + " Character Sheet";
             DisplayCharacteristics();
             DisplayArts();
             DisplayAbilities();

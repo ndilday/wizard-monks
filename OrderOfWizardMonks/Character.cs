@@ -640,5 +640,12 @@ namespace WizardMonks
             return gain / 4;
         }
         #endregion
+
+        #region object Overrides
+        public override string ToString()
+        {
+            return this.Name;
+        }
+        #endregion
     }
 }

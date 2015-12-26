@@ -73,6 +73,8 @@
     <Compile Include="Aura.cs" />
     <Compile Include="Book.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="Decisions\ACondition.cs" />
+    <Compile Include="Decisions\IGoal.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="GoalHelpers.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />
@@ -110,6 +112,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

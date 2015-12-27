@@ -73,8 +73,14 @@
     <Compile Include="Aura.cs" />
     <Compile Include="Book.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="Decisions\AbilityScoreCondition.cs" />
     <Compile Include="Decisions\ACondition.cs" />
-    <Compile Include="Decisions\IGoal.cs" />
+    <Compile Include="Decisions\Goals\AbilityScoreGoal.cs" />
+    <Compile Include="Decisions\Goals\AGoal.cs" />
+    <Compile Include="Decisions\HasLabCondition.cs" />
+    <Compile Include="Decisions\Goals\IGoal.cs" />
+    <Compile Include="Decisions\InAuraCondition.cs" />
+    <Compile Include="Decisions\VisCondition.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="GoalHelpers.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />

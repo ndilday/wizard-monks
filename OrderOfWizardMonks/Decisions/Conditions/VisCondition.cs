@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WizardMonks.Decisions
+namespace WizardMonks.Decisions.Conditions
 {
-    class VisCondition : ACondition
+    public class VisCondition : ACondition
     {
         private Magus _magus;
         public List<Ability> VisTypes { get; private set; }

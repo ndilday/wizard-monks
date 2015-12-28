@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using WizardMonks.Decisions.Conditions;
 
 namespace WizardMonks.Decisions.Goals
 {
-    class AbilityScoreGoal : AGoal
+    public class AbilityScoreGoal : AGoal
     {
-        AbilityScoreGoal(Character character, uint? dueDate, double desire, Ability ability, double level) :
+        public AbilityScoreGoal(Character character, uint? dueDate, double desire, Ability ability, double level) :
             base(character, dueDate, desire)
         {
             Conditions.Add(new AbilityScoreCondition(character, ability, level));
         }
-
-
     }
 }

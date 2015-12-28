@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using WizardMonks.Decisions.Conditions;
+
 namespace WizardMonks.Decisions.Goals
 {
     public interface IGoal

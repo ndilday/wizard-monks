@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Decisions.Conditions;
 using WizardMonks.Instances;
 
-namespace WizardMonks
+namespace WizardMonks.Decisions
 {
     public abstract class BaseHelper
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 
 namespace WizardMonks
@@ -28,8 +29,8 @@ namespace WizardMonks
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
         private MagusTradingDesires _tradeDesires;
-        private List<SummaGoal> _summaGoals;
-        private List<TractatusGoal> _tractatusGoals;
+        //private List<SummaGoal> _summaGoals;
+        //private List<TractatusGoal> _tractatusGoals;
         private Houses _house;
         #endregion
 
@@ -55,8 +56,10 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseAge = 20)
-            : base(writingLanguage, writingAbility, areaAbility, startingGoals, baseAge)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, 80) { }
+        public Magus(uint age) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, age) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseAge = 20)
+            : base(writingLanguage, writingAbility, areaAbility, baseAge)
         {
             _magicAbility = magicAbility;
             Arts = new Arts();
@@ -64,8 +67,8 @@ namespace WizardMonks
             Laboratory = null;
             _visStock = new Dictionary<Ability, double>();
             SpellList = new List<Spell>();
-            _tractatusGoals = new List<TractatusGoal>();
-            _summaGoals = new List<SummaGoal>();
+            //_tractatusGoals = new List<TractatusGoal>();
+            //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
             VisStudyRate = 6;

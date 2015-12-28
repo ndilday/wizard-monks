@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WizardMonks.Decisions
+namespace WizardMonks.Decisions.Conditions
 {
-    public class HasLabCondition : ACondition
+    class InAuraCondition : ACondition
     {
-        public HasLabCondition(Character character) : base(character)
+        public InAuraCondition(Character character) : base(character)
         {
 
         }
@@ -16,7 +16,7 @@ namespace WizardMonks.Decisions
         {
             get
             {
-                return typeof(Magus) == Character.GetType() && ((Magus)Character).Laboratory != null;
+                return Character.KnownAuras != null && Character.KnownAuras.Count > 0;
             }
         }
 

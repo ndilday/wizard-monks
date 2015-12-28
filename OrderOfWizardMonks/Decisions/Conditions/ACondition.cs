@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WizardMonks.Decisions
+namespace WizardMonks.Decisions.Conditions
 {
     public abstract class ACondition
     {

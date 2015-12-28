@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 
 using WizardMonks.Core;
+using WizardMonks.Decisions;
+using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 
 namespace WizardMonks
@@ -122,7 +124,7 @@ namespace WizardMonks
         public bool WantsToFollow { get; protected set; }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, List<IGoal> startingGoals = null, uint baseSeasonableAge = 20)
+        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20)
         {
             Die die = new Die();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
@@ -158,7 +160,7 @@ namespace WizardMonks
             _writingAbilities.Add(_writingLanguage);
 
             _incompleteBooks = new List<Summa>();
-            _goals = startingGoals == null ? new List<IGoal>() : startingGoals;
+            _goals = new List<IGoal>();
             Log = new List<string>();
             Warping = new CharacterAbility(Abilities.Warping);
         }
@@ -335,12 +337,12 @@ namespace WizardMonks
                 ConsideredActions actions = new ConsideredActions();
                 foreach (IGoal goal in _goals)
                 {
-                    if (!goal.IsComplete(this))
+                    if (!goal.IsComplete())
                     {
                         // TODO: it should probably be an error case for a goal to still be here
                         // for now, ignore
                         List<string> dummy = new List<string>();
-                        goal.ModifyActionList(this, actions, dummy);
+                        goal.AddActionPreferencesToList(actions, dummy);
                     }
                 }
                 Log.AddRange(actions.Log());
@@ -638,6 +640,11 @@ namespace WizardMonks
                 return 0;
             }
             return gain / 4;
+        }
+
+        public void AddGoal(IGoal goal)
+        {
+            _goals.Add(goal);
         }
         #endregion
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Decisions.Conditions;
+
 namespace WizardMonks.Decisions.Goals
 {
     public abstract class AGoal : IGoal
@@ -23,14 +25,24 @@ namespace WizardMonks.Decisions.Goals
 
         public virtual void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            foreach(ACondition condition in Conditions)
+            if (!_completed)
             {
-                if(!condition.ConditionFulfilled)
+                bool conditionsFulfilled = true;
+                foreach (ACondition condition in Conditions)
                 {
-                    condition.AddActionPreferencesToList(alreadyConsidered, log);
+                    if (!condition.ConditionFulfilled)
+                    {
+                        conditionsFulfilled = false;
+                        condition.AddActionPreferencesToList(alreadyConsidered, log);
+                    }
+                }
+                if (conditionsFulfilled)
+                {
+                    _completed = true;
                 }
             }
         }
+
         public virtual bool IsComplete()
         {
             return _completed;

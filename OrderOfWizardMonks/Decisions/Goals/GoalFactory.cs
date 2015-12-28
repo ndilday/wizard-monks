@@ -4,7 +4,7 @@ using System.Linq;
 
 using WizardMonks;
 
-namespace WizardMonks.Instances
+namespace WizardMonks.Decisions.Goals
 {
     public enum GoalType
     {
@@ -18,14 +18,10 @@ namespace WizardMonks.Instances
 
     class GoalFactory
     {
-        public static IGoal GenerateGoal(GoalType goalType, double desire)
+        public static IGoal GenerateGoal(Character character, GoalType goalType, double desire)
         {
             switch (goalType)
             {
-                case GoalType.FoundCovenant:
-                    return new HasCovenantCondition(desire, 0);
-                case GoalType.BuildLab:
-                    return new HasLabCondition(desire, 0);
                 default:
                     return null;
             }
@@ -33,7 +29,8 @@ namespace WizardMonks.Instances
 
         public static IGoal GenerateSpellGoal(Spell spell, double desire)
         {
-            return new InventSpellGoal(spell, desire, 0);
+            //return new InventSpellGoal(spell, desire, 0);
+            return null;
         }
     }
 }

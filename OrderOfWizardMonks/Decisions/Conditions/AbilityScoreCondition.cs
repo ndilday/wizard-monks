@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WizardMonks.Decisions
+namespace WizardMonks.Decisions.Conditions
 {
     class AbilityScoreCondition : ACondition
     {

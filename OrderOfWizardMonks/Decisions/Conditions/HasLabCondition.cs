@@ -7,7 +7,7 @@ namespace WizardMonks.Decisions.Conditions
 {
     public class HasLabCondition : ACondition
     {
-        public HasLabCondition(Character character, uint? ageToCompleteBy, double desire) : base(character, ageToCompleteBy, desire)
+        public HasLabCondition(Character character, uint ageToCompleteBy, double desire) : base(character, ageToCompleteBy, desire)
         {
 
         }

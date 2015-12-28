@@ -7,7 +7,8 @@ namespace WizardMonks.Decisions.Goals
         public AbilityScoreGoal(Character character, uint? ageToCompleteBy, double desire, Ability ability, double level) :
             base(character, ageToCompleteBy, desire)
         {
-            Conditions.Add(new AbilityScoreCondition(character, ageToCompleteBy, desire, ability, level));
+            uint modifiedAge = ageToCompleteBy == null ? 100 : (uint)ageToCompleteBy;
+            Conditions.Add(new AbilityScoreCondition(character, modifiedAge, desire, ability, level));
         }
     }
 }

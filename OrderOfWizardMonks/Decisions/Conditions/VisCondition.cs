@@ -11,14 +11,14 @@ namespace WizardMonks.Decisions.Conditions
         public List<Ability> VisTypes { get; private set; }
         public double AmountNeeded { get; private set; }
 
-        public VisCondition(Character character, uint? ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded) :
+        public VisCondition(Character character, uint ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded) :
             base(character, ageToCompleteBy, desire)
         {
             VisTypes = abilities;
             AmountNeeded = totalNeeded;
         }
 
-        public VisCondition(Magus magus, uint? ageToCompleteBy, double desire, Ability ability, double totalNeeded) :
+        public VisCondition(Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded) :
             base(magus, ageToCompleteBy, desire)
         {
             VisTypes = new List<Ability>(1);

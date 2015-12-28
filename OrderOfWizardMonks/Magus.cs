@@ -691,7 +691,7 @@ namespace WizardMonks
                 IGoal teachingGoal = new TeachingApprenticeGoal(apprentice, 3, 0, dueDate);
                 _goals.Add(teachingGoal);
             }
-            IGoal gauntletGoal = new GauntletGoal(apprentice, 3, 0, 60);
+            IGoal gauntletGoal = new GauntletApprenticeGoal(apprentice, 3, 0, 60);
             _goals.Add(gauntletGoal);
         }
 

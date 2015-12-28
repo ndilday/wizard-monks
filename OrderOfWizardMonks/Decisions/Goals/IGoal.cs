@@ -6,7 +6,7 @@ namespace WizardMonks.Decisions.Goals
 {
     public interface IGoal
     {
-        uint? DueDate { get; }
+        uint? AgeToCompleteBy { get; }
         double Desire { get; set; }
         List<ACondition> Conditions { get; }
 

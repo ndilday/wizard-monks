@@ -10,14 +10,14 @@ namespace WizardMonks.Decisions.Goals
     {
         protected bool _completed = false;
 
-        public uint? DueDate { get; private set; }
+        public uint? AgeToCompleteBy { get; private set; }
         public double Desire { get; set; }
         public List<ACondition> Conditions { get; protected set; }
         public Character Character { get; private set; }
 
-        public AGoal(Character character, uint? dueDate, double desire)
+        public AGoal(Character character, uint? ageToCompleteBy, double desire)
         {
-            DueDate = dueDate;
+            AgeToCompleteBy = ageToCompleteBy;
             Desire = desire;
             Character = character;
             Conditions = new List<ACondition>();

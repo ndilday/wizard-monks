@@ -80,11 +80,13 @@
     <Compile Include="Decisions\Goals\AGoal.cs" />
     <Compile Include="Decisions\Conditions\HasLabCondition.cs" />
     <Compile Include="Decisions\Goals\ApprenticeGoal.cs" />
+    <Compile Include="Decisions\Goals\GauntletApprenticeGoal.cs" />
     <Compile Include="Decisions\Goals\IGoal.cs" />
     <Compile Include="Decisions\Conditions\InAuraCondition.cs" />
     <Compile Include="Decisions\Conditions\VisCondition.cs" />
     <Compile Include="Decisions\GoalHelpers.cs" />
     <Compile Include="Decisions\Goals\LongevityRitualGoal.cs" />
+    <Compile Include="Decisions\Goals\TeachApprenticeGoal.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />
     <Compile Include="Covenant.cs" />
     <Compile Include="Core\Dice.cs" />

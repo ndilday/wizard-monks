@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using WizardMonks.Core;
@@ -354,7 +353,7 @@ namespace WizardMonks
         {
             foreach (IGoal goal in _goals)
             {
-                if (!goal.IsComplete(this))
+                if (!goal.IsComplete())
                 {
                     if (!goal.DecrementDueDate())
                     {

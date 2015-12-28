@@ -18,8 +18,8 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        public AbilityScoreCondition(Character character, List<Ability> abilities, List<AttributeType> attributes, double totalNeeded) :
-            base(character)
+        public AbilityScoreCondition(Character character, uint? dueDate, double desire, List<Ability> abilities, List<AttributeType> attributes, double totalNeeded) :
+            base(character, dueDate, desire)
         {
             Abilities = abilities;
             Attributes = attributes;
@@ -27,8 +27,8 @@ namespace WizardMonks.Decisions.Conditions
             _currentTotal = GetTotal();
         }
 
-        public AbilityScoreCondition(Character character, Ability ability, double totalNeeded) :
-            base(character)
+        public AbilityScoreCondition(Character character, uint? dueDate, double desire, Ability ability, double totalNeeded) :
+            base(character, dueDate, desire)
         {
             Abilities = new List<Ability>(1);
             Abilities.Add(ability);

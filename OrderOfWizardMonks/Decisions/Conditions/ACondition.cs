@@ -5,13 +5,17 @@ namespace WizardMonks.Decisions.Conditions
     public abstract class ACondition
     {
         public Character Character { get; private set; }
+        public uint? AgeToCompleteBy { get; set; }
+        public double Desire { get; set; }
         public abstract bool ConditionFulfilled { get; }
 
         public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
 
-        public ACondition(Character character)
+        public ACondition(Character character, uint? ageToCompleteBy, double desire)
         {
             Character = character;
+            AgeToCompleteBy = ageToCompleteBy;
+            Desire = desire;
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace WizardMonks.Decisions.Conditions
 {
-    class InAuraCondition : ACondition
+    class HasAuraCondition : ACondition
     {
-        public InAuraCondition(Character character, uint ageToCompleteBy, double desire) : base(character, ageToCompleteBy, desire)
+        public HasAuraCondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 0) : base(character, ageToCompleteBy, desire, conditionDepth)
         {
 
         }

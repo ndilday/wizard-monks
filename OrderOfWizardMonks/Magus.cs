@@ -688,10 +688,10 @@ namespace WizardMonks
             for (byte i = 2; i < 16; i++)
             {
                 uint dueDate = (uint)(i * 4);
-                IGoal teachingGoal = new TeachingApprenticeGoal(apprentice, 3, 0, dueDate);
+                IGoal teachingGoal = new TeachApprenticeGoal();
                 _goals.Add(teachingGoal);
             }
-            IGoal gauntletGoal = new GauntletApprenticeGoal(apprentice, 3, 0, 60);
+            IGoal gauntletGoal = new GauntletApprenticeGoal();
             _goals.Add(gauntletGoal);
         }
 

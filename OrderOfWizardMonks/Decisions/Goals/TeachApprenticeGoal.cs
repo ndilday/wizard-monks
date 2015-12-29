@@ -5,7 +5,13 @@ using System.Text;
 
 namespace WizardMonks.Decisions.Goals
 {
-    class TeachApprenticeGoal
+    class TeachApprenticeGoal : AGoal
     {
+        private Magus _mage;
+        public TeachApprenticeGoal(Magus magus, uint ageToCompleteBy, double desire) :
+            base(magus, ageToCompleteBy, desire)
+        {
+            _mage = magus;
+        }
     }
 }

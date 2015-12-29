@@ -355,7 +355,7 @@ namespace WizardMonks
             {
                 if (!goal.IsComplete())
                 {
-                    if (!goal.DecrementDueDate())
+                    if (goal.AgeToCompleteBy > SeasonalAge)
                     {
                         Log.Add("Failed to achieve a goal");
                         _goals.Remove(goal);

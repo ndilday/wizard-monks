@@ -42,23 +42,25 @@ namespace WizardMonks.Decisions.Conditions
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
             _currentTotal = GetTotal();
-
-            // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
-            foreach (Ability ability in Abilities)
+            if (!ConditionFulfilled)
             {
-                if (MagicArts.IsArt(ability))
+                // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
+                foreach (Ability ability in Abilities)
                 {
-                    AddPracticeToActionList(ability, alreadyConsidered, log);
-                }
-                else if (Character.GetType() == typeof(Magus))
-                {
-                    AddVisUseToActionList(ability, alreadyConsidered, log);
-                }
+                    if (MagicArts.IsArt(ability))
+                    {
+                        AddPracticeToActionList(ability, alreadyConsidered, log);
+                    }
+                    else if (Character.GetType() == typeof(Magus))
+                    {
+                        AddVisUseToActionList(ability, alreadyConsidered, log);
+                    }
 
-                var topicalBooks = Character.ReadableBooks.Where(b => b.Topic == ability);
-                if (topicalBooks.Any())
-                {
-                    AddReadingToActionList(topicalBooks, ability, alreadyConsidered, log);
+                    var topicalBooks = Character.ReadableBooks.Where(b => b.Topic == ability);
+                    if (topicalBooks.Any())
+                    {
+                        AddReadingToActionList(topicalBooks, ability, alreadyConsidered, log);
+                    }
                 }
             }
         }
@@ -118,14 +120,14 @@ namespace WizardMonks.Decisions.Conditions
                 // TODO: how do we decrement the cost of the vis?
             }
             // putting a limit here to how far the circular loop will go
-            else if (effectiveDesire >= 0.01)
+            else if (ConditionDepth <= 10)
             {
                 List<Ability> visType = new List<Ability>();
                 visType.Add(magicArt.Ability);
                 // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                 VisCondition visCondition =
-                    new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, ConditionDepth + 1);
-                visCondition.ModifyActionList(mage, alreadyConsidered, log);
+                    new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
+                visCondition.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
 

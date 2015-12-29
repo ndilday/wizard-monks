@@ -12,7 +12,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
 
-        public ACondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 0)
+        public ACondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 1)
         {
             Character = character;
             AgeToCompleteBy = ageToCompleteBy;

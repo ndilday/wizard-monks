@@ -118,12 +118,13 @@ namespace WizardMonks.Decisions.Conditions
                 // TODO: how do we decrement the cost of the vis?
             }
             // putting a limit here to how far the circular loop will go
-            else if (baseDesire >= 0.01)
+            else if (effectiveDesire >= 0.01)
             {
                 List<Ability> visType = new List<Ability>();
                 visType.Add(magicArt.Ability);
+                // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                 VisCondition visCondition =
-                    new VisCondition(visType, visNeed - stockpile, baseDesire, (byte)(BaseTier + 1), BaseDueDate == null ? null : BaseDueDate - 1);
+                    new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, ConditionDepth + 1);
                 visCondition.ModifyActionList(mage, alreadyConsidered, log);
             }
         }
@@ -132,7 +133,7 @@ namespace WizardMonks.Decisions.Conditions
         {
             double proportion = increase / (TotalNeeded - _currentTotal);
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion;
+            return immediateDesire * proportion / ConditionDepth;
         }
     }
 }

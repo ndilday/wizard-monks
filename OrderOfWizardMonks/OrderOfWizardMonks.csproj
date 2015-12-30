@@ -75,6 +75,9 @@
     <Compile Include="Character.cs" />
     <Compile Include="Decisions\Conditions\AbilityScoreCondition.cs" />
     <Compile Include="Decisions\Conditions\ACondition.cs" />
+    <Compile Include="Decisions\Conditions\Helpers\AHelper.cs" />
+    <Compile Include="Decisions\Conditions\Helpers\AuraImprovementHelper.cs" />
+    <Compile Include="Decisions\Conditions\Helpers\LabTotalIncreaseHelper.cs" />
     <Compile Include="Decisions\ConsideredActions.cs" />
     <Compile Include="Decisions\Goals\AbilityScoreGoal.cs" />
     <Compile Include="Decisions\Goals\AGoal.cs" />

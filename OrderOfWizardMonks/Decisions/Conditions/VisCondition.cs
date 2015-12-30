@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
@@ -69,11 +70,9 @@ namespace WizardMonks.Decisions.Conditions
 
                         // the difference between the desire of starting now
                         // and the desire of starting after gaining experience
-                        // is the effective value of practicing here
-
-                        // TODO: this should really be a lab total increse, yes?
-                        IncreaseAbilitiesForVisHelper helper = new IncreaseAbilitiesForVisHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
-                        helper.ModifyActionList(_mage, alreadyConsidered, log);
+                        // is the effective value of raising skills
+                        LabTotalIncreaseHelper helper = new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, extractDesirability);
+                        //helper.ModifyActionList(_mage, alreadyConsidered, log);
                     }
                 }
             }

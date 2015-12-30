@@ -84,7 +84,6 @@
     <Compile Include="Decisions\Goals\IGoal.cs" />
     <Compile Include="Decisions\Conditions\HasAuraCondition.cs" />
     <Compile Include="Decisions\Conditions\VisCondition.cs" />
-    <Compile Include="Decisions\GoalHelpers.cs" />
     <Compile Include="Decisions\Goals\LongevityRitualGoal.cs" />
     <Compile Include="Decisions\Goals\TeachApprenticeGoal.cs" />
     <Compile Include="Instances\CharacterFactory.cs" />

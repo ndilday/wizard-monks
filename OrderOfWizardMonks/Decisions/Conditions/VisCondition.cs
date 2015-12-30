@@ -8,41 +8,73 @@ namespace WizardMonks.Decisions.Conditions
 {
     public class VisCondition : ACondition
     {
-        private Magus _magus;
+        private Magus _mage;
+        private bool _vimSufficient;
+        HasLabCondition _labCondition;
+        HasAuraCondition _auraCondition;
         public List<Ability> VisTypes { get; private set; }
         public double AmountNeeded { get; private set; }
 
         public VisCondition(Magus magus, uint ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded, ushort conditionDepth) :
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
-            _magus = magus;
+            _mage = magus;
             VisTypes = abilities;
             AmountNeeded = totalNeeded;
+            HasAuraCondition auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
+            HasLabCondition labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
+            _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
         public VisCondition(Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth) :
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
-            _magus = magus;
+            _mage = magus;
             VisTypes = new List<Ability>(1);
             VisTypes.Add(ability);
             AmountNeeded = totalNeeded;
+            HasAuraCondition auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
+            HasLabCondition labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
+            _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
+            double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
+            double visStillNeeded = AmountNeeded - storedVis;
             // extract
-            if(VisTypes.Contains(MagicArts.Vim))
+            if(_vimSufficient)
             {
-                if(!_magus.KnownAuras.Any())
+                if(!_mage.KnownAuras.Any())
                 {
-                    HasAuraCondition auraCondition = new HasAuraCondition(_magus, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
-                    auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
-                else if(_magus.Laboratory == null)
+                else if(_mage.Laboratory == null)
                 {
-                    HasLabCondition labCondition = new HasLabCondition(_magus, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
-                    labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                }
+                else
+                {
+                    double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+                    double currentDistillRate = labTotal / 10;
+                    double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, visStillNeeded);
+
+                    // we can get what we want in one season, go ahead and do it
+                    log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
+                    alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
+
+                    if (currentDistillRate < visStillNeeded)
+                    {
+                        // we are in the multi-season-to-fulfill scenario
+
+                        // the difference between the desire of starting now
+                        // and the desire of starting after gaining experience
+                        // is the effective value of practicing here
+
+                        // TODO: this should really be a lab total increse, yes?
+                        IncreaseAbilitiesForVisHelper helper = new IncreaseAbilitiesForVisHelper(_extractAbilities, Desire, labTotal, (byte)(Tier + 1), DueDate - 1);
+                        helper.ModifyActionList(_mage, alreadyConsidered, log);
+                    }
                 }
             }
             throw new NotImplementedException();
@@ -58,10 +90,17 @@ namespace WizardMonks.Decisions.Conditions
                 double total = 0;
                 foreach(Ability ability in VisTypes)
                 {
-                    total += _magus.GetVisCount(ability);
+                    total += _mage.GetVisCount(ability);
                 }
                 return total >= AmountNeeded;
             }
+        }
+
+        private double GetDesirabilityOfVisGain(double visGain, double visStillNeeded)
+        {
+            double proportion = visGain / visStillNeeded;
+            double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
+            return immediateDesire * proportion / ConditionDepth;
         }
     }
 }

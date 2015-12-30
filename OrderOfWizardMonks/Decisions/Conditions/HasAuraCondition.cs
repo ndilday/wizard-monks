@@ -7,7 +7,7 @@ namespace WizardMonks.Decisions.Conditions
 {
     class HasAuraCondition : ACondition
     {
-        public HasAuraCondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 0) : base(character, ageToCompleteBy, desire, conditionDepth)
+        public HasAuraCondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(character, ageToCompleteBy, desire, conditionDepth)
         {
 
         }

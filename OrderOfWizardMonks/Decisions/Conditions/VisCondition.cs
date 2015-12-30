@@ -40,6 +40,10 @@ namespace WizardMonks.Decisions.Conditions
                     auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
                 else if(_magus.Laboratory == null)
+                {
+                    HasLabCondition labCondition = new HasLabCondition(_magus, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
+                    labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                }
             }
             throw new NotImplementedException();
             

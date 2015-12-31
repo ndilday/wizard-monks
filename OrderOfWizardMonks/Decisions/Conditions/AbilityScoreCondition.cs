@@ -93,17 +93,18 @@ namespace WizardMonks.Decisions.Conditions
 
         private void AddReadingToActionList(IEnumerable<IBook> topicalBooks, Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            var bestBook =
-                    (from book in topicalBooks
-                     orderby Character.GetBookLevelGain(book),
-                             book.Level ascending
-                     select new { Book = book, Gain = Character.GetBookLevelGain(book)}).First();
-            double effectiveDesire = GetDesirabilityOfIncrease(bestBook.Gain);
-            if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
+            IBook bestBook = Character.GetBestBookToRead(ability);
+            
+            if (bestBook != null)
             {
-                log.Add("Reading " + bestBook.Book.Title + " worth " + (effectiveDesire).ToString("0.00"));
-                Reading readingAction = new Reading(bestBook.Book, effectiveDesire);
-                alreadyConsidered.Add(readingAction);
+                double gain = Character.GetBookLevelGain(bestBook);
+                double effectiveDesire = GetDesirabilityOfIncrease(gain);
+                if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
+                {
+                    log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.00"));
+                    Reading readingAction = new Reading(bestBook, effectiveDesire);
+                    alreadyConsidered.Add(readingAction);
+                }
             }
         }
 

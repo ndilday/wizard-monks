@@ -83,9 +83,12 @@ namespace WizardMonks.Decisions.Conditions
         {
             // For now, assume 4pt practice on everything
             double effectiveDesire = GetDesirabilityOfIncrease(Character.GetAbility(ability).GetValueGain(4));
-            Practice practiceAction = new Practice(ability, effectiveDesire);
-            log.Add("Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.00"));
-            alreadyConsidered.Add(practiceAction);
+            if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
+            {
+                Practice practiceAction = new Practice(ability, effectiveDesire);
+                log.Add("Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.00"));
+                alreadyConsidered.Add(practiceAction);
+            }
         }
 
         private void AddReadingToActionList(IEnumerable<IBook> topicalBooks, Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
@@ -96,9 +99,12 @@ namespace WizardMonks.Decisions.Conditions
                              book.Level ascending
                      select new { Book = book, Gain = Character.GetBookLevelGain(book)}).First();
             double effectiveDesire = GetDesirabilityOfIncrease(bestBook.Gain);
-            log.Add("Reading " + bestBook.Book.Title + " worth " + (effectiveDesire).ToString("0.00"));
-            Reading readingAction = new Reading(bestBook.Book, effectiveDesire);
-            alreadyConsidered.Add(readingAction);
+            if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
+            {
+                log.Add("Reading " + bestBook.Book.Title + " worth " + (effectiveDesire).ToString("0.00"));
+                Reading readingAction = new Reading(bestBook.Book, effectiveDesire);
+                alreadyConsidered.Add(readingAction);
+            }
         }
 
         private void AddVisUseToActionList(Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
@@ -106,28 +112,30 @@ namespace WizardMonks.Decisions.Conditions
             Magus mage = (Magus)Character;
             CharacterAbilityBase magicArt = mage.GetAbility(ability);
             double effectiveDesire = GetDesirabilityOfIncrease(magicArt.GetValueGain(mage.VisStudyRate));
+            if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
+            {
+                // see if the mage has enough vis of this type
+                double stockpile = mage.GetVisCount(ability);
+                double visNeed = 0.5 + (magicArt.Value / 10.0);
 
-            // see if the mage has enough vis of this type
-            double stockpile = mage.GetVisCount(ability);
-            double visNeed = 0.5 + (magicArt.Value / 10.0);
-            
-            // if so, assume vis will return an average of 6XP + aura
-            if (stockpile > visNeed)
-            {
-                log.Add("Studying vis for " + magicArt.Ability.AbilityName + " worth " + effectiveDesire.ToString("0.00"));
-                VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
-                alreadyConsidered.Add(visStudy);
-                // TODO: how do we decrement the cost of the vis?
-            }
-            // putting a limit here to how far the circular loop will go
-            else if (ConditionDepth <= 10)
-            {
-                List<Ability> visType = new List<Ability>();
-                visType.Add(magicArt.Ability);
-                // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
-                VisCondition visCondition =
-                    new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
-                visCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                // if so, assume vis will return an average of 6XP + aura
+                if (stockpile > visNeed)
+                {
+                    log.Add("Studying vis for " + magicArt.Ability.AbilityName + " worth " + effectiveDesire.ToString("0.00"));
+                    VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
+                    alreadyConsidered.Add(visStudy);
+                    // TODO: how do we decrement the cost of the vis?
+                }
+                // putting a limit here to how far the circular loop will go
+                else if (ConditionDepth <= 10)
+                {
+                    List<Ability> visType = new List<Ability>();
+                    visType.Add(magicArt.Ability);
+                    // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
+                    VisCondition visCondition =
+                        new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
+                    visCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                }
             }
         }
 

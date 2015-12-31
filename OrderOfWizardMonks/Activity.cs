@@ -383,7 +383,7 @@ namespace WizardMonks
                 Aura aura = new Aura(Domain.Magic, auraFound);
                 mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.00"));
                 mage.KnownAuras.Add(aura);
-                if (mage.Covenant == null)
+                if (mage.Covenant == null || (mage.Laboratory == null && mage.Covenant.Aura.Strength < aura.Strength))
                 {
                     mage.FoundCovenant(aura);
                 }

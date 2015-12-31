@@ -19,5 +19,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             Desire = desire;
             ConditionDepth = conditionDepth;
         }
+
+        public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
     }
 }

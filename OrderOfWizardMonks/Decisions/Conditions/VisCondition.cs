@@ -59,20 +59,23 @@ namespace WizardMonks.Decisions.Conditions
                     double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                     double currentDistillRate = labTotal / 10;
                     double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, visStillNeeded);
-
-                    // we can get what we want in one season, go ahead and do it
-                    log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
-                    alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
-
-                    if (currentDistillRate < visStillNeeded)
+                    if (!double.IsNaN(extractDesirability) && extractDesirability > 0)
                     {
-                        // we are in the multi-season-to-fulfill scenario
+                        // we can get what we want in one season, go ahead and do it
+                        log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
+                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
-                        // the difference between the desire of starting now
-                        // and the desire of starting after gaining experience
-                        // is the effective value of raising skills
-                        LabTotalIncreaseHelper helper = new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, extractDesirability);
-                        //helper.ModifyActionList(_mage, alreadyConsidered, log);
+                        if (currentDistillRate < visStillNeeded)
+                        {
+                            // we are in the multi-season-to-fulfill scenario
+
+                            // the difference between the desire of starting now
+                            // and the desire of starting after gaining experience
+                            // is the effective value of raising skills
+                            LabTotalIncreaseHelper helper = 
+                                new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi);
+                            //helper.ModifyActionList(_mage, alreadyConsidered, log);
+                        }
                     }
                 }
             }

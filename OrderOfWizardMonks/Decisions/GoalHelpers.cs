@@ -252,7 +252,7 @@ namespace WizardMonks.Decisions
                 else
                 {
                     // how do we want to rate the value of moving and having to build a new lab?
-                    // it seems like basically the same as any other single-month activity
+                    // it seems like basically the same as any other single-season activity
                     double gain = greatestAura - currentAura;
                     double dueDateDesire = CalculateDesire(gain) / (BaseTier + 1);
                     if (BaseDueDate != null)

@@ -10,8 +10,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private ArtPair _arts;
         public bool AllowVimVisUse { get; private set; }
 
-        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth)
+        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _arts = arts;
             AllowVimVisUse = allowVimVisUse;
@@ -23,12 +23,16 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 // increase non-vim through vis study
                 AddVisUseToActionList(_arts.Technique, alreadyConsidered, log);
-                if (_arts.Form.AbilityName != "Vim")
+                if (AllowVimVisUse || _arts.Form.AbilityName != "Vim")
                 {
                     AddVisUseToActionList(_arts.Form, alreadyConsidered, log);
                 }
 
-                // TODO: increase either art through reading
+                // increase either art through reading
+                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
 
@@ -42,9 +46,14 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (stockpile > visNeed)
             {
                 double gain = magicArt.GetValueGain(Mage.VisStudyRate);
-                double effectiveDesire = gain * Desire / ConditionDepth;
-                VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
-                alreadyConsidered.Add(visStudy);
+                double effectiveDesire = _desireFunc(gain, ConditionDepth);
+                if (effectiveDesire > 0.01)
+                {
+                    VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
+                    alreadyConsidered.Add(visStudy);
+                }
+                // TODO: consider the value of finding a better aura to study vis in
+
                 // TODO: how do we decrement the cost of the vis?
             }
             // TODO: searching for a new aura could improve the vis use

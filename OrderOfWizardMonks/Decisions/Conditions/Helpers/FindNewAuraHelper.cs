@@ -9,6 +9,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     class FindNewAuraHelper : AHelper
     {
         private bool _allowVimVisUse;
+        private int _auraCount;
+        private double _currentAura;
+        private double _currentScore;
+        private double _currentDesire;
 
         public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth)
@@ -18,13 +22,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double currentAura = Mage.Covenant == null ? 0 : Mage.Covenant.Aura.Strength;
-            int auraCount = Mage.KnownAuras.Count;
+            _currentAura = Mage.Covenant == null ? 0 : Mage.Covenant.Aura.Strength;
+            _auraCount = Mage.KnownAuras.Count;
 
             // for now
-            double findAuraScore = CalculateFindAuraScore();
-            double probOfBetter = 1 - (currentAura * currentAura * auraCount / (5 * findAuraScore));
-            double maxAura = Math.Sqrt(5.0 * findAuraScore / auraCount);
+            _currentScore= CalculateFindAuraScore();
+            double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * _currentScore));
+            double maxAura = Math.Sqrt(5.0 * _currentScore / _auraCount);
             double averageGain = maxAura * probOfBetter / 2.0;
             double desire = Desire * averageGain / ConditionDepth;
 
@@ -36,26 +40,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing find aura related scores
                 //practice area lore
-                double alPracticeDesire = CalculateScoreGainDesire(4, findAuraScore, currentAura, auraCount);
-                if(alPracticeDesire > 0.01)
-                {
-                    log.Add("Practicing Area Lore before finding a new aura worth " + desire.ToString("0.00"));
-                    alreadyConsidered.Add(new Practice(Abilities.AreaLore, alPracticeDesire));
-                }
+                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore
-                var bestBook = Mage.GetBestBookToRead(Abilities.AreaLore);
-                if (bestBook != null)
-                {
-                    double gain = Mage.GetBookLevelGain(bestBook);
-                    double effectiveDesire = CalculateScoreGainDesire(gain, findAuraScore, currentAura, auraCount);
-                    if (effectiveDesire > 0.01)
-                    {
-                        log.Add("Reading " + bestBook.Title + " before finding a new aura worth " + (effectiveDesire).ToString("0.00"));
-                        Reading readingAction = new Reading(bestBook, effectiveDesire);
-                        alreadyConsidered.Add(readingAction);
-                    }
-                }
+                ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
                 // TODO: consider value of increasing InVi casting total
                 //CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVisUse);
@@ -71,13 +60,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             return areaLore;
         }
 
-        private double CalculateScoreGainDesire(double gain, double findAuraScore, double currentAura, int auraCount)
+        private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
         {
-            double practicedAreaLoreScore = findAuraScore + 4;
-            double probOfBetter = 1 - (currentAura * currentAura * auraCount / (5 * findAuraScore));
-            double maxAura = Math.Sqrt(5.0 * findAuraScore / auraCount);
+            double newScore = _currentScore + gain;
+            double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * newScore));
+            double maxAura = Math.Sqrt(5.0 * newScore / _auraCount);
             double averageGain = maxAura * probOfBetter / 2.0;
-            return Desire * averageGain / (ConditionDepth + 1);
+            return Desire * averageGain / conditionDepth;
             
         }
     }

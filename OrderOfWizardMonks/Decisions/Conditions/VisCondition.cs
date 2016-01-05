@@ -43,38 +43,41 @@ namespace WizardMonks.Decisions.Conditions
         {
             double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
             double visStillNeeded = AmountNeeded - storedVis;
-            // extract
-            if(_vimSufficient)
+            if (visStillNeeded > 0)
             {
-                if(!_mage.KnownAuras.Any())
+                // extract
+                if (_vimSufficient)
                 {
-                    _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
-                }
-                else if(_mage.Laboratory == null)
-                {
-                    _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
-                }
-                else
-                {
-                    double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
-                    double currentDistillRate = labTotal / 10;
-                    double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, visStillNeeded);
-                    if (!double.IsNaN(extractDesirability) && extractDesirability > 0)
+                    if (!_mage.KnownAuras.Any())
                     {
-                        // we can get what we want in one season, go ahead and do it
-                        log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
-                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
-
-                        if (currentDistillRate < visStillNeeded)
+                        _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    }
+                    else if (_mage.Laboratory == null)
+                    {
+                        _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    }
+                    else
+                    {
+                        double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+                        double currentDistillRate = labTotal / 10;
+                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, visStillNeeded);
+                        if (extractDesirability > 0.01)
                         {
-                            // we are in the multi-season-to-fulfill scenario
+                            // we can get what we want in one season, go ahead and do it
+                            log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
+                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
-                            // the difference between the desire of starting now
-                            // and the desire of starting after gaining experience
-                            // is the effective value of raising skills
-                            LabTotalIncreaseHelper helper = 
-                                new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false);
-                            //helper.ModifyActionList(_mage, alreadyConsidered, log);
+                            if (currentDistillRate < visStillNeeded)
+                            {
+                                // we are in the multi-season-to-fulfill scenario
+
+                                // the difference between the desire of starting now
+                                // and the desire of starting after gaining experience
+                                // is the effective value of raising skills
+                                LabTotalIncreaseHelper helper =
+                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false);
+                                //helper.ModifyActionList(_mage, alreadyConsidered, log);
+                            }
                         }
                     }
                 }

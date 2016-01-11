@@ -7,8 +7,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class LabTotalIncreaseHelper : ArtIncreaseHelper
     {
-        public LabTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, arts, allowVimVisUse)
+        public LabTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, arts, allowVimVisUse, desireFunc)
         { }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)

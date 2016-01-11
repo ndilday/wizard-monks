@@ -6,7 +6,7 @@ using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
-    class FindNewAuraHelper : AHelper
+    public class FindNewAuraHelper : AHelper
     {
         private bool _allowVimVisUse;
         private int _auraCount;

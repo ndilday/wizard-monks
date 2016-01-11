@@ -13,6 +13,8 @@ namespace WizardMonks.Decisions.Conditions
         private bool _vimSufficient;
         HasLabCondition _labCondition;
         HasAuraCondition _auraCondition;
+        double _visStillNeeded;
+
         public List<Ability> VisTypes { get; private set; }
         public double AmountNeeded { get; private set; }
 
@@ -42,8 +44,8 @@ namespace WizardMonks.Decisions.Conditions
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
             double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
-            double visStillNeeded = AmountNeeded - storedVis;
-            if (visStillNeeded > 0)
+            _visStillNeeded = AmountNeeded - storedVis;
+            if (_visStillNeeded > 0)
             {
                 // extract
                 if (_vimSufficient)
@@ -60,14 +62,14 @@ namespace WizardMonks.Decisions.Conditions
                     {
                         double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                         double currentDistillRate = labTotal / 10;
-                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, visStillNeeded);
+                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate);
                         if (extractDesirability > 0.01)
                         {
                             // we can get what we want in one season, go ahead and do it
                             log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
                             alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
-                            if (currentDistillRate < visStillNeeded)
+                            if (currentDistillRate < _visStillNeeded)
                             {
                                 // we are in the multi-season-to-fulfill scenario
 
@@ -75,16 +77,17 @@ namespace WizardMonks.Decisions.Conditions
                                 // and the desire of starting after gaining experience
                                 // is the effective value of raising skills
                                 LabTotalIncreaseHelper helper =
-                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false);
+                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
                                 //helper.ModifyActionList(_mage, alreadyConsidered, log);
                             }
                         }
                     }
                 }
+                // search for vis source
+                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Character, AgeToCompleteBy, extra, (ushort)(ConditionDepth + 1), !VisTypes.Contains(MagicArts.Vim));
             }
-            throw new NotImplementedException();
-            
-            // search for vis source
+
+
             // trade?
         }
 
@@ -101,11 +104,18 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        private double GetDesirabilityOfVisGain(double visGain, double visStillNeeded)
+        private double GetDesirabilityOfVisGain(double visGain)
         {
-            double proportion = visGain / visStillNeeded;
+            double proportion = visGain / _visStillNeeded;
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
             return immediateDesire * proportion / ConditionDepth;
+        }
+
+        private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth)
+        {
+            double proportion = gain / _visStillNeeded;
+            double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
+            return immediateDesire * proportion / conditionDepth;
         }
     }
 }

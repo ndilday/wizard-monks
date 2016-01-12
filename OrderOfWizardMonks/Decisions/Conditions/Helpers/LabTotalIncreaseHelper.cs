@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -15,13 +14,18 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             base.AddActionPreferencesToList(alreadyConsidered, log);
             // increase Magic Theory via practice
+            PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicTheory, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+            practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
             // increase Magic Theory via reading
+            ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicTheory, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+            readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             // increase Int
             // improve lab
             // find better aura
-            if (AgeToCompleteBy - Mage.SeasonalAge > 1)
+            if (AgeToCompleteBy - Mage.SeasonalAge > 2)
             {
-                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), AllowVimVisUse);
+                // a season to find the aura, and a season to build a lab in it. Doesn't take into account lab specialization
+                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2), AllowVimVisUse, _desireFunc);
             }
         }
     }

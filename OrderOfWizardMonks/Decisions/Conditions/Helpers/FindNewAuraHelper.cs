@@ -14,8 +14,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _currentScore;
         private double _currentDesire;
 
-        public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth)
+        public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _allowVimVisUse = allowVimVisUse;
         }

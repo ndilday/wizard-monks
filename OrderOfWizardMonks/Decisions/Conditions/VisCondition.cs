@@ -84,7 +84,7 @@ namespace WizardMonks.Decisions.Conditions
                     }
                 }
                 // search for vis source
-                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Character, AgeToCompleteBy, extra, (ushort)(ConditionDepth + 1), !VisTypes.Contains(MagicArts.Vim));
+                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy, Desire, ConditionDepth, GetDesirabilityOfVisGain);
             }
 
 

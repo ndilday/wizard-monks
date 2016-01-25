@@ -62,7 +62,7 @@ namespace WizardMonks.Decisions.Conditions
                     {
                         double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                         double currentDistillRate = labTotal / 10;
-                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate);
+                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
                         if (extractDesirability > 0.01)
                         {
                             // we can get what we want in one season, go ahead and do it
@@ -84,7 +84,7 @@ namespace WizardMonks.Decisions.Conditions
                     }
                 }
                 // search for vis source
-                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy, Desire, ConditionDepth, GetDesirabilityOfVisGain);
+                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy, Desire, ConditionDepth, !_vimSufficient, GetDesirabilityOfVisGain);
             }
 
 
@@ -104,11 +104,11 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        private double GetDesirabilityOfVisGain(double visGain)
+        private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth)
         {
             double proportion = visGain / _visStillNeeded;
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion / ConditionDepth;
+            return immediateDesire * proportion / conditionDepth;
         }
 
         private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth)

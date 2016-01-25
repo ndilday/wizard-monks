@@ -30,7 +30,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * _currentScore));
             double maxAura = Math.Sqrt(5.0 * _currentScore / _auraCount);
             double averageGain = maxAura * probOfBetter / 2.0;
-            double desire = Desire * averageGain / ConditionDepth;
+            double desire = _desireFunc(averageGain, ConditionDepth);
 
             if (desire > 0.01)
             {
@@ -46,8 +46,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // read area lore
                 ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
-                // TODO: consider value of increasing InVi casting total
-                //CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVisUse);
+                // consider value of increasing InVi casting total
+                CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVisUse, _desireFunc);
 
             }
         }

@@ -48,7 +48,7 @@ namespace WizardMonks
 
         public void AddBook(IBook book)
         {
-            // TODO: handle book duplicates
+            // TODO: handle book duplicates when we handle copying books
             if (!_library.Contains(book))
             {
                 _library.Add(book);

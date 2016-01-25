@@ -14,6 +14,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _currentDesire;
         private List<Ability> _visTypes;
         private bool _allowVimVis;
+        private double _magicLoreTotal;
 
         public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVis, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
@@ -31,13 +32,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             // we're not getting vis fast enough, so we need to find a new source
             // consider the value of searching for new vis sites in current auras
             // determine average vis source found
-            double magicLore = Mage.GetAbility(Abilities.MagicLore).Value;
-            magicLore += Mage.GetAttribute(AttributeType.Perception).Value;
-            magicLore += Mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
-            if (magicLore > 0 && Mage.KnownAuras.Any())
+            _magicLoreTotal = Mage.GetAbility(Abilities.MagicLore).Value;
+            _magicLoreTotal += Mage.GetAttribute(AttributeType.Perception).Value;
+            _magicLoreTotal += Mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+            if (_magicLoreTotal > 0 && Mage.KnownAuras.Any())
             {
-                Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(magicLore)).First();
-                double averageFind = aura.GetAverageVisSourceSize(magicLore);
+                Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
                 if (averageFind > 0)
                 {
                     // modify by chance vis will be of the proper type
@@ -75,12 +76,19 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         }
 
-        private double CalculateAuraGainDesire(double gain, ushort conditionDepth)
+        private double CalculateAuraGainDesire(double auraGain, ushort conditionDepth)
         {
-            double currentRoll = Math.Pow(currentVis, 2) / (magicLoreRoll * Strength);
-            double multiplier = Math.Sqrt(magicLoreRoll * Strength) * 2 / 3;
-            double areaUnder = (11.180339887498948482045868343656 - Math.Pow(currentRoll, 1.5)) * multiplier;
-            return areaUnder / 5;
+            double multiplier = Math.Sqrt(_magicLoreTotal * auraGain) * 2 / 3;
+            double areaUnder = (11.180339887498948482045868343656) * multiplier;
+            double averageFind = areaUnder / 5.0;
+
+            if (averageFind > 0)
+            {
+                // modify by chance vis will be of the proper type
+                double gain = (averageFind * _visTypes.Count() / 15);
+                return _desireFunc(gain, conditionDepth);
+            }
+            return 0;
         }
     }
 }

@@ -52,11 +52,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
                     alreadyConsidered.Add(visStudy);
                 }
-                // TODO: consider the value of finding a better aura to study vis in
+                // consider the value of finding a better aura to study vis in
+                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), AllowVimVisUse, _desireFunc);
 
                 // TODO: how do we decrement the cost of the vis?
             }
-            // TODO: searching for a new aura could improve the vis use
         }
     }
 }

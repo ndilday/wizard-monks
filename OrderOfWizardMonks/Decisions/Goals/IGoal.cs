@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+using WizardMonks;
 using WizardMonks.Decisions.Conditions;
 
 namespace WizardMonks.Decisions.Goals
@@ -12,6 +13,7 @@ namespace WizardMonks.Decisions.Goals
 
         void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
         bool IsComplete();
+        IList<BookDesire> GetBookNeeds();
         // TODO: add a boolean to Goals to cache completeness
         // probably should not cache in reversable cases, i.e. labs
     }

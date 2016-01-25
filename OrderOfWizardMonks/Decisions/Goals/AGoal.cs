@@ -47,5 +47,16 @@ namespace WizardMonks.Decisions.Goals
         {
             return _completed;
         }
+
+        public virtual IList<BookDesire> GetBookNeeds()
+        {
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            foreach(ACondition condition in Conditions)
+            {
+                //var conditionalDesires = 
+                // if(conditionalDesires != null)
+            }
+            return bookDesires;
+        }
     }
 }

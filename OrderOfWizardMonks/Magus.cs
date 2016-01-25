@@ -141,7 +141,7 @@ namespace WizardMonks
                 IList<BookDesire> bookNeeds;
                 foreach (IGoal goal in _goals)
                 {
-                    bookNeeds = goal.GetBookNeeds(this);
+                    bookNeeds = goal.GetBookNeeds();
                     if (bookNeeds != null)
                     {
                         bookDesires.AddRange(bookNeeds);

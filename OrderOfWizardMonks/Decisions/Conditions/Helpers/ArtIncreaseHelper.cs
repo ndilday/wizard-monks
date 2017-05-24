@@ -29,8 +29,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 }
 
                 // increase either art through reading
-                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
-                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
                 techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }

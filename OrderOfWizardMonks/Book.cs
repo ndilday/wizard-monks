@@ -55,7 +55,12 @@ namespace WizardMonks
                 this.Title == otherBook.Title && 
                 this.Topic == otherBook.Topic;
         }
-	}
+
+        public override int GetHashCode()
+        {
+            return this.Author.GetHashCode() ^ this.Level.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
+        }
+    }
 
     [Serializable]
     public class Tractatus : IBook
@@ -83,6 +88,11 @@ namespace WizardMonks
                 this.Quality == otherBook.Quality &&
                 this.Title == otherBook.Title &&
                 this.Topic == otherBook.Topic;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Author.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
         }
     }
 

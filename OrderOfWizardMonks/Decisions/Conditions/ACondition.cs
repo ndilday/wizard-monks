@@ -19,5 +19,9 @@ namespace WizardMonks.Decisions.Conditions
             Desire = desire;
             ConditionDepth = conditionDepth;
         }
+
+        public virtual List<BookDesire> GetBookDesires() { return new List<BookDesire>(); }
+
+        public virtual void ModifyVisDesires(VisDesire[] desires) { }
     }
 }

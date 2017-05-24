@@ -34,7 +34,7 @@ namespace WizardMonks.Decisions.Conditions
         {
             Abilities = new List<Ability>(1);
             Abilities.Add(ability);
-            Attributes = null;
+            Attributes = new List<AttributeType>();
             TotalNeeded = totalNeeded;
             _currentTotal = GetTotal();
         }
@@ -47,7 +47,7 @@ namespace WizardMonks.Decisions.Conditions
                 // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
                 foreach (Ability ability in Abilities)
                 {
-                    if (MagicArts.IsArt(ability))
+                    if (!MagicArts.IsArt(ability))
                     {
                         AddPracticeToActionList(ability, alreadyConsidered, log);
                     }
@@ -60,6 +60,35 @@ namespace WizardMonks.Decisions.Conditions
                     if (topicalBooks.Any())
                     {
                         AddReadingToActionList(topicalBooks, ability, alreadyConsidered, log);
+                    }
+                }
+            }
+        }
+
+        public override List<BookDesire> GetBookDesires()
+        {
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            foreach(Ability ability in this.Abilities)
+            {
+                bookDesires.Add(new BookDesire(ability, this.Character.GetAbility(ability).Value));
+            }
+            return bookDesires;
+        }
+
+        public override void ModifyVisDesires(VisDesire[] desires)
+        {
+            foreach (Ability ability in this.Abilities)
+            {
+                if (MagicArts.IsArt(ability))
+                {
+                    double visNeed = 0.5 + (this.Character.GetAbility(ability).Value / 10.0);
+                    foreach (VisDesire visDesire in desires)
+                    {
+                        if (visDesire.Art == ability)
+                        {
+                            visDesire.Quantity += visNeed;
+                            break;
+                        }
                     }
                 }
             }

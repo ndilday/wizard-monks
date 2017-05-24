@@ -10,8 +10,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     {
         private int _auraCount;
         private double _currentAura;
+        private double _currentVis;
         private double _currentScore;
-        private double _currentDesire;
         private List<Ability> _visTypes;
         private bool _allowVimVis;
         private double _magicLoreTotal;
@@ -21,6 +21,21 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             _visTypes = visTypes;
             _allowVimVis = allowVimVis;
+            _auraCount = mage.KnownAuras.Count;
+            if (_auraCount == 0)
+            {
+                _currentAura = 0;
+                _currentVis = 0;
+            }
+            else
+            {
+                // TODO: we should go to the aura with the most vis "cap space", not the largest
+                Aura bestAura = mage.KnownAuras.Aggregate((a, b) => a.Strength > b.Strength ? a : b);
+                _currentAura = bestAura.Strength;
+                _currentVis = bestAura.VisSources.Sum(vs => vs.Amount);
+            }
+
+            _currentScore = mage.GetAbility(Abilities.MagicLore).Value + mage.GetAttribute(AttributeType.Perception).Value + (mage.GetCastingTotal(MagicArtPairs.InVi) / 10);
         }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
@@ -35,7 +50,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _magicLoreTotal = Mage.GetAbility(Abilities.MagicLore).Value;
             _magicLoreTotal += Mage.GetAttribute(AttributeType.Perception).Value;
             _magicLoreTotal += Mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
-            if (_magicLoreTotal > 0 && Mage.KnownAuras.Any())
+            if (Mage.KnownAuras.Any())
             {
                 Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
@@ -52,26 +67,27 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing the casting total first
                 CastingTotalIncreaseHelper castingHelper = 
-                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVis, CalculateScoreGainDesire);
+                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVis, CalculateScoreGainDesire);
                 castingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // consider the value of increasing Magic Lore
-                PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
-                ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // TODO: consider increasing Perception
             }
 
             // consider finding a whole new aura
-            FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), !_visTypes.Contains(MagicArts.Vim), CalculateAuraGainDesire);
+            FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_visTypes.Contains(MagicArts.Vim), CalculateAuraGainDesire);
+            auraHelper.AddActionPreferencesToList(alreadyConsidered, log);
         }
 
         private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
         {
             double newScore = _currentScore + gain;
-            double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * newScore));
-            double maxAura = Math.Sqrt(5.0 * newScore / _auraCount);
-            double averageGain = maxAura * probOfBetter / 2.0;
+            double probOfBetter = 1 - (_currentVis * _currentVis / (5 * _currentAura * newScore));
+            double maxVis = Math.Sqrt(5.0 * newScore * _currentAura);
+            double averageGain = maxVis * probOfBetter / 2.0;
             return Desire * averageGain / conditionDepth;
 
         }

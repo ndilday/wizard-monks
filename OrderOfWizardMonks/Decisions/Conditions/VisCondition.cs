@@ -24,8 +24,8 @@ namespace WizardMonks.Decisions.Conditions
             _mage = magus;
             VisTypes = abilities;
             AmountNeeded = totalNeeded;
-            HasAuraCondition auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
-            HasLabCondition labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
+            _auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
+            _labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
             _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
@@ -36,13 +36,14 @@ namespace WizardMonks.Decisions.Conditions
             VisTypes = new List<Ability>(1);
             VisTypes.Add(ability);
             AmountNeeded = totalNeeded;
-            HasAuraCondition auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
-            HasLabCondition labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
+            _auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
+            _labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
             _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
+            this.AmountNeeded = (_mage.SeasonalAge / 20) + 1;
             double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
             _visStillNeeded = AmountNeeded - storedVis;
             if (_visStillNeeded > 0)
@@ -50,41 +51,34 @@ namespace WizardMonks.Decisions.Conditions
                 // extract
                 if (_vimSufficient)
                 {
-                    if (!_mage.KnownAuras.Any())
+                    _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+
+                    double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+                    double currentDistillRate = labTotal / 10;
+                    double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
+                    if (extractDesirability > 0.01)
                     {
-                        _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
-                    }
-                    else if (_mage.Laboratory == null)
-                    {
-                        _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
-                    }
-                    else
-                    {
-                        double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
-                        double currentDistillRate = labTotal / 10;
-                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
-                        if (extractDesirability > 0.01)
+                        // we can get what we want in one season, go ahead and do it
+                        log.Add("Extracting vis worth " + extractDesirability.ToString("0.00"));
+                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
+
+                        if (currentDistillRate < _visStillNeeded)
                         {
-                            // we can get what we want in one season, go ahead and do it
-                            log.Add("Extracting vis worth " + (extractDesirability).ToString("0.00"));
-                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
+                            // we are in the multi-season-to-fulfill scenario
 
-                            if (currentDistillRate < _visStillNeeded)
-                            {
-                                // we are in the multi-season-to-fulfill scenario
-
-                                // the difference between the desire of starting now
-                                // and the desire of starting after gaining experience
-                                // is the effective value of raising skills
-                                LabTotalIncreaseHelper helper =
-                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
-                                //helper.ModifyActionList(_mage, alreadyConsidered, log);
-                            }
+                            // the difference between the desire of starting now
+                            // and the desire of starting after gaining experience
+                            // is the effective value of raising skills
+                            LabTotalIncreaseHelper helper =
+                                new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
+                            helper.AddActionPreferencesToList(alreadyConsidered, log);
                         }
                     }
                 }
                 // search for vis source
-                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy, Desire, ConditionDepth, !_vimSufficient, GetDesirabilityOfVisGain);
+                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_vimSufficient, GetDesirabilityOfVisGain);
+                visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
 
 
@@ -101,6 +95,14 @@ namespace WizardMonks.Decisions.Conditions
                     total += _mage.GetVisCount(ability);
                 }
                 return total >= AmountNeeded;
+            }
+        }
+
+        public override void ModifyVisDesires(VisDesire[] desires)
+        {
+            foreach(Ability visType in this.VisTypes)
+            {
+                desires.First(d => d.Art == visType).Quantity += this.AmountNeeded;
             }
         }
 

@@ -123,10 +123,9 @@ namespace SkillViewer
         {
             btnAdvance.Enabled = false;
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            //foreach (Magus mage in _magusArray)
-            //{
-            //    mage.Advance();
-            //}
+
+            var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
+            var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
             _log.Add("Advancing Season");
             Parallel.ForEach(_magusArray.Where(m => m != null && !m.WantsToFollow), character =>
             {
@@ -183,8 +182,6 @@ namespace SkillViewer
             }
             _log.Add("Done Advancing Season");
             _log.Add("Considering vis and book trades");
-            var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
-            var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
             foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))
             {
                 if (mage == null) continue;

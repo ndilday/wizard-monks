@@ -89,7 +89,7 @@ namespace WizardMonks
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
 
-        private IAction _mandatoryAction;
+        protected IAction _mandatoryAction;
         #endregion
 
         #region Events
@@ -334,6 +334,7 @@ namespace WizardMonks
             else
             {
                 ConsideredActions actions = new ConsideredActions();
+                AddWritingGoals(tradeDesires);
                 foreach (IGoal goal in _goals)
                 {
                     if (!goal.IsComplete())

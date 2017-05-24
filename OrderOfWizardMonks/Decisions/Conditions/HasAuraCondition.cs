@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using WizardMonks;
+using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
 {
@@ -23,7 +24,12 @@ namespace WizardMonks.Decisions.Conditions
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            throw new NotImplementedException();
+            if(!ConditionFulfilled)
+            {
+                FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                alreadyConsidered.Add(findAuraAction);
+                log.Add("Finding an aura worth " + this.Desire.ToString("0.00"));
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private int _auraCount;
         private double _currentAura;
         private double _currentScore;
-        private double _currentDesire;
+        //private double _currentDesire;
 
         public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
@@ -28,7 +28,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             // for now
             _currentScore= CalculateFindAuraScore();
             double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * _currentScore));
-            double maxAura = Math.Sqrt(5.0 * _currentScore / _auraCount);
+            double maxAura = Math.Sqrt(5.0 * _currentScore / (_auraCount + 1));
             double averageGain = maxAura * probOfBetter / 2.0;
             double desire = _desireFunc(averageGain, ConditionDepth);
 
@@ -40,11 +40,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing find aura related scores
                 //practice area lore
-                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore
-                ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
                 // consider value of increasing InVi casting total
                 CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVisUse, _desireFunc);

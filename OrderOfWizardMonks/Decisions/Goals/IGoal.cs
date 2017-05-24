@@ -13,7 +13,8 @@ namespace WizardMonks.Decisions.Goals
 
         void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
         bool IsComplete();
-        IList<BookDesire> GetBookNeeds();
+        IList<BookDesire> GetBookDesires();
+        void ModifyVisDesires(Magus magus, VisDesire[] visDesires);
         // TODO: add a boolean to Goals to cache completeness
         // probably should not cache in reversable cases, i.e. labs
     }

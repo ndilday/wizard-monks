@@ -15,11 +15,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             if (_desireFunc != null)
             {
-                double alPracticeDesire = _desireFunc(4, ConditionDepth);
-                if (alPracticeDesire > 0.01)
+                double gain = this.Mage.GetAbility(_ability).GetValueGain(4);
+                double practiceDesire = _desireFunc(gain, ConditionDepth);
+                if (practiceDesire > 0.01)
                 {
-                    log.Add("Practicing Area Lore before finding a new aura worth " + alPracticeDesire.ToString("0.00"));
-                    alreadyConsidered.Add(new Practice(_ability, alPracticeDesire));
+                    log.Add("Practicing " + _ability.AbilityName + " worth " + practiceDesire.ToString("0.00"));
+                    alreadyConsidered.Add(new Practice(_ability, practiceDesire));
                 }
             }
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 
@@ -82,9 +83,7 @@ namespace WizardMonks
 
         private void InitializeGoals()
         {
-            uint seasonsLeftToAging = 140 - SeasonalAge;
-
-            _goals.Add(new LongevityRitualGoal(this, 0, seasonsLeftToAging));
+            _goals.Add(new LongevityRitualGoal(this, 140, 1));
         }
         #endregion
 
@@ -141,7 +140,7 @@ namespace WizardMonks
                 IList<BookDesire> bookNeeds;
                 foreach (IGoal goal in _goals)
                 {
-                    bookNeeds = goal.GetBookNeeds();
+                    bookNeeds = goal.GetBookDesires();
                     if (bookNeeds != null)
                     {
                         bookDesires.AddRange(bookNeeds);
@@ -227,7 +226,35 @@ namespace WizardMonks
         public override void ReprioritizeGoals()
         {
         }
-        
+
+        IAction DecideSeasonalActivity(IList<MagusTradingDesires> tradeDesiresList)
+        {
+            if (IsCollaborating)
+            {
+                return _mandatoryAction;
+            }
+            else
+            {
+                ConsideredActions actions = new ConsideredActions();
+                foreach (MagusTradingDesires tradeDesires in tradeDesiresList)
+                {
+                    AddWritingGoals(tradeDesires);
+                }
+                foreach (IGoal goal in _goals)
+                {
+                    if (!goal.IsComplete())
+                    {
+                        // TODO: it should probably be an error case for a goal to still be here
+                        // for now, ignore
+                        List<string> dummy = new List<string>();
+                        goal.AddActionPreferencesToList(actions, dummy);
+                    }
+                }
+                Log.AddRange(actions.Log());
+                return actions.GetBestAction();
+            }
+        }
+
         private void AddWritingGoals(MagusTradingDesires tradingDesires)
         {
             // TODO: right now, this logic is causing characters to start trying to learn skills
@@ -238,10 +265,10 @@ namespace WizardMonks
             {
                 CharacterAbilityBase charAbility = GetAbility(bookDesire.Ability);
                 bool isArt = MagicArts.IsArt(bookDesire.Ability);
-                if (!_tractatusGoals.Where(t => !t.IsComplete(this) && t.Topic == bookDesire.Ability).Any() && (isArt || comm > -2))
+                ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
+                if (previouslyWrittenCount < (isArt ? (charAbility.Value / 5) : charAbility.Value))
                 {
                     // add tractatus goal to both goal list and writing goal list
-                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
                     string name = Name + " " + bookDesire.Ability.AbilityName + " T" + previouslyWrittenCount.ToString();
                     TractatusGoal tractGoal = new TractatusGoal(bookDesire.Ability, name, previouslyWrittenCount);
                     _tractatusGoals.Add(tractGoal);
@@ -312,8 +339,6 @@ namespace WizardMonks
                 {
                     continue;
                 }
-
-                AddWritingGoals(tradeDesires);
 
                 var bookTrades = _tradeDesires.GenerateBookTradeOffers(tradeDesires);
                 bookTradeOffers.AddRange(bookTrades);
@@ -524,7 +549,7 @@ namespace WizardMonks
             desires[14] = new VisDesire(MagicArts.Vim, -this.GetVisCount(MagicArts.Vim));
             foreach (IGoal goal in _goals)
             {
-                goal.ModifyVisNeeds(this, desires);
+                goal.ModifyVisDesires(this, desires);
             }
             foreach (VisDesire desire in desires)
             {
@@ -688,10 +713,10 @@ namespace WizardMonks
             for (byte i = 2; i < 16; i++)
             {
                 uint dueDate = (uint)(i * 4);
-                IGoal teachingGoal = new TeachApprenticeGoal();
+                IGoal teachingGoal = new TeachApprenticeGoal(this, this.SeasonalAge + i - 1, 1);
                 _goals.Add(teachingGoal);
             }
-            IGoal gauntletGoal = new GauntletApprenticeGoal();
+            IGoal gauntletGoal = new GauntletApprenticeGoal(this, this.SeasonalAge + 60, 1);
             _goals.Add(gauntletGoal);
         }
 

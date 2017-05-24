@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
 {
@@ -26,7 +25,17 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-
+                HasAuraCondition auraCondition = new HasAuraCondition(_mage, this.AgeToCompleteBy, this.Desire, (ushort)(this.ConditionDepth + 1));
+                if(!auraCondition.ConditionFulfilled)
+                {
+                    auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                }
+                else
+                {
+                    BuildLaboratory buildLabAction = new BuildLaboratory(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                    alreadyConsidered.Add(buildLabAction);
+                    log.Add("Building a lab worth " + this.Desire.ToString("0.00"));
+                }
             }
         }
     }

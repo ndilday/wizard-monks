@@ -16,7 +16,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (_desireFunc != null)
             {
                 double gain = this.Mage.GetAbility(_ability).GetValueGain(4);
-                double practiceDesire = _desireFunc(gain, ConditionDepth);
+                double practiceDesire = _desireFunc(gain, ConditionDepth, TimeUntilDue);
                 log.Add("Practicing " + _ability.AbilityName + " worth " + practiceDesire.ToString("0.000"));
                 alreadyConsidered.Add(new Practice(_ability, practiceDesire));
             }

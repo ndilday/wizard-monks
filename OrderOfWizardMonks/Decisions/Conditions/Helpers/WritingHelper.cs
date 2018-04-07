@@ -21,7 +21,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             var bestBook = Mage.GetBestBookToWrite();
             if (bestBook != null)
             {
-                double effectiveDesire = _desireFunc(bestBook.Value, ConditionDepth);
+                double effectiveDesire = _desireFunc(bestBook.Value, ConditionDepth, TimeUntilDue);
                 log.Add("Writing " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 Write writingAction = new Write(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
                 alreadyConsidered.Add(writingAction);

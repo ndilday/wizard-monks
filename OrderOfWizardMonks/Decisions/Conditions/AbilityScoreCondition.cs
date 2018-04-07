@@ -174,9 +174,8 @@ namespace WizardMonks.Decisions.Conditions
 
         private double GetDesirabilityOfIncrease(double increase)
         {
-            double proportion = increase / (TotalNeeded - _currentTotal);
-            double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion / ConditionDepth;
+            double fractionalIncrease = increase / (TotalNeeded - _currentTotal);
+            return Desire * fractionalIncrease / (ConditionDepth * TimeUntilDue);
         }
     }
 }

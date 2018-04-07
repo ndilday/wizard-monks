@@ -9,6 +9,13 @@ namespace WizardMonks.Decisions.Conditions
         public double Desire { get; set; }
         public ushort ConditionDepth { get; protected set; }
         public abstract bool ConditionFulfilled { get; }
+        public uint TimeUntilDue
+        {
+            get
+            {
+                return AgeToCompleteBy - Character.SeasonalAge;
+            }
+        }
 
         public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
 

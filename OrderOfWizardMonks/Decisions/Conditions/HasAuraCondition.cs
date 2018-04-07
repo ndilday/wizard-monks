@@ -25,7 +25,7 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-                FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (TimeUntilDue * ConditionDepth));
                 alreadyConsidered.Add(findAuraAction);
                 log.Add("Finding an aura worth " + this.Desire.ToString("0.000"));
             }

@@ -7,9 +7,11 @@ namespace WizardMonks.Decisions.Conditions
     public class HasLabCondition : ACondition
     {
         private Magus _mage;
+        HasAuraCondition _auraCondition;
         public HasLabCondition(Magus magus, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
+            _auraCondition = new HasAuraCondition(_mage, ageToCompleteBy - 1, desire, (ushort)(conditionDepth + 1));
         }
 
         public override bool ConditionFulfilled
@@ -25,14 +27,13 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-                HasAuraCondition auraCondition = new HasAuraCondition(_mage, this.AgeToCompleteBy, this.Desire, (ushort)(this.ConditionDepth + 1));
-                if(!auraCondition.ConditionFulfilled)
+                if(!_auraCondition.ConditionFulfilled)
                 {
-                    auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
                 else
                 {
-                    BuildLaboratory buildLabAction = new BuildLaboratory(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                    BuildLaboratory buildLabAction = new BuildLaboratory(Abilities.MagicTheory, this.Desire / (TimeUntilDue * ConditionDepth));
                     alreadyConsidered.Add(buildLabAction);
                     log.Add("Building a lab worth " + this.Desire.ToString("0.000"));
                 }

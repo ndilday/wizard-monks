@@ -61,7 +61,7 @@ namespace WizardMonks.Decisions.Conditions
                     else
                     {
                         double currentDistillRate = _mage.GetVisDistillationRate();
-                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
+                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth, TimeUntilDue);
                         if (extractDesirability > 0.00001)
                         {
                             // we can get what we want in one season, go ahead and do it
@@ -108,6 +108,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public override void ModifyVisDesires(VisDesire[] desires)
         {
+            // TODO: scale vis desired to time to completion?
             foreach(Ability visType in this.VisTypes)
             {
                 desires.First(d => d.Art == visType).Quantity += this.AmountNeeded;
@@ -129,18 +130,23 @@ namespace WizardMonks.Decisions.Conditions
             return bookDesires;
         }
 
-        private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth)
+        public void ModifyVisAmount(double newAmount)
+        {
+            AmountNeeded = newAmount;
+        }
+
+        private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth, uint timeToComplete)
         {
             double proportion = visGain / _visStillNeeded;
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion / conditionDepth;
+            return immediateDesire * proportion / (conditionDepth * timeToComplete);
         }
 
-        private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth)
+        private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth, uint timeToComplete)
         {
             double proportion = gain / _visStillNeeded;
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion / conditionDepth;
+            return immediateDesire * proportion / (conditionDepth * timeToComplete);
         }
     }
 }

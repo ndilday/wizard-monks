@@ -62,7 +62,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     // so 5 * 4 + 9 * 2 + 1 = 39/15
                     // that represents the relative value of a random vis source compared to vim vis
                     double gain = (averageFind * 39/15);
-                    double desire = _desireFunc(gain, ConditionDepth);
+                    double desire = _desireFunc(gain, ConditionDepth, TimeUntilDue);
 
                     // TODO: modify by lifelong value of source?
                     log.Add("Looking for vis source worth " + (desire).ToString("0.000"));
@@ -86,17 +86,17 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             auraHelper.AddActionPreferencesToList(alreadyConsidered, log);
         }
 
-        private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
+        private double CalculateScoreGainDesire(double gain, ushort conditionDepth, uint timeUntilDue)
         {
             double newScore = _currentScore + gain;
             double probOfBetter = 1 - (_currentVis * _currentVis / (5 * _currentAura * newScore));
             double maxVis = Math.Sqrt(5.0 * newScore * _currentAura);
             double averageGain = maxVis * probOfBetter / 2.0;
-            return _desireFunc(averageGain, conditionDepth);
+            return _desireFunc(averageGain, conditionDepth, timeUntilDue);
 
         }
 
-        private double CalculateAuraGainDesire(double auraGain, ushort conditionDepth)
+        private double CalculateAuraGainDesire(double auraGain, ushort conditionDepth, uint timeUntilDue)
         {
             double multiplier = Math.Sqrt(_magicLoreTotal * auraGain) * 2 / 3;
             double areaUnder = (11.180339887498948482045868343656) * multiplier;
@@ -110,7 +110,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // so 5 * 4 + 9 * 2 + 1 = 39/15
                 // that represents the relative value of a random vis source compared to vim vis
                 double gain = (averageFind * 39 / 15);
-                return _desireFunc(gain, conditionDepth);
+                return _desireFunc(gain, conditionDepth, timeUntilDue);
             }
             return 0;
         }

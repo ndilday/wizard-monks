@@ -30,7 +30,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             double probOfBetter = 1 - (_currentAura * _currentAura * (_auraCount + 1) / (5 * _currentScore));
             double maxAura = Math.Sqrt(5.0 * _currentScore / (_auraCount + 1));
             double averageGain = maxAura * probOfBetter / 2.0;
-            double desire = _desireFunc(averageGain, ConditionDepth);
+            double desire = _desireFunc(averageGain, ConditionDepth, TimeUntilDue);
 
             if (desire > 0.00001)
             {
@@ -60,7 +60,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             return areaLore;
         }
 
-        private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
+        private double CalculateScoreGainDesire(double gain, ushort conditionDepth, uint timeToComplete)
         {
             double newScore = _currentScore + gain;
             double probOfBetterNow = 1 - (_currentAura * _currentAura * (_auraCount + 1) / (5 * _currentScore));
@@ -69,7 +69,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             double maxAuraWithGain = Math.Sqrt(5.0 * newScore / (_auraCount + 1));
             double averageGainNow = maxAuraNow * probOfBetterNow / 2.0;
             double averageGainWithGain = maxAuraWithGain * probOfBetterWithGain / 2.0;
-            return Desire * (averageGainWithGain - averageGainNow) / conditionDepth;
+            return Desire * (averageGainWithGain - averageGainNow) / (conditionDepth * timeToComplete);
             
         }
     }

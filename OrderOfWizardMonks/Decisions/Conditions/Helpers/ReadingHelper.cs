@@ -17,7 +17,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (bestBook != null)
             {
                 double gain = Mage.GetBookLevelGain(bestBook);
-                double effectiveDesire = _desireFunc(gain, ConditionDepth);
+                double effectiveDesire = _desireFunc(gain, ConditionDepth, TimeUntilDue);
                 log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 Read readingAction = new Read(bestBook, effectiveDesire);
                 alreadyConsidered.Add(readingAction);

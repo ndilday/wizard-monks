@@ -6,7 +6,7 @@ using System.Text;
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
 
-    public delegate double CalculateDesireFunc(double gain, ushort conditionDepth);
+    public delegate double CalculateDesireFunc(double gain, ushort conditionDepth, uint timeToComplete);
     public abstract class AHelper
     {
         protected CalculateDesireFunc _desireFunc;
@@ -15,6 +15,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         public uint AgeToCompleteBy { get; set; }
         public double Desire { get; set; }
         public ushort ConditionDepth { get; protected set; }
+        public uint TimeUntilDue
+        {
+            get
+            {
+                return AgeToCompleteBy - Mage.SeasonalAge;
+            }
+        }
 
         public AHelper(Magus mage, uint ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null)
         {

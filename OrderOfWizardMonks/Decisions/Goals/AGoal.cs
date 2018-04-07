@@ -15,7 +15,7 @@ namespace WizardMonks.Decisions.Goals
         public List<ACondition> Conditions { get; protected set; }
         public Character Character { get; private set; }
 
-        public AGoal(Character character, uint? ageToCompleteBy, double desire)
+        public AGoal(Character character, double desire, uint ageToCompleteBy = 400)
         {
             AgeToCompleteBy = ageToCompleteBy;
             Desire = desire;

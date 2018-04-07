@@ -46,7 +46,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (stockpile > visNeed)
             {
                 double gain = magicArt.GetValueGain(Mage.VisStudyRate);
-                double effectiveDesire = _desireFunc(gain, ConditionDepth);
+                double effectiveDesire = _desireFunc(gain, ConditionDepth, TimeUntilDue);
                 VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in

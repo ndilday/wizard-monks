@@ -9,7 +9,7 @@ namespace WizardMonks.Decisions.Goals
     {
         private Magus _mage;
         public TeachApprenticeGoal(Magus magus, uint ageToCompleteBy, double desire) :
-            base(magus, ageToCompleteBy, desire)
+            base(magus, desire, ageToCompleteBy)
         {
             _mage = magus;
         }

@@ -43,7 +43,6 @@ namespace WizardMonks.Decisions.Conditions
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            this.AmountNeeded = (_mage.SeasonalAge / 20) + 1;
             double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
             _visStillNeeded = AmountNeeded - storedVis;
             if (_visStillNeeded > 0)
@@ -51,38 +50,47 @@ namespace WizardMonks.Decisions.Conditions
                 // extract
                 if (_vimSufficient)
                 {
-                    _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
-                    _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
-
-                    double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
-                    double currentDistillRate = labTotal / 10;
-                    double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
-                    if (extractDesirability > 0.01)
+                    if (!_auraCondition.ConditionFulfilled)
                     {
-                        // we can get what we want in one season, go ahead and do it
-                        log.Add("Extracting vis worth " + extractDesirability.ToString("0.00"));
-                        alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
-
-                        if (currentDistillRate < _visStillNeeded)
+                        _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    }
+                    else if (!_labCondition.ConditionFulfilled)
+                    {
+                        _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    }
+                    else
+                    {
+                        double currentDistillRate = _mage.GetVisDistillationRate();
+                        double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth);
+                        if (extractDesirability > 0.00001)
                         {
-                            // we are in the multi-season-to-fulfill scenario
+                            // we can get what we want in one season, go ahead and do it
+                            log.Add("Extracting vis worth " + extractDesirability.ToString("0.000"));
+                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
-                            // the difference between the desire of starting now
-                            // and the desire of starting after gaining experience
-                            // is the effective value of raising skills
-                            LabTotalIncreaseHelper helper =
-                                new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
-                            helper.AddActionPreferencesToList(alreadyConsidered, log);
+                            if (currentDistillRate < _visStillNeeded)
+                            {
+                                // we are in the multi-season-to-fulfill scenario
+
+                                // the difference between the desire of starting now
+                                // and the desire of starting after gaining experience
+                                // is the effective value of raising skills
+                                double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
+                                LabTotalIncreaseHelper helper =
+                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
+                                helper.AddActionPreferencesToList(alreadyConsidered, log);
+                            }
                         }
                     }
                 }
                 // search for vis source
                 FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_vimSufficient, GetDesirabilityOfVisGain);
                 visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
+
+                // consider writing a book to trade for vis
+                WritingHelper writingHelper = new WritingHelper(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
+                writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
-
-
-            // trade?
         }
 
         public override bool ConditionFulfilled
@@ -104,6 +112,21 @@ namespace WizardMonks.Decisions.Conditions
             {
                 desires.First(d => d.Art == visType).Quantity += this.AmountNeeded;
             }
+        }
+
+        public override List<BookDesire> GetBookDesires()
+        {
+            List<BookDesire> bookDesires = new List<BookDesire>();
+            if (!ConditionFulfilled)
+            {
+                foreach (Ability visType in this.VisTypes)
+                {
+                    bookDesires.Add(new BookDesire(visType, this.Character.GetAbility(visType).Value));
+                }
+                // add an interest in MagicLore here, just to have it somewhere?
+                bookDesires.Add(new BookDesire(Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
+            }
+            return bookDesires;
         }
 
         private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth)

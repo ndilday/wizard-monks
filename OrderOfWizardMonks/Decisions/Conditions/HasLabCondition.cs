@@ -34,7 +34,7 @@ namespace WizardMonks.Decisions.Conditions
                 {
                     BuildLaboratory buildLabAction = new BuildLaboratory(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
                     alreadyConsidered.Add(buildLabAction);
-                    log.Add("Building a lab worth " + this.Desire.ToString("0.00"));
+                    log.Add("Building a lab worth " + this.Desire.ToString("0.000"));
                 }
             }
         }

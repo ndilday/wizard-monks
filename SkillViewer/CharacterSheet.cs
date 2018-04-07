@@ -99,5 +99,18 @@ namespace SkillViewer
             txtTerramVis.Text = mage.GetVisCount(MagicArts.Terram).ToString(FORMAT_STRING);
             txtVimVis.Text = mage.GetVisCount(MagicArts.Vim).ToString(FORMAT_STRING);
         }
+
+        private void lstLog_MouseMove(object sender, MouseEventArgs e)
+        {
+            int index = lstLog.IndexFromPoint(e.Location);
+            if (index > 0)
+            {
+                toolTip1.SetToolTip(lstLog, lstLog.Items[index].ToString());
+            }
+            else
+            {
+                toolTip1.SetToolTip(lstLog, "");
+            }
+        }
     }
 }

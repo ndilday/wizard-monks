@@ -50,9 +50,9 @@ namespace WizardMonks
 	}
 
     [Serializable]
-    public class Reading : IAction
+    public class Read : IAction
     {
-        public Reading(IBook book, double desire)
+        public Read(IBook book, double desire)
         {
             Book = book;
             Desire = desire;
@@ -81,13 +81,13 @@ namespace WizardMonks
             {
                 return false;
             }
-            Reading reading = (Reading)action;
+            Read reading = (Read)action;
             return reading.Book == this.Book;
         }
 
         public string Log()
         {
-            return "Reading " + Book.Title + " worth " + Desire.ToString("0.00");
+            return "Reading " + Book.Title + " worth " + Desire.ToString("0.000");
         }
     }
 
@@ -127,7 +127,7 @@ namespace WizardMonks
 
         public virtual string Log()
         {
-            return "Practicing " + Ability.AbilityName + " worth " + Desire.ToString("0.00");
+            return "Practicing " + Ability.AbilityName + " worth " + Desire.ToString("0.000");
         }
     }
 
@@ -158,7 +158,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Exposing " + Ability.AbilityName + " worth " + Desire.ToString("0.00");
+            return "Exposing " + Ability.AbilityName + " worth " + Desire.ToString("0.000");
         }
     }
 
@@ -203,7 +203,7 @@ namespace WizardMonks
 
         public string Log()
         {
-            return "Learning worth " + Desire.ToString("0.00");
+            return "Learning worth " + Desire.ToString("0.000");
         }
     }
     #endregion
@@ -237,13 +237,13 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Writing : ExposingAction
+    public class Write : ExposingAction
     {
         public Ability Topic { get; private set; }
         public double Level { get; private set; }
         public string Name { get; private set; }
 
-        public Writing(Ability topic, string name, Ability exposure, double level, double desire)
+        public Write(Ability topic, string name, Ability exposure, double level, double desire)
             : base(exposure, desire)
         {
             Topic = topic;
@@ -257,7 +257,7 @@ namespace WizardMonks
             IBook book = character.WriteBook(Topic, Name, Exposure, Level);
             if (book != null)
             {
-                character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.00"));
+                character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.000"));
             }
             else
             {
@@ -271,7 +271,7 @@ namespace WizardMonks
             {
                 return false;
             }
-            Writing writing = (Writing)action;
+            Write writing = (Write)action;
             return writing.Topic == this.Topic && writing.Level == this.Level;
         }
 
@@ -279,9 +279,9 @@ namespace WizardMonks
         {
             if (Level == 1000)
             {
-                return "Writing tractatus on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
+                return "Writing tractatus on " + Topic.AbilityName + " worth " + Desire.ToString("0.000");
             }
-            return "Writing summa on " + Topic.AbilityName + " worth " + Desire.ToString("0.00");
+            return "Writing summa on " + Topic.AbilityName + " worth " + Desire.ToString("0.000");
         }
     }
 
@@ -381,7 +381,7 @@ namespace WizardMonks
             if (auraFound > 1)
             {
                 Aura aura = new Aura(Domain.Magic, auraFound);
-                mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.00"));
+                mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.000"));
                 mage.KnownAuras.Add(aura);
                 if (mage.Covenant == null || (mage.Laboratory == null && mage.Covenant.Aura.Strength < aura.Strength))
                 {
@@ -397,7 +397,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Finding a new aura worth " + Desire.ToString("0.00");
+            return "Finding a new aura worth " + Desire.ToString("0.000");
         }
     }
 
@@ -450,7 +450,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Finding apprentice worth " + Desire.ToString("0.00");
+            return "Finding apprentice worth " + Desire.ToString("0.000");
         }
     }
 
@@ -469,7 +469,7 @@ namespace WizardMonks
         {
             if (character.GetType() == typeof(Magus))
             {
-                character.Log.Add("Searching for a vis site in aura " + Aura.Strength.ToString("0.00"));
+                character.Log.Add("Searching for a vis site in aura " + Aura.Strength.ToString("0.000"));
                 Magus mage = (Magus)character;
                 // add bonus to area lore equal to casting total div 5?
                 // TODO: once spells are implemented, increase finding chances based on aura-detection spells
@@ -485,7 +485,7 @@ namespace WizardMonks
                 {
                     Season seasons = DetermineSeasons(ref visSourceFound);
                     Ability art = DetermineArt();
-                    string logMessage = art.AbilityName + " vis source of size " + visSourceFound.ToString("0.00") + " found: ";
+                    string logMessage = art.AbilityName + " vis source of size " + visSourceFound.ToString("0.000") + " found: ";
                     if ((seasons & Season.Spring) == Season.Spring)
                     {
                         logMessage += "Sp";
@@ -618,7 +618,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Finding vis source worth " + Desire.ToString("0.00");
+            return "Finding vis source worth " + Desire.ToString("0.000");
         }
     }
 
@@ -661,7 +661,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Teaching worth " + Desire.ToString("0.00");
+            return "Teaching worth " + Desire.ToString("0.000");
         }
     }
 
@@ -705,7 +705,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Training worth " + Desire.ToString("0.00");
+            return "Training worth " + Desire.ToString("0.000");
         }
     }
     #endregion
@@ -764,7 +764,7 @@ namespace WizardMonks
             ushort roll = Die.Instance.RollExplodingDie();
             double aura = mage.Covenant != null && mage.Covenant.Aura != null ? mage.Covenant.Aura.Strength : 0;
             double gain = roll + aura;
-            character.Log.Add("Studying " + visNeeded.ToString("0.00") + " pawns of " + Art.AbilityName + " vis.");
+            character.Log.Add("Studying " + visNeeded.ToString("0.000") + " pawns of " + Art.AbilityName + " vis.");
             character.Log.Add("Gained " + gain + " experience.");
             charAbility.AddExperience(gain);
         }
@@ -781,7 +781,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Studying " + Art.AbilityName + " vis worth " + Desire.ToString("0.00");
+            return "Studying " + Art.AbilityName + " vis worth " + Desire.ToString("0.000");
         }
     }
     #endregion
@@ -817,7 +817,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Gauntleting apprentice worth " + Desire.ToString("0.00");
+            return "Gauntleting apprentice worth " + Desire.ToString("0.000");
         }
 
         protected override void DoMageAction(Magus mage)
@@ -840,9 +840,9 @@ namespace WizardMonks
             {
                 throw new ArgumentNullException("Magi can only extract vis in an aura!");
             }
-            double amount = mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
-            mage.Log.Add("Extracted " + amount.ToString("0.00") + " pawns of vis from aura");
-            mage.Covenant.AddVis(MagicArts.Vim, mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10);
+            double amount = mage.GetVisDistillationRate();
+            mage.Log.Add("Extracted " + amount.ToString("0.000") + " pawns of vis from aura");
+            mage.Covenant.AddVis(MagicArts.Vim, amount);
         }
 
         public override bool Matches(IAction action)
@@ -852,7 +852,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Extracting vis worth " + Desire.ToString("0.00");
+            return "Extracting vis worth " + Desire.ToString("0.000");
         }
     }
 
@@ -895,7 +895,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Building lab worth " + Desire.ToString("0.00");
+            return "Building lab worth " + Desire.ToString("0.000");
         }
     }
 
@@ -920,7 +920,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Refining lab worth " + Desire.ToString("0.00");
+            return "Refining lab worth " + Desire.ToString("0.000");
         }
     }
 
@@ -953,7 +953,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Inventing " + Spell.BaseArts.Technique.AbilityName + " " + Spell.BaseArts.Form.AbilityName + " spell worth " + Desire.ToString("0.00");
+            return "Inventing " + Spell.BaseArts.Technique.AbilityName + " " + Spell.BaseArts.Form.AbilityName + " spell worth " + Desire.ToString("0.000");
         }
     }
 
@@ -1024,7 +1024,7 @@ namespace WizardMonks
 
         public override string Log()
         {
-            return "Longevity Ritual worth " + Desire.ToString("0.00");
+            return "Longevity Ritual worth " + Desire.ToString("0.000");
         }
     }
     #endregion

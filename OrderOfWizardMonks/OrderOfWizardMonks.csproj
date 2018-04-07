@@ -82,6 +82,7 @@
     <Compile Include="Decisions\Conditions\Helpers\FindVisSourceHelper.cs" />
     <Compile Include="Decisions\Conditions\Helpers\LabTotalIncreaseHelper.cs" />
     <Compile Include="Decisions\Conditions\Helpers\PracticeHelper.cs" />
+    <Compile Include="Decisions\Conditions\Helpers\WritingHelper.cs" />
     <Compile Include="Decisions\Conditions\Helpers\ReadingHelper.cs" />
     <Compile Include="Decisions\ConsideredActions.cs" />
     <Compile Include="Decisions\Goals\AbilityScoreGoal.cs" />

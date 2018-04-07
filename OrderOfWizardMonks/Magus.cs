@@ -71,7 +71,7 @@ namespace WizardMonks
             //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
-            VisStudyRate = 6;
+            VisStudyRate = 6.75;
             House = Houses.Apprentice;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
@@ -110,7 +110,7 @@ namespace WizardMonks
             }
             Covenant = covenant;
             covenant.AddMagus(this);
-            VisStudyRate = 6 + covenant.Aura.Strength;
+            VisStudyRate = 6.75 + covenant.Aura.Strength;
         }
 
         public Covenant FoundCovenant(Aura aura)
@@ -150,6 +150,136 @@ namespace WizardMonks
             }
             return new List<BookDesire>();
         }
+
+        public override IBook GetBestBookToWrite()
+        {
+            double currentBestBookValue = 0;
+            IBook bestBook = null;
+            HashSet<int> consideredTopics = new HashSet<int>();
+
+            // since the value of a tractatus is independent of topic,
+            // calculate the value of writing a tractatus now, so that we don't have to keep doing it
+            double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
+            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
+            var unneededBookTopics = GetUnneededBooksFromCollection().Select(b => b.Topic).Distinct();
+            foreach (BookDesire bookDesire in GlobalEconomy.DesiredBooksList)
+            {
+                // if we already have a suitable book for this topic, let's not try to write another
+                if (unneededBookTopics.Contains(bookDesire.Ability)) continue;
+                // check to see if we could even write a summa of a level that would meet this desire
+                if (GetAbility(bookDesire.Ability).Value > bookDesire.CurrentLevel * 2)
+                {
+                    CharacterAbility buyerAbility = new CharacterAbility(bookDesire.Ability);
+                    buyerAbility.Experience = buyerAbility.GetExperienceUntilLevel(bookDesire.CurrentLevel);
+
+                    // see if we have started a summa on this topic
+                    var relatedIncompleteBooks = _incompleteBooks.Where(b => b.Topic == bookDesire.Ability && b.Level > bookDesire.CurrentLevel);
+                    if (relatedIncompleteBooks.Any())
+                    {
+                        foreach (Summa incompleteBook in relatedIncompleteBooks)
+                        {
+                            // the effective value is based on time to finish, not time already invested
+                            double experienceValue = buyerAbility.GetExperienceUntilLevel(incompleteBook.Level);
+                            double seasonsOfStudy = Math.Ceiling(experienceValue / incompleteBook.Quality);
+                            double effectiveQuality = experienceValue / seasonsOfStudy;
+                            // at a minimum, the book is worth the vis it would take, on average, to gain that experience
+                            double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
+                            double studySeasons = experienceValue / VisStudyRate;
+                            double visNeeded = studySeasons * visUsedPerStudySeason;
+                            // scale visNeeded according to vis type
+                            if(MagicArts.IsTechnique(bookDesire.Ability))
+                            {
+                                visNeeded *= 4;
+                            }
+                            else if(MagicArts.IsArt(bookDesire.Ability) && bookDesire.Ability != MagicArts.Vim)
+                            {
+                                visNeeded *= 2;
+                            }
+
+                            // for now, scale vis according to quality of book vs. quality of vis study
+                            visNeeded *= incompleteBook.Quality / VisStudyRate;
+
+                            // divide this visNeed valuation by how many seasons are left for writing
+                            double writingNeeded = incompleteBook.GetWritingPointsNeeded() - incompleteBook.PointsComplete;
+                            double seasonsLeft = Math.Ceiling(writingNeeded / writingRate);
+                            double writingValue = visNeeded / seasonsLeft;
+                            if(writingValue > currentBestBookValue)
+                            {
+                                // continue writing this summa
+                                bestBook = incompleteBook;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // NOTE: this could lead us down a strange rabbit hole of starting a bunch of 
+                        // summae on a subject of varying levels, but I think that's unlikely enough
+                        // to not try and protect from for now
+                        double maxLevel = GetAbility(bookDesire.Ability).Value / 2.0;
+
+                        for (double l = maxLevel; l > bookDesire.CurrentLevel; l--)
+                        {
+                            double q = 6 + maxLevel - l;
+                            // the effective value is based on time to finish, not time already invested
+                            double experienceValue = buyerAbility.GetExperienceUntilLevel(l);
+                            double seasonsOfStudy = Math.Ceiling(experienceValue / q);
+                            double effectiveQuality = experienceValue / seasonsOfStudy;
+                            // at a minimum, the book is worth the vis it would take, on average, to gain that experience
+                            double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
+                            double studySeasons = experienceValue / VisStudyRate;
+                            double visNeeded = studySeasons * visUsedPerStudySeason;
+                            // scale visNeeded according to vis type
+                            if (MagicArts.IsTechnique(bookDesire.Ability))
+                            {
+                                visNeeded *= 4;
+                            }
+                            else if (MagicArts.IsArt(bookDesire.Ability) && bookDesire.Ability != MagicArts.Vim)
+                            {
+                                visNeeded *= 2;
+                            }
+
+                            // for now, scale vis according to quality of book vs. quality of vis study
+                            visNeeded *= q / VisStudyRate;
+
+                            // divide this visNeed valuation by how many seasons are left for writing
+                            double seasonsLeft = Math.Ceiling(l / writingRate);
+                            double writingValue = visNeeded / seasonsLeft;
+                            if (writingValue > currentBestBookValue)
+                            {
+                                // write this summa
+                                bestBook = new Summa
+                                {
+                                    Quality = q,
+                                    Level = l,
+                                    Topic = bookDesire.Ability,
+                                    Title = bookDesire.Ability.AbilityName + " Summa for Dummies by " + Name,
+                                    Value = writingValue
+                                };
+                                currentBestBookValue = writingValue;
+                            }
+                        }
+                    }
+                }
+
+                // consider the value of writing a tractatus
+                var charAbility = GetAbility(bookDesire.Ability);
+                if (!consideredTopics.Contains(bookDesire.Ability.AbilityId) && tractatusValue > currentBestBookValue && CanWriteTractatus(charAbility))
+                {
+                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
+                    string name = Name + " " + bookDesire.Ability.AbilityName + " T" + previouslyWrittenCount.ToString();
+                    bestBook = new Tractatus
+                    {
+                        Topic = bookDesire.Ability,
+                        Title = name,
+                        Value = tractatusValue
+                    };
+                    currentBestBookValue = tractatusValue;
+                }
+                consideredTopics.Add(bookDesire.Ability.AbilityId);
+            }
+
+            return bestBook;
+        }
         #endregion
 
         #region Goal/Preference Functions
@@ -168,13 +298,13 @@ namespace WizardMonks
             {
                 return base.RateSeasonalExperienceGain(ability, gain);
             }
-            double baseDistillVisRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+            double baseDistillVisRate = GetVisDistillationRate();
             double distillVisRate = baseDistillVisRate;
             if (MagicArts.IsTechnique(ability))
             {
                 distillVisRate /= 4.0;
             }
-            else if (MagicArts.IsForm(ability) && ability != MagicArts.Vim)
+            else if (ability != MagicArts.Vim)
             {
                 distillVisRate /= 2.0;
             }
@@ -202,7 +332,7 @@ namespace WizardMonks
         protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
         {
             List<BookForTrade> list = new List<BookForTrade>();
-            double distillRate = GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
+            double distillRate = GetVisDistillationRate();
             foreach (IBook book in books)
             {
                 if (book.Level == 1000)
@@ -236,10 +366,6 @@ namespace WizardMonks
             else
             {
                 ConsideredActions actions = new ConsideredActions();
-                foreach (MagusTradingDesires tradeDesires in tradeDesiresList)
-                {
-                    AddWritingGoals(tradeDesires);
-                }
                 foreach (IGoal goal in _goals)
                 {
                     if (!goal.IsComplete())
@@ -252,63 +378,6 @@ namespace WizardMonks
                 }
                 Log.AddRange(actions.Log());
                 return actions.GetBestAction();
-            }
-        }
-
-        private void AddWritingGoals(MagusTradingDesires tradingDesires)
-        {
-            // TODO: right now, this logic is causing characters to start trying to learn skills
-            // they have no interest in so that they can write a book to sell off
-            // this may not be inherently wrong, but it should certainly be the case that more attractive choices always exist
-            double comm = GetAttributeValue(AttributeType.Communication);
-            foreach (BookDesire bookDesire in tradingDesires.BookDesires.Values)
-            {
-                CharacterAbilityBase charAbility = GetAbility(bookDesire.Ability);
-                bool isArt = MagicArts.IsArt(bookDesire.Ability);
-                ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
-                if (previouslyWrittenCount < (isArt ? (charAbility.Value / 5) : charAbility.Value))
-                {
-                    // add tractatus goal to both goal list and writing goal list
-                    string name = Name + " " + bookDesire.Ability.AbilityName + " T" + previouslyWrittenCount.ToString();
-                    TractatusGoal tractGoal = new TractatusGoal(bookDesire.Ability, name, previouslyWrittenCount);
-                    _tractatusGoals.Add(tractGoal);
-                    _goals.Add(tractGoal);
-                }
-                double baseLevel = charAbility.Value / 2.0;
-                // don't add a summa goal if we already have one for this topic in progress
-                if (baseLevel - 1 > bookDesire.CurrentLevel && !_summaGoals.Where(s => !s.IsComplete(this) && s.Topic == charAbility.Ability).Any())
-                {
-                    // try to constrain the level of the summa to be something doable in an efficient period of time
-                    double rate = comm + GetAbility(_writingLanguage).Value;
-                    double writingPointsNeeded = isArt ? bookDesire.CurrentLevel + 1 : bookDesire.CurrentLevel * 5 + 5;
-                    double efficientLevel = Math.Ceiling(writingPointsNeeded / rate) * rate;
-                    if (efficientLevel < baseLevel)
-                    {
-                        // add summa goal to both goal list and writing goal list
-                        string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + efficientLevel.ToString("0.00");
-                        SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, efficientLevel, name);
-                        _goals.Add(summaGoal);
-                        _summaGoals.Add(summaGoal);
-                    }
-                    else if (writingPointsNeeded < rate)
-                    {
-                        // it's a one-season summa, may as well do it if it's better than practice
-                        // but we should make sure that it's worth at least two seasons of study
-                        double quality = comm + 6;
-                        double xpToLevel = baseLevel * (baseLevel + 1) / 2.0;
-                        if(!isArt)
-                        {
-                            xpToLevel *= 5;
-                        }
-                        if (xpToLevel >= 2 * quality && (isArt || quality > 4))
-                        {
-                            string name = Name + " " + bookDesire.Ability.AbilityName + " Summa L" + (charAbility.Value / 2.0).ToString("0.00");
-                            SummaGoal summaGoal = new SummaGoal(bookDesire.Ability, baseLevel, name);
-                            _goals.Add(summaGoal);
-                            _summaGoals.Add(summaGoal);
-                        }
-                    }
-                }
             }
         }
 
@@ -331,8 +400,8 @@ namespace WizardMonks
         {
             List<VisTradeOffer> offers = new List<VisTradeOffer>();
             List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
-            List<BookVisOffer> buyBookOffers = new List<BookVisOffer>();
-            List<BookVisOffer> sellBookOffers = new List<BookVisOffer>();
+            List<VisForBookOffer> buyBookOffers = new List<VisForBookOffer>();
+            List<VisForBookOffer> sellBookOffers = new List<VisForBookOffer>();
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)
@@ -394,12 +463,11 @@ namespace WizardMonks
                     if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
                     {
                         Log.Add("Executing vis trade with " + offer.Mage.Name);
-                        Log.Add("Trading " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
-                        Log.Add("for " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                        Log.Add("Trading " + offer.Bid.Quantity.ToString("0.000") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
+                        Log.Add("for " + offer.Ask.Quantity.ToString("0.000") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
                         offer.Mage.Log.Add("Executing vis trade with " + Name);
-                        offer.Mage.Log.Add("Trading " + offer.Ask.Quantity.ToString("0.00") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
-                        offer.Mage.Log.Add("for " + offer.Bid.Quantity.ToString("0.00") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
-                        
+                        offer.Mage.Log.Add("Trading " + offer.Ask.Quantity.ToString("0.000") + " pawns of " + offer.Ask.Art.AbilityName + " vis");
+                        offer.Mage.Log.Add("for " + offer.Bid.Quantity.ToString("0.000") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
                         
                         offer.Execute();
                         internalOffers = internalOffers.Where(o => o != offer);
@@ -418,7 +486,7 @@ namespace WizardMonks
             } while (internalOffers.Any());
         }
 
-        private void ProcessBookOffers(IEnumerable<BookTradeOffer> bookTradeOffers, IEnumerable<BookVisOffer> bookBuys, IEnumerable<BookVisOffer> bookSales)
+        private void ProcessBookOffers(IEnumerable<BookTradeOffer> bookTradeOffers, IEnumerable<VisForBookOffer> bookBuys, IEnumerable<VisForBookOffer> bookSales)
         {
             var trades = bookTradeOffers.OrderBy(bto => bto.BookDesired.Quality);
             while (trades.Any())
@@ -448,43 +516,44 @@ namespace WizardMonks
                 }
             }
 
-            var sales = bookSales.OrderByDescending(bto => bto.VisQuantity);
+            var sales = bookSales.OrderByDescending(bto => bto.VisValue);
             while (sales.Any() )
             {
                 var sellOffer = sales.First();
                 if (GetBooksFromCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
-                    sellOffer.Mage.GetVisCount(sellOffer.VisArt) >= sellOffer.VisQuantity)
+                    sellOffer.TradingPartner.HasSufficientVis(sellOffer.VisOffers))
                 {
-                    Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.Mage.Name);
-                    Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
-                    sellOffer.Mage.Log.Add("Buying " + sellOffer.BookDesired.Title + " from " + Name);
-                    sellOffer.Mage.Log.Add("for " + sellOffer.VisQuantity.ToString("0.00") + " pawns of " + sellOffer.VisArt.AbilityName + " vis");
+                    // enact trade
+                    Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.TradingPartner.Name);
+                    Log.Add("for " + sellOffer.VisValue.ToString("0.000") + " worth of vis");
+                    sellOffer.TradingPartner.Log.Add("Buying " + sellOffer.BookDesired.Title + " from " + Name);
+                    sellOffer.TradingPartner.Log.Add("for " + sellOffer.VisValue.ToString("0.000") + " worth of vis");
 
-                    sellOffer.Mage.AddBookToCollection(sellOffer.BookDesired);
+                    sellOffer.TradingPartner.AddBookToCollection(sellOffer.BookDesired);
                     RemoveBookFromCollection(sellOffer.BookDesired);
-                    sellOffer.Mage.UseVis(sellOffer.VisArt, sellOffer.VisQuantity);
-                    GainVis(sellOffer.VisArt, sellOffer.VisQuantity);
+                    sellOffer.TradingPartner.UseVis(sellOffer.VisOffers);
+                    GainVis(sellOffer.VisOffers);
                 }
-                sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
+                sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisValue);
             }
 
-            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisQuantity);
+            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisValue);
             while (buys.Any())
             {
                 var buyOffer = buys.First();
-                if (GetVisCount(buyOffer.VisArt) >= buyOffer.VisQuantity)
+                if (HasSufficientVis(buyOffer.VisOffers))
                 {
-                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.Mage.Name);
-                    Log.Add("for " + buyOffer.VisQuantity.ToString("0.00") + " pawns of " + buyOffer.VisArt.AbilityName + " vis");
-                    buyOffer.Mage.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
-                    buyOffer.Mage.Log.Add("for " + buyOffer.VisQuantity.ToString("0.00") + " pawns of " + buyOffer.VisArt.AbilityName + " vis");
+                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.TradingPartner.Name);
+                    Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
+                    buyOffer.TradingPartner.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
+                    buyOffer.TradingPartner.Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
 
-                    buyOffer.Mage.RemoveBookFromCollection(buyOffer.BookDesired);
+                    buyOffer.TradingPartner.RemoveBookFromCollection(buyOffer.BookDesired);
                     AddBookToCollection(buyOffer.BookDesired);
-                    buyOffer.Mage.GainVis(buyOffer.VisArt, buyOffer.VisQuantity);
-                    UseVis(buyOffer.VisArt, buyOffer.VisQuantity);
+                    buyOffer.TradingPartner.GainVis(buyOffer.VisOffers);
+                    UseVis(buyOffer.VisOffers);
                 }
-                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisQuantity);
+                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisValue);
             }
         }
         #endregion
@@ -495,6 +564,12 @@ namespace WizardMonks
             double techValue = Arts.GetAbility(artPair.Technique).Value;
             double formValue = Arts.GetAbility(artPair.Form).Value;
             return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
+        }
+
+        public double GetVisDistillationRate()
+        {
+            // TODO: One day, we'll make this more complicated
+            return GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
         }
 
         public double GetAverageAuraFound()
@@ -531,7 +606,7 @@ namespace WizardMonks
         private VisDesire[] GetVisDesires()
         {
             // start by making all of the character's vis stockpiles available
-            VisDesire[] desires = new VisDesire[15];
+            VisDesire[] desires = new VisDesire[MagicArts.Count];
             desires[0] = new VisDesire(MagicArts.Creo, -this.GetVisCount(MagicArts.Creo));
             desires[1] = new VisDesire(MagicArts.Intellego, -this.GetVisCount(MagicArts.Intellego));
             desires[2] = new VisDesire(MagicArts.Muto, -this.GetVisCount(MagicArts.Muto));
@@ -586,6 +661,14 @@ namespace WizardMonks
             return _visStock[visType];
         }
 
+        public void UseVis(List<VisOffer> visOffers)
+        {
+            foreach(VisOffer offer in visOffers)
+            {
+                UseVis(offer.Art, offer.Quantity);
+            }
+        }
+
         public double GainVis(Ability visType, double amount)
         {
             if (!MagicArts.IsArt(visType))
@@ -601,6 +684,26 @@ namespace WizardMonks
                 _visStock[visType] = amount;
             }
             return _visStock[visType];
+        }
+
+        public void GainVis(List<VisOffer> visOffers)
+        {
+            foreach(VisOffer offer in visOffers)
+            {
+                GainVis(offer.Art, offer.Quantity);
+            }
+        }
+        
+        private bool HasSufficientVis(List<VisOffer> visOffers)
+        {
+            foreach(VisOffer offer in visOffers)
+            {
+                if(GetVisCount(offer.Art) < offer.Quantity)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
         #endregion
 
@@ -663,7 +766,7 @@ namespace WizardMonks
         public void ExtractVis(Ability exposureAbility)
         {
             // add vis to personal inventory or covenant inventory
-            _visStock[MagicArts.Vim] += GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
+            _visStock[MagicArts.Vim] += GetVisDistillationRate();
 
             // grant exposure experience
             GetAbility(exposureAbility).AddExperience(2);
@@ -739,6 +842,14 @@ namespace WizardMonks
                     {
                         _visStock[source.Art] += source.Amount;
                     }
+                }
+            }
+            Log.Add("VIS STOCK");
+            foreach(Ability art in MagicArts.GetEnumerator())
+            {
+                if(_visStock[art] > 0)
+                {
+                    Log.Add(art.AbilityName + ": " + _visStock[art].ToString("0.00"));
                 }
             }
             base.Advance();

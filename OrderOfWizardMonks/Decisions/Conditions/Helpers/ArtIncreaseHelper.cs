@@ -47,11 +47,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = magicArt.GetValueGain(Mage.VisStudyRate);
                 double effectiveDesire = _desireFunc(gain, ConditionDepth);
-                if (effectiveDesire > 0.01)
-                {
-                    VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
-                    alreadyConsidered.Add(visStudy);
-                }
+                VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
+                alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
                 FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), AllowVimVisUse, _desireFunc);
 

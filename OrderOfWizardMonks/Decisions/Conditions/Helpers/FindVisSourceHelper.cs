@@ -56,12 +56,16 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
                 if (averageFind > 0)
                 {
-                    // modify by chance vis will be of the proper type
-                    double gain = (averageFind * _visTypes.Count() / 15);
+                    // originally, we modified by chance vis will be of the proper type
+                    // this feels wrong; what's probably more sensible is to scale
+                    // according to the relative value of vis
+                    // so 5 * 4 + 9 * 2 + 1 = 39/15
+                    // that represents the relative value of a random vis source compared to vim vis
+                    double gain = (averageFind * 39/15);
                     double desire = _desireFunc(gain, ConditionDepth);
 
                     // TODO: modify by lifelong value of source?
-                    log.Add("Looking for vis source worth " + (desire).ToString("0.00"));
+                    log.Add("Looking for vis source worth " + (desire).ToString("0.000"));
                     alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, desire));
                 }
 
@@ -88,7 +92,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             double probOfBetter = 1 - (_currentVis * _currentVis / (5 * _currentAura * newScore));
             double maxVis = Math.Sqrt(5.0 * newScore * _currentAura);
             double averageGain = maxVis * probOfBetter / 2.0;
-            return Desire * averageGain / conditionDepth;
+            return _desireFunc(averageGain, conditionDepth);
 
         }
 
@@ -100,8 +104,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
             if (averageFind > 0)
             {
-                // modify by chance vis will be of the proper type
-                double gain = (averageFind * _visTypes.Count() / 15);
+                // originally, we modified by chance vis will be of the proper type
+                // this feels wrong; what's probably more sensible is to scale
+                // according to the relative value of vis
+                // so 5 * 4 + 9 * 2 + 1 = 39/15
+                // that represents the relative value of a random vis source compared to vim vis
+                double gain = (averageFind * 39 / 15);
                 return _desireFunc(gain, conditionDepth);
             }
             return 0;

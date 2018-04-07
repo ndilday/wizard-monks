@@ -126,6 +126,7 @@ namespace SkillViewer
 
             var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
             var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
+            GlobalEconomy.DesiredBooksList = magiDesires.SelectMany(md => md.BookDesires.Values).Distinct().ToList();
             _log.Add("Advancing Season");
             Parallel.ForEach(_magusArray.Where(m => m != null && !m.WantsToFollow), character =>
             {
@@ -181,6 +182,7 @@ namespace SkillViewer
                 _magusCount++;
             }
             _log.Add("Done Advancing Season");
+
             _log.Add("Considering vis and book trades");
             foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))
             {

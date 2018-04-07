@@ -30,6 +30,7 @@ namespace WizardMonks
         }
 		public double Quality { get; set; }
 		public virtual double Level { get; set; }
+        public double Value { get; set; }
 	}
 
 	[Serializable]

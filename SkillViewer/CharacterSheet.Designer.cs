@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -122,6 +123,7 @@
             this.Topic = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Author = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Quality = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAbilities)).BeginInit();
@@ -637,8 +639,8 @@
             // Value
             // 
             this.Value.DataPropertyName = "Value";
-            dataGridViewCellStyle5.Format = "0.00";
-            this.Value.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Format = "0.000";
+            this.Value.DefaultCellStyle = dataGridViewCellStyle1;
             this.Value.FillWeight = 15F;
             this.Value.HeaderText = "Level";
             this.Value.MaxInputLength = 2;
@@ -699,6 +701,7 @@
             this.lstLog.Name = "lstLog";
             this.lstLog.Size = new System.Drawing.Size(281, 576);
             this.lstLog.TabIndex = 25;
+            this.lstLog.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lstLog_MouseMove);
             // 
             // groupBox3
             // 
@@ -1038,7 +1041,7 @@
             this.Title.MinimumWidth = 40;
             this.Title.Name = "Title";
             this.Title.ReadOnly = true;
-            this.Title.Width = 200;
+            this.Title.Width = 50;
             // 
             // Topic
             // 
@@ -1049,7 +1052,7 @@
             this.Topic.MinimumWidth = 40;
             this.Topic.Name = "Topic";
             this.Topic.ReadOnly = true;
-            this.Topic.Width = 100;
+            this.Topic.Width = 57;
             // 
             // Author
             // 
@@ -1060,7 +1063,7 @@
             this.Author.MinimumWidth = 40;
             this.Author.Name = "Author";
             this.Author.ReadOnly = true;
-            this.Author.Width = 100;
+            this.Author.Width = 61;
             // 
             // Quality
             // 
@@ -1071,7 +1074,7 @@
             this.Quality.MinimumWidth = 40;
             this.Quality.Name = "Quality";
             this.Quality.ReadOnly = true;
-            this.Quality.Width = 40;
+            this.Quality.Width = 62;
             // 
             // CharacterSheet
             // 
@@ -1198,5 +1201,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Topic;
         private System.Windows.Forms.DataGridViewTextBoxColumn Author;
         private System.Windows.Forms.DataGridViewTextBoxColumn Quality;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

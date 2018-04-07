@@ -27,15 +27,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
             // for now
             _currentScore= CalculateFindAuraScore();
-            double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * _currentScore));
+            double probOfBetter = 1 - (_currentAura * _currentAura * (_auraCount + 1) / (5 * _currentScore));
             double maxAura = Math.Sqrt(5.0 * _currentScore / (_auraCount + 1));
             double averageGain = maxAura * probOfBetter / 2.0;
             double desire = _desireFunc(averageGain, ConditionDepth);
 
-            if (desire > 0.01)
+            if (desire > 0.00001)
             {
                 
-                log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.00"));
+                log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.000"));
                 alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
 
                 // consider the value of increasing find aura related scores
@@ -63,10 +63,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
         {
             double newScore = _currentScore + gain;
-            double probOfBetter = 1 - (_currentAura * _currentAura * _auraCount / (5 * newScore));
-            double maxAura = Math.Sqrt(5.0 * newScore / _auraCount);
-            double averageGain = maxAura * probOfBetter / 2.0;
-            return Desire * averageGain / conditionDepth;
+            double probOfBetterNow = 1 - (_currentAura * _currentAura * (_auraCount + 1) / (5 * _currentScore));
+            double probOfBetterWithGain = 1 - (_currentAura * _currentAura * (_auraCount + 1) / (5 * newScore));
+            double maxAuraNow = Math.Sqrt(5.0 * _currentScore / (_auraCount + 1));
+            double maxAuraWithGain = Math.Sqrt(5.0 * newScore / (_auraCount + 1));
+            double averageGainNow = maxAuraNow * probOfBetterNow / 2.0;
+            double averageGainWithGain = maxAuraWithGain * probOfBetterWithGain / 2.0;
+            return Desire * (averageGainWithGain - averageGainNow) / conditionDepth;
             
         }
     }

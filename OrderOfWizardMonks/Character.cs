@@ -334,7 +334,6 @@ namespace WizardMonks
             else
             {
                 ConsideredActions actions = new ConsideredActions();
-                AddWritingGoals(tradeDesires);
                 foreach (IGoal goal in _goals)
                 {
                     if (!goal.IsComplete())
@@ -350,20 +349,20 @@ namespace WizardMonks
             }
         }
 
-        public virtual void ReprioritizeGoals()
-        {
-            foreach (IGoal goal in _goals)
-            {
-                if (!goal.IsComplete())
-                {
-                    if (goal.AgeToCompleteBy > SeasonalAge)
-                    {
-                        Log.Add("Failed to achieve a goal");
-                        _goals.Remove(goal);
-                    }
-                }
-            }
-        }
+       public virtual void ReprioritizeGoals()
+       {
+           foreach (IGoal goal in _goals)
+           {
+               if (!goal.IsComplete())
+               {
+                   if (goal.AgeToCompleteBy > SeasonalAge)
+                   {
+                       Log.Add("Failed to achieve a goal");
+                       _goals.Remove(goal);
+                   }
+               }
+           }
+       }
 
         public virtual void CommitAction(IAction action)
         {
@@ -502,7 +501,7 @@ namespace WizardMonks
                 charAbility = GetAbility(book.Topic);
             }
 
-            if (charAbility.Value > book.Level)
+            if (charAbility.Value >= book.Level)
             {
                 return 0;
             }
@@ -627,6 +626,11 @@ namespace WizardMonks
         public ushort GetTractatiiWrittenOnTopic(Ability topic)
         {
             return (ushort)_booksWritten.Where(b => b.Topic == topic && b.Level == 1000).Count();
+        }
+
+        public virtual IBook GetBestBookToWrite()
+        {
+            return null;
         }
         #endregion
 

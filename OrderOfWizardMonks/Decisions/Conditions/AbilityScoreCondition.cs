@@ -68,9 +68,12 @@ namespace WizardMonks.Decisions.Conditions
         public override List<BookDesire> GetBookDesires()
         {
             List<BookDesire> bookDesires = new List<BookDesire>();
-            foreach(Ability ability in this.Abilities)
+            if (!ConditionFulfilled)
             {
-                bookDesires.Add(new BookDesire(ability, this.Character.GetAbility(ability).Value));
+                foreach (Ability ability in this.Abilities)
+                {
+                    bookDesires.Add(new BookDesire(ability, this.Character.GetAbility(ability).Value));
+                }
             }
             return bookDesires;
         }
@@ -115,7 +118,7 @@ namespace WizardMonks.Decisions.Conditions
             if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
             {
                 Practice practiceAction = new Practice(ability, effectiveDesire);
-                log.Add("Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.00"));
+                log.Add("Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.000"));
                 alreadyConsidered.Add(practiceAction);
             }
         }
@@ -130,8 +133,8 @@ namespace WizardMonks.Decisions.Conditions
                 double effectiveDesire = GetDesirabilityOfIncrease(gain);
                 if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
                 {
-                    log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.00"));
-                    Reading readingAction = new Reading(bestBook, effectiveDesire);
+                    log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
+                    Read readingAction = new Read(bestBook, effectiveDesire);
                     alreadyConsidered.Add(readingAction);
                 }
             }
@@ -151,7 +154,7 @@ namespace WizardMonks.Decisions.Conditions
                 // if so, assume vis will return an average of 6XP + aura
                 if (stockpile > visNeed)
                 {
-                    log.Add("Studying vis for " + magicArt.Ability.AbilityName + " worth " + effectiveDesire.ToString("0.00"));
+                    log.Add("Studying vis for " + magicArt.Ability.AbilityName + " worth " + effectiveDesire.ToString("0.000"));
                     VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
                     alreadyConsidered.Add(visStudy);
                     // TODO: how do we decrement the cost of the vis?

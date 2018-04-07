@@ -21,14 +21,13 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
             if(!ConditionFulfilled)
             {
                 FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
                 alreadyConsidered.Add(findAuraAction);
-                log.Add("Finding an aura worth " + this.Desire.ToString("0.00"));
+                log.Add("Finding an aura worth " + this.Desire.ToString("0.000"));
             }
         }
     }

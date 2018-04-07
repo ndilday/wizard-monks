@@ -23,6 +23,8 @@ namespace WizardMonks.Instances
         public static Ability Terram { get; set; }
         public static Ability Vim { get; set; }
 
+        public static int Count = 15;
+
         static MagicArts()
         {
             Creo = new Ability(300, AbilityType.Art, "Creo");

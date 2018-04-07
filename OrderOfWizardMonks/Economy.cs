@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Instances;
+
 namespace WizardMonks
 {
+    /// <summary>
+    /// Container used in vis trades. Negative Quantities represent vis available to trade away
+    /// </summary>
     public class VisDesire
     {
         public Ability Art { get; private set; }
@@ -96,18 +101,39 @@ namespace WizardMonks
         }
     }
 
-    public class BookVisOffer
+    public class VisForBookOffer
     {
-        public Magus Mage { get; private set; }
-        public Ability VisArt { get; private set; }
-        public double VisQuantity { get; private set; }
+        public Magus TradingPartner { get; private set; }
+        public List<VisOffer> VisOffers { get; private set; }
+        public double VisValue { get; private set; }
         public IBook BookDesired { get; private set; }
-        public BookVisOffer(Magus mage, Ability art, double quantity, IBook bookDesired)
+        public VisForBookOffer(Magus buyer, IEnumerable<VisOffer> visOffers, double quantity, IBook bookDesired)
         {
-            Mage = mage;
-            VisArt = art;
-            VisQuantity = quantity;
+            TradingPartner = buyer;
+            VisOffers = visOffers.ToList();
             BookDesired = bookDesired;
+            VisValue = CalculateVisValue();
+        }
+
+        private double CalculateVisValue()
+        {
+            double total = 0;
+            foreach(VisOffer offer in VisOffers)
+            {
+                if(MagicArts.IsTechnique(offer.Art))
+                {
+                    total += offer.Quantity * 4.0;
+                }
+                else if(offer.Art != MagicArts.Vim)
+                {
+                    total += offer.Quantity * 2.0;
+                }
+                else
+                {
+                    total += offer.Quantity;
+                }
+            }
+            return total;
         }
     }
 
@@ -157,9 +183,9 @@ namespace WizardMonks
             return tradeList;
         }
 
-        public IList<BookVisOffer> GenerateBuyBookOffers(MagusTradingDesires otherDesires)
+        public IList<VisForBookOffer> GenerateBuyBookOffers(MagusTradingDesires otherDesires)
         {
-            List<BookVisOffer> bookTradeOffers = new List<BookVisOffer>();
+            List<VisForBookOffer> bookTradeOffers = new List<VisForBookOffer>();
             if (BookDesires.Any() && otherDesires.BooksForTrade.Any())
             {
                 // they have books, we want books
@@ -174,13 +200,12 @@ namespace WizardMonks
                         double bookVisValue = Mage.RateLifetimeBookValue(bookForTrade.Book);
                         // TODO: improve pricing mechanics
                         double price = bookVisValue + bookForTrade.MinimumPrice / 2;
-                        for (int i = 0; i < 15; i++)
+                        var visOffers = GenerateVisOffer(price, otherDesires.VisDesires, VisDesires);
+
+                        if(visOffers != null)
                         {
-                            if (-(VisDesires[i].Quantity) >= price && otherDesires.VisDesires[i].Quantity >= price)
-                            {
-                                // we can offer this sort of vis for the book
-                                bookTradeOffers.Add(new BookVisOffer(otherDesires.Mage, VisDesires[i].Art, price, bookForTrade.Book));
-                            }
+                            // we can offer this sort of vis for the book
+                            bookTradeOffers.Add(new VisForBookOffer(otherDesires.Mage, visOffers, price, bookForTrade.Book));
                         }
                     }
                 }
@@ -188,9 +213,9 @@ namespace WizardMonks
             return bookTradeOffers;
         }
 
-        public IList<BookVisOffer> GenerateSellBookOffers(MagusTradingDesires otherDesires)
+        public IList<VisForBookOffer> GenerateSellBookOffers(MagusTradingDesires otherDesires)
         {
-            List<BookVisOffer> bookTradeOffers = new List<BookVisOffer>();
+            List<VisForBookOffer> bookTradeOffers = new List<VisForBookOffer>();
             if (BooksForTrade.Any() && otherDesires.BookDesires.Any())
             {
                 // we have books, they want books
@@ -205,13 +230,10 @@ namespace WizardMonks
                         double bookVisValue = otherDesires.Mage.RateLifetimeBookValue(bookForTrade.Book);
                         // TODO: improve pricing mechanics
                         double price = bookVisValue + bookForTrade.MinimumPrice / 2;
-                        for (int i = 0; i < 15; i++)
+                        var offer = GenerateVisOffer(price, otherDesires.VisDesires, VisDesires);
+                        if(offer != null)
                         {
-                            if (-(otherDesires.VisDesires[i].Quantity) >= price && VisDesires[i].Quantity >= price)
-                            {
-                                // we can offer this sort of vis for the book
-                                bookTradeOffers.Add(new BookVisOffer(otherDesires.Mage, VisDesires[i].Art, price, bookForTrade.Book));
-                            }
+                            bookTradeOffers.Add(new VisForBookOffer(otherDesires.Mage, offer, price, bookForTrade.Book));
                         }
                     }
                 }
@@ -219,11 +241,73 @@ namespace WizardMonks
             return bookTradeOffers;
         }
 
+        /// <summary>
+        /// Looks at the giver and receiver vis desires, and sees what combination of vis can meet the desires
+        /// </summary>
+        /// <param name="price">the agreed upon price, in Vim vis</param>
+        /// <param name="giverVisDesires"></param>
+        /// <param name="receiverVisDesires"></param>
+        /// <returns></returns>
+        private IEnumerable<VisOffer> GenerateVisOffer(double price, VisDesire[] giverVisDesires, VisDesire[] receiverVisDesires)
+        {
+            double remainingPrice = price;
+            List<VisOffer> offerSegments = new List<VisOffer>();
+            // order the receiver's desires from largest to smallest
+            foreach(VisDesire desire in receiverVisDesires.Where(d => d.Quantity > 0).OrderByDescending(d => d.Quantity))
+            {
+                var giverArt = giverVisDesires.First(d => d.Art == desire.Art);
+                // see if the giver can supply this type of vis
+                if (giverArt.Quantity < 0 )
+                {
+                    // they have some to trade
+                    double maxNeed = remainingPrice;
+                    if(MagicArts.IsTechnique(desire.Art))
+                    {
+                        maxNeed /= 4.0;
+                        if(giverArt.Quantity * -1 >= maxNeed)
+                        {
+                            offerSegments.Add(new VisOffer(desire.Art, maxNeed));
+                            remainingPrice = 0;
+                            break;
+                        }
+                        else
+                        {
+                            // we're going to need more than this, so use all of this vis and move on
+                            offerSegments.Add(new VisOffer(desire.Art, giverArt.Quantity * -1));
+                            remainingPrice -= giverArt.Quantity * -4;
+                        }
+                    }
+                    else if(desire.Art != MagicArts.Vim)
+                    {
+                        maxNeed /= 2.0;
+                        if (giverArt.Quantity * -1 >= maxNeed)
+                        {
+                            offerSegments.Add(new VisOffer(desire.Art, maxNeed));
+                            remainingPrice = 0;
+                            break;
+                        }
+                        else
+                        {
+                            // we're going to need more than this, so use all of this vis and move on
+                            offerSegments.Add(new VisOffer(desire.Art, giverArt.Quantity * -1));
+                            remainingPrice -= giverArt.Quantity * -2;
+                        }
+                    }
+                }
+            }
+            if(remainingPrice > 0)
+            {
+                return null;
+            }
+            return offerSegments;
+        }
+
         private IList<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)
         {
+            // TODO: need to take Vis type into account
             List<VisOffer> bids = new List<VisOffer>();
             List<VisOffer> asks = new List<VisOffer>();
-            for(byte i = 0; i < 15; i++)
+            for(byte i = 0; i < MagicArts.Count; i++)
             {
                 if(VisDesires[i].Quantity < 0 && otherVisDesires[i].Quantity > 0)
                 {
@@ -281,7 +365,25 @@ namespace WizardMonks
         }
     }
 
-    public class Economy
-    {   
+    // in the future, we should probably have ad hoc micro-economies, 
+    // and the possibility of someone profiting by trading among unconnected micro-economies
+    public static class GlobalEconomy
+    {
+        // needs to know about all books available for trade
+        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = new Dictionary<Ability, List<BookForTrade>>();
+        // needs to know about all topics people have expressed wanting a book for
+        public static List<BookDesire> DesiredBooksList = new List<BookDesire>();
+        // needs to know about all vis desires
+        public static double[] GlobalVisDemandMap = new double[MagicArts.Count];
+        // needs to have some sense of the average value of a tractatus
+        public static double GlobalTractatusValue = 2;
+
+        public static IEnumerable<Ability> DesiredBookTopics
+        {
+            get
+            {
+                return DesiredBooksList.Select(b => b.Ability).Distinct();
+            }
+        }
     }
 }

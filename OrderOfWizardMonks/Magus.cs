@@ -83,7 +83,7 @@ namespace WizardMonks
 
         private void InitializeGoals()
         {
-            _goals.Add(new LongevityRitualGoal(this, 140, 1));
+            _goals.Add(new LongevityRitualGoal(this, 100, 140));
         }
         #endregion
 

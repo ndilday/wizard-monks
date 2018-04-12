@@ -47,6 +47,14 @@ namespace WizardMonks.Decisions.Conditions
             _visStillNeeded = AmountNeeded - storedVis;
             if (_visStillNeeded > 0)
             {
+                string openingLog = "Trying to get vis of types ";
+                foreach (Ability ability in VisTypes)
+                {
+                    openingLog += " " + ability.AbilityName;
+                }
+                openingLog += " to a quantity of at least" + AmountNeeded.ToString("0.0");
+                log.Add(openingLog);
+
                 // extract
                 if (_vimSufficient)
                 {

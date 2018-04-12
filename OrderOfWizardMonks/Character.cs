@@ -333,6 +333,7 @@ namespace WizardMonks
             }
             else
             {
+                List<string> temporaryLog = new List<string>();
                 ConsideredActions actions = new ConsideredActions();
                 foreach (IGoal goal in _goals)
                 {
@@ -340,8 +341,7 @@ namespace WizardMonks
                     {
                         // TODO: it should probably be an error case for a goal to still be here
                         // for now, ignore
-                        List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, dummy);
+                        goal.AddActionPreferencesToList(actions, temporaryLog);
                     }
                 }
                 Log.AddRange(actions.Log());

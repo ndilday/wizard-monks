@@ -41,6 +41,13 @@ namespace WizardMonks.Decisions.Conditions
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
+            string openingLog = "Trying to get abilities ";
+            foreach(Ability ability in Abilities)
+            {
+                openingLog += " " + ability.AbilityName;
+            }
+            openingLog += " up to a total of " + TotalNeeded.ToString("0.0");
+            log.Add(openingLog);
             _currentTotal = GetTotal();
             if (!ConditionFulfilled)
             {

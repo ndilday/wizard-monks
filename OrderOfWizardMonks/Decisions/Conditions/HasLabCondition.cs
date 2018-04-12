@@ -27,7 +27,9 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-                if(!_auraCondition.ConditionFulfilled)
+                string startingLog = "Need to have a lab, desire " + Desire.ToString("0.0");
+                log.Add(startingLog);
+                if (!_auraCondition.ConditionFulfilled)
                 {
                     _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
@@ -35,7 +37,7 @@ namespace WizardMonks.Decisions.Conditions
                 {
                     BuildLaboratory buildLabAction = new BuildLaboratory(Abilities.MagicTheory, this.Desire / (TimeUntilDue * ConditionDepth));
                     alreadyConsidered.Add(buildLabAction);
-                    log.Add("Building a lab worth " + this.Desire.ToString("0.000"));
+                    log.Add(buildLabAction.Log());
                 }
             }
         }

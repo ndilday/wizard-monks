@@ -18,6 +18,8 @@ namespace WizardMonks.Decisions.Goals
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
             _visCondition.ModifyVisAmount((Character.SeasonalAge / 20) + 1);
+            string startingLog = "Interested in making a longevity ritual, desire " + Desire.ToString("0.0");
+            log.Add(startingLog);
             base.AddActionPreferencesToList(alreadyConsidered, log);
         }
 

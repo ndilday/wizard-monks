@@ -25,9 +25,11 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
+                string startingLog = "Need to have an aura, desire " + Desire.ToString("0.0");
+                log.Add(startingLog);
                 FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (TimeUntilDue * ConditionDepth));
                 alreadyConsidered.Add(findAuraAction);
-                log.Add("Finding an aura worth " + this.Desire.ToString("0.000"));
+                log.Add(findAuraAction.Log());
             }
         }
     }

@@ -308,6 +308,7 @@ namespace WizardMonks
                 Tractatus tract = new Tractatus
                 {
                     Author = Book.Author,
+                    AuthorName = Book.AuthorName,
                     Quality = Book.Quality,
                     Title = Book.Title,
                     Topic = Book.Topic

@@ -20,8 +20,8 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        public AbilityScoreCondition(Character character, uint dueDate, double desire, List<Ability> abilities, List<AttributeType> attributes, double totalNeeded) :
-            base(character, dueDate, desire)
+        public AbilityScoreCondition(Character character, uint? ageToCompleteBy, double desire, List<Ability> abilities, List<AttributeType> attributes, double totalNeeded) :
+            base(character, ageToCompleteBy, desire)
         {
             Abilities = abilities;
             Attributes = attributes;
@@ -29,8 +29,8 @@ namespace WizardMonks.Decisions.Conditions
             _currentTotal = GetTotal();
         }
 
-        public AbilityScoreCondition(Character character, uint dueDate, double desire, Ability ability, double totalNeeded) :
-            base(character, dueDate, desire)
+        public AbilityScoreCondition(Character character, uint? ageToCompleteBy, double desire, Ability ability, double totalNeeded) :
+            base(character, ageToCompleteBy, desire)
         {
             Abilities = new List<Ability>(1);
             Abilities.Add(ability);
@@ -173,7 +173,7 @@ namespace WizardMonks.Decisions.Conditions
                     visType.Add(magicArt.Ability);
                     // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                     VisCondition visCondition =
-                        new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
+                        new VisCondition(mage, GetLowerOrderAgeToCompleteBy(-1), effectiveDesire, visType, visNeed, (ushort)(ConditionDepth + 1));
                     visCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }

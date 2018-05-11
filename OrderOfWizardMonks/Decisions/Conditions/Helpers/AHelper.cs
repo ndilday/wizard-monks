@@ -6,24 +6,33 @@ using System.Text;
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
 
-    public delegate double CalculateDesireFunc(double gain, ushort conditionDepth, uint timeToComplete);
+    public delegate double CalculateDesireFunc(double gain, ushort conditionDepth, uint timeToCompleteBy);
     public abstract class AHelper
     {
         protected CalculateDesireFunc _desireFunc;
 
         public Magus Mage { get; private set; }
-        public uint AgeToCompleteBy { get; set; }
+        public uint? AgeToCompleteBy { get; set; }
         public double Desire { get; set; }
         public ushort ConditionDepth { get; protected set; }
         public uint TimeUntilDue
         {
             get
             {
-                return AgeToCompleteBy - Mage.SeasonalAge;
+                if (AgeToCompleteBy == null)
+                {
+                    return 1;
+                }
+                return (uint)AgeToCompleteBy - Mage.SeasonalAge;
             }
         }
 
-        public AHelper(Magus mage, uint ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null)
+        protected uint? GetLowerOrderAgeToCompleteBy(short modifier)
+        {
+            return AgeToCompleteBy == null ? null : (uint?)((uint)AgeToCompleteBy + modifier);
+        }
+
+        public AHelper(Magus mage, uint? ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null)
         {
             Mage = mage;
             AgeToCompleteBy = ageToCompleteBy;

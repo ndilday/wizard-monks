@@ -16,7 +16,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private bool _allowVimVis;
         private double _magicLoreTotal;
 
-        public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVis, CalculateDesireFunc desireFunc) :
+        public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint? ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVis, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _visTypes = visTypes;

@@ -100,13 +100,16 @@
     <Compile Include="Core\Dice.cs" />
     <Compile Include="Economy.cs" />
     <Compile Include="Instances\Abilities.cs" />
+    <Compile Include="Instances\ExistingBooks.cs" />
     <Compile Include="Instances\Founders.cs" />
     <Compile Include="Decisions\Goals\GoalFactory.cs" />
+    <Compile Include="Instances\World.cs" />
     <Compile Include="Instances\MagicArts.cs" />
     <Compile Include="Houses.cs" />
     <Compile Include="Instances\SpellBases.cs" />
     <Compile Include="Instances\SpellModifiers.cs" />
     <Compile Include="Laboratory.cs" />
+    <Compile Include="Area.cs" />
     <Compile Include="Magus.cs" />
     <Compile Include="Core\Multiton.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

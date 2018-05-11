@@ -15,7 +15,13 @@ namespace WizardMonks.Instances
         public static Ability ParmaMagica { get; private set; }
         public static Ability Penetration { get; private set; }
         public static Ability Etiquette { get; private set; }
-        public static Ability AreaLore { get; private set; }
+        public static Ability FlorenceLore { get; private set; }
+        public static Ability RomeLore { get; private set; }
+        public static Ability GreeceLore { get; private set; }
+        public static Ability AlpineLore { get; private set; }
+        public static Ability BlackForestLore { get; private set; }
+        public static Ability EgyptLore { get; private set; }
+        public static Ability EphsusLore { get; private set; }
         public static Ability Athletics { get; private set; }
         public static Ability Awareness { get; private set; }
         public static Ability Brawl { get; private set; }
@@ -52,10 +58,10 @@ namespace WizardMonks.Instances
             ParmaMagica = new Ability(251, AbilityType.Arcane, "Parma Magica");
             Penetration = new Ability(252, AbilityType.Arcane, "Penetration");
             Finesse = new Ability(253, AbilityType.Arcane, "Finesse");
-            CodeOfHermes = new Ability(254, AbilityType.Arcane, "Code of Hermes");
+            Warping = new Ability(-1, AbilityType.Arcane, "Warping");
 
             Etiquette = new Ability(0, AbilityType.General, "Etiquette");
-            AreaLore = new Ability(1, AbilityType.General, "Area Lore");
+            CodeOfHermes = new Ability(1, AbilityType.General, "Code of Hermes");
             Concentration = new Ability(2, AbilityType.General, "Concentration");
             Teaching = new Ability(3, AbilityType.General, "Teaching");
             Scribing = new Ability(4, AbilityType.General, "Scribing");
@@ -71,14 +77,20 @@ namespace WizardMonks.Instances
             Survival = new Ability(14, AbilityType.General, "Survival");
             Swim = new Ability(15, AbilityType.General, "Swim");
 
-            Warping = new Ability(-1, AbilityType.Arcane, "Warping");
-
             EnigmaticWisdom = new Ability(150, AbilityType.Supernatural, "Enigmatic Wisdom");
             CriamonLore = new Ability(50, AbilityType.General, "Criamon Lore");
             Heartbeast = new Ability(151, AbilityType.Supernatural, "Heartbeast");
             BjornaerLore = new Ability(51, AbilityType.General, "Bjornaer Lore");
             MerinitaLore = new Ability(52, AbilityType.General, "Merinita Lore");
             VerditiusLore = new Ability(53, AbilityType.General, "Verditius Lore");
+
+            AlpineLore = new Ability(300, AbilityType.AreaLore, "Alpine Lore");
+            BlackForestLore = new Ability(301, AbilityType.AreaLore, "Black Forest Lore");
+            EgyptLore = new Ability(302, AbilityType.AreaLore, "Egypt Lore");
+            EphsusLore = new Ability(303, AbilityType.AreaLore, "Ephsus Lore");
+            FlorenceLore = new Ability(304, AbilityType.AreaLore, "Florence Lore");
+            GreeceLore = new Ability(305, AbilityType.AreaLore, "Greece Lore");
+            RomeLore = new Ability(306, AbilityType.AreaLore, "Rome Lore");
         }
 
         public static IEnumerable<Ability> GetEnumerator()
@@ -93,7 +105,13 @@ namespace WizardMonks.Instances
             yield return Finesse;
             yield return CodeOfHermes;
             yield return Etiquette;
-            yield return AreaLore;
+            yield return AlpineLore;
+            yield return BlackForestLore;
+            yield return EgyptLore;
+            yield return EphsusLore;
+            yield return FlorenceLore;
+            yield return GreeceLore;
+            yield return RomeLore;
             yield return Athletics;
             yield return Awareness;
             yield return Brawl;

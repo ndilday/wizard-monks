@@ -6,7 +6,7 @@ namespace WizardMonks.Decisions.Goals
     public class AbilityScoreGoal : AGoal
     {
         Ability _ability;
-        public AbilityScoreGoal(Character character, Ability ability, double level, double desire, uint ageToCompleteBy = 400) :
+        public AbilityScoreGoal(Character character, Ability ability, double level, double desire, uint? ageToCompleteBy = null) :
             base(character, desire, ageToCompleteBy)
         {
             _ability = ability;

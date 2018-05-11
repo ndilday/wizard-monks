@@ -30,7 +30,11 @@ namespace WizardMonks
         [DataMember]
         Art,
         [DataMember]
-        Language
+        Language,
+        [DataMember]
+        AreaLore,
+        [DataMember]
+        Profession
 	}
 
     public delegate void AbilityValueChangedEventHandler(object sender, EventArgs e);

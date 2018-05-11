@@ -10,7 +10,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private ArtPair _arts;
         public bool AllowVimVisUse { get; private set; }
 
-        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
+        public ArtIncreaseHelper(Magus mage, uint? ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _arts = arts;
@@ -29,8 +29,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 }
 
                 // increase either art through reading
-                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
-                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), _desireFunc);
                 techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
@@ -50,7 +50,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
-                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), AllowVimVisUse, _desireFunc);
+                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), AllowVimVisUse, _desireFunc);
 
                 // TODO: how do we decrement the cost of the vis?
             }

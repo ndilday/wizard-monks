@@ -17,6 +17,7 @@ namespace WizardMonks
         public sbyte PointsLost { get; private set; }
         public Character Character { get; private set; }
         public bool Died { get; private set; }
+        public Area CurrentLocation { get; private set; }
 
         public AgingEventArgs(Character character, bool crisis, bool apparent, bool death, string ability, sbyte lost)
         {

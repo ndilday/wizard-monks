@@ -8,7 +8,7 @@ namespace WizardMonks.Decisions.Conditions
     {
         private Magus _mage;
         HasAuraCondition _auraCondition;
-        public HasLabCondition(Magus magus, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(magus, ageToCompleteBy, desire, conditionDepth)
+        public HasLabCondition(Magus magus, uint? ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
             _auraCondition = new HasAuraCondition(_mage, ageToCompleteBy - 1, desire, (ushort)(conditionDepth + 1));

@@ -11,13 +11,36 @@ namespace WizardMonks
 	[Serializable]
 	public class IBook
 	{
+        private string _authorName;
+        private Character _author;
         public string Title { get; set; }
-        public Character Author { get; set; }
+        public Character Author
+        {
+            get
+            {
+                return _author;
+            }
+            set
+            {
+                _author = value;
+                if (_author != null)
+                {
+                    _authorName = value.Name;
+                }
+            }
+        }
         public string AuthorName
         {
             get
             {
-                return Author.Name;
+                return _authorName;
+            }
+            set
+            {
+                if(Author == null)
+                {
+                    _authorName = value;
+                }
             }
         }
 		public Ability Topic { get; set; }
@@ -50,7 +73,7 @@ namespace WizardMonks
             }
             Summa otherBook = (Summa)obj;
             return 
-                this.Author == otherBook.Author && 
+                this.AuthorName == otherBook.AuthorName && 
                 this.Level == otherBook.Level && 
                 this.Quality == otherBook.Quality && 
                 this.Title == otherBook.Title && 
@@ -59,7 +82,7 @@ namespace WizardMonks
 
         public override int GetHashCode()
         {
-            return this.Author.GetHashCode() ^ this.Level.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
+            return this.AuthorName.GetHashCode() ^ this.Level.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
         }
     }
 
@@ -85,7 +108,7 @@ namespace WizardMonks
             }
             Tractatus otherBook = (Tractatus)obj;
             return
-                this.Author == otherBook.Author &&
+                this.AuthorName == otherBook.AuthorName &&
                 this.Quality == otherBook.Quality &&
                 this.Title == otherBook.Title &&
                 this.Topic == otherBook.Topic;
@@ -93,7 +116,7 @@ namespace WizardMonks
 
         public override int GetHashCode()
         {
-            return this.Author.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
+            return this.AuthorName.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
         }
     }
 

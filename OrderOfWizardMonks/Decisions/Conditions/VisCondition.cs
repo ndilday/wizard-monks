@@ -18,14 +18,14 @@ namespace WizardMonks.Decisions.Conditions
         public List<Ability> VisTypes { get; private set; }
         public double AmountNeeded { get; private set; }
 
-        public VisCondition(Magus magus, uint ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded, ushort conditionDepth) :
+        public VisCondition(Magus magus, uint? ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded, ushort conditionDepth) :
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
             VisTypes = abilities;
             AmountNeeded = totalNeeded;
-            _auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
-            _labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
+            _auraCondition = new HasAuraCondition(_mage, GetLowerOrderAgeToCompleteBy(-2), Desire, (ushort)(ConditionDepth + 2));
+            _labCondition = new HasLabCondition(_mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1));
             _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
@@ -70,10 +70,10 @@ namespace WizardMonks.Decisions.Conditions
                     {
                         double currentDistillRate = _mage.GetVisDistillationRate();
                         double extractDesirability = GetDesirabilityOfVisGain(currentDistillRate, ConditionDepth, TimeUntilDue);
+                        log.Add("Extracting vis worth " + extractDesirability.ToString("0.00000"));
                         if (extractDesirability > 0.00001)
                         {
                             // we can get what we want in one season, go ahead and do it
-                            log.Add("Extracting vis worth " + extractDesirability.ToString("0.000"));
                             alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
                             if (currentDistillRate < _visStillNeeded)
@@ -85,18 +85,18 @@ namespace WizardMonks.Decisions.Conditions
                                 // is the effective value of raising skills
                                 double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                                 LabTotalIncreaseHelper helper =
-                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
+                                    new LabTotalIncreaseHelper(_mage, GetLowerOrderAgeToCompleteBy(-1), extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
                                 helper.AddActionPreferencesToList(alreadyConsidered, log);
                             }
                         }
                     }
                 }
                 // search for vis source
-                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_vimSufficient, GetDesirabilityOfVisGain);
+                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), !_vimSufficient, GetDesirabilityOfVisGain);
                 visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // consider writing a book to trade for vis
-                WritingHelper writingHelper = new WritingHelper(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
+                WritingHelper writingHelper = new WritingHelper(_mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
                 writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
@@ -146,14 +146,14 @@ namespace WizardMonks.Decisions.Conditions
         private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth, uint timeToComplete)
         {
             double proportion = visGain / _visStillNeeded;
-            double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
+            double immediateDesire = Desire / TimeUntilDue;
             return immediateDesire * proportion / (conditionDepth * timeToComplete);
         }
 
         private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth, uint timeToComplete)
         {
             double proportion = gain / _visStillNeeded;
-            double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
+            double immediateDesire = Desire / TimeUntilDue;
             return immediateDesire * proportion / (conditionDepth * timeToComplete);
         }
     }

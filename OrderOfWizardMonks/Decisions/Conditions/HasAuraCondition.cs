@@ -8,7 +8,7 @@ namespace WizardMonks.Decisions.Conditions
 {
     class HasAuraCondition : ACondition
     {
-        public HasAuraCondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(character, ageToCompleteBy, desire, conditionDepth)
+        public HasAuraCondition(Character character, uint? ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(character, ageToCompleteBy, desire, conditionDepth)
         {
 
         }
@@ -25,9 +25,10 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-                string startingLog = "Need to have an aura, desire " + Desire.ToString("0.0");
+                double effectiveDesire = this.Desire / (TimeUntilDue * ConditionDepth);
+                string startingLog = "Need to have an aura, desire " + effectiveDesire.ToString("0.0");
                 log.Add(startingLog);
-                FindAura findAuraAction = new FindAura(Abilities.AreaLore, this.Desire / (TimeUntilDue * ConditionDepth));
+                FindAura findAuraAction = new FindAura(Abilities.AreaLore, effectiveDesire);
                 alreadyConsidered.Add(findAuraAction);
                 log.Add(findAuraAction.Log());
             }

@@ -11,7 +11,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     /// </summary>
     class WritingHelper : AHelper
     {
-        public WritingHelper(Magus mage, uint ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
+        public WritingHelper(Magus mage, uint? ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
             base(mage, ageToCompleteBy, desire, conditionDepth, desireFunc)
         {
         }

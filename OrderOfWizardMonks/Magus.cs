@@ -56,10 +56,10 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, 80) { }
-        public Magus(uint age) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, age) { }
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseAge = 20)
-            : base(writingLanguage, writingAbility, areaAbility, baseAge)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, 80) { }
+        public Magus(uint age) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, age) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, uint baseAge = 20)
+            : base(writingLanguage, writingAbility, baseAge)
         {
             _magicAbility = magicAbility;
             Arts = new Arts();
@@ -575,7 +575,7 @@ namespace WizardMonks
         public double GetAverageAuraFound()
         {
             double auraCount = KnownAuras.Count;
-            double areaLore = GetAbility(Abilities.AreaLore).Value;
+            double areaLore = GetAbility(CurrentLocation.AreaLore).Value;
             areaLore += GetCastingTotal(MagicArtPairs.InVi) / 10;
             areaLore += GetAttribute(AttributeType.Perception).Value;
 

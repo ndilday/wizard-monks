@@ -17,7 +17,6 @@ namespace WizardMonks
         public sbyte PointsLost { get; private set; }
         public Character Character { get; private set; }
         public bool Died { get; private set; }
-        public Area CurrentLocation { get; private set; }
 
         public AgingEventArgs(Character character, bool crisis, bool apparent, bool death, string ability, sbyte lost)
         {
@@ -98,6 +97,7 @@ namespace WizardMonks
         #endregion
 
         #region Public Properties
+        public Area CurrentLocation { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
@@ -124,7 +124,7 @@ namespace WizardMonks
         public bool WantsToFollow { get; protected set; }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20)
+        public Character(Ability writingLanguage, Ability writingAbility, uint baseSeasonableAge = 20)
         {
             Die die = new Die();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
@@ -152,7 +152,6 @@ namespace WizardMonks
             _booksWritten = new List<IBook>();
             _booksOwned = new List<IBook>();
 
-            _areaAbility = areaAbility;
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
             _writingAbilities = new List<Ability>();

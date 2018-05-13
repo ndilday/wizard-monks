@@ -84,7 +84,7 @@ namespace WizardMonks.Instances
             Bjornaer.GetAbility(MagicArts.Mentem).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Terram).AddExperience(0);
             Bjornaer.GetAbility(MagicArts.Vim).AddExperience(0);
-            Bjornaer.GetAbility(Abilities.AreaLore).AddExperience(45);
+            Bjornaer.GetAbility(Abilities.RhineLore).AddExperience(45);
             Bjornaer.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Bjornaer.GetAbility(Abilities.English).AddExperience(75);
             Bjornaer.GetAbility(Abilities.Etiquette).AddExperience(0);
@@ -139,7 +139,6 @@ namespace WizardMonks.Instances
             Bonisgaus.GetAbility(MagicArts.Mentem).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Terram).AddExperience(0);
             Bonisgaus.GetAbility(MagicArts.Vim).AddExperience(55);
-            Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(0);
             Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Bonisgaus.GetAbility(Abilities.English).AddExperience(75);
             Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(45);
@@ -186,7 +185,7 @@ namespace WizardMonks.Instances
             Criamon.GetAbility(MagicArts.Mentem).AddExperience(0);
             Criamon.GetAbility(MagicArts.Terram).AddExperience(0);
             Criamon.GetAbility(MagicArts.Vim).AddExperience(15);
-            Criamon.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Criamon.GetAbility(Abilities.AlpineLore).AddExperience(30);
             Criamon.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Criamon.GetAbility(Abilities.English).AddExperience(75);
             Criamon.GetAbility(Abilities.Etiquette).AddExperience(15);
@@ -241,7 +240,7 @@ namespace WizardMonks.Instances
             Diedne.GetAbility(MagicArts.Mentem).AddExperience(6);
             Diedne.GetAbility(MagicArts.Terram).AddExperience(6);
             Diedne.GetAbility(MagicArts.Vim).AddExperience(6);
-            Diedne.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Diedne.GetAbility(Abilities.StonehengeLore).AddExperience(30);
             Diedne.GetAbility(Abilities.ArtesLiberales).AddExperience(0);
             Diedne.GetAbility(Abilities.English).AddExperience(75);
             Diedne.GetAbility(Abilities.Etiquette).AddExperience(15);
@@ -327,7 +326,7 @@ namespace WizardMonks.Instances
             Flambeau.GetAbility(MagicArts.Mentem).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Terram).AddExperience(0);
             Flambeau.GetAbility(MagicArts.Vim).AddExperience(0);
-            Flambeau.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Flambeau.GetAbility(Abilities.ProvencalLore).AddExperience(15);
             Flambeau.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Flambeau.GetAbility(Abilities.English).AddExperience(75);
             Flambeau.GetAbility(Abilities.Etiquette).AddExperience(30);
@@ -380,7 +379,7 @@ namespace WizardMonks.Instances
             Guernicus.GetAbility(MagicArts.Mentem).AddExperience(0);
             Guernicus.GetAbility(MagicArts.Terram).AddExperience(55);
             Guernicus.GetAbility(MagicArts.Vim).AddExperience(0);
-            Guernicus.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Guernicus.GetAbility(Abilities.AlpineLore).AddExperience(15);
             Guernicus.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Guernicus.GetAbility(Abilities.English).AddExperience(75);
             Guernicus.GetAbility(Abilities.Etiquette).AddExperience(30);
@@ -433,7 +432,7 @@ namespace WizardMonks.Instances
             Jerbiton.GetAbility(MagicArts.Mentem).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Terram).AddExperience(0);
             Jerbiton.GetAbility(MagicArts.Vim).AddExperience(0);
-            Jerbiton.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Jerbiton.GetAbility(Abilities.AlpineLore).AddExperience(15);
             Jerbiton.GetAbility(Abilities.ArtesLiberales).AddExperience(50);
             Jerbiton.GetAbility(Abilities.English).AddExperience(75);
             Jerbiton.GetAbility(Abilities.Etiquette).AddExperience(30);
@@ -489,7 +488,7 @@ namespace WizardMonks.Instances
             Mercere.GetAbility(MagicArts.Mentem).AddExperience(55);
             Mercere.GetAbility(MagicArts.Terram).AddExperience(0);
             Mercere.GetAbility(MagicArts.Vim).AddExperience(1);
-            Mercere.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Mercere.GetAbility(Abilities.RomeLore).AddExperience(30);
             Mercere.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Mercere.GetAbility(Abilities.English).AddExperience(75);
             Mercere.GetAbility(Abilities.Etiquette).AddExperience(30);
@@ -539,7 +538,7 @@ namespace WizardMonks.Instances
             Merinita.GetAbility(MagicArts.Mentem).AddExperience(0);
             Merinita.GetAbility(MagicArts.Terram).AddExperience(15);
             Merinita.GetAbility(MagicArts.Vim).AddExperience(0);
-            Merinita.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Merinita.GetAbility(Abilities.RhineLore).AddExperience(15);
             Merinita.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Merinita.GetAbility(Abilities.English).AddExperience(75);
             Merinita.GetAbility(Abilities.Etiquette).AddExperience(15);
@@ -604,7 +603,7 @@ namespace WizardMonks.Instances
             Tremere.GetAbility(MagicArts.Mentem).AddExperience(0);
             Tremere.GetAbility(MagicArts.Terram).AddExperience(0);
             Tremere.GetAbility(MagicArts.Vim).AddExperience(0);
-            Tremere.GetAbility(Abilities.AreaLore).AddExperience(0);
+            Tremere.GetAbility(Abilities.RomeLore).AddExperience(0);
             Tremere.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
             Tremere.GetAbility(Abilities.English).AddExperience(75);
             Tremere.GetAbility(Abilities.Etiquette).AddExperience(5);
@@ -654,7 +653,7 @@ namespace WizardMonks.Instances
             Tytalus.GetAbility(MagicArts.Mentem).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Terram).AddExperience(0);
             Tytalus.GetAbility(MagicArts.Vim).AddExperience(0);
-            Tytalus.GetAbility(Abilities.AreaLore).AddExperience(30);
+            Tytalus.GetAbility(Abilities.RomeLore).AddExperience(30);
             Tytalus.GetAbility(Abilities.ArtesLiberales).AddExperience(5);
             Tytalus.GetAbility(Abilities.English).AddExperience(75);
             Tytalus.GetAbility(Abilities.Etiquette).AddExperience(15);
@@ -710,7 +709,7 @@ namespace WizardMonks.Instances
             Verditius.GetAbility(MagicArts.Mentem).AddExperience(0);
             Verditius.GetAbility(MagicArts.Terram).AddExperience(15);
             Verditius.GetAbility(MagicArts.Vim).AddExperience(15);
-            Verditius.GetAbility(Abilities.AreaLore).AddExperience(15);
+            Verditius.GetAbility(Abilities.RomeLore).AddExperience(15);
             Verditius.GetAbility(Abilities.ArtesLiberales).AddExperience(30);
             Verditius.GetAbility(Abilities.English).AddExperience(75);
             Verditius.GetAbility(Abilities.Etiquette).AddExperience(30);

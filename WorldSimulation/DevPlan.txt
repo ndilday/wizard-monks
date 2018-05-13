@@ -1,0 +1,19 @@
+﻿
+3) personalities which impact decision-making
+4) certamen
+5) wizard's war
+6) apprentice gauntlet
+9) enchantment
+10) lab specialization
+11) Grand Tribunals
+12) imperfect information
+
+0) Geography
+	1) Have characters and coventants exist in an area
+	2) update aura finding logic to take into account number of auras in area
+1) scripted behavior
+2) procedurally generated founding
+	2) Experimentation?
+	3) Mysteries?
+	4) Virtues/flaws?
+3) Prestige + Reputation

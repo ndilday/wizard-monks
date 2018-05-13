@@ -9,9 +9,9 @@ namespace WizardMonks.Instances
 {
     public class CharacterFactory
     {
-        public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility, Ability areaAbility)
+        public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility)
         {
-            Character character = new Character(langAbility, writingAbility, areaAbility);
+            Character character = new Character(langAbility, writingAbility);
             NormalizeAttributes(character);
 
             return character;
@@ -29,16 +29,16 @@ namespace WizardMonks.Instances
             character.GetAttribute(AttributeType.Communication).BaseValue = Die.Instance.RollNormal();
         }
 
-        public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
+        public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility)
         {
-            Magus magus = new Magus(magicAbility, langAbility, writingAbility, areaAbility);
+            Magus magus = new Magus(magicAbility, langAbility, writingAbility);
             NormalizeAttributes(magus);
             return magus;
         }
 
-        public static Magus GenerateNewApprentice()
+        public static Magus GenerateNewApprentice(Area location)
         {
-            Magus magus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            Magus magus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales);
             NormalizeAttributes(magus);
             magus.GetAbility(Abilities.English).AddExperience(75);
             // randomly assign 45 points to childhood skills in 5 point blocks
@@ -50,7 +50,7 @@ namespace WizardMonks.Instances
                 switch (Die.Instance.RollSimpleDie())
                 {
                     case 1:
-                        charAbility = magus.GetAbility(Abilities.AreaLore);
+                        charAbility = magus.GetAbility(location.AreaLore);
                         break;
                     case 2:
                         charAbility = magus.GetAbility(Abilities.Athletics);

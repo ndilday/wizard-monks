@@ -340,9 +340,12 @@ namespace WizardMonks
     [Serializable]
     public class FindAura : ExposingAction
     {
-        public FindAura(Ability exposureAbility, double desire)
+        public Area Location { get; private set; }
+
+        public FindAura(Area location, Ability exposureAbility, double desire)
             : base(exposureAbility, desire)
         {
+            Location = location;
             Action = Activity.FindAura;
         }
 
@@ -372,7 +375,7 @@ namespace WizardMonks
         {
             // add bonus to area lore equal to casting total div 10?
             // TODO: once spells are implemented, increase finding chances based on aura-detection spells
-            double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
+            double areaLore = mage.GetAbility(Location.AreaLore).Value;
             areaLore += mage.GetAttribute(AttributeType.Perception).Value;
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             double roll = Die.Instance.RollDouble() * 5;
@@ -438,7 +441,7 @@ namespace WizardMonks
             if (roll > 12)
             {
                 mage.Log.Add("Apprentice found");
-                mage.TakeApprentice(CharacterFactory.GenerateNewApprentice());
+                mage.TakeApprentice(CharacterFactory.GenerateNewApprentice(mage.CurrentLocation));
                 mage.Apprentice.Name = "Apprentice filius " + mage.Name;
             }
             // TODO: gradual reduction in chance?

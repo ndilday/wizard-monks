@@ -28,7 +28,7 @@ namespace WizardMonks.Decisions.Conditions
                 double effectiveDesire = this.Desire / (TimeUntilDue * ConditionDepth);
                 string startingLog = "Need to have an aura, desire " + effectiveDesire.ToString("0.0");
                 log.Add(startingLog);
-                FindAura findAuraAction = new FindAura(Abilities.AreaLore, effectiveDesire);
+                FindAura findAuraAction = new FindAura(Character.CurrentLocation, Character.CurrentLocation.AreaLore, effectiveDesire);
                 alreadyConsidered.Add(findAuraAction);
                 log.Add(findAuraAction.Log());
             }

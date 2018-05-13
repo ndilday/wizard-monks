@@ -8,16 +8,18 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class FindNewAuraHelper : AHelper
     {
+        private Area _location;
         private bool _allowVimVisUse;
         private int _auraCount;
         private double _currentAura;
         private double _currentScore;
         //private double _currentDesire;
 
-        public FindNewAuraHelper(Magus mage, uint? ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
+        public FindNewAuraHelper(Magus mage, Area location, uint? ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVisUse, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _allowVimVisUse = allowVimVisUse;
+            _location = location;
         }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
@@ -35,15 +37,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
             if (desire > 0.00001)
             {
-                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+                alreadyConsidered.Add(new FindAura(_location, _location.AreaLore, desire));
 
                 // consider the value of increasing find aura related scores
                 //practice area lore
-                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                PracticeHelper areaLorePracticeHelper = new PracticeHelper(_location.AreaLore, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore
-                ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                ReadingHelper readAreaLoreHelper = new ReadingHelper(_location.AreaLore, Mage, GetLowerOrderAgeToCompleteBy(-1), Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
                 // consider value of increasing InVi casting total
                 CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, GetLowerOrderAgeToCompleteBy(-1), Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVisUse, _desireFunc);
@@ -52,7 +54,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         private double CalculateFindAuraScore()
         {
-            double areaLore = Mage.GetAbility(Abilities.AreaLore).Value;
+            double areaLore = Mage.GetAbility(_location.AreaLore).Value;
             areaLore += Mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             areaLore += Mage.GetAttribute(AttributeType.Perception).Value;
             return areaLore;

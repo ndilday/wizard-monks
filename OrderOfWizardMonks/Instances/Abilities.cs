@@ -9,12 +9,7 @@ namespace WizardMonks.Instances
     {
         public static Ability English { get; private set; }
         public static Ability Latin { get; private set; }
-        public static Ability MagicTheory { get; private set; }
-        public static Ability Finesse { get; private set; }
-        public static Ability ArtesLiberales { get; private set; }
-        public static Ability ParmaMagica { get; private set; }
-        public static Ability Penetration { get; private set; }
-        public static Ability Etiquette { get; private set; }
+
         public static Ability FlorenceLore { get; private set; }
         public static Ability RomeLore { get; private set; }
         public static Ability GreeceLore { get; private set; }
@@ -22,6 +17,24 @@ namespace WizardMonks.Instances
         public static Ability BlackForestLore { get; private set; }
         public static Ability EgyptLore { get; private set; }
         public static Ability EphsusLore { get; private set; }
+        public static Ability HibernianLore { get; private set; }
+        public static Ability IberianLore { get; private set; }
+        public static Ability LevantineLore { get; private set; }
+        public static Ability LochLegeanLore { get; private set; }
+        public static Ability NormandyLore { get; private set; }
+        public static Ability NovgorodLore { get; private set; }
+        public static Ability ProvencalLore { get; private set; }
+        public static Ability RhineLore { get; private set; }
+        public static Ability StonehengeLore { get; private set; }
+        public static Ability ThebianLore { get; private set; }
+        public static Ability TransylvanianLore { get; private set; }
+
+        public static Ability MagicTheory { get; private set; }
+        public static Ability Finesse { get; private set; }
+        public static Ability ArtesLiberales { get; private set; }
+        public static Ability ParmaMagica { get; private set; }
+        public static Ability Penetration { get; private set; }
+        public static Ability Etiquette { get; private set; }
         public static Ability Athletics { get; private set; }
         public static Ability Awareness { get; private set; }
         public static Ability Brawl { get; private set; }
@@ -90,7 +103,18 @@ namespace WizardMonks.Instances
             EphsusLore = new Ability(303, AbilityType.AreaLore, "Ephsus Lore");
             FlorenceLore = new Ability(304, AbilityType.AreaLore, "Florence Lore");
             GreeceLore = new Ability(305, AbilityType.AreaLore, "Greece Lore");
-            RomeLore = new Ability(306, AbilityType.AreaLore, "Rome Lore");
+            HibernianLore = new Ability(306, AbilityType.AreaLore, "Hibernian Lore");
+            IberianLore = new Ability(307, AbilityType.AreaLore, "Iberian Lore");
+            LevantineLore = new Ability(308, AbilityType.AreaLore, "Levantine Lore");
+            LochLegeanLore = new Ability(309, AbilityType.AreaLore, "Loch Legean Lore");
+            NormandyLore = new Ability(310, AbilityType.AreaLore, "Normandy Lore");
+            NovgorodLore = new Ability(311, AbilityType.AreaLore, "Novgorod Lore");
+            ProvencalLore = new Ability(312, AbilityType.AreaLore, "Provencal Lore");
+            RhineLore = new Ability(313, AbilityType.AreaLore, "Rhine Lore");
+            RomeLore = new Ability(314, AbilityType.AreaLore, "Rome Lore");
+            StonehengeLore = new Ability(315, AbilityType.AreaLore, "Stonehenge Lore");
+            ThebianLore = new Ability(316, AbilityType.AreaLore, "Thebian Lore");
+            TransylvanianLore = new Ability(317, AbilityType.AreaLore, "Transylvanian Lore");
         }
 
         public static IEnumerable<Ability> GetEnumerator()
@@ -111,7 +135,15 @@ namespace WizardMonks.Instances
             yield return EphsusLore;
             yield return FlorenceLore;
             yield return GreeceLore;
+            yield return HibernianLore;
+            yield return IberianLore;
+            yield return LochLegeanLore;
+            yield return NormandyLore;
+            yield return NovgorodLore;
+            yield return ProvencalLore;
+            yield return RhineLore;
             yield return RomeLore;
+            yield return StonehengeLore;
             yield return Athletics;
             yield return Awareness;
             yield return Brawl;

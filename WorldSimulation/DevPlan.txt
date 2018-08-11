@@ -7,13 +7,18 @@
 10) lab specialization
 11) Grand Tribunals
 12) imperfect information
+13) expanded book rules
 
-0) Geography
-	1) Have characters and coventants exist in an area
+
+1) Geography
+	DONE 1) Have characters and coventants exist in an area
 	2) update aura finding logic to take into account number of auras in area
-1) scripted behavior
-2) procedurally generated founding
-	2) Experimentation?
-	3) Mysteries?
+2) scripted behavior
+3) procedurally generated founding
+	1) Separation of book instances/copies from original text
+	1) Experimentation
+	2) Breakthroughs
+	3) Mysteries
 	4) Virtues/flaws?
-3) Prestige + Reputation
+
+4) Prestige + Reputation

@@ -589,16 +589,10 @@ namespace WizardMonks
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                s = new Summa()
-                {
-                    Author = this,
-                    Level = desiredLevel,
-                    Topic = topic,
-                    Title = name,
-                    Quality = MagicArts.IsArt(ability.Ability) ?
+                double quality = MagicArts.IsArt(ability.Ability) ?
                         this.GetAttribute(AttributeType.Communication).Value + difference + 6 :
-                        this.GetAttribute(AttributeType.Communication).Value + (difference * 3) + 6
-                };
+                        this.GetAttribute(AttributeType.Communication).Value + (difference * 3) + 6;
+                s = new Summa(name, this, topic, quality, desiredLevel, Abilities.Latin);
             }
             else
             {

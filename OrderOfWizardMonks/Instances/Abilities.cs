@@ -23,6 +23,7 @@ namespace WizardMonks.Instances
         public static Ability LochLegeanLore { get; private set; }
         public static Ability NormandyLore { get; private set; }
         public static Ability NovgorodLore { get; private set; }
+        public static Ability PersiaLore { get; private set; }
         public static Ability ProvencalLore { get; private set; }
         public static Ability RhineLore { get; private set; }
         public static Ability StonehengeLore { get; private set; }
@@ -109,6 +110,7 @@ namespace WizardMonks.Instances
             LochLegeanLore = new Ability(309, AbilityType.AreaLore, "Loch Legean Lore");
             NormandyLore = new Ability(310, AbilityType.AreaLore, "Normandy Lore");
             NovgorodLore = new Ability(311, AbilityType.AreaLore, "Novgorod Lore");
+            PersiaLore = new Ability(312, AbilityType.AreaLore, "Persia Lore");
             ProvencalLore = new Ability(312, AbilityType.AreaLore, "Provencal Lore");
             RhineLore = new Ability(313, AbilityType.AreaLore, "Rhine Lore");
             RomeLore = new Ability(314, AbilityType.AreaLore, "Rome Lore");
@@ -140,6 +142,7 @@ namespace WizardMonks.Instances
             yield return LochLegeanLore;
             yield return NormandyLore;
             yield return NovgorodLore;
+            yield return PersiaLore;
             yield return ProvencalLore;
             yield return RhineLore;
             yield return RomeLore;

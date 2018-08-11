@@ -115,7 +115,7 @@ namespace WizardMonks
 
         public Covenant FoundCovenant(Aura aura)
         {
-            Covenant coventant = new Covenant(aura);
+            Covenant coventant = new Covenant("Covenant of " + Name, CurrentLocation, aura);
             Join(coventant);
             return coventant;
         }
@@ -247,14 +247,7 @@ namespace WizardMonks
                             if (writingValue > currentBestBookValue)
                             {
                                 // write this summa
-                                bestBook = new Summa
-                                {
-                                    Quality = q,
-                                    Level = l,
-                                    Topic = bookDesire.Ability,
-                                    Title = bookDesire.Ability.AbilityName + " Summa for Dummies by " + Name,
-                                    Value = writingValue
-                                };
+                                bestBook = new Summa(bookDesire.Ability.AbilityName + " Summa for Dummies by " + Name, this, bookDesire.Ability, q, l, Abilities.Latin);
                                 currentBestBookValue = writingValue;
                             }
                         }

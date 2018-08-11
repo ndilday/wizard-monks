@@ -38,6 +38,12 @@ namespace WizardMonks.Instances
             NovgorodTribunal = new Area("Novgorod Tribunal", Abilities.NovgorodLore);
             LevantineTribunal = new Area("Levantine Tribunal", Abilities.LevantineLore);
             EverywhereElse = new Area("", null);
+            LevantineTribunal.SubAreas.Add(new Area("Persia", Abilities.PersiaLore, LevantineTribunal));
+            RhineTribunal.SubAreas.Add(new Area("Black Forest", Abilities.BlackForestLore, RhineTribunal));
+            RomanTribunal.SubAreas.Add(new Area("Florence", Abilities.FlorenceLore, RomanTribunal));
+            ThebianTribunal.SubAreas.Add(new Area("Greece", Abilities.GreeceLore, ThebianTribunal));
+            ThebianTribunal.SubAreas.Add(new Area("Ephesus", Abilities.EphsusLore, ThebianTribunal));
+            EverywhereElse.SubAreas.Add(new Area("Egypt", Abilities.EgyptLore, EverywhereElse));
         }
 
         public static IEnumerable<Area> GetEnumerator()

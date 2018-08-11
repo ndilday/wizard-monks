@@ -54,11 +54,35 @@ namespace WizardMonks
 		public double Quality { get; set; }
 		public virtual double Level { get; set; }
         public double Value { get; set; }
+        public Ability Language { get; set; }
+        public IBook OriginalBook { get; set; }
 	}
 
 	[Serializable]
 	public class Summa : IBook
 	{
+        public Summa(string title, string authorName, Ability topic, double quality, double level, Ability language, IBook originalBook = null)
+        {
+            AuthorName = authorName;
+            Title = title;
+            Topic = topic;
+            Quality = quality;
+            Level = level;
+            Language = language;
+            OriginalBook = originalBook;
+        }
+
+        public Summa(string title, Character author, Ability topic, double quality, double level, Ability language, IBook originalBook = null)
+        {
+            Author = author;
+            Title = title;
+            Topic = topic;
+            Quality = quality;
+            Level = level;
+            Language = language;
+            OriginalBook = originalBook;
+        }
+
         public double GetWritingPointsNeeded()
         {
             return MagicArts.IsArt(Topic) ? Level : Level * 5;

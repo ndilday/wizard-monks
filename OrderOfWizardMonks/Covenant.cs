@@ -7,26 +7,20 @@ using WizardMonks.Instances;
 namespace WizardMonks
 {
 	[Serializable]
-	public class Covenant
+	public class Covenant : Area
 	{
 		protected List<Magus> _magi;
 		protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<IBook> _library;
         public Aura Aura { get; private set; }
-        public string Name { get; set; }
 
-        public Covenant()
+        public Covenant(string name, Area location, Aura aura = null) : base(name, location.AreaLore, location) 
         {
             _magi = new List<Magus>();
             _visSources = new Dictionary<Ability, double>();
             _visStock = new Dictionary<Ability, double>();
             _library = new List<IBook>();
-            Aura = null;
-        }
-
-        public Covenant(Aura aura) : this()
-        {
             Aura = aura;
         }
 

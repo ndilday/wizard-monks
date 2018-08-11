@@ -5,7 +5,13 @@ using System.Text;
 
 namespace WizardMonks.Instances
 {
-    class ExistingBooks
+    public static class ExistingBooks
     {
+        public static Summa ArsGrammatica;
+
+        static ExistingBooks()
+        {
+            ArsGrammatica = new Summa("Ars Grammatica - Ars Minor", "Donatus", Abilities.ArtesLiberales, 15, 4, Abilities.Latin);
+        }
     }
 }

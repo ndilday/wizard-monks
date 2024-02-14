@@ -664,19 +664,19 @@ namespace WizardMonks.Instances
             Tytalus.GetAbility(Abilities.Penetration).AddExperience(30);
             Tytalus.GetAbility(Abilities.Concentration).AddExperience(15);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Tremere, null, 1, MagicArts.Rego, 20);
+            AbilityScoreGoal goal = new AbilityScoreGoal(Tytalus, null, 1, MagicArts.Rego, 20);
             Tytalus.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Tremere, null, 1, MagicArts.Mentem, 10);
+            goal = new AbilityScoreGoal(Tytalus, null, 1, MagicArts.Mentem, 10);
             Tytalus.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Tremere, null, 1, Abilities.Penetration, 5);
+            goal = new AbilityScoreGoal(Tytalus, null, 1, Abilities.Penetration, 5);
             Tytalus.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Tremere, null, 1, Abilities.Finesse, 5);
+            goal = new AbilityScoreGoal(Tytalus, null, 1, Abilities.Finesse, 5);
             Tytalus.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Tremere, null, 1);
+            ApprenticeGoal app = new ApprenticeGoal(Tytalus, null, 1);
             Tytalus.AddGoal(app);
         }
 

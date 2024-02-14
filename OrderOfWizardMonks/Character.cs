@@ -46,22 +46,9 @@ namespace WizardMonks
         public double GetAttributeValue(AttributeType attributeType)
         {
             double value = _attributes[(short)attributeType].Value;
-            // TODO: make less stair-step
-            if (SeasonalAge <= 28)
+            if(SeasonalAge < 60)
             {
-                return value - 4.0;
-            }
-            else if (SeasonalAge <= 36)
-            {
-                return value - 3.0;
-            }
-            else if (SeasonalAge <= 44)
-            {
-                return value - 2.0;
-            }
-            else if (SeasonalAge <= 52)
-            {
-                return value - 1.0;
+                return value - ((60 - SeasonalAge) / 8.0);
             }
             else
             {
@@ -77,6 +64,7 @@ namespace WizardMonks
         protected Ability _writingLanguage;
         protected Ability _areaAbility;
         protected List<IGoal> _goals;
+        protected List<string> _verboseLog;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
@@ -150,6 +138,7 @@ namespace WizardMonks
             _booksRead = new List<IBook>();
             _booksWritten = new List<IBook>();
             _booksOwned = new List<IBook>();
+            _verboseLog = new List<string>();
 
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
@@ -334,14 +323,13 @@ namespace WizardMonks
             else
             {
                 ConsideredActions actions = new ConsideredActions();
+                _verboseLog.Add("----------");
                 foreach (IGoal goal in _goals)
                 {
                     if (!goal.IsComplete())
                     {
-                        // TODO: it should probably be an error case for a goal to still be here
-                        // for now, ignore
-                        List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, dummy);
+                        //List<string> dummy = new List<string>();
+                        goal.AddActionPreferencesToList(actions, _verboseLog);
                     }
                 }
                 Log.AddRange(actions.Log());
@@ -466,6 +454,7 @@ namespace WizardMonks
 
         public virtual IBook GetBestBookToRead(Ability ability)
         {
+            // TODO: take into account the level cap of a summa
             return ReadableBooks.Where(b => b.Topic == ability).OrderByDescending(b => b.Quality).FirstOrDefault();
         }
 

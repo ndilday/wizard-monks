@@ -167,6 +167,8 @@ namespace WizardMonks
                 // if we already have a suitable book for this topic, let's not try to write another
                 if (unneededBookTopics.Contains(bookDesire.Ability)) continue;
                 // check to see if we could even write a summa of a level that would meet this desire
+                // TODO: make sure our book level is sufficiently higher than the current level that our quality will be worthwhile
+
                 if (GetAbility(bookDesire.Ability).Value > bookDesire.CurrentLevel * 2)
                 {
                     CharacterAbility buyerAbility = new CharacterAbility(bookDesire.Ability);
@@ -207,6 +209,7 @@ namespace WizardMonks
                             {
                                 // continue writing this summa
                                 bestBook = incompleteBook;
+                                currentBestBookValue = writingValue;
                             }
                         }
                     }
@@ -252,7 +255,7 @@ namespace WizardMonks
                                     Quality = q,
                                     Level = l,
                                     Topic = bookDesire.Ability,
-                                    Title = bookDesire.Ability.AbilityName + " Summa for Dummies by " + Name,
+                                    Title = bookDesire.Ability.AbilityName + l.ToString() + " Summa for Dummies by " + Name,
                                     Value = writingValue
                                 };
                                 currentBestBookValue = writingValue;
@@ -366,14 +369,15 @@ namespace WizardMonks
             else
             {
                 ConsideredActions actions = new ConsideredActions();
+                _verboseLog.Add("----------");
                 foreach (IGoal goal in _goals)
                 {
                     if (!goal.IsComplete())
                     {
                         // TODO: it should probably be an error case for a goal to still be here
                         // for now, ignore
-                        List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, dummy);
+                        //List<string> dummy = new List<string>();
+                        goal.AddActionPreferencesToList(actions, _verboseLog);
                     }
                 }
                 Log.AddRange(actions.Log());

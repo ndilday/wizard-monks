@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using WizardMonks.Core;
 using WizardMonks.Instances;
@@ -257,7 +255,15 @@ namespace WizardMonks
             IBook book = character.WriteBook(Topic, Name, Exposure, Level);
             if (book != null)
             {
-                character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.000"));
+                if(Level == 0) 
+                {
+                    character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.0"));
+                }
+                else
+                {
+                    character.Log.Add("Wrote " + book.Title + ": Q" + book.Quality.ToString("0.0") + ", L" + book.Level.ToString("0.0"));
+                }
+                
             }
             else
             {

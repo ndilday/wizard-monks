@@ -699,7 +699,7 @@
             this.lstLog.FormattingEnabled = true;
             this.lstLog.Location = new System.Drawing.Point(515, 51);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(281, 576);
+            this.lstLog.Size = new System.Drawing.Size(362, 576);
             this.lstLog.TabIndex = 25;
             this.lstLog.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lstLog_MouseMove);
             // 
@@ -1041,7 +1041,7 @@
             this.Title.MinimumWidth = 40;
             this.Title.Name = "Title";
             this.Title.ReadOnly = true;
-            this.Title.Width = 50;
+            this.Title.Width = 52;
             // 
             // Topic
             // 
@@ -1052,7 +1052,7 @@
             this.Topic.MinimumWidth = 40;
             this.Topic.Name = "Topic";
             this.Topic.ReadOnly = true;
-            this.Topic.Width = 57;
+            this.Topic.Width = 59;
             // 
             // Author
             // 
@@ -1063,7 +1063,7 @@
             this.Author.MinimumWidth = 40;
             this.Author.Name = "Author";
             this.Author.ReadOnly = true;
-            this.Author.Width = 61;
+            this.Author.Width = 63;
             // 
             // Quality
             // 
@@ -1074,13 +1074,13 @@
             this.Quality.MinimumWidth = 40;
             this.Quality.Name = "Quality";
             this.Quality.ReadOnly = true;
-            this.Quality.Width = 62;
+            this.Quality.Width = 64;
             // 
             // CharacterSheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(808, 632);
+            this.ClientSize = new System.Drawing.Size(889, 632);
             this.Controls.Add(this.dgvBooks);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.lstLog);

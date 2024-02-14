@@ -119,10 +119,11 @@ namespace WizardMonks.Decisions.Conditions
             List<BookDesire> bookDesires = new List<BookDesire>();
             if (!ConditionFulfilled)
             {
-                foreach (Ability visType in this.VisTypes)
+                // books won't help us get the vis we want, will they?
+                /*foreach (Ability visType in this.VisTypes)
                 {
                     bookDesires.Add(new BookDesire(visType, this.Character.GetAbility(visType).Value));
-                }
+                }*/
                 // add an interest in MagicLore here, just to have it somewhere?
                 bookDesires.Add(new BookDesire(Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
             }

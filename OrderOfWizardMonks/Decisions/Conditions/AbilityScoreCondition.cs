@@ -156,13 +156,13 @@ namespace WizardMonks.Decisions.Conditions
                 // if so, assume vis will return an average of 6XP + aura
                 if (stockpile > visNeed)
                 {
-                    log.Add(mage.Name + "Studying " + visNeed.ToString() + "/" + stockpile.ToString() + " vis for " + magicArt.Ability.AbilityName + ability.AbilityName + " worth " + effectiveDesire.ToString("0.000"));
+                    log.Add(mage.Name + "Studying vis for " + magicArt.Ability.AbilityName + ability.AbilityName + " worth " + effectiveDesire.ToString("0.000"));
                     VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
                     alreadyConsidered.Add(visStudy);
                     // TODO: how do we decrement the cost of the vis?
                 }
                 // putting a limit here to how far the circular loop will go
-                else if (ConditionDepth <= 10)
+                else if (ConditionDepth <= 10 && AgeToCompleteBy - 1 > mage.SeasonalAge)
                 {
                     List<Ability> visType = new List<Ability>();
                     visType.Add(magicArt.Ability);
@@ -176,9 +176,11 @@ namespace WizardMonks.Decisions.Conditions
 
         private double GetDesirabilityOfIncrease(double increase)
         {
-            double proportion = increase / (TotalNeeded - _currentTotal);
+            // TODO: temporarily seeing how logic changes if we stop reducing desire based on how far away we are from the desire
+            // since this has had the impact of making people want to keep practicing a particular thing once they start doing it
+            //double proportion = increase / (TotalNeeded - _currentTotal);
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
-            return immediateDesire * proportion / ConditionDepth;
+            return immediateDesire * increase / ConditionDepth;
         }
     }
 }

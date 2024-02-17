@@ -847,8 +847,8 @@ namespace WizardMonks
                 throw new ArgumentNullException("Magi can only extract vis in an aura!");
             }
             double amount = mage.GetVisDistillationRate();
-            mage.Log.Add("Extracted " + amount.ToString("0.000") + " pawns of vis from aura");
-            mage.Covenant.AddVis(MagicArts.Vim, amount);
+            mage.Log.Add("Extracted " + amount.ToString("0.00") + " pawns of vis from aura");
+            mage.GainVis(MagicArts.Vim, amount);
         }
 
         public override bool Matches(IAction action)
@@ -915,7 +915,7 @@ namespace WizardMonks
 
         protected override void DoMageAction(Magus mage)
         {
-            // TODO: we may want to do the check here as well to be safe
+            // we may want to do the check here as well to be safe
             mage.RefineLaboratory();
         }
 

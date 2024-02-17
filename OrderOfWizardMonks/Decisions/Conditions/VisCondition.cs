@@ -68,7 +68,7 @@ namespace WizardMonks.Decisions.Conditions
                             log.Add("Extracting vis worth " + extractDesirability.ToString("0.000"));
                             alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
 
-                            if (currentDistillRate < _visStillNeeded)
+                            if (currentDistillRate < _visStillNeeded && AgeToCompleteBy -1 > _mage.SeasonalAge)
                             {
                                 // we are in the multi-season-to-fulfill scenario
 

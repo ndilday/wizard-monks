@@ -454,8 +454,8 @@ namespace WizardMonks
 
         public virtual IBook GetBestBookToRead(Ability ability)
         {
-            // TODO: take into account the level cap of a summa
-            return ReadableBooks.Where(b => b.Topic == ability).OrderByDescending(b => b.Quality).FirstOrDefault();
+            // TODO: may eventually want to take into account reading a slower summa before a higher quality tractatus?
+            return ReadableBooks.Where(b => b.Topic == ability).OrderByDescending(b => GetBookLevelGain(b)).FirstOrDefault();
         }
 
         public virtual IEnumerable<IBook> GetUnneededBooksFromCollection()
@@ -481,6 +481,7 @@ namespace WizardMonks
 
         public double RateLifetimeBookValue(IBook book, CharacterAbilityBase charAbility = null)
         {
+            // see if it's a tractatus
             if (book.Level == 1000)
             {
                 return RateSeasonalExperienceGain(book.Topic, book.Quality);
@@ -490,14 +491,26 @@ namespace WizardMonks
                 charAbility = GetAbility(book.Topic);
             }
 
+            // if this book is beneath me, don't pay for it
             if (charAbility.Value >= book.Level)
             {
                 return 0;
             }
-            
+
+            //TODO: see if we already have a summa on this topic
+            IBook existingBook = GetBestBookToRead(book.Topic);
             double expValue = charAbility.GetExperienceUntilLevel(book.Level);
             double bookSeasons = expValue / book.Quality;
-            return RateSeasonalExperienceGain(book.Topic, book.Quality) * bookSeasons;
+
+            if (existingBook != null)
+            {
+                // for now, rate it in terms of marginal value difference
+                return (RateSeasonalExperienceGain(book.Topic, book.Quality) - RateSeasonalExperienceGain(existingBook.Topic, existingBook.Quality)) * bookSeasons;
+            }
+            else
+            {
+                return RateSeasonalExperienceGain(book.Topic, book.Quality) * bookSeasons;
+            }
         }
 
         public virtual void ReadBook(IBook book)

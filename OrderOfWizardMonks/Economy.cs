@@ -75,6 +75,11 @@ namespace WizardMonks
         {
             return Ability.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"{Ability.ToString()} {CurrentLevel.ToString()}";
+        }
     }
 
     public class BookForTrade

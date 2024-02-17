@@ -255,7 +255,7 @@ namespace WizardMonks
                                     Quality = q,
                                     Level = l,
                                     Topic = bookDesire.Ability,
-                                    Title = bookDesire.Ability.AbilityName + l.ToString() + " Summa for Dummies by " + Name,
+                                    Title = bookDesire.Ability.AbilityName + l.ToString("0.0") + " Summa " + SeasonalAge + " by " + Name,
                                     Value = writingValue
                                 };
                                 currentBestBookValue = writingValue;

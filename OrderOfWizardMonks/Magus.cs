@@ -168,8 +168,8 @@ namespace WizardMonks
                 if (unneededBookTopics.Contains(bookDesire.Ability)) continue;
                 // check to see if we could even write a summa of a level that would meet this desire
                 // TODO: make sure our book level is sufficiently higher than the current level that our quality will be worthwhile
-
-                if (GetAbility(bookDesire.Ability).Value > bookDesire.CurrentLevel * 2)
+                CharacterAbilityBase ability = GetAbility(bookDesire.Ability);
+                if (ability.Value > bookDesire.CurrentLevel * 2 && ability.Experience >= 15)
                 {
                     CharacterAbilityBase buyerAbility;
                     if (bookDesire.Ability.AbilityType != AbilityType.Art)
@@ -230,7 +230,7 @@ namespace WizardMonks
 
                         for (double l = maxLevel; l > bookDesire.CurrentLevel; l--)
                         {
-                            double q = 6 + maxLevel - l;
+                            double q = 6 + GetAttributeValue(AttributeType.Communication) + maxLevel - l;
                             // the effective value is based on time to finish, not time already invested
                             double experienceValue = buyerAbility.GetExperienceUntilLevel(l);
                             double seasonsOfStudy = Math.Ceiling(experienceValue / q);

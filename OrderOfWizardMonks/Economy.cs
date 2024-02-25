@@ -204,7 +204,8 @@ namespace WizardMonks
                         // evaluate the value of the book to us
                         double bookVisValue = Mage.RateLifetimeBookValue(bookForTrade.Book);
                         // TODO: improve pricing mechanics
-                        double price = bookVisValue + bookForTrade.MinimumPrice / 2;
+                        // rounding up to the nearest half-vis
+                        double price = Math.Round((bookVisValue + bookForTrade.MinimumPrice) + 0.5,0) / 2.0;
                         var visOffers = GenerateVisOffer(price, otherDesires.VisDesires, VisDesires);
 
                         if(visOffers != null)
@@ -234,7 +235,8 @@ namespace WizardMonks
                         // evaluate the value of the book to them
                         double bookVisValue = otherDesires.Mage.RateLifetimeBookValue(bookForTrade.Book);
                         // TODO: improve pricing mechanics
-                        double price = bookVisValue + bookForTrade.MinimumPrice / 2;
+                        // rounding up to the nearest half-vis
+                        double price = Math.Round((bookVisValue + bookForTrade.MinimumPrice) + 0.5, 0) / 2.0;
                         var offer = GenerateVisOffer(price, otherDesires.VisDesires, VisDesires);
                         if(offer != null)
                         {

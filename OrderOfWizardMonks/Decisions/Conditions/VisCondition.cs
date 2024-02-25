@@ -77,14 +77,14 @@ namespace WizardMonks.Decisions.Conditions
                                 // is the effective value of raising skills
                                 double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                                 LabTotalIncreaseHelper helper =
-                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, false, GetDesirabilityOfLabTotalGain);
+                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, GetDesirabilityOfLabTotalGain);
                                 helper.AddActionPreferencesToList(alreadyConsidered, log);
                             }
                         }
                     }
                 }
                 // search for vis source
-                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_vimSufficient, GetDesirabilityOfVisGain);
+                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
                 visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // consider writing a book to trade for vis
@@ -139,7 +139,7 @@ namespace WizardMonks.Decisions.Conditions
 
         private double GetDesirabilityOfLabTotalGain(double gain, ushort conditionDepth)
         {
-            double proportion = gain / _visStillNeeded;
+            double proportion = gain / 10.0 / _visStillNeeded;
             double immediateDesire = Desire / (AgeToCompleteBy - Character.SeasonalAge);
             return immediateDesire * proportion / conditionDepth;
         }

@@ -171,7 +171,15 @@ namespace WizardMonks
 
                 if (GetAbility(bookDesire.Ability).Value > bookDesire.CurrentLevel * 2)
                 {
-                    CharacterAbility buyerAbility = new CharacterAbility(bookDesire.Ability);
+                    CharacterAbilityBase buyerAbility;
+                    if (bookDesire.Ability.AbilityType != AbilityType.Art)
+                    {
+                        buyerAbility = new CharacterAbility(bookDesire.Ability);
+                    }
+                    else
+                    {
+                        buyerAbility = new AcceleratedAbility(bookDesire.Ability);
+                    }
                     buyerAbility.Experience = buyerAbility.GetExperienceUntilLevel(bookDesire.CurrentLevel);
 
                     // see if we have started a summa on this topic
@@ -402,7 +410,7 @@ namespace WizardMonks
 
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
-            List<VisTradeOffer> offers = new List<VisTradeOffer>();
+            List<VisTradeOffer> visTradeOffers = new List<VisTradeOffer>();
             List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
             List<VisForBookOffer> buyBookOffers = new List<VisForBookOffer>();
             List<VisForBookOffer> sellBookOffers = new List<VisForBookOffer>();
@@ -431,11 +439,11 @@ namespace WizardMonks
                 var visOffersGenerated = _tradeDesires.GenerateVisOffers(tradeDesires);
                 if (visOffersGenerated != null)
                 {
-                    offers.AddRange(visOffersGenerated);
+                    visTradeOffers.AddRange(visOffersGenerated);
                 }
             }
 
-            ProcessVisOffers(offers);
+            ProcessVisOffers(visTradeOffers);
             ProcessBookOffers(bookTradeOffers, buyBookOffers, sellBookOffers);
             // figure out book for book
         }

@@ -13,14 +13,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _currentVis;
         private double _currentScore;
         private List<Ability> _visTypes;
-        private bool _allowVimVis;
         private double _magicLoreTotal;
 
-        public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, bool allowVimVis, CalculateDesireFunc desireFunc) :
+        public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _visTypes = visTypes;
-            _allowVimVis = allowVimVis;
             _auraCount = mage.KnownAuras.Count;
             if (_auraCount == 0)
             {
@@ -29,10 +27,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             }
             else
             {
-                // TODO: we should go to the aura with the most vis "cap space", not the largest
-                Aura bestAura = mage.KnownAuras.Aggregate((a, b) => a.Strength > b.Strength ? a : b);
-                _currentAura = bestAura.Strength;
-                _currentVis = bestAura.VisSources.Sum(vs => vs.Amount);
+                // find the aura with the most vis scource "capacity"
+                // this magic lore score builds in an assumed roll on the aura search of 2.5
+                Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                _currentAura = aura.Strength;
+                _currentVis = aura.VisSources.Sum(vs => vs.Amount);
             }
 
             _currentScore = mage.GetAbility(Abilities.MagicLore).Value + mage.GetAttribute(AttributeType.Perception).Value + (mage.GetCastingTotal(MagicArtPairs.InVi) / 10);
@@ -54,15 +53,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
-                if (averageFind > 0)
+                if (averageFind > 1.0)
                 {
-                    // originally, we modified by chance vis will be of the proper type
-                    // this feels wrong; what's probably more sensible is to scale
-                    // according to the relative value of vis
-                    // so 5 * 4 + 9 * 2 + 1 = 39/15
-                    // that represents the relative value of a random vis source compared to vim vis
-                    double gain = (averageFind * 39/15);
-                    double desire = _desireFunc(gain, ConditionDepth);
+                    // going to try to go closer to the original logic, where chances the vis type will be acceptable are factored in
+                    //averageFind = averageFind * _visTypes.Count / 15;
+                    // in this version, unaccecptable vis types get half credit
+                    averageFind = averageFind * (_visTypes.Count+15) / 30;
+                    double desire = _desireFunc(averageFind, ConditionDepth);
 
                     // TODO: modify by lifelong value of source?
                     log.Add("Looking for vis source worth " + (desire).ToString("0.000"));
@@ -71,25 +68,35 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing the casting total first
                 CastingTotalIncreaseHelper castingHelper = 
-                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _allowVimVis, CalculateScoreGainDesire);
+                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
                 castingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // consider the value of increasing Magic Lore
-                PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
                 practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
-                ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
                 readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // TODO: consider increasing Perception
             }
 
             // consider finding a whole new aura
-            FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), !_visTypes.Contains(MagicArts.Vim), CalculateAuraGainDesire);
+            FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateAuraGainDesire);
             auraHelper.AddActionPreferencesToList(alreadyConsidered, log);
         }
 
-        private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
+        private double CalculateMagicLoreGainDesire(double gain, ushort conditionDepth)
         {
             double newScore = _currentScore + gain;
-            double probOfBetter = 1 - (_currentVis * _currentVis / (5 * _currentAura * newScore));
+            double probOfBetter = 1 - ((_currentVis + 1) * (_currentVis + 1) / (5 * _currentAura * newScore));
+            double maxVis = Math.Sqrt(5.0 * newScore * _currentAura);
+            double averageGain = maxVis * probOfBetter / 2.0;
+            return _desireFunc(averageGain, conditionDepth);
+
+        }
+
+        private double CalculateCastingTotalGainDesire(double gain, ushort conditionDepth)
+        {
+            double newScore = _currentScore + gain/5.0;
+            double probOfBetter = 1 - ((_currentVis + 1) * (_currentVis + 1) / (5 * _currentAura * newScore));
             double maxVis = Math.Sqrt(5.0 * newScore * _currentAura);
             double averageGain = maxVis * probOfBetter / 2.0;
             return _desireFunc(averageGain, conditionDepth);
@@ -102,14 +109,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             double areaUnder = (11.180339887498948482045868343656) * multiplier;
             double averageFind = areaUnder / 5.0;
 
-            if (averageFind > 0)
+            if (averageFind > 1.0)
             {
-                // originally, we modified by chance vis will be of the proper type
-                // this feels wrong; what's probably more sensible is to scale
-                // according to the relative value of vis
-                // so 5 * 4 + 9 * 2 + 1 = 39/15
-                // that represents the relative value of a random vis source compared to vim vis
-                double gain = (averageFind * 39 / 15);
+                double gain = averageFind * (_visTypes.Count + 15) / 30; ;
                 return _desireFunc(gain, conditionDepth);
             }
             return 0;

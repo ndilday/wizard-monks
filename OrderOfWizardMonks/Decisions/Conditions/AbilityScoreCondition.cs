@@ -47,19 +47,20 @@ namespace WizardMonks.Decisions.Conditions
                 // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
                 foreach (Ability ability in Abilities)
                 {
-                    if (!MagicArts.IsArt(ability))
-                    {
-                        AddPracticeToActionList(ability, alreadyConsidered, log);
-                    }
-                    else if (Character.GetType() == typeof(Magus))
-                    {
-                        AddVisUseToActionList(ability, alreadyConsidered, log);
-                    }
-
                     var topicalBooks = Character.ReadableBooks.Where(b => b.Topic == ability);
                     if (topicalBooks.Any())
                     {
                         AddReadingToActionList(topicalBooks, ability, alreadyConsidered, log);
+                    }
+                    // we should only practice if there isn't a book to read
+                    else if (!MagicArts.IsArt(ability))
+                    {
+                        AddPracticeToActionList(ability, alreadyConsidered, log);
+                    }
+                    // should we only study vis if we don't have a book?
+                    else if (Character.GetType() == typeof(Magus))
+                    {
+                        AddVisUseToActionList(ability, alreadyConsidered, log);
                     }
                 }
             }
@@ -84,7 +85,8 @@ namespace WizardMonks.Decisions.Conditions
         {
             foreach (Ability ability in this.Abilities)
             {
-                if (MagicArts.IsArt(ability))
+                // if we have a summa to read, we should do that before studying vis
+                if (MagicArts.IsArt(ability) && this.Character.GetBestSummaToRead(ability) == null)
                 {
                     double visNeed = 0.5 + (this.Character.GetAbility(ability).Value / 10.0);
                     foreach (VisDesire visDesire in desires)

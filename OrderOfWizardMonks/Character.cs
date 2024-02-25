@@ -458,6 +458,11 @@ namespace WizardMonks
             return ReadableBooks.Where(b => b.Topic == ability).OrderByDescending(b => GetBookLevelGain(b)).FirstOrDefault();
         }
 
+        public virtual IBook GetBestSummaToRead(Ability ability)
+        {
+            return ReadableBooks.Where(b => b.Topic == ability & b.Level < 1000).OrderByDescending(b => GetBookLevelGain(b)).FirstOrDefault();
+        }
+
         public virtual IEnumerable<IBook> GetUnneededBooksFromCollection()
         {
             return _booksOwned.Where(b => b.Author == this || (_booksRead.Contains(b) && b.Level == 1000) || (GetAbility(b.Topic).Value >= b.Level));

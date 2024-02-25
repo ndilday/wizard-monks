@@ -21,13 +21,5 @@ namespace WizardMonks.Decisions.Goals
         {
             base.AddActionPreferencesToList(alreadyConsidered, log);
         }
-
-        public override void ModifyVisDesires(Magus magus, VisDesire[] visDesires)
-        {
-            foreach(Ability visAbility in visTypes)
-            {
-                visDesires[visAbility.AbilityId].Quantity += 7;
-            }
-        }
     }
 }

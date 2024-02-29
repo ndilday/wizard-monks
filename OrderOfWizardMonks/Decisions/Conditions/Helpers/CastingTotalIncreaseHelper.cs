@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
-    class CastingTotalIncreaseHelper :ArtIncreaseHelper
+    class CastingTotalIncreaseHelper : ArtIncreaseHelper
     {
         public CastingTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, arts, desireFunc)

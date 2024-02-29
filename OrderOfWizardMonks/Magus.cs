@@ -578,6 +578,18 @@ namespace WizardMonks
             return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
         }
 
+        public Spell GetBestSpell(SpellBase spellBase)
+        {
+            return SpellList.Where(s => s.Base == spellBase).OrderByDescending(s => s.Level).FirstOrDefault();
+        }
+
+        public double GetSpontaneousCastingTotal(ArtPair artPair)
+        {
+            // TODO: make the Diedne hack better
+            double divisor = Name == "Diedne" ? 2.0 : 5.0;
+            return GetCastingTotal(artPair) / divisor;
+        }
+
         public double GetVisDistillationRate()
         {
             // TODO: One day, we'll make this more complicated
@@ -789,7 +801,7 @@ namespace WizardMonks
             // TODO: multiple spells in a season
             // TODO: foci
             // TODO: Working from Lab Text
-            double labTotal = GetLabTotal(spell.BaseArts, Activity.InventSpells);
+            double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
             if(spell == _partialSpell)
             {
                 // continue previous spell work

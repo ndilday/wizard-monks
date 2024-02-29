@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using WizardMonks.Instances;
+//using WizardMonks.Instances;
 
 namespace WizardMonks
 {
@@ -84,6 +81,22 @@ namespace WizardMonks
         Boundary,
         Sight
     }
+
+    public class EffectUse : SpellAttribute
+    {
+        public Uses Use { get; private set; }
+        public EffectUse(Uses uses, byte level, bool needsRitual = false)
+            : base(level, needsRitual)
+        {
+            Use = uses;
+        }
+    }
+    
+    public enum Uses
+    {
+        FindVis,
+        FindAura
+    }
     #endregion
 
     [Flags]
@@ -110,8 +123,6 @@ namespace WizardMonks
 
     public class Spell
     {
-        public ArtPair BaseArts { get; private set; }
-
         public EffectRange Range { get; private set; }
         public EffectDuration Duration { get; private set; }
         public EffectTarget Target { get; private set; }
@@ -119,8 +130,7 @@ namespace WizardMonks
         public byte Modifiers { get; private set; }
         public bool IsRitual { get; private set; }
 
-        public SpellArts RequisiteTechniques { get; private set; }
-        public SpellArts RequisiteForms { get; private set; }
+        public SpellArts RequisiteArts { get; private set; }
         public string Name { get; private set; }
 
         public double Level
@@ -158,66 +168,18 @@ namespace WizardMonks
 
         public ushort Level { get; protected set; }
 
-        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, byte level)
+        public string Name { get; private set; }
+
+        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, byte level, string name)
         {
             TechniqueEffects = techniqueEffects;
             FormEffects = formEffects;
             Level = level;
             Arts = arts;
             ArtPair = artPair;
+            Name = name;
         }
     }
-
-    #region Animal Spells
-    public static class CrAnBases
-    {
-        public static readonly SpellBase CreateAnimalProduct;
-        public static readonly SpellBase CreateInsect;
-        public const byte CreateAnimalCorpse = 10;
-        public const byte CreateBird = 10;
-        public const byte CreateReptile = 10;
-        public const byte CreateAmphibian = 10;
-        public const byte CreateFish = 10;
-        public const byte CreateMammal = 15;
-        public const byte AcceleratedMaturityDay = 15;
-        public const byte AcceleratedMaturityTwoHour = 20;
-        public const byte StopDisease = 25;
-        public const byte RestoreSense = 25;
-        public const byte RestoreLimb = 25;
-        public const byte IncreaseChar0 = 30;
-        public const byte AcceleratedMaturityDiameter = 30;
-        public const byte IncreaseChar1 = 35;
-        public const byte IncreaseChar2 = 40;
-        public const byte IncreaseChar3 = 45;
-        public const byte IncreaseChar4 = 50;
-        public const byte CreateMagicBeast = 50;
-        public const byte IncreaseChar5 = 55;
-        public const byte RaiseDead = 75;
-
-        static CrAnBases()
-        {
-            
-        }
-    }
-
-    public static class InAnBases
-    {
-        public const byte MentalImage = 1;
-        public const byte KnowGeneralInformation = 3;
-        public const byte KnowConsciousness = 3;
-        public const byte KnowMotivation = 4;
-        public const byte KnowSingleFact = 4;
-        public const byte KnowSingleFactProduct = 5;
-        public const byte SpeakAnimal = 10;
-        public const byte ReadRecentMemories = 15;
-        public const byte MindProbe = 20;
-    }
-
-    public static class MuAnBases
-    {
-
-    }
-    #endregion
 
     [Flags]
     public enum TechniqueEffects : long
@@ -243,6 +205,8 @@ namespace WizardMonks
         ReadRecentMemories = 0x0000000000080000,
         MindProbe = 0x0000000000100000,
         MakeSensesUnhinderedBy = 0x0000000000200000,
+        Detect = 0x0000000000400000,
+        Quantify = 0x0000000000800000,
         // Muto
         SuperficialChange = 0x0000000001000000,
         MajorChange = 0x0000000002000000,
@@ -298,5 +262,8 @@ namespace WizardMonks
         SevereWeather = 0x0000000000400000,
         VerySevereWeather = 0x0000000000800000,
         DebilitatingAir = 0x0000000001000000,
+        //Vim
+        Aura = 0x0100000000000000,
+        Vis = 0x0200000000000000
     }
 }

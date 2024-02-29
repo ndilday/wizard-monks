@@ -376,15 +376,26 @@ namespace WizardMonks
         private void MageAuraSearch(Magus mage)
         {
             // add bonus to area lore equal to casting total div 10?
-            // TODO: once spells are implemented, increase finding chances based on aura-detection spells
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetAttribute(AttributeType.Perception).Value;
-            areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+            
+            Spell bestAuraSearchSpell = 
+                mage.GetBestSpell(SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura));
+            // add 1 per magnitude of detection spell to the total
+            if(bestAuraSearchSpell != null)
+            {
+                areaLore += bestAuraSearchSpell.Level / 5.0;
+            }
+            else
+            {
+                areaLore += mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+            }
+
             double roll = Die.Instance.RollDouble() * 5;
 
             // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
             double auraFound = Math.Sqrt(roll * areaLore / (mage.KnownAuras.Count() + 1));
-            if (auraFound > 1)
+            if (auraFound >= 1)
             {
                 Aura aura = new Aura(Domain.Magic, auraFound);
                 mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.000"));
@@ -945,6 +956,7 @@ namespace WizardMonks
         {
             // TODO: multiple spells
             mage.InventSpell(Spell);
+            mage.Log.Add("Inventing " + Spell.Name);
         }
 
         public override bool Matches(IAction action)
@@ -954,12 +966,13 @@ namespace WizardMonks
                 return false;
             }
             InventSpell invent = (InventSpell)action;
-            return invent.Spell == this.Spell;
+            // TODO: fix this later
+            return invent.Spell.Base == this.Spell.Base;
         }
 
         public override string Log()
         {
-            return "Inventing " + Spell.BaseArts.Technique.AbilityName + " " + Spell.BaseArts.Form.AbilityName + " spell worth " + Desire.ToString("0.000");
+            return "Inventing " + Spell.Name + " worth " + Desire.ToString("0.000");
         }
     }
 

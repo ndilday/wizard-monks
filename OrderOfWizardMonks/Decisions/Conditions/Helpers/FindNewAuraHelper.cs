@@ -11,11 +11,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private int _auraCount;
         private double _currentAura;
         private double _currentScore;
+        private SpellBase _findAuraSpellBase;
         //private double _currentDesire;
 
         public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
+            _findAuraSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
         }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
@@ -37,16 +39,23 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
 
                 // consider the value of increasing find aura related scores
-                //practice area lore
-                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                // practice area lore
+                PracticeHelper areaLorePracticeHelper = 
+                    new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore, once we have reasonable ways of defining different areas
                 //ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
                 // consider value of increasing InVi casting total
-                CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
+                CastingTotalIncreaseHelper inViHelper = 
+                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 25, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
+                inViHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
+                // consider value of learning a new spell to detect auras
+                LearnSpellHelper spellHelper =
+                    new LearnSpellHelper(Mage, AgeToCompleteBy - 1, desire / 5, (ushort)(ConditionDepth + 1), _findAuraSpellBase, _desireFunc);
+                spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
 
@@ -86,8 +95,17 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double CalculateFindAuraScore()
         {
             double areaLore = Mage.GetAbility(Abilities.AreaLore).Value;
-            areaLore += Mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             areaLore += Mage.GetAttribute(AttributeType.Perception).Value;
+            Spell bestAuraSearchSpell = Mage.GetBestSpell(_findAuraSpellBase);
+            // add 1 per magnitude of detection spell to the total
+            if (bestAuraSearchSpell != null)
+            {
+                areaLore += bestAuraSearchSpell.Level / 5.0;
+            }
+            else
+            {
+                areaLore += Mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+            }
             return areaLore;
         }
 

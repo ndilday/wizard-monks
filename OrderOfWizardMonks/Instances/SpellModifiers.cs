@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WizardMonks.Instances
 {
-    public static class Ranges
+    public static class EffectRanges
     {
         public static EffectRange Personal;
         public static EffectRange Touch;
@@ -14,18 +14,18 @@ namespace WizardMonks.Instances
         public static EffectRange Sight;
         public static EffectRange Arcane;
 
-        static Ranges()
+        static EffectRanges()
         {
-            Personal = new EffectRange(WizardMonks.Ranges.Personal, 0);
-            Touch = new EffectRange(WizardMonks.Ranges.Touch, 1);
-            Eye = new EffectRange(WizardMonks.Ranges.Eye, 1);
-            Voice = new EffectRange(WizardMonks.Ranges.Voice, 2);
-            Sight = new EffectRange(WizardMonks.Ranges.Sight, 3);
-            Arcane = new EffectRange(WizardMonks.Ranges.Arcane, 4);
+            Personal = new EffectRange(Ranges.Personal, 0);
+            Touch = new EffectRange(Ranges.Touch, 1);
+            Eye = new EffectRange(Ranges.Eye, 1);
+            Voice = new EffectRange(Ranges.Voice, 2);
+            Sight = new EffectRange(Ranges.Sight, 3);
+            Arcane = new EffectRange(Ranges.Arcane, 4);
         }
     }
 
-    public static class Durations
+    public static class EffectDurations
     {
         public static EffectDuration Instant;
         public static EffectDuration Concentration;
@@ -35,19 +35,19 @@ namespace WizardMonks.Instances
         public static EffectDuration Moon;
         public static EffectDuration Year;
 
-        static Durations()
+        static EffectDurations()
         {
-            Instant = new EffectDuration(WizardMonks.Durations.Instantaneous, 0);
-            Concentration = new EffectDuration(WizardMonks.Durations.Concentration, 1);
-            Diameter = new EffectDuration(WizardMonks.Durations.Diameter, 1);
-            Sun = new EffectDuration(WizardMonks.Durations.Sun, 2);
-            Ring = new EffectDuration(WizardMonks.Durations.Ring, 2);
-            Moon = new EffectDuration(WizardMonks.Durations.Moon, 3);
-            Year = new EffectDuration(WizardMonks.Durations.Year, 4, true);
+            Instant = new EffectDuration(Durations.Instantaneous, 0);
+            Concentration = new EffectDuration(Durations.Concentration, 1);
+            Diameter = new EffectDuration(Durations.Diameter, 1);
+            Sun = new EffectDuration(Durations.Sun, 2);
+            Ring = new EffectDuration(Durations.Ring, 2);
+            Moon = new EffectDuration(Durations.Moon, 3);
+            Year = new EffectDuration(Durations.Year, 4, true);
         }
     }
 
-    public static class Targets
+    public static class EffectTargets
     {
         public static EffectTarget Individual;
         public static EffectTarget Taste;
@@ -62,20 +62,20 @@ namespace WizardMonks.Instances
         public static EffectTarget Boundary;
         public static EffectTarget Sight;
 
-        static Targets()
+        static EffectTargets()
         {
-            Individual = new EffectTarget(WizardMonks.Targets.Individual, 0);
-            Taste = new EffectTarget(WizardMonks.Targets.Taste, 0);
-            Circle = new EffectTarget(WizardMonks.Targets.Circle, 0);
-            Part = new EffectTarget(WizardMonks.Targets.Part, 1);
-            Touch = new EffectTarget(WizardMonks.Targets.Touch, 1);
-            Group = new EffectTarget(WizardMonks.Targets.Group, 2);
-            Smell = new EffectTarget(WizardMonks.Targets.Smell, 2);
-            Room = new EffectTarget(WizardMonks.Targets.Room, 2);
-            Structure = new EffectTarget(WizardMonks.Targets.Structure, 3);
-            Hearing = new EffectTarget(WizardMonks.Targets.Hearing, 3);
-            Boundary = new EffectTarget(WizardMonks.Targets.Boundary, 4, true);
-            Sight = new EffectTarget(WizardMonks.Targets.Sight, 4);
+            Individual = new EffectTarget(Targets.Individual, 0);
+            Taste = new EffectTarget(Targets.Taste, 0);
+            Circle = new EffectTarget(Targets.Circle, 0);
+            Part = new EffectTarget(Targets.Part, 1);
+            Touch = new EffectTarget(Targets.Touch, 1);
+            Group = new EffectTarget(Targets.Group, 2);
+            Smell = new EffectTarget(Targets.Smell, 2);
+            Room = new EffectTarget(Targets.Room, 2);
+            Structure = new EffectTarget(Targets.Structure, 3);
+            Hearing = new EffectTarget(Targets.Hearing, 3);
+            Boundary = new EffectTarget(Targets.Boundary, 4, true);
+            Sight = new EffectTarget(Targets.Sight, 4);
         }
     }
 }

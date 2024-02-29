@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using WizardMonks;
+﻿using System.Collections.Generic;
+
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions

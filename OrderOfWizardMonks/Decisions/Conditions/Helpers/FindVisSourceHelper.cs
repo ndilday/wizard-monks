@@ -14,11 +14,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _currentScore;
         private List<Ability> _visTypes;
         private double _magicLoreTotal;
+        private SpellBase _findVisSpellBase;
 
         public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
         {
             _visTypes = visTypes;
+            _findVisSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
             _auraCount = mage.KnownAuras.Count;
             if (_auraCount == 0)
             {
@@ -48,7 +50,16 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             // determine average vis source found
             _magicLoreTotal = Mage.GetAbility(Abilities.MagicLore).Value;
             _magicLoreTotal += Mage.GetAttribute(AttributeType.Perception).Value;
-            _magicLoreTotal += Mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+            Spell bestVisSearchSpell = Mage.GetBestSpell(_findVisSpellBase);
+            // add 1 per magnitude of detection spell to the total
+            if (bestVisSearchSpell != null)
+            {
+                _magicLoreTotal += bestVisSearchSpell.Level / 5.0;
+            }
+            else
+            {
+                _magicLoreTotal += Mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+            }
             if (Mage.KnownAuras.Any())
             {
                 Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
@@ -75,6 +86,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
                 readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                // consider value of learning a new spell to detect auras
+                LearnSpellHelper spellHelper =
+                    new LearnSpellHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
+                spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // TODO: consider increasing Perception
             }
 

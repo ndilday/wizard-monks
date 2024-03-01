@@ -7,8 +7,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     class ReadingHelper : AHelper
     {
         private Ability _ability;
-        public ReadingHelper(Ability ability, Magus mage, uint ageToCompleteBy, double desire, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
-            base(mage, ageToCompleteBy, desire, conditionDepth, desireFunc)
+        public ReadingHelper(Ability ability, Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
+            base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _ability = ability;
         }
@@ -27,10 +27,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             else if(ConditionDepth < 10 && AgeToCompleteBy > Mage.SeasonalAge)
             {
                 // consider both writing and vis to provide the capital to trade for a book?
-                WritingHelper writingHelper = new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                WritingHelper writingHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
                 writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
-                FindVisSourceHelper findVisSourceHelper = new(Mage, MagicArts.GetEnumerator().ToList() , AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                FindVisSourceHelper findVisSourceHelper = new(Mage, MagicArts.GetEnumerator().ToList() , AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
                 findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }

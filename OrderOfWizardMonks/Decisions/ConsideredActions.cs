@@ -7,7 +7,7 @@ namespace WizardMonks.Decisions
 {
     public class ConsideredActions
     {
-        Dictionary<Activity, IList<IAction>> ActionTypeMap = new();
+        readonly Dictionary<Activity, IList<IAction>> ActionTypeMap = [];
 
         public void Add(IAction action)
         {

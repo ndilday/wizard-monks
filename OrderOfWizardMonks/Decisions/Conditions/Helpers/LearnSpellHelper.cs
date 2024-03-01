@@ -8,9 +8,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     class LearnSpellHelper : AHelper
     {
         private SpellBase _spellBase;
-        public LearnSpellHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, 
-                                ushort conditionDepth, SpellBase spellBase, CalculateDesireFunc desireFunc) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
+        public LearnSpellHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, SpellBase spellBase, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _spellBase = spellBase;
         }
@@ -21,7 +20,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 if (AgeToCompleteBy - 1 > Mage.SeasonalAge)
                 {
                     HasLabCondition labCondition = 
-                        new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
+                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1));
                     labCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }
@@ -101,7 +100,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 if (AgeToCompleteBy > Mage.SeasonalAge && ConditionDepth < 10)
                 {
                     LabTotalIncreaseHelper labTotalIncreaseHelper =
-                        new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
+                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
                     labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }
@@ -109,7 +108,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
         {
-            return Desire * gain / 10 / conditionDepth;
+            return _desireFunc(gain / 2, conditionDepth);
         }
     }
 }

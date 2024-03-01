@@ -9,8 +9,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     {
         private ArtPair _arts;
 
-        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
+        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _arts = arts;
         }
@@ -24,8 +24,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 AddVisUseToActionList(_arts.Form, alreadyConsidered, log);
 
                 // increase either art through reading
-                ReadingHelper techReadingHelper = new(_arts.Technique, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
-                ReadingHelper formReadingHelper = new(_arts.Form, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper techReadingHelper = new(_arts.Technique, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new(_arts.Form, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
                 techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
@@ -45,7 +45,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 VisStudying visStudy = new(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
-                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
 
                 // TODO: how do we decrement the cost of the vis?
             }

@@ -7,8 +7,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 {
     class CastingTotalIncreaseHelper : ArtIncreaseHelper
     {
-        public CastingTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, arts, desireFunc)
+        public CastingTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
         { }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)

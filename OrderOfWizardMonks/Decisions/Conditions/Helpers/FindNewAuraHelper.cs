@@ -14,8 +14,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _averageGain;
         private SpellBase _findAuraSpellBase;
 
-        public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, double desirePerPoint, ushort conditionDepth, CalculateDesireFunc desireFunc) :
-            base(mage, ageToCompleteBy, desirePerPoint, conditionDepth, desireFunc)
+        public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
+            base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _findAuraSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
             _currentAura = Mage.KnownAuras.Any() ? Mage.KnownAuras.Max(a => a.Strength) : 0;
@@ -26,17 +26,20 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            double desire = _desireFunc(_averageGain, ConditionDepth);
+            if (_averageGain > 0)
+            {
+                double desire = _desireFunc(_averageGain, ConditionDepth);
 
-            log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.000"));
-            alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+                log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.000"));
+                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+            }
 
-            if (ConditionDepth < 10 && AgeToCompleteBy >  Mage.SeasonalAge && desire > 0)
+            if (ConditionDepth < 10 && AgeToCompleteBy >  Mage.SeasonalAge)
             {
                 // consider the value of increasing find aura related scores
                 // practice area lore
                 PracticeHelper areaLorePracticeHelper =
-                    new(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                    new(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore, once we have reasonable ways of defining different areas
@@ -44,12 +47,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider value of increasing InVi casting total
                 CastingTotalIncreaseHelper inViHelper =
-                    new(Mage, AgeToCompleteBy - 1, desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
+                    new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
                 inViHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // consider value of learning a new spell to detect auras
                 LearnSpellHelper spellHelper =
-                    new(Mage, AgeToCompleteBy - 1, desire, (ushort)(ConditionDepth + 1), _findAuraSpellBase, CalculateSpellGainDesire);
+                    new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _findAuraSpellBase, CalculateSpellGainDesire);
                 spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
@@ -81,7 +84,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
         {
             double newScore = _currentScore + gain;
-            double averageGainWithGain = GetAverageNewAura(newScore);
+            // if the current score is so bad that the gain doesn't bring it over zero,
+            // just pretend the current score is zero
+            double averageGainWithGain = newScore < 0 ? GetAverageNewAura(gain) : GetAverageNewAura(newScore);
             return _desireFunc(averageGainWithGain - _averageGain, conditionDepth);
 
         }

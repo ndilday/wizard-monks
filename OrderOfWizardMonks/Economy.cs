@@ -165,7 +165,7 @@ namespace WizardMonks
 
         public IList<BookTradeOffer> GenerateBookTradeOffers(MagusTradingDesires tradeDesires)
         {
-            List<BookTradeOffer> tradeList = new List<BookTradeOffer>();
+            List<BookTradeOffer> tradeList = new();
             foreach(BookForTrade book in BooksForTrade)
             {
                 if (tradeDesires.BookDesires.ContainsKey(book.Book.Topic) &&
@@ -190,7 +190,7 @@ namespace WizardMonks
 
         public IList<VisForBookOffer> GenerateBuyBookOffers(MagusTradingDesires otherDesires)
         {
-            List<VisForBookOffer> bookTradeOffers = new List<VisForBookOffer>();
+            List<VisForBookOffer> bookTradeOffers = new();
             if (BookDesires.Any() && otherDesires.BooksForTrade.Any())
             {
                 // they have books, we want books
@@ -221,7 +221,7 @@ namespace WizardMonks
 
         public IList<VisForBookOffer> GenerateSellBookOffers(MagusTradingDesires otherDesires)
         {
-            List<VisForBookOffer> bookTradeOffers = new List<VisForBookOffer>();
+            List<VisForBookOffer> bookTradeOffers = new();
             if (BooksForTrade.Any() && otherDesires.BookDesires.Any())
             {
                 // we have books, they want books
@@ -258,7 +258,7 @@ namespace WizardMonks
         private IEnumerable<VisOffer> GenerateVisOffer(double price, VisDesire[] giverVisDesires, VisDesire[] receiverVisDesires)
         {
             double remainingPrice = price;
-            List<VisOffer> offerSegments = new List<VisOffer>();
+            List<VisOffer> offerSegments = new();
             // order the receiver's desires from largest to smallest
             foreach(VisDesire desire in receiverVisDesires.Where(d => d.Quantity > 0).OrderByDescending(d => d.Quantity))
             {
@@ -312,8 +312,8 @@ namespace WizardMonks
         private IList<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)
         {
             // TODO: need to take Vis type into account
-            List<VisOffer> bids = new List<VisOffer>();
-            List<VisOffer> asks = new List<VisOffer>();
+            List<VisOffer> bids = new();
+            List<VisOffer> asks = new();
             for(byte i = 0; i < MagicArts.Count; i++)
             {
                 if(VisDesires[i].Quantity < 0 && otherVisDesires[i].Quantity > 0)
@@ -350,7 +350,7 @@ namespace WizardMonks
             // we need at least one bid and one ask to make a deal
             if (bids.Count() > 0 && asks.Count() > 0)
             {
-                List<VisTradeOffer> visTradeOffer = new List<VisTradeOffer>();
+                List<VisTradeOffer> visTradeOffer = new();
                 foreach (VisOffer bid in bids)
                 {
                     foreach (VisOffer ask in asks)
@@ -377,9 +377,9 @@ namespace WizardMonks
     public static class GlobalEconomy
     {
         // needs to know about all books available for trade
-        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = new Dictionary<Ability, List<BookForTrade>>();
+        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = new();
         // needs to know about all topics people have expressed wanting a book for
-        public static List<BookDesire> DesiredBooksList = new List<BookDesire>();
+        public static List<BookDesire> DesiredBooksList = new();
         // needs to know about all vis desires
         public static double[] GlobalVisDemandMap = new double[MagicArts.Count];
         // needs to have some sense of the average value of a tractatus

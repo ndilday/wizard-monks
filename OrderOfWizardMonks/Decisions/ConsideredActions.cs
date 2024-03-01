@@ -7,7 +7,7 @@ namespace WizardMonks.Decisions
 {
     public class ConsideredActions
     {
-        Dictionary<Activity, IList<IAction>> ActionTypeMap = new Dictionary<Activity, IList<IAction>>();
+        Dictionary<Activity, IList<IAction>> ActionTypeMap = new();
 
         public void Add(IAction action)
         {
@@ -32,7 +32,7 @@ namespace WizardMonks.Decisions
 
         public IList<string> Log()
         {
-            List<string> log = new List<string>();
+            List<string> log = new();
             log.Add("----------");
             log.AddRange(ActionTypeMap.SelectMany(a => a.Value).Select(a => a.Log()));
             log.Add("----------");

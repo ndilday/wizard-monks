@@ -41,7 +41,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            List<Ability> visSearchAbilities = new List<Ability>();
+            List<Ability> visSearchAbilities = new();
             visSearchAbilities.Add(Abilities.MagicLore);
             visSearchAbilities.Add(MagicArts.Intellego);
             visSearchAbilities.Add(MagicArts.Vim);
@@ -79,22 +79,22 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing the casting total first
                 CastingTotalIncreaseHelper castingHelper = 
-                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
+                    new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
                 castingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // consider the value of increasing Magic Lore
-                PracticeHelper practiceHelper = new PracticeHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
+                PracticeHelper practiceHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
                 practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
-                ReadingHelper readingHelper = new ReadingHelper(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
+                ReadingHelper readingHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
                 readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // consider value of learning a new spell to detect auras
                 LearnSpellHelper spellHelper =
-                    new LearnSpellHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
+                    new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
                 spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 // TODO: consider increasing Perception
             }
 
             // consider finding a whole new aura
-            FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateAuraGainDesire);
+            FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateAuraGainDesire);
             auraHelper.AddActionPreferencesToList(alreadyConsidered, log);
         }
 

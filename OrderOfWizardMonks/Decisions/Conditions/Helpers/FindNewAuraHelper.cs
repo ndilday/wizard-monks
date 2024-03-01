@@ -41,7 +41,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // consider the value of increasing find aura related scores
                 // practice area lore
                 PracticeHelper areaLorePracticeHelper = 
-                    new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                    new(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore, once we have reasonable ways of defining different areas
@@ -49,12 +49,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider value of increasing InVi casting total
                 CastingTotalIncreaseHelper inViHelper = 
-                    new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 25, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
+                    new(Mage, AgeToCompleteBy - 1, Desire / 25, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
                 inViHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // consider value of learning a new spell to detect auras
                 LearnSpellHelper spellHelper =
-                    new LearnSpellHelper(Mage, AgeToCompleteBy - 1, desire / 5, (ushort)(ConditionDepth + 1), _findAuraSpellBase, _desireFunc);
+                    new(Mage, AgeToCompleteBy - 1, desire / 5, (ushort)(ConditionDepth + 1), _findAuraSpellBase, _desireFunc);
                 spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
@@ -80,14 +80,14 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // consider the value of increasing find aura related scores
                 //practice area lore
-                PracticeHelper areaLorePracticeHelper = new PracticeHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
+                PracticeHelper areaLorePracticeHelper = new(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
                 areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // read area lore, once we have reasonable ways of defining different areas
                 //ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
 
                 // consider value of increasing InVi casting total
-                CastingTotalIncreaseHelper inViHelper = new CastingTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
+                CastingTotalIncreaseHelper inViHelper = new(Mage, AgeToCompleteBy - 1, Desire / 10, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, _desireFunc);
 
             }
         }

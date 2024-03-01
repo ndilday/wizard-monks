@@ -17,7 +17,7 @@ namespace WizardMonks.Core
 
     public class Die : IAMDie
     {
-        private Random _random = new Random();
+        private Random _random = new();
         private static volatile IAMDie _singletonDie;
         private static readonly object _lockerObject;
         private static readonly int Z_MAX = 5;

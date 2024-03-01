@@ -8,7 +8,7 @@ namespace WizardMonks.Core
 {
     public class Multiton<K, T> where T: new()
     {
-        private static readonly Dictionary<K, T> instances = new Dictionary<K, T>();
+        private static readonly Dictionary<K, T> instances = new();
 
         private Multiton() 
         {
@@ -36,7 +36,7 @@ namespace WizardMonks.Core
 
     public class ImmutableMultiton<K, T> where T: IKeyed<K>, new()
     {
-        private static readonly Dictionary<K, T> instances = new Dictionary<K, T>();
+        private static readonly Dictionary<K, T> instances = new();
 
         private ImmutableMultiton() 
         {
@@ -45,8 +45,8 @@ namespace WizardMonks.Core
         public static void Initialize(string filePath)
         {
             instances.Clear();
-            StreamReader reader = new StreamReader(filePath);
-            XmlSerializer serializer = new XmlSerializer(typeof(List<T>));
+            StreamReader reader = new(filePath);
+            XmlSerializer serializer = new(typeof(List<T>));
             List<T> list = (List<T>)serializer.Deserialize(reader);
             foreach (T t in list)
             {

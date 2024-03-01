@@ -68,7 +68,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public override List<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new List<BookDesire>();
+            List<BookDesire> bookDesires = new();
             if (!ConditionFulfilled)
             {
                 foreach (Ability ability in this.Abilities)
@@ -121,7 +121,7 @@ namespace WizardMonks.Decisions.Conditions
             double effectiveDesire = GetDesirabilityOfIncrease(Character.GetAbility(ability).GetValueGain(4));
             if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
             {
-                Practice practiceAction = new Practice(ability, effectiveDesire);
+                Practice practiceAction = new(ability, effectiveDesire);
                 log.Add(Character.Name + " Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.000"));
                 alreadyConsidered.Add(practiceAction);
             }
@@ -138,7 +138,7 @@ namespace WizardMonks.Decisions.Conditions
                 if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
                 {
                     log.Add(Character.Name + "Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
-                    Read readingAction = new Read(bestBook, effectiveDesire);
+                    Read readingAction = new(bestBook, effectiveDesire);
                     alreadyConsidered.Add(readingAction);
                 }
             }
@@ -159,18 +159,18 @@ namespace WizardMonks.Decisions.Conditions
                 if (stockpile > visNeed)
                 {
                     log.Add(mage.Name + "Studying vis for " + magicArt.Ability.AbilityName + ability.AbilityName + " worth " + effectiveDesire.ToString("0.000"));
-                    VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
+                    VisStudying visStudy = new(magicArt.Ability, effectiveDesire);
                     alreadyConsidered.Add(visStudy);
                     // TODO: how do we decrement the cost of the vis?
                 }
                 // putting a limit here to how far the circular loop will go
                 else if (ConditionDepth <= 10 && AgeToCompleteBy - 1 > mage.SeasonalAge)
                 {
-                    List<Ability> visType = new List<Ability>();
+                    List<Ability> visType = new();
                     visType.Add(magicArt.Ability);
                     // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                     VisCondition visCondition =
-                        new VisCondition(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
+                        new(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
                     visCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }

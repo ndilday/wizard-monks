@@ -11,7 +11,7 @@ namespace WizardMonks.Instances
     {
         public static Character GenerateNewCharacter(Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
-            Character character = new Character(langAbility, writingAbility, areaAbility);
+            Character character = new(langAbility, writingAbility, areaAbility);
             NormalizeAttributes(character);
 
             return character;
@@ -31,14 +31,14 @@ namespace WizardMonks.Instances
 
         public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
-            Magus magus = new Magus(magicAbility, langAbility, writingAbility, areaAbility);
+            Magus magus = new(magicAbility, langAbility, writingAbility, areaAbility);
             NormalizeAttributes(magus);
             return magus;
         }
 
         public static Magus GenerateNewApprentice()
         {
-            Magus magus = new Magus(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            Magus magus = new(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
             NormalizeAttributes(magus);
             magus.GetAbility(Abilities.English).AddExperience(75);
             // randomly assign 45 points to childhood skills in 5 point blocks

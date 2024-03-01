@@ -24,8 +24,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 AddVisUseToActionList(_arts.Form, alreadyConsidered, log);
 
                 // increase either art through reading
-                ReadingHelper techReadingHelper = new ReadingHelper(_arts.Technique, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
-                ReadingHelper formReadingHelper = new ReadingHelper(_arts.Form, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper techReadingHelper = new(_arts.Technique, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new(_arts.Form, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
                 techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
                 formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
@@ -42,10 +42,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = magicArt.GetValueGain(Mage.VisStudyRate);
                 double effectiveDesire = _desireFunc(gain, ConditionDepth);
-                VisStudying visStudy = new VisStudying(magicArt.Ability, effectiveDesire);
+                VisStudying visStudy = new(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
-                FindNewAuraHelper auraHelper = new FindNewAuraHelper(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
 
                 // TODO: how do we decrement the cost of the vis?
             }

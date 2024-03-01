@@ -115,7 +115,7 @@ namespace WizardMonks
 
         public Covenant FoundCovenant(Aura aura)
         {
-            Covenant coventant = new Covenant(aura);
+            Covenant coventant = new(aura);
             Join(coventant);
             return coventant;
         }
@@ -136,7 +136,7 @@ namespace WizardMonks
         {
             if (GetAbility(_writingAbility).Value >= 1.0 && GetAbility(_writingLanguage).Value >= 4.0)
             {
-                List<BookDesire> bookDesires = new List<BookDesire>();
+                List<BookDesire> bookDesires = new();
                 IList<BookDesire> bookNeeds;
                 foreach (IGoal goal in _goals)
                 {
@@ -155,7 +155,7 @@ namespace WizardMonks
         {
             double currentBestBookValue = 0;
             IBook bestBook = null;
-            HashSet<int> consideredTopics = new HashSet<int>();
+            HashSet<int> consideredTopics = new();
 
             // since the value of a tractatus is independent of topic,
             // calculate the value of writing a tractatus now, so that we don't have to keep doing it
@@ -342,7 +342,7 @@ namespace WizardMonks
 
         protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
         {
-            List<BookForTrade> list = new List<BookForTrade>();
+            List<BookForTrade> list = new();
             double distillRate = GetVisDistillationRate();
             foreach (IBook book in books)
             {
@@ -376,7 +376,7 @@ namespace WizardMonks
             }
             else
             {
-                ConsideredActions actions = new ConsideredActions();
+                ConsideredActions actions = new();
                 _verboseLog.Add("----------");
                 foreach (IGoal goal in _goals)
                 {
@@ -410,10 +410,10 @@ namespace WizardMonks
 
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
-            List<VisTradeOffer> visTradeOffers = new List<VisTradeOffer>();
-            List<BookTradeOffer> bookTradeOffers = new List<BookTradeOffer>();
-            List<VisForBookOffer> buyBookOffers = new List<VisForBookOffer>();
-            List<VisForBookOffer> sellBookOffers = new List<VisForBookOffer>();
+            List<VisTradeOffer> visTradeOffers = new();
+            List<BookTradeOffer> bookTradeOffers = new();
+            List<VisForBookOffer> buyBookOffers = new();
+            List<VisForBookOffer> sellBookOffers = new();
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)

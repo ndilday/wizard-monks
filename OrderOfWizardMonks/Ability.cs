@@ -100,10 +100,7 @@ namespace WizardMonks
 
         public virtual void OnChanged(EventArgs e)
         {
-            if (Changed != null)
-            {
-                Changed(this, e);
-            }
+            Changed?.Invoke(this, e);
         }
 
         protected CharacterAbilityBase(Ability ability)
@@ -212,19 +209,16 @@ namespace WizardMonks
 	}
 
     [DataContract]
-    public class CharacterAbility : CharacterAbilityBase
+    public class CharacterAbility(Ability newAbility) : CharacterAbilityBase(newAbility)
     {
-        public CharacterAbility(Ability newAbility)
-            : base(newAbility)
-        {
-        }
-
         public override CharacterAbilityBase MakeCopy()
         {
-            CharacterAbility retVal = new CharacterAbility(this.Ability);
-            retVal.Experience = this.Experience;
-            retVal.IsAffinity = this.IsAffinity;
-            retVal.IsPuissant = this.IsPuissant;
+            CharacterAbility retVal = new(this.Ability)
+            {
+                Experience = this.Experience,
+                IsAffinity = this.IsAffinity,
+                IsPuissant = this.IsPuissant
+            };
             return retVal;
         }
 
@@ -266,19 +260,16 @@ namespace WizardMonks
     }
 
     [DataContract]
-    public class AcceleratedAbility : CharacterAbilityBase
+    public class AcceleratedAbility(Ability newAbility) : CharacterAbilityBase(newAbility)
     {
-        public AcceleratedAbility(Ability newAbility)
-            : base(newAbility)
-        {
-        }
-
         public override CharacterAbilityBase MakeCopy()
         {
-            AcceleratedAbility retVal = new AcceleratedAbility(this.Ability);
-            retVal.Experience = this.Experience;
-            retVal.IsAffinity = this.IsAffinity;
-            retVal.IsPuissant = this.IsPuissant;
+            AcceleratedAbility retVal = new(this.Ability)
+            {
+                Experience = this.Experience,
+                IsAffinity = this.IsAffinity,
+                IsPuissant = this.IsPuissant
+            };
             return retVal;
         }
 

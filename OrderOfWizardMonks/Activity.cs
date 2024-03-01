@@ -48,15 +48,9 @@ namespace WizardMonks
 	}
 
     [Serializable]
-    public class Read : IAction
+    public class Read(IBook book, double desire) : IAction
     {
-        public Read(IBook book, double desire)
-        {
-            Book = book;
-            Desire = desire;
-        }
-
-        public IBook Book { get; private set; }
+        public IBook Book { get; private set; } = book;
 
         public Activity Action
         {
@@ -66,7 +60,7 @@ namespace WizardMonks
             }
         }
 
-        public double Desire { get; set; }
+        public double Desire { get; set; } = desire;
 
         public void Act(Character character)
         {
@@ -90,22 +84,16 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Practice : IAction
+    public class Practice(Ability ability, double desire) : IAction
     {
-        public Practice(Ability ability, double desire)
-        {
-            Ability = ability;
-            Desire = desire;
-        }
-
-        public Ability Ability { get; private set; }
+        public Ability Ability { get; private set; } = ability;
 
         public virtual Activity Action
         {
             get { return Activity.Practice; }
         }
 
-        public double Desire { get; set; }
+        public double Desire { get; set; } = desire;
 
         public virtual void Act(Character character)
         {
@@ -130,10 +118,8 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Exposure : Practice
+    public class Exposure(Ability ability, double desire) : Practice(ability, desire)
     {
-        public Exposure(Ability ability, double desire) : base(ability, desire) { }
-
         public override Activity Action
         {
             get { return Activity.Sundry; }
@@ -161,20 +147,12 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Learn : IAction
+    public class Learn(double quality, double maxLevel, Ability topic, Character teacher) : IAction
     {
-        private double _quality;
-        private double _maxLevel;
-        private Ability _topic;
-        private Character _teacher;
-
-        public Learn(double quality, double maxLevel, Ability topic, Character teacher)
-        {
-            _quality = quality;
-            _topic = topic;
-            _teacher = teacher;
-            _maxLevel = maxLevel;
-        }
+        private readonly double _quality = quality;
+        private readonly double _maxLevel = maxLevel;
+        private readonly Ability _topic = topic;
+        private readonly Character _teacher = teacher;
 
         public Activity Action
         {
@@ -207,19 +185,13 @@ namespace WizardMonks
     #endregion
 
     #region ExposingAction classes
-    public abstract class ExposingAction : IAction
+    public abstract class ExposingAction(Ability exposure, double desire) : IAction
     {
-        public Ability Exposure { get; private set; }
+        public Ability Exposure { get; private set; } = exposure;
 
         public Activity Action { get; protected set; }
 
-        public double Desire { get; set; }
-
-        protected ExposingAction(Ability exposure, double desire)
-        {
-            Exposure = exposure;
-            Desire = desire;
-        }
+        public double Desire { get; set; } = desire;
 
         public void Act(Character character)
         {
@@ -311,7 +283,7 @@ namespace WizardMonks
             double scribeAbilityValue = character.GetAbility(Abilities.Scribing).Value;
             if(Book.Level == 1000)
             {
-                Tractatus tract = new Tractatus
+                Tractatus tract = new()
                 {
                     Author = Book.Author,
                     Quality = Book.Quality,
@@ -394,10 +366,10 @@ namespace WizardMonks
             double roll = Die.Instance.RollDouble() * 5;
 
             // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
-            double auraFound = Math.Sqrt(roll * areaLore / (mage.KnownAuras.Count() + 1));
+            double auraFound = Math.Sqrt(roll * areaLore / (mage.KnownAuras.Count + 1));
             if (auraFound >= 1)
             {
-                Aura aura = new Aura(Domain.Magic, auraFound);
+                Aura aura = new(Domain.Magic, auraFound);
                 mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.000"));
                 mage.KnownAuras.Add(aura);
                 if (mage.Covenant == null || (mage.Laboratory == null && mage.Covenant.Aura.Strength < aura.Strength))
@@ -525,46 +497,30 @@ namespace WizardMonks
             }
         }
 
-        private Ability DetermineArt()
+        private static Ability DetermineArt()
         {
             double artRoll = Die.Instance.RollDouble() * 15;
-            switch ((int)artRoll)
+            return (int)artRoll switch
             {
-                case 0:
-                    return MagicArts.Creo;
-                case 1:
-                    return MagicArts.Intellego;
-                case 2:
-                    return MagicArts.Muto;
-                case 3:
-                    return MagicArts.Perdo;
-                case 4:
-                    return MagicArts.Rego;
-                case 5:
-                    return MagicArts.Animal;
-                case 6:
-                    return MagicArts.Aquam;
-                case 7:
-                    return MagicArts.Auram;
-                case 8:
-                    return MagicArts.Corpus;
-                case 9:
-                    return MagicArts.Herbam;
-                case 10:
-                    return MagicArts.Ignem;
-                case 11:
-                    return MagicArts.Imaginem;
-                case 12:
-                    return MagicArts.Mentem;
-                case 13:
-                    return MagicArts.Terram;
-                default:
-                    return MagicArts.Vim;
-            }
-
+                0 => MagicArts.Creo,
+                1 => MagicArts.Intellego,
+                2 => MagicArts.Muto,
+                3 => MagicArts.Perdo,
+                4 => MagicArts.Rego,
+                5 => MagicArts.Animal,
+                6 => MagicArts.Aquam,
+                7 => MagicArts.Auram,
+                8 => MagicArts.Corpus,
+                9 => MagicArts.Herbam,
+                10 => MagicArts.Ignem,
+                11 => MagicArts.Imaginem,
+                12 => MagicArts.Mentem,
+                13 => MagicArts.Terram,
+                _ => MagicArts.Vim,
+            };
         }
 
-        private Season DetermineSeasons(ref double visSourceFound)
+        private static Season DetermineSeasons(ref double visSourceFound)
         {
             // we always want at least 1 pawn/harvest season
             // the larger the source, the more likely multiple seasons should be
@@ -736,7 +692,7 @@ namespace WizardMonks
 
         public abstract void Act(Character character);
 
-        protected Magus ConfirmCharacterIsMage(Character character)
+        protected static Magus ConfirmCharacterIsMage(Character character)
         {
             if (typeof(Magus) != character.GetType())
             {
@@ -806,7 +762,7 @@ namespace WizardMonks
     #region ExposingMageAction Classes
     public abstract class ExposingMageAction : MageAction
     {
-        private Ability _exposure;
+        private readonly Ability _exposure;
 
         protected ExposingMageAction(Ability exposure, double desire)
         {
@@ -823,10 +779,8 @@ namespace WizardMonks
         protected abstract void DoMageAction(Magus mage);
     }
 
-    public class GauntletApprentice : ExposingMageAction
+    public class GauntletApprentice(Ability exposure, double desire) : ExposingMageAction(exposure, desire)
     {
-        public GauntletApprentice(Ability exposure, double desire) : base(exposure, desire) { }
-
         public override bool Matches(IAction action)
         {
             return action.Action == Activity.GauntletApprentice;
@@ -875,7 +829,7 @@ namespace WizardMonks
 
     public class BuildLaboratory : ExposingMageAction
     {
-        private Aura _aura;
+        private readonly Aura _aura;
 
         public BuildLaboratory(Ability exposure, double desire)
             : base(exposure, desire)

@@ -23,7 +23,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double effectiveDesire = _desireFunc(bestBook.Value, ConditionDepth);
                 log.Add("Writing " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
-                Write writingAction = new Write(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
+                Write writingAction = new(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
                 alreadyConsidered.Add(writingAction);
             }
         }

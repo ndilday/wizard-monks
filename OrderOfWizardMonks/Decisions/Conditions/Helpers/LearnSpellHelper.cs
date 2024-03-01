@@ -21,7 +21,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 if (AgeToCompleteBy - Mage.SeasonalAge > 1)
                 {
                     HasLabCondition labCondition = 
-                        new HasLabCondition(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
+                        new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
                     labCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }
@@ -102,7 +102,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // increase Lab Total
                 LabTotalIncreaseHelper labTotalIncreaseHelper =
-                    new LabTotalIncreaseHelper(Mage, AgeToCompleteBy - 1, Desire / 2, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, _desireFunc);
+                    new(Mage, AgeToCompleteBy - 1, Desire / 2, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, _desireFunc);
                 labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }

@@ -96,10 +96,10 @@ namespace WizardMonks.Instances
             Bjornaer.GetAbility(Abilities.Heartbeast).AddExperience(30);
             Bjornaer.GetAbility(Abilities.BjornaerLore).AddExperience(75);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Bjornaer, null, 1, MagicArts.Animal, 20);
+            AbilityScoreGoal goal = new(Bjornaer, null, 1, MagicArts.Animal, 20);
             Bjornaer.AddGoal(goal);
 
-            ApprenticeGoal apprentice = new ApprenticeGoal(Bjornaer, null, 1);
+            ApprenticeGoal apprentice = new(Bjornaer, null, 1);
             Bjornaer.AddGoal(apprentice);
 
             goal = new AbilityScoreGoal(Bjornaer, null, 1.01, Abilities.BjornaerLore, 5);
@@ -149,10 +149,10 @@ namespace WizardMonks.Instances
             Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(5);
             Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(5);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Bonisgaus, null, 1, Abilities.MagicTheory, 10);
+            AbilityScoreGoal goal = new(Bonisgaus, null, 1, Abilities.MagicTheory, 10);
             Bonisgaus.AddGoal(goal);
 
-            ApprenticeGoal apprentice = new ApprenticeGoal(Bonisgaus, null, 1);
+            ApprenticeGoal apprentice = new(Bonisgaus, null, 1);
             Bonisgaus.AddGoal(apprentice);
         }
 
@@ -198,7 +198,7 @@ namespace WizardMonks.Instances
             Criamon.GetAbility(Abilities.EnigmaticWisdom).AddExperience(15);
             Criamon.GetAbility(Abilities.CriamonLore).AddExperience(30);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Criamon, null, 1, Abilities.MagicTheory, 5);
+            AbilityScoreGoal goal = new(Criamon, null, 1, Abilities.MagicTheory, 5);
             Criamon.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Criamon, null, 1, Abilities.EnigmaticWisdom, 5);
@@ -207,7 +207,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Criamon, null, 1, Abilities.CriamonLore, 5);
             Criamon.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Criamon, null, 1);
+            ApprenticeGoal app = new(Criamon, null, 1);
             Criamon.AddGoal(app);
         }
 
@@ -251,7 +251,7 @@ namespace WizardMonks.Instances
             Diedne.GetAbility(Abilities.Penetration).AddExperience(30);
             Diedne.GetAbility(Abilities.Concentration).AddExperience(30);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Diedne, null, 5, MagicArts.Creo, 5);
+            AbilityScoreGoal goal = new(Diedne, null, 5, MagicArts.Creo, 5);
             Diedne.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Intellego, 5);
@@ -293,7 +293,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Vim, 5);
             Diedne.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Diedne, null, 1);
+            ApprenticeGoal app = new(Diedne, null, 1);
             Diedne.AddGoal(app);
         }
 
@@ -337,7 +337,7 @@ namespace WizardMonks.Instances
             Flambeau.GetAbility(Abilities.Penetration).AddExperience(30);
             Flambeau.GetAbility(Abilities.Concentration).AddExperience(30);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Flambeau, null, 1, MagicArts.Ignem, 20);
+            AbilityScoreGoal goal = new(Flambeau, null, 1, MagicArts.Ignem, 20);
             Flambeau.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Flambeau, null, 1, Abilities.Penetration, 5);
@@ -346,7 +346,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Flambeau, null, 1, Abilities.ParmaMagica, 5);
             Flambeau.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Flambeau, null, 1);
+            ApprenticeGoal app = new(Flambeau, null, 1);
             Flambeau.AddGoal(app);
         }
 
@@ -390,7 +390,7 @@ namespace WizardMonks.Instances
             Guernicus.GetAbility(Abilities.CodeOfHermes).AddExperience(5);
             Guernicus.GetAbility(Abilities.Concentration).AddExperience(5);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Guernicus, null, 1, MagicArts.Terram, 20);
+            AbilityScoreGoal goal = new(Guernicus, null, 1, MagicArts.Terram, 20);
             Guernicus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Guernicus, null, 1.5, Abilities.CodeOfHermes, 5);
@@ -399,7 +399,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Guernicus, null, 1, Abilities.MagicTheory, 5);
             Guernicus.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Guernicus, null, 1);
+            ApprenticeGoal app = new(Guernicus, null, 1);
             Guernicus.AddGoal(app);
         }
 
@@ -443,7 +443,7 @@ namespace WizardMonks.Instances
             Jerbiton.GetAbility(Abilities.Penetration).AddExperience(0);
             Jerbiton.GetAbility(Abilities.Finesse).AddExperience(15);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Jerbiton, null, 1, MagicArts.Imaginem, 20);
+            AbilityScoreGoal goal = new(Jerbiton, null, 1, MagicArts.Imaginem, 20);
             Jerbiton.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Jerbiton, null, 1, Abilities.ArtesLiberales, 5);
@@ -455,7 +455,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Jerbiton, null, 1.01, Abilities.Finesse, 5);
             Jerbiton.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Jerbiton, null, 1);
+            ApprenticeGoal app = new(Jerbiton, null, 1);
             Jerbiton.AddGoal(app);
         }
 
@@ -499,13 +499,13 @@ namespace WizardMonks.Instances
             Mercere.GetAbility(Abilities.Penetration).AddExperience(0);
             Mercere.GetAbility(Abilities.Concentration).AddExperience(0);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Mercere, null, 1, MagicArts.Mentem, 20);
+            AbilityScoreGoal goal = new(Mercere, null, 1, MagicArts.Mentem, 20);
             Mercere.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Mercere, null, 5, Abilities.Etiquette, 5);
             Mercere.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Mercere, null, 1);
+            ApprenticeGoal app = new(Mercere, null, 1);
             Mercere.AddGoal(app);
         }
 
@@ -549,7 +549,7 @@ namespace WizardMonks.Instances
             Merinita.GetAbility(Abilities.Penetration).AddExperience(0);
             Merinita.GetAbility(Abilities.MerinitaLore).AddExperience(50);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Merinita, null, 1, MagicArts.Herbam, 20);
+            AbilityScoreGoal goal = new(Merinita, null, 1, MagicArts.Herbam, 20);
             Merinita.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Merinita, null, 1, MagicArts.Animal, 15);
@@ -664,7 +664,7 @@ namespace WizardMonks.Instances
             Tytalus.GetAbility(Abilities.Penetration).AddExperience(30);
             Tytalus.GetAbility(Abilities.Concentration).AddExperience(15);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Tytalus, null, 1, MagicArts.Rego, 20);
+            AbilityScoreGoal goal = new(Tytalus, null, 1, MagicArts.Rego, 20);
             Tytalus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Tytalus, null, 1, MagicArts.Mentem, 10);
@@ -676,7 +676,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Tytalus, null, 1, Abilities.Finesse, 5);
             Tytalus.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Tytalus, null, 1);
+            ApprenticeGoal app = new(Tytalus, null, 1);
             Tytalus.AddGoal(app);
         }
 
@@ -721,7 +721,7 @@ namespace WizardMonks.Instances
             Verditius.GetAbility(Abilities.Craft).AddExperience(30);
             Verditius.GetAbility(Abilities.Philosophae).AddExperience(5);
 
-            AbilityScoreGoal goal = new AbilityScoreGoal(Verditius, null, 1, MagicArts.Intellego, 5);
+            AbilityScoreGoal goal = new(Verditius, null, 1, MagicArts.Intellego, 5);
             Verditius.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Verditius, null, 1, MagicArts.Muto, 5);
@@ -742,7 +742,7 @@ namespace WizardMonks.Instances
             goal = new AbilityScoreGoal(Verditius, null, 1, Abilities.Craft, 5);
             Verditius.AddGoal(goal);
 
-            ApprenticeGoal app = new ApprenticeGoal(Verditius, null, 1);
+            ApprenticeGoal app = new(Verditius, null, 1);
             Verditius.AddGoal(app);
         }
     }

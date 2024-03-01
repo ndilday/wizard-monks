@@ -77,18 +77,18 @@ namespace WizardMonks.Decisions.Conditions
                                 // is the effective value of raising skills
                                 double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                                 LabTotalIncreaseHelper helper =
-                                    new LabTotalIncreaseHelper(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, GetDesirabilityOfLabTotalGain);
+                                    new(_mage, AgeToCompleteBy - 1, extractDesirability / labTotal, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, GetDesirabilityOfLabTotalGain);
                                 helper.AddActionPreferencesToList(alreadyConsidered, log);
                             }
                         }
                     }
                 }
                 // search for vis source
-                FindVisSourceHelper visSourceHelper = new FindVisSourceHelper(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
+                FindVisSourceHelper visSourceHelper = new(_mage, VisTypes, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
                 visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
 
                 // consider writing a book to trade for vis
-                WritingHelper writingHelper = new WritingHelper(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
+                WritingHelper writingHelper = new(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
                 writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
@@ -116,7 +116,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public override List<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new List<BookDesire>();
+            List<BookDesire> bookDesires = new();
             if (!ConditionFulfilled)
             {
                 // books won't help us get the vis we want, will they?

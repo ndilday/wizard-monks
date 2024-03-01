@@ -1,21 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4D44A76B-4EB8-463F-A09A-F69C3C3AC662}</ProjectGuid>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WizardMonks</RootNamespace>
-    <AssemblyName>OrderOfWizardMonks</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -31,88 +18,22 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <AssemblyTitle>OrderOfHermes</AssemblyTitle>
+    <Company>Microsoft</Company>
+    <Product>OrderOfHermes</Product>
+    <Copyright>Copyright © Microsoft 2011</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
+    <Reference Update="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq">
+    <Reference Update="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Ability.cs" />
-    <Compile Include="Attribute.cs" />
-    <Compile Include="Aura.cs" />
-    <Compile Include="Book.cs" />
-    <Compile Include="Character.cs" />
-    <Compile Include="Decisions\Conditions\AbilityScoreCondition.cs" />
-    <Compile Include="Decisions\Conditions\ACondition.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\AHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\ArtIncreaseHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\CastingTotalIncreaseHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\FindNewAuraHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\FindVisSourceHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\LabTotalIncreaseHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\LearnSpellHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\PracticeHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\WritingHelper.cs" />
-    <Compile Include="Decisions\Conditions\Helpers\ReadingHelper.cs" />
-    <Compile Include="Decisions\ConsideredActions.cs" />
-    <Compile Include="Decisions\Goals\AbilityScoreGoal.cs" />
-    <Compile Include="Decisions\Goals\AGoal.cs" />
-    <Compile Include="Decisions\Conditions\HasLabCondition.cs" />
-    <Compile Include="Decisions\Goals\ApprenticeGoal.cs" />
-    <Compile Include="Decisions\Goals\GauntletApprenticeGoal.cs" />
-    <Compile Include="Decisions\Goals\IGoal.cs" />
-    <Compile Include="Decisions\Conditions\HasAuraCondition.cs" />
-    <Compile Include="Decisions\Conditions\VisCondition.cs" />
-    <Compile Include="Decisions\Goals\LongevityRitualGoal.cs" />
-    <Compile Include="Decisions\Goals\TeachApprenticeGoal.cs" />
-    <Compile Include="Instances\CharacterFactory.cs" />
-    <Compile Include="Covenant.cs" />
-    <Compile Include="Core\Dice.cs" />
-    <Compile Include="Economy.cs" />
-    <Compile Include="Instances\Abilities.cs" />
-    <Compile Include="Instances\Founders.cs" />
-    <Compile Include="Decisions\Goals\GoalFactory.cs" />
-    <Compile Include="Instances\MagicArts.cs" />
-    <Compile Include="Houses.cs" />
-    <Compile Include="Instances\SpellBases.cs" />
-    <Compile Include="Instances\SpellModifiers.cs" />
-    <Compile Include="Laboratory.cs" />
-    <Compile Include="Magus.cs" />
-    <Compile Include="Core\Multiton.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Activity.cs" />
-    <Compile Include="Spell.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -131,13 +52,11 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <ItemGroup>
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Decisions\GoalHelpers.cs" />
+    <Compile Remove="Goal.cs" />
+  </ItemGroup>
 </Project>

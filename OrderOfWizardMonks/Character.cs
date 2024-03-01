@@ -113,7 +113,7 @@ namespace WizardMonks
 
         public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20)
         {
-            Die die = new Die();
+            Die die = new();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
             _attributes[(short)AttributeType.Stamina] = new Attribute(die.RollNormal());
             _attributes[(short)AttributeType.Dexterity] = new Attribute(die.RollNormal());
@@ -271,7 +271,7 @@ namespace WizardMonks
                 died = true;
             }
 
-            AgingEventArgs args = new AgingEventArgs(this, crisis, apparent, died);
+            AgingEventArgs args = new(this, crisis, apparent, died);
             OnAged(args);
         }
 
@@ -322,7 +322,7 @@ namespace WizardMonks
             }
             else
             {
-                ConsideredActions actions = new ConsideredActions();
+                ConsideredActions actions = new();
                 _verboseLog.Add("----------");
                 foreach (IGoal goal in _goals)
                 {
@@ -541,7 +541,7 @@ namespace WizardMonks
         public IBook WriteBook(Ability topic, string name, Ability exposureAbility, double desiredLevel = 0)
         {
             // grant exposure experience
-            List<Ability> abilityList = new List<Ability>(_writingAbilities);
+            List<Ability> abilityList = new(_writingAbilities);
             abilityList.Add(topic);
             GetAbility(exposureAbility).AddExperience(2);
             
@@ -565,7 +565,7 @@ namespace WizardMonks
 
         protected Tractatus WriteTractatus(Ability topic, string name)
         {
-            Tractatus t = new Tractatus
+            Tractatus t = new()
             {
                 Author = this,
                 Quality = this.GetAttribute(AttributeType.Communication).Value + 6,

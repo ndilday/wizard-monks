@@ -50,7 +50,7 @@ namespace WizardMonks.Decisions.Goals
 
         public virtual IList<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new List<BookDesire>();
+            List<BookDesire> bookDesires = new();
             foreach(ACondition condition in Conditions)
             {
                 var conditionalDesires = condition.GetBookDesires();

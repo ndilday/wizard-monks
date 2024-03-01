@@ -20,11 +20,13 @@ namespace SkillViewer
             InitializeComponent();
         }
 
-        private void LoadSkills()
+        private static void LoadSkills()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "XML Files (*.xml)|*.xml|All Files (*.*)|*.*";
-            ofd.FilterIndex = 0;
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
+                FilterIndex = 0
+            };
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 StreamReader reader = new StreamReader(ofd.FileName);

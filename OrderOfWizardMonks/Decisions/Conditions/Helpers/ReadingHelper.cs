@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -21,6 +23,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 Read readingAction = new(bestBook, effectiveDesire);
                 alreadyConsidered.Add(readingAction);
+            }
+            else if(ConditionDepth < 10 && AgeToCompleteBy > Mage.SeasonalAge)
+            {
+                // consider both writing and vis to provide the capital to trade for a book?
+                WritingHelper writingHelper = new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+
+                FindVisSourceHelper findVisSourceHelper = new(Mage, MagicArts.GetEnumerator().ToList() , AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _desireFunc);
+                findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
             }
         }
     }

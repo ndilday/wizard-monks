@@ -17,7 +17,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            if (AgeToCompleteBy - Mage.SeasonalAge > 0)
+            if (AgeToCompleteBy > Mage.SeasonalAge)
             {
                 // increase non-vim through vis study
                 AddVisUseToActionList(_arts.Technique, alreadyConsidered, log);

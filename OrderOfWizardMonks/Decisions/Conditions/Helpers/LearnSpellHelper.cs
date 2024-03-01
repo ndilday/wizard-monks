@@ -18,25 +18,25 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             if(Mage.Laboratory == null)
             {
-                if (AgeToCompleteBy - Mage.SeasonalAge > 1)
+                if (AgeToCompleteBy - 1 > Mage.SeasonalAge)
                 {
                     HasLabCondition labCondition = 
                         new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1));
                     labCondition.AddActionPreferencesToList(alreadyConsidered, log);
                 }
             }
-            else if (AgeToCompleteBy - Mage.SeasonalAge > 0)
+            else if (AgeToCompleteBy > Mage.SeasonalAge)
             {
-                double minMagnitude = 0;
+                double minLevel = 0;
                 // see if the mage already knows a spell
                 Spell bestSpell = Mage.GetBestSpell(_spellBase);
                 if(bestSpell != null)
                 {
-                    minMagnitude = bestSpell.Level / 5;
+                    minLevel = bestSpell.Level;
                 }
                 else
                 {
-                    minMagnitude = Mage.GetSpontaneousCastingTotal(_spellBase.ArtPair) / 5;
+                    minLevel = Mage.GetSpontaneousCastingTotal(_spellBase.ArtPair);
                 }
 
                 double labTotal = Mage.GetLabTotal(_spellBase.ArtPair, Activity.InventSpells);
@@ -50,13 +50,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 {
                     singleSeasonSpellLevel = Math.Floor(singleSeasonSpellLevel);
                 }
-                double newSpellMagnitude = singleSeasonSpellLevel / 5;
+                //double newSpellMagnitude = singleSeasonSpellLevel / 5;
                 
                 // TODO: we're going to have to put a lot of design thought into making this flexible
-                if(newSpellMagnitude > minMagnitude && newSpellMagnitude >= _spellBase.Level)
+                if(singleSeasonSpellLevel > minLevel && singleSeasonSpellLevel >= _spellBase.Level)
                 {
                     Spell newSpell;
-                    switch(newSpellMagnitude)
+                    switch(singleSeasonSpellLevel)
                     {
                         case 1:
                             newSpell =
@@ -91,20 +91,25 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                                 new Spell(EffectRanges.Personal, EffectDurations.Moon, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
                             break;
                     }
-                    double desire = _desireFunc(newSpellMagnitude - minMagnitude, ConditionDepth);
-                    if (desire > 0.00001)
-                    {
-                        log.Add("Inventing a spell worth " + desire.ToString("0.000"));
-                        alreadyConsidered.Add(new InventSpell(newSpell, Abilities.MagicTheory, desire));
-                    }
+                    double desire = _desireFunc((singleSeasonSpellLevel - minLevel), ConditionDepth);
+                    log.Add($"Inventing {newSpell.Name} {newSpell.Level} worth {desire:0.000}");
+                    alreadyConsidered.Add(new InventSpell(newSpell, Abilities.MagicTheory, desire));
                 }
                 // TODO: incorporate lab text library
 
                 // increase Lab Total
-                LabTotalIncreaseHelper labTotalIncreaseHelper =
-                    new(Mage, AgeToCompleteBy - 1, Desire / 2, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, _desireFunc);
-                labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                if (AgeToCompleteBy > Mage.SeasonalAge && ConditionDepth < 10)
+                {
+                    LabTotalIncreaseHelper labTotalIncreaseHelper =
+                        new(Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
+                    labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                }
             }
+        }
+
+        private double CalculateScoreGainDesire(double gain, ushort conditionDepth)
+        {
+            return Desire * gain / 10 / conditionDepth;
         }
     }
 }

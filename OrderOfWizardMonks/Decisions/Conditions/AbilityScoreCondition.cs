@@ -164,7 +164,7 @@ namespace WizardMonks.Decisions.Conditions
                     // TODO: how do we decrement the cost of the vis?
                 }
                 // putting a limit here to how far the circular loop will go
-                else if (ConditionDepth <= 10 && AgeToCompleteBy - 1 > mage.SeasonalAge)
+                else if (ConditionDepth < 10 && AgeToCompleteBy > mage.SeasonalAge)
                 {
                     List<Ability> visType = new();
                     visType.Add(magicArt.Ability);

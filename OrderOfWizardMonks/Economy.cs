@@ -55,10 +55,12 @@ namespace WizardMonks
     {
         public Ability Ability { get; private set; }
         public double CurrentLevel { get; private set; }
-        public BookDesire(Ability ability, double curLevel = 0)
+        public Character Character { get; private set; }
+        public BookDesire(Character character, Ability ability, double curLevel = 0)
         {
             Ability = ability;
             CurrentLevel = curLevel;
+            Character = character;
         }
 
         public override bool Equals(object obj)
@@ -68,7 +70,7 @@ namespace WizardMonks
                 return false;
             }
             BookDesire bookDesire = (BookDesire)obj;
-            return bookDesire.Ability == this.Ability;
+            return bookDesire.Ability == this.Ability && bookDesire.Character == this.Character;
         }
 
         public override int GetHashCode()

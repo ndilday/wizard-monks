@@ -165,7 +165,7 @@ namespace WizardMonks
             foreach (BookDesire bookDesire in GlobalEconomy.DesiredBooksList)
             {
                 // if we already have a suitable book for this topic, let's not try to write another
-                if (unneededBookTopics.Contains(bookDesire.Ability)) continue;
+                if (unneededBookTopics.Contains(bookDesire.Ability) || bookDesire.Character == this) continue;
                 // check to see if we could even write a summa of a level that would meet this desire
                 // TODO: make sure our book level is sufficiently higher than the current level that our quality will be worthwhile
                 CharacterAbilityBase ability = GetAbility(bookDesire.Ability);

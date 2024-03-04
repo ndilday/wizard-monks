@@ -125,7 +125,7 @@ namespace WizardMonks.Decisions.Conditions
                     bookDesires.Add(new BookDesire(visType, this.Character.GetAbility(visType).Value));
                 }*/
                 // add an interest in MagicLore here, just to have it somewhere?
-                bookDesires.Add(new BookDesire(Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
+                bookDesires.Add(new BookDesire(this.Character, Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
             }
             return bookDesires;
         }

@@ -75,7 +75,7 @@ namespace WizardMonks.Decisions.Conditions
                 {
                     double abilityLevel = this.Character.GetAbilityMaximumFromReading(ability);
                     if(abilityLevel < TotalNeeded)
-                    bookDesires.Add(new BookDesire(ability, abilityLevel));
+                    bookDesires.Add(new BookDesire(this.Character, ability, abilityLevel));
                 }
             }
             return bookDesires;

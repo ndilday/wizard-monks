@@ -34,7 +34,7 @@ namespace WizardMonks.Decisions
         {
             List<string> log = new();
             log.Add("----------");
-            log.AddRange(ActionTypeMap.SelectMany(a => a.Value).Select(a => a.Log()));
+            log.AddRange(ActionTypeMap.SelectMany(a => a.Value).OrderByDescending(a => a.Desire).Select(a => a.Log()));
             log.Add("----------");
             return log;
         }

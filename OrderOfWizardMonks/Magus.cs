@@ -444,7 +444,9 @@ namespace WizardMonks
             }
 
             ProcessVisOffers(visTradeOffers);
-            ProcessBookOffers(bookTradeOffers, buyBookOffers, sellBookOffers);
+            ProcessBookSwaps(bookTradeOffers);
+            ProcessBookSales(sellBookOffers);
+            ProcessBookPurchases(buyBookOffers);
             // figure out book for book
         }
 
@@ -498,38 +500,32 @@ namespace WizardMonks
             } while (internalOffers.Any());
         }
 
-        private void ProcessBookOffers(IEnumerable<BookTradeOffer> bookTradeOffers, IEnumerable<VisForBookOffer> bookBuys, IEnumerable<VisForBookOffer> bookSales)
+        private void ProcessBookPurchases(IEnumerable<VisForBookOffer> bookBuys)
         {
-            var trades = bookTradeOffers.OrderBy(bto => bto.BookDesired.Quality);
-            while (trades.Any())
+            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisValue);
+            while (buys.Any())
             {
-                var tradeOffer = trades.First();
-                if (GetBooksFromCollection(tradeOffer.BookOffered.Topic).Contains(tradeOffer.BookOffered) &&
-                   tradeOffer.Mage.GetBooksFromCollection(tradeOffer.BookDesired.Topic).Contains(tradeOffer.BookDesired))
+                var buyOffer = buys.First();
+                if (HasSufficientVis(buyOffer.VisOffers))
                 {
-                    Log.Add("Trading " + tradeOffer.BookOffered.Title + " to " + tradeOffer.Mage.Name);
-                    Log.Add("For " + tradeOffer.BookDesired.Title);
-                    tradeOffer.Mage.Log.Add("Trading " + tradeOffer.BookDesired.Title + " to " + Name);
-                    tradeOffer.Mage.Log.Add("For " + tradeOffer.BookOffered.Title);
+                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.TradingPartner.Name);
+                    Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
+                    buyOffer.TradingPartner.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
+                    buyOffer.TradingPartner.Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
 
-                    AddBookToCollection(tradeOffer.BookDesired);
-                    tradeOffer.Mage.RemoveBookFromCollection(tradeOffer.BookDesired);
-                    RemoveBookFromCollection(tradeOffer.BookOffered);
-                    tradeOffer.Mage.AddBookToCollection(tradeOffer.BookOffered);
-                    bookSales = bookSales.Where(b => b.BookDesired != tradeOffer.BookOffered);
-                    bookBuys = bookBuys.Where(b => b.BookDesired != tradeOffer.BookDesired);
-                    trades = trades.Where(bto => bto.BookDesired != tradeOffer.BookDesired &&
-                                                 bto.BookOffered != tradeOffer.BookDesired)
-                                   .OrderBy(bto => bto.BookDesired.Quality);
+                    buyOffer.TradingPartner.RemoveBookFromCollection(buyOffer.BookDesired);
+                    AddBookToCollection(buyOffer.BookDesired);
+                    buyOffer.TradingPartner.GainVis(buyOffer.VisOffers);
+                    UseVis(buyOffer.VisOffers);
                 }
-                else
-                {
-                    trades = trades.Where(t => t != tradeOffer).OrderBy(bto => bto.BookDesired.Quality);
-                }
+                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisValue);
             }
+        }
 
-            var sales = bookSales.OrderByDescending(bto => bto.VisValue);
-            while (sales.Any() )
+        private void ProcessBookSales(IEnumerable<VisForBookOffer> bookSales)
+        {
+            var sales = bookSales.OrderByDescending(bts => bts.VisValue);
+            while (sales.Any())
             {
                 var sellOffer = sales.First();
                 if (GetBooksFromCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
@@ -548,24 +544,34 @@ namespace WizardMonks
                 }
                 sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisValue);
             }
+        }
 
-            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisValue);
-            while (buys.Any())
+        private void ProcessBookSwaps(IEnumerable<BookTradeOffer> bookTradeOffers)
+        {
+            var trades = bookTradeOffers.OrderBy(bto => bto.BookDesired.Quality);
+            while (trades.Any())
             {
-                var buyOffer = buys.First();
-                if (HasSufficientVis(buyOffer.VisOffers))
+                var tradeOffer = trades.First();
+                if (GetBooksFromCollection(tradeOffer.BookOffered.Topic).Contains(tradeOffer.BookOffered) &&
+                   tradeOffer.Mage.GetBooksFromCollection(tradeOffer.BookDesired.Topic).Contains(tradeOffer.BookDesired))
                 {
-                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.TradingPartner.Name);
-                    Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
-                    buyOffer.TradingPartner.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
-                    buyOffer.TradingPartner.Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
+                    Log.Add("Trading " + tradeOffer.BookOffered.Title + " to " + tradeOffer.Mage.Name);
+                    Log.Add("For " + tradeOffer.BookDesired.Title);
+                    tradeOffer.Mage.Log.Add("Trading " + tradeOffer.BookDesired.Title + " to " + Name);
+                    tradeOffer.Mage.Log.Add("For " + tradeOffer.BookOffered.Title);
 
-                    buyOffer.TradingPartner.RemoveBookFromCollection(buyOffer.BookDesired);
-                    AddBookToCollection(buyOffer.BookDesired);
-                    buyOffer.TradingPartner.GainVis(buyOffer.VisOffers);
-                    UseVis(buyOffer.VisOffers);
+                    AddBookToCollection(tradeOffer.BookDesired);
+                    tradeOffer.Mage.RemoveBookFromCollection(tradeOffer.BookDesired);
+                    RemoveBookFromCollection(tradeOffer.BookOffered);
+                    tradeOffer.Mage.AddBookToCollection(tradeOffer.BookOffered);
+                    trades = trades.Where(bto => bto.BookDesired != tradeOffer.BookDesired &&
+                                                 bto.BookOffered != tradeOffer.BookDesired)
+                                   .OrderBy(bto => bto.BookDesired.Quality);
                 }
-                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisValue);
+                else
+                {
+                    trades = trades.Where(t => t != tradeOffer).OrderBy(bto => bto.BookDesired.Quality);
+                }
             }
         }
         #endregion

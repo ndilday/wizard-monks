@@ -18,10 +18,10 @@ namespace WizardMonks
 
         public Covenant()
         {
-            _magi = new List<Magus>();
-            _visSources = new Dictionary<Ability, double>();
-            _visStock = new Dictionary<Ability, double>();
-            _library = new List<IBook>();
+            _magi = [];
+            _visSources = [];
+            _visStock = [];
+            _library = [];
             Aura = null;
         }
 

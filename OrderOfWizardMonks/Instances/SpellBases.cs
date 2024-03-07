@@ -26,6 +26,7 @@ namespace WizardMonks.Instances
             Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Aura, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, 1, "Detect Aura"));
             Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Vis, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, 1, "Detect Vis"));
             Add(new SpellBase(TechniqueEffects.Quantify, FormEffects.Vis, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, 4, "Quantify Vis"));
+            Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Gift, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, 10, "Detect Gift"));
             #endregion
         }
 

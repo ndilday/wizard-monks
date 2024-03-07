@@ -400,7 +400,7 @@ namespace WizardMonks
 
         protected override void DoAction(Character character)
         {
-            // see if the character can safely spont gift-finding spells
+            // TODO: see if the character can safely spont gift-finding spells
             if (typeof(Magus) == character.GetType())
             {
                 MageApprenticeSearch((Magus)character);
@@ -420,8 +420,19 @@ namespace WizardMonks
         private void MageApprenticeSearch(Magus mage)
         {
             // add bonus to area lore equal to casting total div 5?
-            double folkKen = mage.GetAttribute(AttributeType.Perception).Value;
-            folkKen += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
+            double folkKen = mage.GetAbility(Abilities.FolkKen).Value;
+            folkKen += mage.GetAttribute(AttributeType.Perception).Value;
+            Spell bestApprenticeSearchSpell =
+                mage.GetBestSpell(SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift));
+            // add 1 per magnitude of detection spell to the total
+            if (bestApprenticeSearchSpell != null)
+            {
+                folkKen += bestApprenticeSearchSpell.Level / 5.0;
+            }
+            else
+            {
+                folkKen += mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+            }
             double roll = Die.Instance.RollExplodingDie() + folkKen;
             if (roll > 12)
             {

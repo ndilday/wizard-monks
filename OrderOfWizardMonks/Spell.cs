@@ -264,6 +264,7 @@ namespace WizardMonks
         DebilitatingAir = 0x0000000001000000,
         //Vim
         Aura = 0x0100000000000000,
-        Vis = 0x0200000000000000
+        Vis = 0x0200000000000000,
+        Gift = 0x0400000000000000,
     }
 }

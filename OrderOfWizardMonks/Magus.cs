@@ -752,6 +752,10 @@ namespace WizardMonks
                 {
                     labTotal += Laboratory.GetModifier(artPair, activity);
                 }
+                if(Apprentice != null)
+                {
+                    labTotal += Apprentice.GetAbility(_magicAbility).Value + Apprentice.GetAttributeValue(AttributeType.Intelligence);
+                }
             }
 
             //TODO: foci

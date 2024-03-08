@@ -11,21 +11,20 @@ namespace WizardMonks.Decisions
 
         public void Add(IAction action)
         {
-            if (!ActionTypeMap.ContainsKey(action.Action))
+            if (!ActionTypeMap.TryGetValue(action.Action, out IList<IAction> value))
             {
-                ActionTypeMap[action.Action] = new List<IAction>();
-                ActionTypeMap[action.Action].Add(action);
+                ActionTypeMap[action.Action] = [action];
             }
             else
             {
-                var match = ActionTypeMap[action.Action].Where(a => a.Matches(action)).FirstOrDefault();
+                var match = value.Where(a => a.Matches(action)).FirstOrDefault();
                 if (match != null)
                 {
                     match.Desire += action.Desire;
                 }
                 else
                 {
-                    ActionTypeMap[action.Action].Add(action);
+                    value.Add(action);
                 }
             }
         }

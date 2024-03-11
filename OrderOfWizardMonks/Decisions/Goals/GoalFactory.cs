@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using WizardMonks.Characters;
 
 namespace WizardMonks.Decisions.Goals
 {
@@ -14,21 +12,10 @@ namespace WizardMonks.Decisions.Goals
         InventSpell
     }
 
-    class GoalFactory
+    interface IGoalFactory
     {
-        public static IGoal GenerateGoal(Character character, GoalType goalType, double desire)
-        {
-            switch (goalType)
-            {
-                default:
-                    return null;
-            }
-        }
+        IGoal GenerateGoal(Character character, GoalType goalType, double desire);
 
-        public static IGoal GenerateSpellGoal(Spell spell, double desire)
-        {
-            //return new InventSpellGoal(spell, desire, 0);
-            return null;
-        }
+        IGoal GenerateSpellGoal(Spell spell, double desire);
     }
 }

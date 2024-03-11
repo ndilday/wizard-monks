@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Characters;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
@@ -10,8 +11,8 @@ namespace WizardMonks
 {
     public class TwilightEventArgs : EventArgs
     {
-        DateTime _duration;
-        ushort _extraWarping;
+        readonly DateTime _duration;
+        readonly ushort _extraWarping;
 
         public TwilightEventArgs(DateTime duration, ushort extraWarping)
         {
@@ -24,10 +25,10 @@ namespace WizardMonks
 	public partial class Magus : Character
     {
         #region Private Fields
-        private Ability _magicAbility;
+        private readonly Ability _magicAbility;
         private Spell _partialSpell;
         private double _partialSpellProgress;
-        private Dictionary<Ability, double> _visStock;
+        private readonly Dictionary<Ability, double> _visStock;
         private MagusTradingDesires _tradeDesires;
         //private List<SummaGoal> _summaGoals;
         //private List<TractatusGoal> _tractatusGoals;
@@ -65,8 +66,8 @@ namespace WizardMonks
             Arts = new Arts();
             Covenant = null;
             Laboratory = null;
-            _visStock = new Dictionary<Ability, double>();
-            SpellList = new List<Spell>();
+            _visStock = [];
+            SpellList = [];
             //_tractatusGoals = new List<TractatusGoal>();
             //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
@@ -104,10 +105,7 @@ namespace WizardMonks
         #region Covenant Functions
         public void Join(Covenant covenant)
         {
-            if (Covenant != null)
-            {
-                Covenant.RemoveMagus(this);
-            }
+            Covenant?.RemoveMagus(this);
             Covenant = covenant;
             covenant.AddMagus(this);
             VisStudyRate = 6.75 + covenant.Aura.Strength;
@@ -136,7 +134,7 @@ namespace WizardMonks
         {
             if (GetAbility(_writingAbility).Value >= 1.0 && GetAbility(_writingLanguage).Value >= 4.0)
             {
-                List<BookDesire> bookDesires = new();
+                List<BookDesire> bookDesires = [];
                 IList<BookDesire> bookNeeds;
                 foreach (IGoal goal in _goals)
                 {
@@ -148,20 +146,20 @@ namespace WizardMonks
                 }
                 return bookDesires;
             }
-            return new List<BookDesire>();
+            return [];
         }
 
         public override IBook GetBestBookToWrite()
         {
             double currentBestBookValue = 0;
             IBook bestBook = null;
-            HashSet<int> consideredTopics = new();
+            HashSet<int> consideredTopics = [];
 
             // since the value of a tractatus is independent of topic,
             // calculate the value of writing a tractatus now, so that we don't have to keep doing it
             double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
             double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
-            var unneededBookTopics = GetUnneededBooksFromCollection().Select(b => b.Topic).Distinct();
+            var unneededBookTopics = GetUnneededBooksFromCollection().Select(b => b.Topic).Distinct().ToList();
             foreach (BookDesire bookDesire in GlobalEconomy.DesiredBooksList)
             {
                 // if we already have a suitable book for this topic, let's not try to write another
@@ -342,7 +340,7 @@ namespace WizardMonks
 
         protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
         {
-            List<BookForTrade> list = new();
+            List<BookForTrade> list = [];
             double distillRate = GetVisDistillationRate();
             foreach (IBook book in books)
             {
@@ -410,10 +408,10 @@ namespace WizardMonks
 
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
-            List<VisTradeOffer> visTradeOffers = new();
-            List<BookTradeOffer> bookTradeOffers = new();
-            List<VisForBookOffer> buyBookOffers = new();
-            List<VisForBookOffer> sellBookOffers = new();
+            List<VisTradeOffer> visTradeOffers = [];
+            List<BookTradeOffer> bookTradeOffers = [];
+            List<VisForBookOffer> buyBookOffers = [];
+            List<VisForBookOffer> sellBookOffers = [];
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)
@@ -626,9 +624,9 @@ namespace WizardMonks
             {
                 total += Covenant.GetVis(visArt);
             }
-            if(_visStock.ContainsKey(visArt))
+            if(_visStock.TryGetValue(visArt, out double value))
             {
-                total += _visStock[visArt];
+                total += value;
             }
             return total;
         }

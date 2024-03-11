@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Characters;
+
 namespace WizardMonks
 {
     public enum Domain
@@ -72,7 +74,7 @@ namespace WizardMonks
         {
             Domain = type;
             Strength = strength;
-            VisSources = new List<VisSource>();
+            VisSources = [];
         }
 
         public double GetAverageVisSourceSize(double magicLoreRoll)

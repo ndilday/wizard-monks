@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
@@ -32,9 +32,8 @@ namespace WizardMonks.Decisions.Conditions
         public AbilityScoreCondition(Character character, uint dueDate, double desire, Ability ability, double totalNeeded) :
             base(character, dueDate, desire)
         {
-            Abilities = new List<Ability>(1);
-            Abilities.Add(ability);
-            Attributes = new List<AttributeType>();
+            Abilities = [ability];
+            Attributes = [];
             TotalNeeded = totalNeeded;
             _currentTotal = GetTotal();
         }
@@ -68,7 +67,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public override List<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new();
+            List<BookDesire> bookDesires = [];
             if (!ConditionFulfilled)
             {
                 foreach (Ability ability in this.Abilities)
@@ -166,8 +165,7 @@ namespace WizardMonks.Decisions.Conditions
                 // putting a limit here to how far the circular loop will go
                 else if (ConditionDepth < 10 && AgeToCompleteBy > mage.SeasonalAge)
                 {
-                    List<Ability> visType = new();
-                    visType.Add(magicArt.Ability);
+                    List<Ability> visType = [magicArt.Ability];
                     // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                     VisCondition visCondition =
                         new(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));

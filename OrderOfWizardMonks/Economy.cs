@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks
@@ -80,7 +80,7 @@ namespace WizardMonks
 
         public override string ToString()
         {
-            return $"{Ability.ToString()} {CurrentLevel.ToString()}";
+            return $"{Ability} {CurrentLevel}";
         }
     }
 
@@ -167,7 +167,7 @@ namespace WizardMonks
 
         public IList<BookTradeOffer> GenerateBookTradeOffers(MagusTradingDesires tradeDesires)
         {
-            List<BookTradeOffer> tradeList = new();
+            List<BookTradeOffer> tradeList = [];
             foreach(BookForTrade book in BooksForTrade)
             {
                 if (tradeDesires.BookDesires.ContainsKey(book.Book.Topic) &&
@@ -192,8 +192,8 @@ namespace WizardMonks
 
         public IList<VisForBookOffer> GenerateBuyBookOffers(MagusTradingDesires otherDesires)
         {
-            List<VisForBookOffer> bookTradeOffers = new();
-            if (BookDesires.Any() && otherDesires.BooksForTrade.Any())
+            List<VisForBookOffer> bookTradeOffers = [];
+            if (BookDesires.Count != 0 && otherDesires.BooksForTrade.Any())
             {
                 // they have books, we want books
                 foreach (BookForTrade bookForTrade in otherDesires.BooksForTrade)
@@ -223,8 +223,8 @@ namespace WizardMonks
 
         public IList<VisForBookOffer> GenerateSellBookOffers(MagusTradingDesires otherDesires)
         {
-            List<VisForBookOffer> bookTradeOffers = new();
-            if (BooksForTrade.Any() && otherDesires.BookDesires.Any())
+            List<VisForBookOffer> bookTradeOffers = [];
+            if (BooksForTrade.Any() && otherDesires.BookDesires.Count != 0)
             {
                 // we have books, they want books
                 foreach (BookForTrade bookForTrade in BooksForTrade)
@@ -257,10 +257,10 @@ namespace WizardMonks
         /// <param name="giverVisDesires"></param>
         /// <param name="receiverVisDesires"></param>
         /// <returns></returns>
-        private IEnumerable<VisOffer> GenerateVisOffer(double price, VisDesire[] giverVisDesires, VisDesire[] receiverVisDesires)
+        private List<VisOffer> GenerateVisOffer(double price, VisDesire[] giverVisDesires, VisDesire[] receiverVisDesires)
         {
             double remainingPrice = price;
-            List<VisOffer> offerSegments = new();
+            List<VisOffer> offerSegments = [];
             // order the receiver's desires from largest to smallest
             foreach(VisDesire desire in receiverVisDesires.Where(d => d.Quantity > 0).OrderByDescending(d => d.Quantity))
             {
@@ -311,11 +311,11 @@ namespace WizardMonks
             return offerSegments;
         }
 
-        private IList<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)
+        private List<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)
         {
             // TODO: need to take Vis type into account
-            List<VisOffer> bids = new();
-            List<VisOffer> asks = new();
+            List<VisOffer> bids = [];
+            List<VisOffer> asks = [];
             for(byte i = 0; i < MagicArts.Count; i++)
             {
                 if(VisDesires[i].Quantity < 0 && otherVisDesires[i].Quantity > 0)
@@ -350,9 +350,9 @@ namespace WizardMonks
             }
             // we should now have a list of bids and asks
             // we need at least one bid and one ask to make a deal
-            if (bids.Count() > 0 && asks.Count() > 0)
+            if (bids.Count > 0 && asks.Count > 0)
             {
-                List<VisTradeOffer> visTradeOffer = new();
+                List<VisTradeOffer> visTradeOffer = [];
                 foreach (VisOffer bid in bids)
                 {
                     foreach (VisOffer ask in asks)
@@ -379,9 +379,9 @@ namespace WizardMonks
     public static class GlobalEconomy
     {
         // needs to know about all books available for trade
-        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = new();
+        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = [];
         // needs to know about all topics people have expressed wanting a book for
-        public static List<BookDesire> DesiredBooksList = new();
+        public static List<BookDesire> DesiredBooksList = [];
         // needs to know about all vis desires
         public static double[] GlobalVisDemandMap = new double[MagicArts.Count];
         // needs to have some sense of the average value of a tractatus

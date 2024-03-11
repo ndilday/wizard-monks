@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class FindVisSourceHelper : AHelper
     {
-        private int _auraCount;
-        private double _currentAura;
-        private double _currentVis;
-        private double _currentScore;
-        private List<Ability> _visTypes;
+        private readonly int _auraCount;
+        private readonly double _currentAura;
+        private readonly double _currentVis;
+        private readonly double _currentScore;
+        private readonly List<Ability> _visTypes;
+        private readonly SpellBase _findVisSpellBase;
         private double _magicLoreTotal;
-        private SpellBase _findVisSpellBase;
 
         public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
@@ -41,10 +42,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
         {
-            List<Ability> visSearchAbilities = new();
-            visSearchAbilities.Add(Abilities.MagicLore);
-            visSearchAbilities.Add(MagicArts.Intellego);
-            visSearchAbilities.Add(MagicArts.Vim);
+            List<Ability> visSearchAbilities =
+            [
+                Abilities.MagicLore,
+                MagicArts.Intellego,
+                MagicArts.Vim,
+            ];
             // we're not getting vis fast enough, so we need to find a new source
             // consider the value of searching for new vis sites in current auras
             // determine average vis source found

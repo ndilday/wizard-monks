@@ -31,10 +31,12 @@ namespace WizardMonks.Decisions
 
         public IList<string> Log()
         {
-            List<string> log = new();
-            log.Add("----------");
-            log.AddRange(ActionTypeMap.SelectMany(a => a.Value).OrderByDescending(a => a.Desire).Select(a => a.Log()));
-            log.Add("----------");
+            List<string> log =
+            [
+                "----------",
+                .. ActionTypeMap.SelectMany(a => a.Value).OrderByDescending(a => a.Desire).Select(a => a.Log()),
+                "----------",
+            ];
             return log;
         }
 

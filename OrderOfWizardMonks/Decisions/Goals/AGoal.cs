@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using WizardMonks.Decisions.Conditions;
 
 namespace WizardMonks.Decisions.Goals
@@ -20,7 +19,7 @@ namespace WizardMonks.Decisions.Goals
             AgeToCompleteBy = ageToCompleteBy;
             Desire = desire;
             Character = character;
-            Conditions = new List<ACondition>();
+            Conditions = [];
         }
 
         public virtual void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
@@ -50,7 +49,7 @@ namespace WizardMonks.Decisions.Goals
 
         public virtual IList<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new();
+            List<BookDesire> bookDesires = [];
             foreach(ACondition condition in Conditions)
             {
                 var conditionalDesires = condition.GetBookDesires();

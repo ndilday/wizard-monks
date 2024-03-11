@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
-
+using WizardMonks.Characters;
 using WizardMonks.Core;
 using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-	[Serializable]
+    [Serializable]
 	public enum Activity
 	{
 		ReadBook,
@@ -626,7 +626,7 @@ namespace WizardMonks
             double experienceDifference = character.GetAbility(Topic).Experience - Student.GetAbility(Topic).Experience;
             if (experienceDifference <= 0)
             {
-                throw new ArgumentOutOfRangeException("Teacher has nothing to teach this student!");
+                throw new Exception("Teacher has nothing to teach this student!");
             }
             double quality = character.GetAbility(Abilities.Teaching).Value + character.GetAttributeValue(AttributeType.Communication) + 6;
             Student.Advance(new Learn(quality, character.GetAbility(Topic).Value, Topic, character));
@@ -667,7 +667,7 @@ namespace WizardMonks
             double abilityDifference = character.GetAbility(AbilityToTrain).Value - Student.GetAbility(AbilityToTrain).Value;
             if (abilityDifference <= 0)
             {
-                throw new ArgumentOutOfRangeException("Trainer has nothing to teach this student!");
+                throw new Exception("Trainer has nothing to teach this student!");
             }
             double amountTrained = 3 + character.GetAbility(AbilityToTrain).Value;
             if (amountTrained > abilityDifference)
@@ -820,7 +820,7 @@ namespace WizardMonks
         {
             if (mage.Covenant == null)
             {
-                throw new ArgumentNullException("Magi can only extract vis in an aura!");
+                throw new Exception("Magi can only extract vis in an aura!");
             }
             double amount = mage.GetVisDistillationRate();
             mage.Log.Add("Extracted " + amount.ToString("0.00") + " pawns of vis from aura");

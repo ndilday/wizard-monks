@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     class ReadingHelper : AHelper
     {
-        private Ability _ability;
+        private readonly Ability _ability;
         public ReadingHelper(Ability ability, Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {

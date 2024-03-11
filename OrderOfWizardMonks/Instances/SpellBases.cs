@@ -12,8 +12,8 @@ namespace WizardMonks.Instances
 
         static SpellBases()
         {
-            _spellBasesByArts = new Dictionary<Ability, Dictionary<Ability, List<SpellBase>>>();
-            _spellBasesByEffects = new Dictionary<TechniqueEffects, Dictionary<FormEffects, SpellBase>>();
+            _spellBasesByArts = [];
+            _spellBasesByEffects = [];
 
             #region CrAn
             Add(new SpellBase(TechniqueEffects.Create, FormEffects.PlainAnimalProduct, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, 5, "Create Animal Product"));
@@ -40,11 +40,11 @@ namespace WizardMonks.Instances
         {
             if (!_spellBasesByArts.ContainsKey(spellBase.ArtPair.Technique))
             {
-                _spellBasesByArts[spellBase.ArtPair.Technique] = new Dictionary<Ability, List<SpellBase>>();
+                _spellBasesByArts[spellBase.ArtPair.Technique] = [];
             }
             if (!_spellBasesByArts[spellBase.ArtPair.Technique].ContainsKey(spellBase.ArtPair.Form))
             {
-                _spellBasesByArts[spellBase.ArtPair.Technique][spellBase.ArtPair.Form] = new List<SpellBase>();
+                _spellBasesByArts[spellBase.ArtPair.Technique][spellBase.ArtPair.Form] = [];
             }
             _spellBasesByArts[spellBase.ArtPair.Technique][spellBase.ArtPair.Form].Add(spellBase);
         }
@@ -53,7 +53,7 @@ namespace WizardMonks.Instances
         {
             if (!_spellBasesByEffects.ContainsKey(spellBase.TechniqueEffects))
             {
-                _spellBasesByEffects[spellBase.TechniqueEffects] = new Dictionary<FormEffects, SpellBase>();
+                _spellBasesByEffects[spellBase.TechniqueEffects] = [];
             }
             if (!_spellBasesByEffects[spellBase.TechniqueEffects].ContainsKey(spellBase.FormEffects))
             {

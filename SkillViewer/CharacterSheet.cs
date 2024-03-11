@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using WizardMonks;
+using WizardMonks.Character;
 using WizardMonks.Instances;
 
 namespace SkillViewer

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using WizardMonks.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class ArtIncreaseHelper : AHelper
     {
-        private ArtPair _arts;
+        private readonly ArtPair _arts;
 
         public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)

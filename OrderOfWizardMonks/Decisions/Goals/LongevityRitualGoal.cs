@@ -4,12 +4,12 @@ using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Goals
 {
-    
+
     public class LongevityRitualGoal : AGoal
     {
         // TODO: Make this configurable
         // TODO: figure out a way to make vis desires split over multiple arts
-        private static readonly List<Ability> visTypes = new(){ MagicArts.Creo, MagicArts.Vim };
+        private static readonly List<Ability> visTypes = [MagicArts.Creo, MagicArts.Vim];
         public LongevityRitualGoal(Magus magus, uint? ageToCompleteBy, double desire) : base(magus, ageToCompleteBy, desire)
         {
             // target longevity ritual for age 35

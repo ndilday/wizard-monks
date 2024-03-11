@@ -8,7 +8,7 @@ namespace WizardMonks.Core
 {
     public class Multiton<K, T> where T: new()
     {
-        private static readonly Dictionary<K, T> instances = new();
+        private static readonly Dictionary<K, T> instances = [];
 
         private Multiton() 
         {
@@ -36,7 +36,7 @@ namespace WizardMonks.Core
 
     public class ImmutableMultiton<K, T> where T: IKeyed<K>, new()
     {
-        private static readonly Dictionary<K, T> instances = new();
+        private static readonly Dictionary<K, T> instances = [];
 
         private ImmutableMultiton() 
         {

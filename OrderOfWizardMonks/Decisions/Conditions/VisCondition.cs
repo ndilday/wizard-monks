@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Characters;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
 
@@ -9,10 +9,10 @@ namespace WizardMonks.Decisions.Conditions
 {
     public class VisCondition : ACondition
     {
-        private Magus _mage;
-        private bool _vimSufficient;
-        HasLabCondition _labCondition;
-        HasAuraCondition _auraCondition;
+        private readonly Magus _mage;
+        private readonly bool _vimSufficient;
+        readonly HasLabCondition _labCondition;
+        readonly HasAuraCondition _auraCondition;
         double _visStillNeeded;
 
         public List<Ability> VisTypes { get; private set; }
@@ -33,8 +33,7 @@ namespace WizardMonks.Decisions.Conditions
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
-            VisTypes = new List<Ability>(1);
-            VisTypes.Add(ability);
+            VisTypes = [ability];
             AmountNeeded = totalNeeded;
             _auraCondition = new HasAuraCondition(_mage, AgeToCompleteBy - 2, Desire, (ushort)(ConditionDepth + 2));
             _labCondition = new HasLabCondition(_mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 2));
@@ -116,7 +115,7 @@ namespace WizardMonks.Decisions.Conditions
 
         public override List<BookDesire> GetBookDesires()
         {
-            List<BookDesire> bookDesires = new();
+            List<BookDesire> bookDesires = [];
             if (!ConditionFulfilled)
             {
                 // books won't help us get the vis we want, will they?

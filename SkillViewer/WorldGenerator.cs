@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using WizardMonks;
+using WizardMonks.Character;
 using WizardMonks.Core;
 using WizardMonks.Instances;
 using WorldSimulation;

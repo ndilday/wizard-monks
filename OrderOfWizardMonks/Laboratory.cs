@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using WizardMonks.Characters;
 
 namespace WizardMonks
 {
@@ -18,8 +17,8 @@ namespace WizardMonks
 
         public Feature()
         {
-            ArtModifiers = new Dictionary<Ability, double>();
-            ActivityModifiers = new Dictionary<Activity, double>();
+            ArtModifiers = [];
+            ActivityModifiers = [];
             Refinement = 0;
             Aesthetics = 0;
             Quality = 0;
@@ -40,7 +39,7 @@ namespace WizardMonks
 
         public Laboratory(Magus owner, Aura aura, double size) : base()
         {
-            _features = new List<Feature>();
+            _features = [];
             _owner = owner;
             Size = size;
             _availableRefinement = size;
@@ -97,9 +96,8 @@ namespace WizardMonks
 
         public void RemoveFeature(Feature feature)
         {
-            if (_features.Contains(feature))
+            if (_features.Remove(feature))
             {
-                _features.Remove(feature);
                 SubtractFeatureStats(feature);
                 foreach (KeyValuePair<Ability, double> artModifier in feature.ArtModifiers)
                 {

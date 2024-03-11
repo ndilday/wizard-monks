@@ -17,7 +17,7 @@ namespace WizardMonks.Core
 
     public class Die : IAMDie
     {
-        private Random _random = new();
+        private readonly Random _random = new();
         private static volatile IAMDie _singletonDie;
         private static readonly object _lockerObject;
         private static readonly int Z_MAX = 5;
@@ -125,7 +125,7 @@ namespace WizardMonks.Core
             }
         
             while ((maxz - minz) > Z_EPSILON) {
-                pval = poz(zval);
+                pval = Poz(zval);
                 if (pval > p) {
                     maxz = zval;
                 } else {
@@ -136,7 +136,7 @@ namespace WizardMonks.Core
             return(zval);
         }
 
-        private double poz(double z) 
+        private static double Poz(double z) 
         {
             double y, x, w;
         

@@ -1,14 +1,12 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-	[Serializable]
+    [Serializable]
 	public class IBook
 	{
         public string Title { get; set; }

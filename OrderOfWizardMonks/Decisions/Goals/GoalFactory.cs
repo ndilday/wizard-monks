@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using WizardMonks;
-
 namespace WizardMonks.Decisions.Goals
 {
     public enum GoalType

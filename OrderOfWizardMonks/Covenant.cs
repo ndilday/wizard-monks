@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-	[Serializable]
+    [Serializable]
 	public class Covenant
 	{
 		protected List<Magus> _magi;
@@ -40,10 +41,7 @@ namespace WizardMonks
 
         public void RemoveMagus(Magus mage)
         {
-            if (_magi.Contains(mage))
-            {
-                _magi.Remove(mage);
-            }
+            _magi.Remove(mage);
         }
 
         public void AddBook(IBook book)
@@ -78,13 +76,13 @@ namespace WizardMonks
         {
             if (amount <= 0)
             {
-                return _visStock.ContainsKey(visType) ? _visStock[visType] : 0;
+                return _visStock.TryGetValue(visType, out double value) ? value : 0;
             }
             if (!MagicArts.IsArt(visType))
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            if(!_visStock.ContainsKey(visType) || _visStock[visType] < amount)
+            if(!_visStock.TryGetValue(visType, out double value2) || value2 < amount)
             {
                 throw new ArgumentException("Insufficient vis available!");
             }
@@ -98,7 +96,7 @@ namespace WizardMonks
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            return _visStock.ContainsKey(visType) ? _visStock[visType] : 0;
+            return _visStock.TryGetValue(visType, out double value) ? value : 0;
         }
         #endregion
 

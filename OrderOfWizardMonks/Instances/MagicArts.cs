@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using WizardMonks.Characters;
 
 namespace WizardMonks.Instances
 {
@@ -23,7 +22,7 @@ namespace WizardMonks.Instances
         public static Ability Terram { get; set; }
         public static Ability Vim { get; set; }
 
-        public static int Count = 15;
+        public static readonly int Count = 15;
 
         static MagicArts()
         {
@@ -94,56 +93,56 @@ namespace WizardMonks.Instances
 
     public static class MagicArtPairs
     {
-        public static ArtPair CrAn = new(MagicArts.Creo, MagicArts.Animal);
-        public static ArtPair CrAq = new(MagicArts.Creo, MagicArts.Aquam);
-        public static ArtPair CrAu = new(MagicArts.Creo, MagicArts.Auram);
-        public static ArtPair CrCo = new(MagicArts.Creo, MagicArts.Corpus);
-        public static ArtPair CrHe = new(MagicArts.Creo, MagicArts.Herbam);
-        public static ArtPair CrIg = new(MagicArts.Creo, MagicArts.Ignem);
-        public static ArtPair CrIm = new(MagicArts.Creo, MagicArts.Imaginem);
-        public static ArtPair CrMe = new(MagicArts.Creo, MagicArts.Mentem);
-        public static ArtPair CrTe = new(MagicArts.Creo, MagicArts.Terram);
-        public static ArtPair CrVi = new(MagicArts.Creo, MagicArts.Vim);
-        public static ArtPair InAn = new(MagicArts.Intellego, MagicArts.Animal);
-        public static ArtPair InAq = new(MagicArts.Intellego, MagicArts.Aquam);
-        public static ArtPair InAu = new(MagicArts.Intellego, MagicArts.Auram);
-        public static ArtPair InCo = new(MagicArts.Intellego, MagicArts.Corpus);
-        public static ArtPair InHe = new(MagicArts.Intellego, MagicArts.Herbam);
-        public static ArtPair InIg = new(MagicArts.Intellego, MagicArts.Ignem);
-        public static ArtPair InIm = new(MagicArts.Intellego, MagicArts.Imaginem);
-        public static ArtPair InMe = new(MagicArts.Intellego, MagicArts.Mentem);
-        public static ArtPair InTe = new(MagicArts.Intellego, MagicArts.Terram);
-        public static ArtPair InVi = new(MagicArts.Intellego, MagicArts.Vim);
-        public static ArtPair MuAn = new(MagicArts.Muto, MagicArts.Animal);
-        public static ArtPair MuAq = new(MagicArts.Muto, MagicArts.Aquam);
-        public static ArtPair MuAu = new(MagicArts.Muto, MagicArts.Auram);
-        public static ArtPair MuCo = new(MagicArts.Muto, MagicArts.Corpus);
-        public static ArtPair MuHe = new(MagicArts.Muto, MagicArts.Herbam);
-        public static ArtPair MuIg = new(MagicArts.Muto, MagicArts.Ignem);
-        public static ArtPair MuIm = new(MagicArts.Muto, MagicArts.Imaginem);
-        public static ArtPair MuMe = new(MagicArts.Muto, MagicArts.Mentem);
-        public static ArtPair MuTe = new(MagicArts.Muto, MagicArts.Terram);
-        public static ArtPair MuVi = new(MagicArts.Muto, MagicArts.Vim);
-        public static ArtPair PeAn = new(MagicArts.Perdo, MagicArts.Animal);
-        public static ArtPair PeAq = new(MagicArts.Perdo, MagicArts.Aquam);
-        public static ArtPair PeAu = new(MagicArts.Perdo, MagicArts.Auram);
-        public static ArtPair PeCo = new(MagicArts.Perdo, MagicArts.Corpus);
-        public static ArtPair PeHe = new(MagicArts.Perdo, MagicArts.Herbam);
-        public static ArtPair PeIg = new(MagicArts.Perdo, MagicArts.Ignem);
-        public static ArtPair PeIm = new(MagicArts.Perdo, MagicArts.Imaginem);
-        public static ArtPair PeMe = new(MagicArts.Perdo, MagicArts.Mentem);
-        public static ArtPair PeTe = new(MagicArts.Perdo, MagicArts.Terram);
-        public static ArtPair PeVi = new(MagicArts.Perdo, MagicArts.Vim);
-        public static ArtPair ReAn = new(MagicArts.Rego, MagicArts.Animal);
-        public static ArtPair ReAq = new(MagicArts.Rego, MagicArts.Aquam);
-        public static ArtPair ReAu = new(MagicArts.Rego, MagicArts.Auram);
-        public static ArtPair ReCo = new(MagicArts.Rego, MagicArts.Corpus);
-        public static ArtPair ReHe = new(MagicArts.Rego, MagicArts.Herbam);
-        public static ArtPair ReIg = new(MagicArts.Rego, MagicArts.Ignem);
-        public static ArtPair ReIm = new(MagicArts.Rego, MagicArts.Imaginem);
-        public static ArtPair ReMe = new(MagicArts.Rego, MagicArts.Mentem);
-        public static ArtPair ReTe = new(MagicArts.Rego, MagicArts.Terram);
-        public static ArtPair ReVi = new(MagicArts.Rego, MagicArts.Vim);
+        public static readonly ArtPair CrAn = new(MagicArts.Creo, MagicArts.Animal);
+        public static readonly ArtPair CrAq = new(MagicArts.Creo, MagicArts.Aquam);
+        public static readonly ArtPair CrAu = new(MagicArts.Creo, MagicArts.Auram);
+        public static readonly ArtPair CrCo = new(MagicArts.Creo, MagicArts.Corpus);
+        public static readonly ArtPair CrHe = new(MagicArts.Creo, MagicArts.Herbam);
+        public static readonly ArtPair CrIg = new(MagicArts.Creo, MagicArts.Ignem);
+        public static readonly ArtPair CrIm = new(MagicArts.Creo, MagicArts.Imaginem);
+        public static readonly ArtPair CrMe = new(MagicArts.Creo, MagicArts.Mentem);
+        public static readonly ArtPair CrTe = new(MagicArts.Creo, MagicArts.Terram);
+        public static readonly ArtPair CrVi = new(MagicArts.Creo, MagicArts.Vim);
+        public static readonly ArtPair InAn = new(MagicArts.Intellego, MagicArts.Animal);
+        public static readonly ArtPair InAq = new(MagicArts.Intellego, MagicArts.Aquam);
+        public static readonly ArtPair InAu = new(MagicArts.Intellego, MagicArts.Auram);
+        public static readonly ArtPair InCo = new(MagicArts.Intellego, MagicArts.Corpus);
+        public static readonly ArtPair InHe = new(MagicArts.Intellego, MagicArts.Herbam);
+        public static readonly ArtPair InIg = new(MagicArts.Intellego, MagicArts.Ignem);
+        public static readonly ArtPair InIm = new(MagicArts.Intellego, MagicArts.Imaginem);
+        public static readonly ArtPair InMe = new(MagicArts.Intellego, MagicArts.Mentem);
+        public static readonly ArtPair InTe = new(MagicArts.Intellego, MagicArts.Terram);
+        public static readonly ArtPair InVi = new(MagicArts.Intellego, MagicArts.Vim);
+        public static readonly ArtPair MuAn = new(MagicArts.Muto, MagicArts.Animal);
+        public static readonly ArtPair MuAq = new(MagicArts.Muto, MagicArts.Aquam);
+        public static readonly ArtPair MuAu = new(MagicArts.Muto, MagicArts.Auram);
+        public static readonly ArtPair MuCo = new(MagicArts.Muto, MagicArts.Corpus);
+        public static readonly ArtPair MuHe = new(MagicArts.Muto, MagicArts.Herbam);
+        public static readonly ArtPair MuIg = new(MagicArts.Muto, MagicArts.Ignem);
+        public static readonly ArtPair MuIm = new(MagicArts.Muto, MagicArts.Imaginem);
+        public static readonly ArtPair MuMe = new(MagicArts.Muto, MagicArts.Mentem);
+        public static readonly ArtPair MuTe = new(MagicArts.Muto, MagicArts.Terram);
+        public static readonly ArtPair MuVi = new(MagicArts.Muto, MagicArts.Vim);
+        public static readonly ArtPair PeAn = new(MagicArts.Perdo, MagicArts.Animal);
+        public static readonly ArtPair PeAq = new(MagicArts.Perdo, MagicArts.Aquam);
+        public static readonly ArtPair PeAu = new(MagicArts.Perdo, MagicArts.Auram);
+        public static readonly ArtPair PeCo = new(MagicArts.Perdo, MagicArts.Corpus);
+        public static readonly ArtPair PeHe = new(MagicArts.Perdo, MagicArts.Herbam);
+        public static readonly ArtPair PeIg = new(MagicArts.Perdo, MagicArts.Ignem);
+        public static readonly ArtPair PeIm = new(MagicArts.Perdo, MagicArts.Imaginem);
+        public static readonly ArtPair PeMe = new(MagicArts.Perdo, MagicArts.Mentem);
+        public static readonly ArtPair PeTe = new(MagicArts.Perdo, MagicArts.Terram);
+        public static readonly ArtPair PeVi = new(MagicArts.Perdo, MagicArts.Vim);
+        public static readonly ArtPair ReAn = new(MagicArts.Rego, MagicArts.Animal);
+        public static readonly ArtPair ReAq = new(MagicArts.Rego, MagicArts.Aquam);
+        public static readonly ArtPair ReAu = new(MagicArts.Rego, MagicArts.Auram);
+        public static readonly ArtPair ReCo = new(MagicArts.Rego, MagicArts.Corpus);
+        public static readonly ArtPair ReHe = new(MagicArts.Rego, MagicArts.Herbam);
+        public static readonly ArtPair ReIg = new(MagicArts.Rego, MagicArts.Ignem);
+        public static readonly ArtPair ReIm = new(MagicArts.Rego, MagicArts.Imaginem);
+        public static readonly ArtPair ReMe = new(MagicArts.Rego, MagicArts.Mentem);
+        public static readonly ArtPair ReTe = new(MagicArts.Rego, MagicArts.Terram);
+        public static readonly ArtPair ReVi = new(MagicArts.Rego, MagicArts.Vim);
     }
 
     public class Arts : IEnumerable<CharacterAbilityBase>
@@ -166,41 +165,25 @@ namespace WizardMonks.Instances
 
         public CharacterAbilityBase GetAbility(Ability ability)
         {
-            switch (ability.AbilityId)
+            return ability.AbilityId switch
             {
-                case 300:
-                    return creo;
-                case 301:
-                    return intellego;
-                case 302:
-                    return muto;
-                case 303:
-                    return perdo;
-                case 304:
-                    return rego;
-                case 305:
-                    return animal;
-                case 306:
-                    return aquam;
-                case 307:
-                    return auram;
-                case 308:
-                    return corpus;
-                case 309:
-                    return herbam;
-                case 310:
-                    return ignem;
-                case 311:
-                    return imaginem;
-                case 312:
-                    return mentem;
-                case 313:
-                    return terram;
-                case 314:
-                    return vim;
-                default:
-                    return null;
-            }
+                300 => creo,
+                301 => intellego,
+                302 => muto,
+                303 => perdo,
+                304 => rego,
+                305 => animal,
+                306 => aquam,
+                307 => auram,
+                308 => corpus,
+                309 => herbam,
+                310 => ignem,
+                311 => imaginem,
+                312 => mentem,
+                313 => terram,
+                314 => vim,
+                _ => null,
+            };
         }
 
         public AcceleratedAbility Creo

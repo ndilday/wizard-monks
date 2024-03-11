@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using WizardMonks.Characters;
+
 namespace WizardMonks.Decisions.Conditions
 {
     public abstract class ACondition
@@ -20,7 +22,7 @@ namespace WizardMonks.Decisions.Conditions
             ConditionDepth = conditionDepth;
         }
 
-        public virtual List<BookDesire> GetBookDesires() { return new List<BookDesire>(); }
+        public virtual List<BookDesire> GetBookDesires() { return []; }
 
         public virtual void ModifyVisDesires(VisDesire[] desires) { }
     }

@@ -9,8 +9,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-using WizardMonks;
-
 namespace SkillViewer
 {
     public partial class CharacterBuilderForm : Form

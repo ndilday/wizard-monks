@@ -62,6 +62,7 @@ namespace WizardMonks.Characters
 
         #region Public Properties
         public Personality Personality { get; private set; }
+        public IList<Relationship> Relationships { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
@@ -104,6 +105,7 @@ namespace WizardMonks.Characters
             Decrepitude = 0;
             CurrentSeason = Season.Spring;
             KnownAuras = [];
+            Relationships = [];
             IsCollaborating = false;
             WantsToFollow = true;
 

@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace WizardMonks.Thoughts
 {
-    internal class Thought
+    public class Opinion
     {
-        public List<string> Categories { get; private set; }
-        public Thought() 
-        {
-            Categories = [];
-        }
     }
 }

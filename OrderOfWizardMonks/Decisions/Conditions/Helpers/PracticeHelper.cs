@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 
+using WizardMonks.Characters;
+
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     class PracticeHelper : AHelper
     {
-        private Ability _ability;
+        private readonly Ability _ability;
         public PracticeHelper(Ability ability, Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using WizardMonks.Characters;
 using WizardMonks.Decisions.Goals;
 
 namespace WizardMonks.Instances
@@ -55,9 +54,11 @@ namespace WizardMonks.Instances
 
         public static void BuildBjornaer()
         {
-            Bjornaer = new Magus(80);
-            Bjornaer.Name = "Bjornaer";
-            Bjornaer.House = Houses.Bjornaer;
+            Bjornaer = new Magus(80)
+            {
+                Name = "Bjornaer",
+                House = Houses.Bjornaer
+            };
 
             Bjornaer.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Bjornaer.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -110,9 +111,11 @@ namespace WizardMonks.Instances
 
         public static void BuildBonisagus()
         {
-            Bonisgaus = new Magus(80);
-            Bonisgaus.Name = "Bonisagus";
-            Bonisgaus.House = Houses.Bonisagus;
+            Bonisgaus = new Magus(80)
+            {
+                Name = "Bonisagus",
+                House = Houses.Bonisagus
+            };
 
             Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -157,9 +160,11 @@ namespace WizardMonks.Instances
 
         public static void BuildCriamon()
         {
-            Criamon = new Magus(80);
-            Criamon.Name = "Criamon";
-            Criamon.House = Houses.Criamon;
+            Criamon = new Magus(80)
+            {
+                Name = "Criamon",
+                House = Houses.Criamon
+            };
 
             Criamon.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Criamon.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -212,9 +217,11 @@ namespace WizardMonks.Instances
 
         public static void BuildDiedne()
         {
-            Diedne = new Magus(80);
-            Diedne.Name = "Diedne";
-            Diedne.House = Houses.Diedne;
+            Diedne = new Magus(80)
+            {
+                Name = "Diedne",
+                House = Houses.Diedne
+            };
 
             Diedne.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Diedne.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -298,9 +305,11 @@ namespace WizardMonks.Instances
 
         public static void BuildFlambeau()
         {
-            Flambeau = new Magus(80);
-            Flambeau.Name = "Flambeau";
-            Flambeau.House = Houses.Flambeau;
+            Flambeau = new Magus(80)
+            {
+                Name = "Flambeau",
+                House = Houses.Flambeau
+            };
 
             Flambeau.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Flambeau.GetAttribute(AttributeType.Strength).BaseValue = 2;
@@ -351,9 +360,11 @@ namespace WizardMonks.Instances
 
         public static void BuildGuernicus()
         {
-            Guernicus = new Magus(80);
-            Guernicus.Name = "Guernicus";
-            Guernicus.House = Houses.Guernicus;
+            Guernicus = new Magus(80)
+            {
+                Name = "Guernicus",
+                House = Houses.Guernicus
+            };
 
             Guernicus.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Guernicus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -404,9 +415,11 @@ namespace WizardMonks.Instances
 
         public static void BuildJerbiton()
         {
-            Jerbiton = new Magus(80);
-            Jerbiton.Name = "Jerbiton";
-            Jerbiton.House = Houses.Jerbiton;
+            Jerbiton = new Magus(80)
+            {
+                Name = "Jerbiton",
+                House = Houses.Jerbiton
+            };
 
             Jerbiton.GetAttribute(AttributeType.Stamina).BaseValue = -1;
             Jerbiton.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -460,9 +473,11 @@ namespace WizardMonks.Instances
 
         public static void BuildMercere()
         {
-            Mercere = new Magus(80);
-            Mercere.Name = "Mercere";
-            Mercere.House = Houses.Mercere;
+            Mercere = new Magus(80)
+            {
+                Name = "Mercere",
+                House = Houses.Mercere
+            };
 
             Mercere.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Mercere.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -510,9 +525,11 @@ namespace WizardMonks.Instances
 
         public static void BuildMerinita()
         {
-            Merinita = new Magus(80);
-            Merinita.Name = "Merinita";
-            Merinita.House = Houses.Merinita;
+            Merinita = new Magus(80)
+            {
+                Name = "Merinita",
+                House = Houses.Merinita
+            };
 
             Merinita.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Merinita.GetAttribute(AttributeType.Strength).BaseValue = -1;
@@ -575,9 +592,11 @@ namespace WizardMonks.Instances
 
         public static void BuildTremere()
         {
-            Tremere = new Magus(80);
-            Tremere.Name = "Tremere";
-            Tremere.House = Houses.Tremere;
+            Tremere = new Magus(80)
+            {
+                Name = "Tremere",
+                House = Houses.Tremere
+            };
 
             Tremere.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Tremere.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -625,9 +644,11 @@ namespace WizardMonks.Instances
 
         public static void BuildTytalus()
         {
-            Tytalus = new Magus(80);
-            Tytalus.Name = "Tytalus";
-            Tytalus.House = Houses.Tytalus;
+            Tytalus = new Magus(80)
+            {
+                Name = "Tytalus",
+                House = Houses.Tytalus
+            };
 
             Tytalus.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Tytalus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -681,9 +702,11 @@ namespace WizardMonks.Instances
 
         public static void BuildVerditius()
         {
-            Verditius = new Magus(80);
-            Verditius.Name = "Verditius";
-            Verditius.House = Houses.Verditius;
+            Verditius = new Magus(80)
+            {
+                Name = "Verditius",
+                House = Houses.Verditius
+            };
 
             Verditius.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Verditius.GetAttribute(AttributeType.Strength).BaseValue = 0;

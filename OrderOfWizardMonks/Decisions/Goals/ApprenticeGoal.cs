@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using WizardMonks.Characters;
 using WizardMonks.Decisions.Conditions;
 using WizardMonks.Instances;
 

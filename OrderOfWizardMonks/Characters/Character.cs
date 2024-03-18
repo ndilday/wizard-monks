@@ -6,6 +6,7 @@ using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
+using WizardMonks.Thoughts;
 
 namespace WizardMonks.Characters
 {
@@ -63,6 +64,7 @@ namespace WizardMonks.Characters
         #region Public Properties
         public Personality Personality { get; private set; }
         public IList<Relationship> Relationships { get; private set; }
+        public Memory Memory { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
@@ -106,6 +108,7 @@ namespace WizardMonks.Characters
             CurrentSeason = Season.Spring;
             KnownAuras = [];
             Relationships = [];
+            Memory = new Memory();
             IsCollaborating = false;
             WantsToFollow = true;
 
@@ -467,10 +470,7 @@ namespace WizardMonks.Characters
             {
                 return RateSeasonalExperienceGain(book.Topic, book.Quality);
             }
-            if (charAbility == null)
-            {
-                charAbility = GetAbility(book.Topic);
-            }
+            charAbility ??= GetAbility(book.Topic);
 
             // if this book is beneath me, don't pay for it
             if (charAbility.Value >= book.Level)

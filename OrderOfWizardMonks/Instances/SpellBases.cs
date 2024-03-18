@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using WizardMonks.Characters;
+
 namespace WizardMonks.Instances
 {
     // TODO: serialize this class
     static class SpellBases
     {
-        private static Dictionary<Ability, Dictionary<Ability, List<SpellBase>>> _spellBasesByArts;
-        private static Dictionary<TechniqueEffects, Dictionary<FormEffects, SpellBase>> _spellBasesByEffects;
+        private readonly static Dictionary<Ability, Dictionary<Ability, List<SpellBase>>> _spellBasesByArts;
+        private readonly static Dictionary<TechniqueEffects, Dictionary<FormEffects, SpellBase>> _spellBasesByEffects;
 
         static SpellBases()
         {
@@ -38,26 +40,30 @@ namespace WizardMonks.Instances
 
         static void AddByArt(SpellBase spellBase)
         {
-            if (!_spellBasesByArts.ContainsKey(spellBase.ArtPair.Technique))
+            if (!_spellBasesByArts.TryGetValue(spellBase.ArtPair.Technique, out Dictionary<Ability, List<SpellBase>> spellBaseMap))
             {
-                _spellBasesByArts[spellBase.ArtPair.Technique] = [];
+                spellBaseMap = [];
+                _spellBasesByArts[spellBase.ArtPair.Technique] = spellBaseMap;
             }
-            if (!_spellBasesByArts[spellBase.ArtPair.Technique].ContainsKey(spellBase.ArtPair.Form))
+            if (!spellBaseMap.TryGetValue(spellBase.ArtPair.Form, out List<SpellBase> spellBaseList))
             {
-                _spellBasesByArts[spellBase.ArtPair.Technique][spellBase.ArtPair.Form] = [];
+                spellBaseList = [];
+                spellBaseMap[spellBase.ArtPair.Form] = spellBaseList;
             }
-            _spellBasesByArts[spellBase.ArtPair.Technique][spellBase.ArtPair.Form].Add(spellBase);
+
+            spellBaseList.Add(spellBase);
         }
 
         static void AddByEffect(SpellBase spellBase)
         {
-            if (!_spellBasesByEffects.ContainsKey(spellBase.TechniqueEffects))
+            if (!_spellBasesByEffects.TryGetValue(spellBase.TechniqueEffects, out Dictionary<FormEffects, SpellBase> value))
             {
-                _spellBasesByEffects[spellBase.TechniqueEffects] = [];
+                value = ([]);
+                _spellBasesByEffects[spellBase.TechniqueEffects] = value;
             }
-            if (!_spellBasesByEffects[spellBase.TechniqueEffects].ContainsKey(spellBase.FormEffects))
+            if (!value.ContainsKey(spellBase.FormEffects))
             {
-                _spellBasesByEffects[spellBase.TechniqueEffects][spellBase.FormEffects] = spellBase;
+                value[spellBase.FormEffects] = spellBase;
             }
             else
             {
@@ -67,20 +73,20 @@ namespace WizardMonks.Instances
 
         static IOrderedEnumerable<SpellBase> GetSpellBasesByArtPair(ArtPair pair)
         {
-            if (!_spellBasesByArts.ContainsKey(pair.Technique) || !_spellBasesByArts[pair.Technique].ContainsKey(pair.Form))
+            if (!_spellBasesByArts.TryGetValue(pair.Technique, out Dictionary<Ability, List<SpellBase>> value) || !value.TryGetValue(pair.Form, out List<SpellBase> spellBaseList))
             {
                 return null;
             }
-            return _spellBasesByArts[pair.Technique][pair.Form].OrderBy(s => s.Level);
+            return spellBaseList.OrderBy(s => s.Level);
         }
     
         public static SpellBase GetSpellBaseForEffect(TechniqueEffects technique, FormEffects form)
         {
-            if(!_spellBasesByEffects.ContainsKey(technique) || !_spellBasesByEffects[technique].ContainsKey(form))
+            if(!_spellBasesByEffects.TryGetValue(technique, out Dictionary<FormEffects, SpellBase> value) || !value.TryGetValue(form, out SpellBase spellBase))
             {
                 return null;
             }
-            return _spellBasesByEffects[technique][form];
+            return spellBase;
         }
     }
 }

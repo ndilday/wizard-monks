@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace WizardMonks.Thoughts
 {
-    internal class Memory
+    public class Memory
     {
         public Dictionary<string, List<Thought>> ThoughtMap {  get; private set; }
         public Memory() 
@@ -19,9 +16,9 @@ namespace WizardMonks.Thoughts
         {
             foreach(string category in thought.Categories) 
             {
-                if(ThoughtMap.ContainsKey(category))
+                if(ThoughtMap.TryGetValue(category, out List<Thought> value))
                 {
-                    ThoughtMap[category].Add(thought);
+                    value.Add(thought);
                 }
                 else
                 {

@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+
 using WizardMonks.Core;
+using WizardMonks.Characters;
 
 namespace WizardMonks.Instances
 {
@@ -30,7 +31,7 @@ namespace WizardMonks.Instances
         private static void NormalizeAttributes(Character character, double value)
         {
             double[] doubles =
-            {
+            [
                 Die.Instance.RollNormal(),
                 Die.Instance.RollNormal(),
                 Die.Instance.RollNormal(),
@@ -39,7 +40,7 @@ namespace WizardMonks.Instances
                 Die.Instance.RollNormal(),
                 Die.Instance.RollNormal(),
                 Die.Instance.RollNormal()
-            };
+            ];
             double sum = doubles.Sum();
             double scale = value / sum;
             character.GetAttribute(AttributeType.Stamina).BaseValue = doubles[0] * scale;

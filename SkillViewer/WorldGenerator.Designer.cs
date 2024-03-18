@@ -1,4 +1,4 @@
-﻿using WizardMonks.Character;
+﻿using WizardMonks.Characters;
 
 namespace SkillViewer
 {

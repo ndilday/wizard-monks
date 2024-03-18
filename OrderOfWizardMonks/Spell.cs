@@ -1,6 +1,6 @@
 ﻿using System;
 
-//using WizardMonks.Instances;
+using WizardMonks.Characters;
 
 namespace WizardMonks
 {

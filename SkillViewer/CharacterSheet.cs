@@ -8,14 +8,14 @@ using System.Text;
 using System.Windows.Forms;
 
 using WizardMonks;
-using WizardMonks.Character;
+using WizardMonks.Characters;
 using WizardMonks.Instances;
 
 namespace SkillViewer
 {
     public partial class CharacterSheet : Form
     {
-        private Character _character;
+        private readonly Character _character;
         private const string FORMAT_STRING = "0.00";
 
         public CharacterSheet(Character character)

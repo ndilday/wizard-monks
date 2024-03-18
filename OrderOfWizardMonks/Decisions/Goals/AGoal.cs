@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Characters;
 using WizardMonks.Decisions.Conditions;
 
 namespace WizardMonks.Decisions.Goals
@@ -53,7 +53,7 @@ namespace WizardMonks.Decisions.Goals
             foreach(ACondition condition in Conditions)
             {
                 var conditionalDesires = condition.GetBookDesires();
-                if(conditionalDesires != null && conditionalDesires.Any())
+                if(conditionalDesires != null && conditionalDesires.Count != 0)
                 {
                     bookDesires.AddRange(conditionalDesires);
                 }

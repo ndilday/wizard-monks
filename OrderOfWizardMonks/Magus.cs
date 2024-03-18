@@ -366,7 +366,7 @@ namespace WizardMonks
         {
         }
 
-        IAction DecideSeasonalActivity(IList<MagusTradingDesires> tradeDesiresList)
+        IAction DecideSeasonalActivity()
         {
             if (IsCollaborating)
             {

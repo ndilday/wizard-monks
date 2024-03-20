@@ -4,12 +4,19 @@ namespace WizardMonks.Decisions.Goals
 {
     public enum GoalType
     {
-        FoundCovenant,
+        StartCovenant,
+        FindCovenant,
         FindApprentice,
+        FindFamiliar,
         BindFamiliar,
-        BuildLab,
         Ability,
-        InventSpell
+        InventSpell,
+        FoundMysteryCult,
+        InventMystery,
+        GainPower,
+        GainPrestige,
+        HermeticBreakthrough,
+        EnchantItem
     }
 
     interface IGoalFactory

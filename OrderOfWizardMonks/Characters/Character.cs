@@ -6,6 +6,7 @@ using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
+using WizardMonks.Organizations;
 using WizardMonks.Thoughts;
 
 namespace WizardMonks.Characters
@@ -43,8 +44,8 @@ namespace WizardMonks.Characters
         protected List<IGoal> _goals;
         protected List<string> _verboseLog;
 
-        private readonly string[] _virtueList = new string[10];
-        private readonly string[] _flawList = new string[10];
+        //private readonly string[] _virtueList = new string[10];
+        //private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityList;
         protected readonly List<IAction> _seasonList;
@@ -64,6 +65,7 @@ namespace WizardMonks.Characters
         #region Public Properties
         public Personality Personality { get; private set; }
         public IList<Relationship> Relationships { get; private set; }
+        public IList<Affiliation> Affiliations { get; private set; }
         public Memory Memory { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
@@ -108,6 +110,7 @@ namespace WizardMonks.Characters
             CurrentSeason = Season.Spring;
             KnownAuras = [];
             Relationships = [];
+            Affiliations = [];
             Memory = new Memory();
             IsCollaborating = false;
             WantsToFollow = true;

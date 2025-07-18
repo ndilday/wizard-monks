@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
@@ -31,7 +32,7 @@ namespace WizardMonks.Decisions.Conditions
                 }
                 else
                 {
-                    BuildLaboratory buildLabAction = new(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                    BuildLaboratoryActivity buildLabAction = new(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
                     alreadyConsidered.Add(buildLabAction);
                     log.Add("Building a lab worth " + this.Desire.ToString("0.000"));
                 }

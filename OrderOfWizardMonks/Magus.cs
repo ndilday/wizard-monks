@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
@@ -28,6 +28,7 @@ namespace WizardMonks
         private Spell _partialSpell;
         private double _partialSpellProgress;
         private Dictionary<Ability, double> _visStock;
+        private List<LabText> _labTextsOwned;
         private MagusTradingDesires _tradeDesires;
         //private List<SummaGoal> _summaGoals;
         //private List<TractatusGoal> _tractatusGoals;
@@ -67,6 +68,7 @@ namespace WizardMonks
             Laboratory = null;
             _visStock = new Dictionary<Ability, double>();
             SpellList = new List<Spell>();
+            _labTextsOwned = new List<LabText>();
             //_tractatusGoals = new List<TractatusGoal>();
             //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
@@ -122,9 +124,9 @@ namespace WizardMonks
         #endregion
 
         #region Book Functions
-        public override IEnumerable<IBook> GetBooksFromCollection(Ability ability)
+        public override IEnumerable<ABook> GetBooksFromCollection(Ability ability)
         {
-            IEnumerable<IBook> books = _booksOwned.Where(b => b.Topic == ability);
+            IEnumerable<ABook> books = _booksOwned.Where(b => b.Topic == ability);
             if (Covenant != null)
             {
                 books = books.Union(Covenant.GetLibrary(ability));
@@ -151,10 +153,10 @@ namespace WizardMonks
             return new List<BookDesire>();
         }
 
-        public override IBook GetBestBookToWrite()
+        public override ABook GetBestBookToWrite()
         {
             double currentBestBookValue = 0;
-            IBook bestBook = null;
+            ABook bestBook = null;
             HashSet<int> consideredTopics = new();
 
             // since the value of a tractatus is independent of topic,
@@ -340,11 +342,11 @@ namespace WizardMonks
             return totalVisEquivalent - visValueOfExposure;
         }
 
-        protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<IBook> books)
+        protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<ABook> books)
         {
             List<BookForTrade> list = new();
             double distillRate = GetVisDistillationRate();
-            foreach (IBook book in books)
+            foreach (ABook book in books)
             {
                 if (book.Level == 1000)
                 {
@@ -368,7 +370,7 @@ namespace WizardMonks
         {
         }
 
-        IAction DecideSeasonalActivity(IList<MagusTradingDesires> tradeDesiresList)
+        IActivity DecideSeasonalActivity(IList<MagusTradingDesires> tradeDesiresList)
         {
             if (IsCollaborating)
             {
@@ -810,7 +812,7 @@ namespace WizardMonks
         {
             // TODO: multiple spells in a season
             // TODO: foci
-            // TODO: Working from Lab Text
+            // TODO: similar spell
             double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
             if (labTotal <= spell.Level)
             {
@@ -823,23 +825,51 @@ namespace WizardMonks
                 _partialSpellProgress += labTotal - spell.Level;
                 if (_partialSpellProgress >= _partialSpell.Level)
                 {
-                    SpellList.Add(_partialSpell);
-                    _partialSpell = null;
-                    _partialSpellProgress = 0;
+                    LearnSpell(_partialSpell);
                 }
             }
             
             else if (labTotal >= spell.Level * 2)
             {
-                SpellList.Add(spell);
-                _partialSpell = null;
-                _partialSpellProgress = 0;
+                LearnSpell(spell);
             }
             else
             {
                 _partialSpell = spell;
                 _partialSpellProgress = labTotal - spell.Level;
             }
+        }
+
+        public void LearnSpellFromLabText(LabText text)
+        {
+            // TODO: multiple spells in a season
+            // TODO: foci
+            // TODO: similar spell
+            Spell spell = text.SpellContained;
+            double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
+            if (labTotal < spell.Level)
+            {
+                throw new ArgumentException("This mage cannot invent this spell!");
+            }
+            else
+            {
+                LearnSpell(spell);
+            }
+        }
+
+        private void LearnSpell(Spell spell)
+        {
+            SpellList.Add(spell);
+            _partialSpell = null;
+            _partialSpellProgress = 0;
+            LabText newLabText = new LabText
+            {
+                Author = this,
+                IsShorthand = true,
+                SpellContained = spell
+            };
+            _labTextsOwned.Add(newLabText);
+
         }
         #endregion
 

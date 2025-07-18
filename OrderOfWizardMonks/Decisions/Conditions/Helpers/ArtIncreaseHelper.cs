@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using WizardMonks.Activities.MageActivities;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -42,7 +40,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = magicArt.GetValueGain(Mage.VisStudyRate);
                 double effectiveDesire = _desireFunc(gain, ConditionDepth);
-                VisStudying visStudy = new(magicArt.Ability, effectiveDesire);
+                StudyVisActivity visStudy = new(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
                 FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);

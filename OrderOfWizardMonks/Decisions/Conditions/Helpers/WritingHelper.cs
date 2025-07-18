@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -23,7 +23,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double effectiveDesire = _desireFunc(bestBook.Value, ConditionDepth);
                 log.Add("Writing " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
-                Write writingAction = new(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
+                WriteActivity writingAction = new(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
                 alreadyConsidered.Add(writingAction);
             }
         }

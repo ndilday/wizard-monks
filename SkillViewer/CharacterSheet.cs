@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Data;
 using System.Linq;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 using WizardMonks;
@@ -12,6 +8,7 @@ using WizardMonks.Instances;
 
 namespace SkillViewer
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class CharacterSheet : Form
     {
         private Character _character;

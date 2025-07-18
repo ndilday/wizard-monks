@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SkillViewer
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class ListViewExpanded : ListView
     {
         private const int LVM_FIRST = 0x1000;                    // ListView messages

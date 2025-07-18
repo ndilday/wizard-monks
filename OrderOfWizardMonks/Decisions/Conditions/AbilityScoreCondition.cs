@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
@@ -121,15 +121,15 @@ namespace WizardMonks.Decisions.Conditions
             double effectiveDesire = GetDesirabilityOfIncrease(Character.GetAbility(ability).GetValueGain(4));
             if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
             {
-                Practice practiceAction = new(ability, effectiveDesire);
+                PracticeActivity practiceAction = new(ability, effectiveDesire);
                 log.Add(Character.Name + " Practicing " + ability.AbilityName + " worth " + (effectiveDesire).ToString("0.000"));
                 alreadyConsidered.Add(practiceAction);
             }
         }
 
-        private void AddReadingToActionList(IEnumerable<IBook> topicalBooks, Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
+        private void AddReadingToActionList(IEnumerable<ABook> topicalBooks, Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            IBook bestBook = Character.GetBestBookToRead(ability);
+            ABook bestBook = Character.GetBestBookToRead(ability);
             
             if (bestBook != null)
             {
@@ -138,7 +138,7 @@ namespace WizardMonks.Decisions.Conditions
                 if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
                 {
                     log.Add(Character.Name + "Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
-                    Read readingAction = new(bestBook, effectiveDesire);
+                    ReadActivity readingAction = new(bestBook, effectiveDesire);
                     alreadyConsidered.Add(readingAction);
                 }
             }
@@ -159,7 +159,7 @@ namespace WizardMonks.Decisions.Conditions
                 if (stockpile > visNeed)
                 {
                     log.Add(mage.Name + "Studying vis for " + magicArt.Ability.AbilityName + ability.AbilityName + " worth " + effectiveDesire.ToString("0.000"));
-                    VisStudying visStudy = new(magicArt.Ability, effectiveDesire);
+                    StudyVisActivity visStudy = new(magicArt.Ability, effectiveDesire);
                     alreadyConsidered.Add(visStudy);
                     // TODO: how do we decrement the cost of the vis?
                 }

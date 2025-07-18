@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WizardMonks.Activities;
 
 namespace WizardMonks.Decisions
 {
     public class ConsideredActions
     {
-        readonly Dictionary<Activity, IList<IAction>> ActionTypeMap = [];
+        readonly Dictionary<Activity, IList<IActivity>> ActionTypeMap = [];
 
-        public void Add(IAction action)
+        public void Add(IActivity action)
         {
-            if (!ActionTypeMap.TryGetValue(action.Action, out IList<IAction> value))
+            if (!ActionTypeMap.TryGetValue(action.Action, out IList<IActivity> value))
             {
                 ActionTypeMap[action.Action] = [action];
             }
@@ -38,7 +39,7 @@ namespace WizardMonks.Decisions
             return log;
         }
 
-        public IAction GetBestAction()
+        public IActivity GetBestAction()
         {
             return ActionTypeMap.SelectMany(a => a.Value).OrderByDescending(a => a.Desire).FirstOrDefault();
         }

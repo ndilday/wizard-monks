@@ -812,7 +812,12 @@ namespace WizardMonks
             // TODO: foci
             // TODO: Working from Lab Text
             double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
-            if(spell == _partialSpell)
+            if (labTotal <= spell.Level)
+            {
+                throw new ArgumentException("This mage cannot invent this spell!");
+            }
+
+            if (spell == _partialSpell)
             {
                 // continue previous spell work
                 _partialSpellProgress += labTotal - spell.Level;
@@ -823,10 +828,7 @@ namespace WizardMonks
                     _partialSpellProgress = 0;
                 }
             }
-            if(labTotal <= spell.Level)
-            {
-                throw new ArgumentException("This mage cannot invent this spell!");
-            }
+            
             else if (labTotal >= spell.Level * 2)
             {
                 SpellList.Add(spell);

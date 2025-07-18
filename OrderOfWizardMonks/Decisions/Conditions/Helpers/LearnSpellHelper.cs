@@ -55,33 +55,33 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 if(singleSeasonSpellLevel > minLevel && singleSeasonSpellLevel >= _spellBase.Level)
                 {
                     Spell newSpell;
-                    switch(singleSeasonSpellLevel)
+                    switch(singleSeasonSpellLevel - _spellBase.Level)
                     {
-                        case 1:
+                        case 0:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Taste, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 2:
+                        case 1:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Touch, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 3:
+                        case 2:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Smell, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 4:
+                        case 3:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Hearing, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 5:
+                        case 4:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 10:
+                        case 5:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Diameter, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
                             break;
-                        case 15:
+                        case 10:
                             newSpell =
                                 new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
                             break;

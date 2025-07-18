@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -31,7 +31,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 double desire = _desireFunc(_averageGain, ConditionDepth);
 
                 log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.000"));
-                alreadyConsidered.Add(new FindAura(Abilities.AreaLore, desire));
+                alreadyConsidered.Add(new FindAuraActivity(Abilities.AreaLore, desire));
             }
 
             if (ConditionDepth < 10 && AgeToCompleteBy >  Mage.SeasonalAge)

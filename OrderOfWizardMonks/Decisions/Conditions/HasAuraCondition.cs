@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions
@@ -23,7 +23,7 @@ namespace WizardMonks.Decisions.Conditions
         {
             if(!ConditionFulfilled)
             {
-                FindAura findAuraAction = new(Abilities.AreaLore, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
+                FindAuraActivity findAuraAction = new(Abilities.AreaLore, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
                 alreadyConsidered.Add(findAuraAction);
                 log.Add("Finding an aura worth " + this.Desire.ToString("0.000"));
             }

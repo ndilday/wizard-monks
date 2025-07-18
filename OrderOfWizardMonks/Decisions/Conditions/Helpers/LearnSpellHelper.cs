@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using WizardMonks.Activities;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -92,7 +93,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     }
                     double desire = _desireFunc((singleSeasonSpellLevel - minLevel), ConditionDepth);
                     log.Add($"Inventing {newSpell.Name} {newSpell.Level} worth {desire:0.000}");
-                    alreadyConsidered.Add(new InventSpell(newSpell, Abilities.MagicTheory, desire));
+                    alreadyConsidered.Add(new InventSpellActivity(newSpell, Abilities.MagicTheory, desire));
                 }
                 // TODO: incorporate lab text library
 

@@ -12,7 +12,7 @@ namespace WizardMonks
 		protected List<Magus> _magi;
 		protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
-		protected List<IBook> _library;
+		protected List<ABook> _library;
         public Aura Aura { get; private set; }
         public string Name { get; set; }
 
@@ -46,7 +46,7 @@ namespace WizardMonks
             }
         }
 
-        public void AddBook(IBook book)
+        public void AddBook(ABook book)
         {
             // TODO: handle book duplicates when we handle copying books
             if (!_library.Contains(book))
@@ -102,12 +102,12 @@ namespace WizardMonks
         }
         #endregion
 
-        public List<IBook> GetLibrary()
+        public List<ABook> GetLibrary()
         {
             return _library;
         }
 
-        public IEnumerable<IBook> GetLibrary(Ability ability)
+        public IEnumerable<ABook> GetLibrary(Ability ability)
         {
             return _library.Where(b => b.Topic == ability);
         }

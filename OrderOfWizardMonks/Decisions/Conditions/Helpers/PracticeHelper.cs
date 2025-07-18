@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WizardMonks.Activities;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -18,7 +19,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 double gain = this.Mage.GetAbility(_ability).GetValueGain(4);
                 double practiceDesire = _desireFunc(gain, ConditionDepth);
                 log.Add("Practicing " + _ability.AbilityName + " worth " + practiceDesire.ToString("0.000"));
-                alreadyConsidered.Add(new Practice(_ability, practiceDesire));
+                alreadyConsidered.Add(new PracticeActivity(_ability, practiceDesire));
             }
         }
     }

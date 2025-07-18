@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -74,7 +74,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                     // TODO: modify by lifelong value of source?
                     log.Add("Looking for vis source worth " + (desire).ToString("0.000"));
-                    alreadyConsidered.Add(new FindVisSource(aura, Abilities.MagicLore, desire));
+                    alreadyConsidered.Add(new FindVisSourceActivity(aura, Abilities.MagicLore, desire));
                 }
                 if (ConditionDepth < 10)
                 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities;
 using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
@@ -70,14 +70,14 @@ namespace WizardMonks
 		private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityList;
-        protected readonly List<IAction> _seasonList;
-        protected readonly List<IBook> _booksWritten;
-        protected readonly List<IBook> _booksRead;
-        protected readonly List<IBook> _booksOwned;
+        protected readonly List<IActivity> _seasonList;
+        protected readonly List<ABook> _booksWritten;
+        protected readonly List<ABook> _booksRead;
+        protected readonly List<ABook> _booksOwned;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
 
-        protected IAction _mandatoryAction;
+        protected IActivity _mandatoryAction;
         #endregion
 
         #region Events
@@ -92,14 +92,14 @@ namespace WizardMonks
         public string Name { get; set; }
         public Season CurrentSeason { get; private set; }
         public List<string> Log { get; private set; }
-        public IEnumerable<IBook> Books
+        public IEnumerable<ABook> Books
         {
             get
             {
                 return _booksOwned;
             }
         }
-        public IEnumerable<IBook> ReadableBooks
+        public IEnumerable<ABook> ReadableBooks
         {
             get
             {
@@ -134,10 +134,10 @@ namespace WizardMonks
             _mandatoryAction = null;
 
             _abilityList = new Dictionary<int, CharacterAbilityBase>();
-            _seasonList = new List<IAction>();
-            _booksRead = new List<IBook>();
-            _booksWritten = new List<IBook>();
-            _booksOwned = new List<IBook>();
+            _seasonList = new List<IActivity>();
+            _booksRead = new List<ABook>();
+            _booksWritten = new List<ABook>();
+            _booksOwned = new List<ABook>();
             _verboseLog = new List<string>();
 
             _areaAbility = areaAbility;
@@ -186,12 +186,12 @@ namespace WizardMonks
             CharacterAbilityBase charAbility = GetAbility(ability).MakeCopy();
             double value = charAbility.Value;
             var books = GetReadableBooksFromCollection(ability);
-            IBook summa = books.Where(b => b.Level < 1000).OrderBy(b => b.Level).FirstOrDefault();
+            ABook summa = books.Where(b => b.Level < 1000).OrderBy(b => b.Level).FirstOrDefault();
             if (summa != null && summa.Level > value)
             {
                 charAbility.AddExperience(1000, summa.Level);
             }
-            foreach (IBook book in books.Where(b => b.Level == 1000))
+            foreach (ABook book in books.Where(b => b.Level == 1000))
             {
                 charAbility.AddExperience(book.Quality);
             }
@@ -314,7 +314,7 @@ namespace WizardMonks
 
         #region Seasonal Functions
 
-        IAction DecideSeasonalActivity()
+        IActivity DecideSeasonalActivity()
         {
             if (IsCollaborating)
             {
@@ -352,7 +352,7 @@ namespace WizardMonks
            }
        }
 
-        public virtual void CommitAction(IAction action)
+        public virtual void CommitAction(IActivity action)
         {
             _seasonList.Add(action);
             action.Act(this);
@@ -368,7 +368,7 @@ namespace WizardMonks
             {
                 Log.Add("");
                 Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
-                IAction activity = DecideSeasonalActivity();
+                IActivity activity = DecideSeasonalActivity();
                 _seasonList.Add(activity);
                 activity.Act(this);
                 if (SeasonalAge >= 140)
@@ -395,7 +395,7 @@ namespace WizardMonks
             ReprioritizeGoals();
         }
 
-        internal virtual void Advance(IAction activity)
+        internal virtual void Advance(IActivity activity)
         {
             Log.Add("");
             Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
@@ -431,49 +431,49 @@ namespace WizardMonks
         #endregion
 
         #region Book Functions
-        public virtual void AddBookToCollection(IBook book)
+        public virtual void AddBookToCollection(ABook book)
         {
             _booksOwned.Add(book);
         }
 
-        public virtual void RemoveBookFromCollection(IBook book)
+        public virtual void RemoveBookFromCollection(ABook book)
         {
             _booksOwned.Remove(book);
         }
 
-        public virtual IEnumerable<IBook> GetBooksFromCollection(Ability ability)
+        public virtual IEnumerable<ABook> GetBooksFromCollection(Ability ability)
         {
             return _booksOwned.Where(b => b.Topic == ability);
         }
 
-        public virtual IEnumerable<IBook> GetReadableBooksFromCollection(Ability ability)
+        public virtual IEnumerable<ABook> GetReadableBooksFromCollection(Ability ability)
         {
             
             return ReadableBooks.Where(b => b.Topic == ability);
         }
 
-        public virtual IBook GetBestBookToRead(Ability ability)
+        public virtual ABook GetBestBookToRead(Ability ability)
         {
             // TODO: may eventually want to take into account reading a slower summa before a higher quality tractatus?
             return ReadableBooks.Where(b => b.Topic == ability).OrderByDescending(b => GetBookLevelGain(b)).FirstOrDefault();
         }
 
-        public virtual IBook GetBestSummaToRead(Ability ability)
+        public virtual ABook GetBestSummaToRead(Ability ability)
         {
             return ReadableBooks.Where(b => b.Topic == ability & b.Level < 1000).OrderByDescending(b => GetBookLevelGain(b)).FirstOrDefault();
         }
 
-        public virtual IEnumerable<IBook> GetUnneededBooksFromCollection()
+        public virtual IEnumerable<ABook> GetUnneededBooksFromCollection()
         {
             return _booksOwned.Where(b => b.Author == this || (_booksRead.Contains(b) && b.Level == 1000) || (GetAbility(b.Topic).Value >= b.Level));
         }
         
-        public virtual bool ValidToRead(IBook book)
+        public virtual bool ValidToRead(ABook book)
         {
             return book.Author != this && (!this._booksRead.Contains(book) || (GetAbility(book.Topic).Value < book.Level));
         }
 
-        public virtual double GetBookLevelGain(IBook book)
+        public virtual double GetBookLevelGain(ABook book)
         {
             if (book == null)
             {
@@ -484,7 +484,7 @@ namespace WizardMonks
             return GetAbility(book.Topic).GetValueGain(book.Quality, book.Level);
         }
 
-        public double RateLifetimeBookValue(IBook book, CharacterAbilityBase charAbility = null)
+        public double RateLifetimeBookValue(ABook book, CharacterAbilityBase charAbility = null)
         {
             // see if it's a tractatus
             if (book.Level == 1000)
@@ -503,7 +503,7 @@ namespace WizardMonks
             }
 
             //TODO: see if we already have a summa on this topic
-            IBook existingBook = GetBestBookToRead(book.Topic);
+            ABook existingBook = GetBestBookToRead(book.Topic);
             double expValue = charAbility.GetExperienceUntilLevel(book.Level);
             double bookSeasons = expValue / book.Quality;
 
@@ -518,7 +518,7 @@ namespace WizardMonks
             }
         }
 
-        public virtual void ReadBook(IBook book)
+        public virtual void ReadBook(ABook book)
         {
             Log.Add("Reading " + book.Title);
             CharacterAbilityBase ability = GetAbility(book.Topic);
@@ -538,7 +538,7 @@ namespace WizardMonks
             return charAbility.GetTractatiiLimit() > GetTractatiiWrittenOnTopic(charAbility.Ability);
         }
 
-        public IBook WriteBook(Ability topic, string name, Ability exposureAbility, double desiredLevel = 0)
+        public ABook WriteBook(Ability topic, string name, Ability exposureAbility, double desiredLevel = 0)
         {
             // grant exposure experience
             List<Ability> abilityList = new(_writingAbilities);
@@ -635,7 +635,7 @@ namespace WizardMonks
             return (ushort)_booksWritten.Where(b => b.Topic == topic && b.Level == 1000).Count();
         }
 
-        public virtual IBook GetBestBookToWrite()
+        public virtual ABook GetBestBookToWrite()
         {
             return null;
         }

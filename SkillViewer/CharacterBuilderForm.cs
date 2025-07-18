@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -13,6 +8,7 @@ using WizardMonks;
 
 namespace SkillViewer
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class CharacterBuilderForm : Form
     {
         public CharacterBuilderForm()

@@ -86,9 +86,9 @@ namespace WizardMonks
 
     public class BookForTrade
     {
-        public IBook Book { get; private set; }
+        public ABook Book { get; private set; }
         public double MinimumPrice { get; private set; }
-        public BookForTrade(IBook book, double minPrice)
+        public BookForTrade(ABook book, double minPrice)
         {
             Book = book;
             MinimumPrice = minPrice;
@@ -98,9 +98,9 @@ namespace WizardMonks
     public class BookTradeOffer
     {
         public Magus Mage { get; private set; }
-        public IBook BookOffered { get; private set; }
-        public IBook BookDesired { get; private set; }
-        public BookTradeOffer(Magus mage, IBook bookOffered, IBook bookDesired)
+        public ABook BookOffered { get; private set; }
+        public ABook BookDesired { get; private set; }
+        public BookTradeOffer(Magus mage, ABook bookOffered, ABook bookDesired)
         {
             Mage = mage;
             BookOffered = bookOffered;
@@ -113,8 +113,8 @@ namespace WizardMonks
         public Magus TradingPartner { get; private set; }
         public List<VisOffer> VisOffers { get; private set; }
         public double VisValue { get; private set; }
-        public IBook BookDesired { get; private set; }
-        public VisForBookOffer(Magus buyer, IEnumerable<VisOffer> visOffers, double quantity, IBook bookDesired)
+        public ABook BookDesired { get; private set; }
+        public VisForBookOffer(Magus buyer, IEnumerable<VisOffer> visOffers, double quantity, ABook bookDesired)
         {
             TradingPartner = buyer;
             VisOffers = visOffers.ToList();

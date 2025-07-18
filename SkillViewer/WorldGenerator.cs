@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -8,12 +9,12 @@ using System.Windows.Forms;
 using WizardMonks;
 using WizardMonks.Core;
 using WizardMonks.Instances;
-using WorldSimulation;
 
 namespace SkillViewer
 {
     delegate void AdvanceCharacterDelegate(Character character);
 
+    [SupportedOSPlatform("windows7.0")]
     public partial class WorldGenerator : Form
     {
         private Magus[] _magusArray = new Magus[40];

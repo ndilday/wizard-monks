@@ -114,3 +114,6 @@ packages/System.Data.SQLite.Linq.1.0.108.0/lib/net46/System.Data.SQLite.Linq.dll
 /.vs/ProjectEvaluation
 /.vs/wizard-monks/DesignTimeBuild
 /SkillViewer/*.user
+/.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db
+/.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db-shm
+/.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db-wal

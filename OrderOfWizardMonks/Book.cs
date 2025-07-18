@@ -8,10 +8,9 @@ using WizardMonks.Instances;
 
 namespace WizardMonks
 {
-	[Serializable]
-	public class IBook
-	{
-        public string Title { get; set; }
+    [Serializable]
+    public abstract class AWritable
+    {
         public Character Author { get; set; }
         public string AuthorName
         {
@@ -20,6 +19,13 @@ namespace WizardMonks
                 return Author.Name;
             }
         }
+    }
+
+	[Serializable]
+	public abstract class ABook : AWritable
+	{
+        public string Title { get; set; }
+
 		public Ability Topic { get; set; }
         public string TopicName
         {
@@ -34,7 +40,7 @@ namespace WizardMonks
 	}
 
 	[Serializable]
-	public class Summa : IBook
+	public class Summa : ABook
 	{
         public double GetWritingPointsNeeded()
         {
@@ -64,7 +70,7 @@ namespace WizardMonks
     }
 
     [Serializable]
-    public class Tractatus : IBook
+    public class Tractatus : ABook
     {
         public override double Level
         {
@@ -99,7 +105,7 @@ namespace WizardMonks
 
     public class EvaluatedBook
     {
-        public IBook Book { get; set; }
+        public ABook Book { get; set; }
         public double PerceivedValue { get; set; }
         public Ability ExposureAbility { get; set; }
     }

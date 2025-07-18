@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SkillViewer
 {
+    [SupportedOSPlatform("windows7.0")]
     static class Program
     {
         /// <summary>

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Activities;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
 
@@ -66,7 +67,7 @@ namespace WizardMonks.Decisions.Conditions
                         {
                             // we can get what we want in one season, go ahead and do it
                             log.Add("Extracting vis worth " + extractDesirability.ToString("0.000"));
-                            alreadyConsidered.Add(new VisExtracting(Abilities.MagicTheory, extractDesirability));
+                            alreadyConsidered.Add(new ExtractVisActivity(Abilities.MagicTheory, extractDesirability));
 
                             if (currentDistillRate < _visStillNeeded && AgeToCompleteBy -1 > _mage.SeasonalAge)
                             {

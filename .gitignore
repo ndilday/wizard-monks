@@ -117,3 +117,6 @@ packages/System.Data.SQLite.Linq.1.0.108.0/lib/net46/System.Data.SQLite.Linq.dll
 /.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db
 /.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db-shm
 /.vs/wizard-monks/CopilotIndices/17.14.786.1071/*.db-wal
+/.vs/wizard-monks/CopilotIndices/17.12.38.29086/*.db
+/.vs/wizard-monks/CopilotIndices/17.12.38.29086/*.db-shm
+/.vs/wizard-monks/CopilotIndices/17.12.38.29086/*.db-wal

@@ -591,6 +591,11 @@ namespace WizardMonks
             return SpellList.Where(s => s.Base == spellBase).OrderByDescending(s => s.Level).FirstOrDefault();
         }
 
+        public IEnumerable<LabText> GetLabTexts(SpellBase spellBase)
+        {
+            return _labTextsOwned.Where(t => t.SpellContained.Base == spellBase);
+        }
+
         public double GetSpontaneousCastingTotal(ArtPair artPair)
         {
             // TODO: make the Diedne hack better
@@ -766,6 +771,19 @@ namespace WizardMonks
             return labTotal;
         }
 
+        public double GetSpellLabTotal(Spell spell)
+        {
+            double total = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
+            // see if the mage knows a sell with the same base effect
+            Spell similarSpell = GetBestSpell(spell.Base);
+            if(similarSpell != null)
+            {
+                // if so, add the level of that spell to the lab total
+                total += similarSpell.Level / 5.0;
+            }
+            return total;
+        }
+
         public void BuildLaboratory()
         {
             // TODO: flesh out laboratory specialization
@@ -812,8 +830,7 @@ namespace WizardMonks
         {
             // TODO: multiple spells in a season
             // TODO: foci
-            // TODO: similar spell
-            double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
+            double labTotal = GetSpellLabTotal(spell);
             if (labTotal <= spell.Level)
             {
                 throw new ArgumentException("This mage cannot invent this spell!");
@@ -844,9 +861,8 @@ namespace WizardMonks
         {
             // TODO: multiple spells in a season
             // TODO: foci
-            // TODO: similar spell
             Spell spell = text.SpellContained;
-            double labTotal = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
+            double labTotal = GetSpellLabTotal(spell);
             if (labTotal < spell.Level)
             {
                 throw new ArgumentException("This mage cannot invent this spell!");

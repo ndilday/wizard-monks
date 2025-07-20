@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
@@ -39,8 +40,24 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     minLevel = Mage.GetSpontaneousCastingTotal(_spellBase.ArtPair);
                 }
 
+                // determine the level of a spell the mage can invent in a single season
                 double labTotal = Mage.GetLabTotal(_spellBase.ArtPair, Activity.InventSpells);
+                if(bestSpell != null)
+                {
+                    // account for already knowing a similar spell in the lab total
+                    labTotal += bestSpell.Level / 5.0;
+                }
                 double singleSeasonSpellLevel = labTotal / 2.0;
+
+                // if the mage has a lab text with this effect of level between singleSeasonSpellLevel and labTotal, invent that instead
+                var labTexts = Mage.GetLabTexts(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= singleSeasonSpellLevel);
+                if(labTexts.Any())
+                {
+                    // use the highest level lab text
+                    singleSeasonSpellLevel = labTexts.Max(t => t.SpellContained.Level);
+                    log.Add($"Using lab text for {_spellBase.Name} at level {singleSeasonSpellLevel}");
+                }
+
                 if (singleSeasonSpellLevel > 5)
                 {
                     // round off to a multiple of 5
@@ -50,7 +67,6 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 {
                     singleSeasonSpellLevel = Math.Floor(singleSeasonSpellLevel);
                 }
-                //double newSpellMagnitude = singleSeasonSpellLevel / 5;
                 
                 // TODO: we're going to have to put a lot of design thought into making this flexible
                 if(singleSeasonSpellLevel > minLevel && singleSeasonSpellLevel >= _spellBase.Level)

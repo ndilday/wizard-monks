@@ -93,12 +93,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         private double CalculateCastingTotalGainDesire(double gain, ushort conditionDepth)
         {
-            return CalculateScoreGainDesire(gain/25, conditionDepth);
+            return CalculateScoreGainDesire(gain/25.0, conditionDepth);
         }
 
         private double CalculateSpellGainDesire(double gain, ushort conditionDepth)
         {
-            return CalculateScoreGainDesire(gain / 5, conditionDepth);
+            return CalculateScoreGainDesire(gain / 5.0, conditionDepth);
         }
     }
 }

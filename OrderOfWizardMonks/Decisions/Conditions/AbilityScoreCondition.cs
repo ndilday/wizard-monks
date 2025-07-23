@@ -2,6 +2,7 @@
 using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions

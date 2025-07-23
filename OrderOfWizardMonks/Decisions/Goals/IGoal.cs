@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-
-using WizardMonks;
 using WizardMonks.Decisions.Conditions;
+using WizardMonks.Economy;
 
 namespace WizardMonks.Decisions.Goals
 {

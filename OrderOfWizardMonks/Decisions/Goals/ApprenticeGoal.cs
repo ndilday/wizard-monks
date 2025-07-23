@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using WizardMonks.Decisions.Conditions;
+﻿using WizardMonks.Decisions.Conditions;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Goals

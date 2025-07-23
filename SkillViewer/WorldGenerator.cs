@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using WizardMonks;
 using WizardMonks.Core;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace SkillViewer

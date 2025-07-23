@@ -4,6 +4,7 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks
@@ -401,7 +402,9 @@ namespace WizardMonks
                 this,
                 GetVisDesires(),
                 GetBookDesires().Distinct(),
-                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection())
+                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection(),
+                // lab texts desired,
+                // lab texts for trade)
             );
             if (_tradeDesires == null)
             {

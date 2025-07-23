@@ -4,6 +4,7 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions.Conditions.Helpers;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions

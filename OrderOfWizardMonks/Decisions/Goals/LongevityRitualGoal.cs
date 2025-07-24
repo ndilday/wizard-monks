@@ -17,9 +17,9 @@ namespace WizardMonks.Decisions.Goals
             this.Conditions.Add(new VisCondition(magus, 140, desire, visTypes, 7, 1));
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            base.AddActionPreferencesToList(alreadyConsidered, log);
+            base.AddActionPreferencesToList(alreadyConsidered, desires, log);
         }
     }
 }

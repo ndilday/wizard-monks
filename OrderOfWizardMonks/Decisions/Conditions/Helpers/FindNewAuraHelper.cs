@@ -24,7 +24,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _averageGain = GetAverageNewAura(_currentScore);
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if (_averageGain > 0)
             {
@@ -40,7 +40,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // practice area lore
                 PracticeHelper areaLorePracticeHelper =
                     new(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
-                areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                areaLorePracticeHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
                 // read area lore, once we have reasonable ways of defining different areas
                 //ReadingHelper readAreaLoreHelper = new ReadingHelper(Abilities.AreaLore, Mage, AgeToCompleteBy - 1, Desire, (ushort)(ConditionDepth + 1), CalculateScoreGainDesire);
@@ -48,12 +48,12 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // consider value of increasing InVi casting total
                 CastingTotalIncreaseHelper inViHelper =
                     new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
-                inViHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                inViHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
                 // consider value of learning a new spell to detect auras
                 LearnSpellHelper spellHelper =
                     new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _findAuraSpellBase, CalculateSpellGainDesire);
-                spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                spellHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }
 

@@ -21,14 +21,14 @@ namespace WizardMonks.Decisions.Conditions
         }
 
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if(!ConditionFulfilled)
             {
                 HasAuraCondition auraCondition = new(_mage, this.AgeToCompleteBy, this.Desire, (ushort)(this.ConditionDepth + 1));
                 if(!auraCondition.ConditionFulfilled)
                 {
-                    auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    auraCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
                 else
                 {

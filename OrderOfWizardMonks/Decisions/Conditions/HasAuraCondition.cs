@@ -19,7 +19,7 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if(!ConditionFulfilled)
             {

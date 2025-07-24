@@ -64,6 +64,7 @@ namespace WizardMonks
         protected Ability _writingLanguage;
         protected Ability _areaAbility;
         protected List<IGoal> _goals;
+        protected Desires _desires;
         protected List<string> _verboseLog;
 
         private readonly string[] _virtueList = new string[10];
@@ -316,6 +317,7 @@ namespace WizardMonks
 
         IActivity DecideSeasonalActivity()
         {
+            _desires = new Desires();
             if (IsCollaborating)
             {
                 return _mandatoryAction;
@@ -329,7 +331,7 @@ namespace WizardMonks
                     if (!goal.IsComplete())
                     {
                         //List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, _verboseLog);
+                        goal.AddActionPreferencesToList(actions, _desires, _verboseLog);
                     }
                 }
                 Log.AddRange(actions.Log());

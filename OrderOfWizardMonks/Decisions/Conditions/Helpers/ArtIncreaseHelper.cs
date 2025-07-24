@@ -13,7 +13,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _arts = arts;
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if (AgeToCompleteBy > Mage.SeasonalAge)
             {
@@ -24,8 +24,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // increase either art through reading
                 ReadingHelper techReadingHelper = new(_arts.Technique, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
                 ReadingHelper formReadingHelper = new(_arts.Form, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-                techReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
-                formReadingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                techReadingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
+                formReadingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }
 

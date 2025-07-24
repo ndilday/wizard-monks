@@ -43,22 +43,30 @@ namespace WizardMonks.Decisions.Conditions
             _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             double storedVis = VisTypes.Sum(v => _mage.GetVisCount(v));
             _visStillNeeded = AmountNeeded - storedVis;
+
             if (_visStillNeeded > 0)
             {
+                foreach (Ability visType in this.VisTypes)
+                {
+                    desires.VisDesires.First(d => d.Art == visType).Quantity += _visStillNeeded;
+                }
+                // add an interest in MagicLore here, just to have it somewhere?
+                desires.BookDesires.Add(new BookDesire(this.Character, Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
+
                 // extract
                 if (_vimSufficient)
                 {
                     if (!_auraCondition.ConditionFulfilled)
                     {
-                        _auraCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                        _auraCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     }
                     else if (!_labCondition.ConditionFulfilled)
                     {
-                        _labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                        _labCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     }
                     else
                     {
@@ -80,18 +88,18 @@ namespace WizardMonks.Decisions.Conditions
                                 double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
                                 LabTotalIncreaseHelper helper =
                                     new(_mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, GetDesirabilityOfLabTotalGain);
-                                helper.AddActionPreferencesToList(alreadyConsidered, log);
+                                helper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                             }
                         }
                     }
                 }
                 // search for vis source
                 FindVisSourceHelper visSourceHelper = new(_mage, VisTypes, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
-                visSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                visSourceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
                 // consider writing a book to trade for vis
                 WritingHelper writingHelper = new(_mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), GetDesirabilityOfVisGain);
-                writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                writingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }
 
@@ -106,30 +114,6 @@ namespace WizardMonks.Decisions.Conditions
                 }
                 return total >= AmountNeeded;
             }
-        }
-
-        public override void ModifyVisDesires(VisDesire[] desires)
-        {
-            foreach(Ability visType in this.VisTypes)
-            {
-                desires.First(d => d.Art == visType).Quantity += this.AmountNeeded;
-            }
-        }
-
-        public override List<BookDesire> GetBookDesires()
-        {
-            List<BookDesire> bookDesires = new();
-            if (!ConditionFulfilled)
-            {
-                // books won't help us get the vis we want, will they?
-                /*foreach (Ability visType in this.VisTypes)
-                {
-                    bookDesires.Add(new BookDesire(visType, this.Character.GetAbility(visType).Value));
-                }*/
-                // add an interest in MagicLore here, just to have it somewhere?
-                bookDesires.Add(new BookDesire(this.Character, Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
-            }
-            return bookDesires;
         }
 
         private double GetDesirabilityOfVisGain(double visGain, ushort conditionDepth)

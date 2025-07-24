@@ -135,25 +135,6 @@ namespace WizardMonks
             return books;
         }
 
-        private List<BookDesire> GetBookDesires()
-        {
-            if (GetAbility(_writingAbility).Value >= 1.0 && GetAbility(_writingLanguage).Value >= 4.0)
-            {
-                List<BookDesire> bookDesires = new();
-                IList<BookDesire> bookNeeds;
-                foreach (IGoal goal in _goals)
-                {
-                    bookNeeds = goal.GetBookDesires();
-                    if (bookNeeds != null)
-                    {
-                        bookDesires.AddRange(bookNeeds);
-                    }
-                }
-                return bookDesires;
-            }
-            return new List<BookDesire>();
-        }
-
         public override ABook GetBestBookToWrite()
         {
             double currentBestBookValue = 0;
@@ -371,46 +352,33 @@ namespace WizardMonks
         {
         }
 
-        IActivity DecideSeasonalActivity(IList<MagusTradingDesires> tradeDesiresList)
-        {
-            if (IsCollaborating)
-            {
-                return _mandatoryAction;
-            }
-            else
-            {
-                ConsideredActions actions = new();
-                _verboseLog.Add("----------");
-                foreach (IGoal goal in _goals)
-                {
-                    if (!goal.IsComplete())
-                    {
-                        // TODO: it should probably be an error case for a goal to still be here
-                        // for now, ignore
-                        //List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, _verboseLog);
-                    }
-                }
-                Log.AddRange(actions.Log());
-                return actions.GetBestAction();
-            }
-        }
-
         public MagusTradingDesires GenerateTradingDesires()
         {
+            UpdateVisDesiresWithStock();
             _tradeDesires = new MagusTradingDesires(
                 this,
-                GetVisDesires(),
-                GetBookDesires().Distinct(),
-                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection(),
-                // lab texts desired,
-                // lab texts for trade)
+                _desires.VisDesires,
+                _desires.BookDesires,
+                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection()),
+                null,// lab texts desired,
+                null// lab texts for trade)
             );
             if (_tradeDesires == null)
             {
                 throw new NullReferenceException();
             }
             return _tradeDesires;
+        }
+
+        private void UpdateVisDesiresWithStock()
+        {
+            foreach (VisDesire visDesire in _desires.VisDesires)
+            {
+                if (_visStock.ContainsKey(visDesire.Art))
+                {
+                    visDesire.Quantity -= _visStock[visDesire.Art];
+                }
+            }
         }
 
         public void EvaluateTradingDesires(IEnumerable<MagusTradingDesires> mageTradeDesires)
@@ -641,37 +609,6 @@ namespace WizardMonks
                 total += _visStock[visArt];
             }
             return total;
-        }
-
-        private VisDesire[] GetVisDesires()
-        {
-            // start by making all of the character's vis stockpiles available
-            VisDesire[] desires = new VisDesire[MagicArts.Count];
-            desires[0] = new VisDesire(MagicArts.Creo, -this.GetVisCount(MagicArts.Creo));
-            desires[1] = new VisDesire(MagicArts.Intellego, -this.GetVisCount(MagicArts.Intellego));
-            desires[2] = new VisDesire(MagicArts.Muto, -this.GetVisCount(MagicArts.Muto));
-            desires[3] = new VisDesire(MagicArts.Perdo, -this.GetVisCount(MagicArts.Perdo));
-            desires[4] = new VisDesire(MagicArts.Rego, -this.GetVisCount(MagicArts.Rego));
-            desires[5] = new VisDesire(MagicArts.Animal, -this.GetVisCount(MagicArts.Animal));
-            desires[6] = new VisDesire(MagicArts.Aquam, -this.GetVisCount(MagicArts.Aquam));
-            desires[7] = new VisDesire(MagicArts.Auram, -this.GetVisCount(MagicArts.Auram));
-            desires[8] = new VisDesire(MagicArts.Corpus, -this.GetVisCount(MagicArts.Corpus));
-            desires[9] = new VisDesire(MagicArts.Herbam, -this.GetVisCount(MagicArts.Herbam));
-            desires[10] = new VisDesire(MagicArts.Ignem, -this.GetVisCount(MagicArts.Ignem));
-            desires[11] = new VisDesire(MagicArts.Imaginem, -this.GetVisCount(MagicArts.Imaginem));
-            desires[12] = new VisDesire(MagicArts.Mentem, -this.GetVisCount(MagicArts.Mentem));
-            desires[13] = new VisDesire(MagicArts.Terram, -this.GetVisCount(MagicArts.Terram));
-            desires[14] = new VisDesire(MagicArts.Vim, -this.GetVisCount(MagicArts.Vim));
-            foreach (IGoal goal in _goals)
-            {
-                goal.ModifyVisDesires(this, desires);
-            }
-            foreach (VisDesire desire in desires)
-            {
-                desire.Quantity = Math.Truncate(desire.Quantity * 2.0) / 2.0;
-            }
-
-            return desires;
         }
 
         public double UseVis(Ability visType, double amount)

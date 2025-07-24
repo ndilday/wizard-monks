@@ -23,6 +23,6 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _desireFunc = desireFunc;
         }
 
-        public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
+        public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log);
     }
 }

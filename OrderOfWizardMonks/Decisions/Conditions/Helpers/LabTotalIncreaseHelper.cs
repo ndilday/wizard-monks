@@ -10,15 +10,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
         { }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            base.AddActionPreferencesToList(alreadyConsidered, log);
+            base.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Magic Theory via practice
             PracticeHelper practiceHelper = new(Abilities.MagicTheory, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-            practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
+            practiceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Magic Theory via reading
             ReadingHelper readingHelper = new(Abilities.MagicTheory, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-            readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+            readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Int
             // improve lab
             // find better aura.

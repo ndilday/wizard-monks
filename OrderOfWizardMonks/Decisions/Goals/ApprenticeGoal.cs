@@ -13,10 +13,5 @@ namespace WizardMonks.Decisions.Goals
                 Conditions.Add(new AbilityScoreCondition(character, dueDate == null ? 200 : (uint)(dueDate - 1), desire, ability, 5));
             }
         }
-
-        public override void ModifyVisDesires(Magus magus, VisDesire[] visDesires)
-        {
-            base.ModifyVisDesires(magus, visDesires);
-        }
     }
 }

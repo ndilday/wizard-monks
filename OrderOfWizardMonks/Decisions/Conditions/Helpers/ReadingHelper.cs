@@ -14,7 +14,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _ability = ability;
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             var bestBook = Mage.GetBestBookToRead(_ability);
             if (bestBook != null)
@@ -29,10 +29,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 // consider both writing and vis to provide the capital to trade for a book?
                 WritingHelper writingHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-                writingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                writingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
                 FindVisSourceHelper findVisSourceHelper = new(Mage, MagicArts.GetEnumerator().ToList() , AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-                findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }
     }

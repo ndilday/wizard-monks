@@ -24,7 +24,7 @@ namespace WizardMonks.Decisions.Goals
             Conditions = new List<ACondition>();
         }
 
-        public virtual void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public virtual void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if (!_completed)
             {
@@ -34,7 +34,7 @@ namespace WizardMonks.Decisions.Goals
                     if (!condition.ConditionFulfilled)
                     {
                         conditionsFulfilled = false;
-                        condition.AddActionPreferencesToList(alreadyConsidered, log);
+                        condition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     }
                 }
                 if (conditionsFulfilled)
@@ -47,28 +47,6 @@ namespace WizardMonks.Decisions.Goals
         public virtual bool IsComplete()
         {
             return _completed;
-        }
-
-        public virtual IList<BookDesire> GetBookDesires()
-        {
-            List<BookDesire> bookDesires = new();
-            foreach(ACondition condition in Conditions)
-            {
-                var conditionalDesires = condition.GetBookDesires();
-                if(conditionalDesires != null && conditionalDesires.Any())
-                {
-                    bookDesires.AddRange(conditionalDesires);
-                }
-            }
-            return bookDesires;
-        }
-
-        public virtual void ModifyVisDesires(Magus magus, VisDesire[] visDesires)
-        {
-            foreach(ACondition condition in this.Conditions)
-            {
-                condition.ModifyVisDesires(visDesires);
-            }
         }
     }
 }

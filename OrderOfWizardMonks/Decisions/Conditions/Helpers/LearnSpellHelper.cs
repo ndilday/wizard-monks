@@ -15,7 +15,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             _spellBase = spellBase;
         }
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if(Mage.Laboratory == null)
             {
@@ -23,7 +23,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 {
                     HasLabCondition labCondition = 
                         new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1));
-                    labCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    labCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
             }
             else if (AgeToCompleteBy > Mage.SeasonalAge)
@@ -76,7 +76,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 {
                     LabTotalIncreaseHelper labTotalIncreaseHelper =
                         new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
-                    labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                    labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
             }
         }

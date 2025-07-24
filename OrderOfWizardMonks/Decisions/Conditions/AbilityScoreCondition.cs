@@ -40,11 +40,13 @@ namespace WizardMonks.Decisions.Conditions
             _currentTotal = GetTotal();
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             _currentTotal = GetTotal();
             if (!ConditionFulfilled)
             {
+                ModifyBookDesires(desires.BookDesires);
+                ModifyVisDesires(desires.VisDesires);
                 // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
                 foreach (Ability ability in Abilities)
                 {
@@ -61,28 +63,30 @@ namespace WizardMonks.Decisions.Conditions
                     // should we only study vis if we don't have a book?
                     else if (Character.GetType() == typeof(Magus))
                     {
-                        AddVisUseToActionList(ability, alreadyConsidered, log);
+                        AddVisUseToActionList(ability, alreadyConsidered, desires, log);
                     }
                 }
             }
         }
 
-        public override List<BookDesire> GetBookDesires()
+        private void ModifyBookDesires(IList<BookDesire> bookDesires)
         {
-            List<BookDesire> bookDesires = new();
-            if (!ConditionFulfilled)
+            foreach (Ability ability in this.Abilities)
             {
-                foreach (Ability ability in this.Abilities)
+                //see if bookDesires already has a desire for this ability
+                if (bookDesires.Any(bd => bd.Ability == ability))
                 {
-                    double abilityLevel = this.Character.GetAbilityMaximumFromReading(ability);
-                    if(abilityLevel < TotalNeeded)
+                    continue; // we already have a desire for this ability
+                }
+                double abilityLevel = this.Character.GetAbilityMaximumFromReading(ability);
+                if (abilityLevel < TotalNeeded)
+                {
                     bookDesires.Add(new BookDesire(this.Character, ability, abilityLevel));
                 }
             }
-            return bookDesires;
         }
 
-        public override void ModifyVisDesires(VisDesire[] desires)
+        private void ModifyVisDesires(VisDesire[] desires)
         {
             foreach (Ability ability in this.Abilities)
             {
@@ -145,7 +149,7 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        private void AddVisUseToActionList(Ability ability, ConsideredActions alreadyConsidered, IList<string> log)
+        private void AddVisUseToActionList(Ability ability, ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             Magus mage = (Magus)Character;
             CharacterAbilityBase magicArt = mage.GetAbility(ability);
@@ -172,7 +176,7 @@ namespace WizardMonks.Decisions.Conditions
                     // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                     VisCondition visCondition =
                         new(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
-                    visCondition.AddActionPreferencesToList(alreadyConsidered, log);
+                    visCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
             }
         }

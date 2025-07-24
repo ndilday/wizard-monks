@@ -39,7 +39,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _currentScore = mage.GetAbility(Abilities.MagicLore).Value + mage.GetAttribute(AttributeType.Perception).Value + (mage.GetCastingTotal(MagicArtPairs.InVi) / 10);
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             List<Ability> visSearchAbilities = new();
             visSearchAbilities.Add(Abilities.MagicLore);
@@ -81,16 +81,16 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     // consider the value of increasing the casting total first
                     CastingTotalIncreaseHelper castingHelper =
                         new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
-                    castingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                    castingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // consider the value of increasing Magic Lore
                     PracticeHelper practiceHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
-                    practiceHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                    practiceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     ReadingHelper readingHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
-                    readingHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                    readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // consider value of learning a new spell to detect vis
                     LearnSpellHelper spellHelper =
                         new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
-                    spellHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                    spellHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // TODO: consider increasing Perception
                 }
             }
@@ -99,7 +99,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (ConditionDepth < 10 && _magicLoreTotal > 0)
             {
                 FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateAuraGainDesire);
-                auraHelper.AddActionPreferencesToList(alreadyConsidered, log);
+                auraHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }
 

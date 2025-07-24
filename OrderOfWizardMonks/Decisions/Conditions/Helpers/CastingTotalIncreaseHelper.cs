@@ -11,9 +11,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
         { }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            base.AddActionPreferencesToList(alreadyConsidered, log);
+            base.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Sta
         }
     }

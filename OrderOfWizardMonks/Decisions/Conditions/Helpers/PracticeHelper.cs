@@ -12,7 +12,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             _ability = ability;
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if (_desireFunc != null)
             {

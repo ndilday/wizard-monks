@@ -10,7 +10,7 @@ namespace WizardMonks.Decisions.Conditions
         public ushort ConditionDepth { get; protected set; }
         public abstract bool ConditionFulfilled { get; }
 
-        public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log);
+        public abstract void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log);
 
         public ACondition(Character character, uint ageToCompleteBy, double desire, ushort conditionDepth = 1)
         {
@@ -19,9 +19,5 @@ namespace WizardMonks.Decisions.Conditions
             Desire = desire;
             ConditionDepth = conditionDepth;
         }
-
-        public virtual List<BookDesire> GetBookDesires() { return new List<BookDesire>(); }
-
-        public virtual void ModifyVisDesires(VisDesire[] desires) { }
     }
 }

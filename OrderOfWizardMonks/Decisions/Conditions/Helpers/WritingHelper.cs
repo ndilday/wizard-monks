@@ -16,7 +16,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
         }
 
-        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, IList<string> log)
+        public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             var bestBook = Mage.GetBestBookToWrite();
             if (bestBook != null)

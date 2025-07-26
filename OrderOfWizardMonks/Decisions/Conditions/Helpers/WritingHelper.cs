@@ -18,10 +18,10 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            var bestBook = Mage.GetBestBookToWrite();
+            var bestBook = _mage.GetBestBookToWrite();
             if (bestBook != null)
             {
-                double effectiveDesire = _desireFunc(bestBook.Value, ConditionDepth);
+                double effectiveDesire = _desireFunc(bestBook.Value, _conditionDepth);
                 log.Add("Writing " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 WriteActivity writingAction = new(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
                 alreadyConsidered.Add(writingAction);

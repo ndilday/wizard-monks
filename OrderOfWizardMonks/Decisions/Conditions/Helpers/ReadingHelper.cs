@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -16,22 +17,25 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            var bestBook = Mage.GetBestBookToRead(_ability);
+            var bestBook = _mage.GetBestBookToRead(_ability);
             if (bestBook != null)
             {
-                double gain = Mage.GetBookLevelGain(bestBook);
-                double effectiveDesire = _desireFunc(gain, ConditionDepth);
+                double gain = _mage.GetBookLevelGain(bestBook);
+                double effectiveDesire = _desireFunc(gain, _conditionDepth);
                 log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 ReadActivity readingAction = new(bestBook, effectiveDesire);
                 alreadyConsidered.Add(readingAction);
             }
-            else if(ConditionDepth < 10 && AgeToCompleteBy > Mage.SeasonalAge)
+            else if(_conditionDepth < 10 && _ageToCompleteBy > _mage.SeasonalAge)
             {
+                // add a book in this topic to the desired list
+                desires.BookDesires.Add(new BookDesire(_mage, _ability, _mage.GetAbility(_ability).Value));
+
                 // consider both writing and vis to provide the capital to trade for a book?
-                WritingHelper writingHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+                WritingHelper writingHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
                 writingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
-                FindVisSourceHelper findVisSourceHelper = new(Mage, MagicArts.GetEnumerator().ToList() , AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+                FindVisSourceHelper findVisSourceHelper = new(_mage, MagicArts.GetEnumerator().ToList() , _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
                 findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }

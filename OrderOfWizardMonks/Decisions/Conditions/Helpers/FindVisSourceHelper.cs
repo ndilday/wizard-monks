@@ -31,7 +31,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 // find the aura with the most vis scource "capacity"
                 // this magic lore score builds in an assumed roll on the aura search of 2.5
-                Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                Aura aura = _mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 _currentAura = aura.Strength;
                 _currentVis = aura.VisSources.Sum(vs => vs.Amount);
             }
@@ -48,9 +48,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             // we're not getting vis fast enough, so we need to find a new source
             // consider the value of searching for new vis sites in current auras
             // determine average vis source found
-            _magicLoreTotal = Mage.GetAbility(Abilities.MagicLore).Value;
-            _magicLoreTotal += Mage.GetAttribute(AttributeType.Perception).Value;
-            Spell bestVisSearchSpell = Mage.GetBestSpell(_findVisSpellBase);
+            _magicLoreTotal = _mage.GetAbility(Abilities.MagicLore).Value;
+            _magicLoreTotal += _mage.GetAttribute(AttributeType.Perception).Value;
+            Spell bestVisSearchSpell = _mage.GetBestSpell(_findVisSpellBase);
             // add 1 per magnitude of detection spell to the total
             if (bestVisSearchSpell != null)
             {
@@ -58,11 +58,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             }
             else
             {
-                _magicLoreTotal += Mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+                _magicLoreTotal += _mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
             }
-            if (Mage.KnownAuras.Any())
+            if (_mage.KnownAuras.Any())
             {
-                Aura aura = Mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                Aura aura = _mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
                 if (averageFind > 1.0)
                 {
@@ -70,35 +70,35 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     //averageFind = averageFind * _visTypes.Count / 15;
                     // in this version, unaccecptable vis types get half credit
                     averageFind = averageFind * (_visTypes.Count+15) / 30;
-                    double desire = _desireFunc(averageFind, ConditionDepth);
+                    double desire = _desireFunc(averageFind, _conditionDepth);
 
                     // TODO: modify by lifelong value of source?
                     log.Add("Looking for vis source worth " + (desire).ToString("0.000"));
                     alreadyConsidered.Add(new FindVisSourceActivity(aura, Abilities.MagicLore, desire));
                 }
-                if (ConditionDepth < 10)
+                if (_conditionDepth < 10)
                 {
                     // consider the value of increasing the casting total first
                     CastingTotalIncreaseHelper castingHelper =
-                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
+                        new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), MagicArtPairs.InVi, CalculateCastingTotalGainDesire);
                     castingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // consider the value of increasing Magic Lore
-                    PracticeHelper practiceHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
+                    PracticeHelper practiceHelper = new(Abilities.MagicLore, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), CalculateMagicLoreGainDesire);
                     practiceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
-                    ReadingHelper readingHelper = new(Abilities.MagicLore, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateMagicLoreGainDesire);
+                    ReadingHelper readingHelper = new(Abilities.MagicLore, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), CalculateMagicLoreGainDesire);
                     readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // consider value of learning a new spell to detect vis
                     LearnSpellHelper spellHelper =
-                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
+                        new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _findVisSpellBase, CalculateCastingTotalGainDesire);
                     spellHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                     // TODO: consider increasing Perception
                 }
             }
 
             // consider finding a whole new aura
-            if (ConditionDepth < 10 && _magicLoreTotal > 0)
+            if (_conditionDepth < 10 && _magicLoreTotal > 0)
             {
-                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), CalculateAuraGainDesire);
+                FindNewAuraHelper auraHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), CalculateAuraGainDesire);
                 auraHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }

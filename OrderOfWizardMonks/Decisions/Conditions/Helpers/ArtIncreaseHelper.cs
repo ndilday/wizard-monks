@@ -15,15 +15,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            if (AgeToCompleteBy > Mage.SeasonalAge)
+            if (_ageToCompleteBy > _mage.SeasonalAge)
             {
                 // increase non-vim through vis study
                 AddVisUseToActionList(_arts.Technique, alreadyConsidered, log);
                 AddVisUseToActionList(_arts.Form, alreadyConsidered, log);
 
                 // increase either art through reading
-                ReadingHelper techReadingHelper = new(_arts.Technique, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
-                ReadingHelper formReadingHelper = new(_arts.Form, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+                ReadingHelper techReadingHelper = new(_arts.Technique, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
+                ReadingHelper formReadingHelper = new(_arts.Form, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
                 techReadingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 formReadingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
@@ -31,19 +31,19 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
         private void AddVisUseToActionList(Ability art, ConsideredActions alreadyConsidered, IList<string> log)
         {
-            CharacterAbilityBase magicArt = Mage.GetAbility(art);
-            double stockpile = Mage.GetVisCount(art);
+            CharacterAbilityBase magicArt = _mage.GetAbility(art);
+            double stockpile = _mage.GetVisCount(art);
             double visNeed = 0.5 + (magicArt.Value / 10.0);
 
             // if so, assume vis will return an average of 6XP + aura
             if (stockpile > visNeed)
             {
-                double gain = magicArt.GetValueGain(Mage.VisStudyRate);
-                double effectiveDesire = _desireFunc(gain, ConditionDepth);
+                double gain = magicArt.GetValueGain(_mage.VisStudyRate);
+                double effectiveDesire = _desireFunc(gain, _conditionDepth);
                 StudyVisActivity visStudy = new(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);
                 // consider the value of finding a better aura to study vis in
-                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+                FindNewAuraHelper auraHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
 
                 // TODO: how do we decrement the cost of the vis?
             }

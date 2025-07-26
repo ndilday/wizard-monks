@@ -14,18 +14,18 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             base.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Magic Theory via practice
-            PracticeHelper practiceHelper = new(Abilities.MagicTheory, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+            PracticeHelper practiceHelper = new(Abilities.MagicTheory, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
             practiceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Magic Theory via reading
-            ReadingHelper readingHelper = new(Abilities.MagicTheory, Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _desireFunc);
+            ReadingHelper readingHelper = new(Abilities.MagicTheory, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
             readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Int
             // improve lab
             // find better aura.
-            if (AgeToCompleteBy - 1 > Mage.SeasonalAge)
+            if (_ageToCompleteBy - 1 > _mage.SeasonalAge)
             {
                 // a season to find the aura, and a season to build a lab in it. Doesn't take into account lab specialization
-                FindNewAuraHelper auraHelper = new(Mage, AgeToCompleteBy - 2, (ushort)(ConditionDepth + 2), _desireFunc);
+                FindNewAuraHelper auraHelper = new(_mage, _ageToCompleteBy - 2, (ushort)(_conditionDepth + 2), _desireFunc);
             }
         }
     }

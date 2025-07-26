@@ -11,15 +11,15 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     {
         protected CalculateDesireFunc _desireFunc;
 
-        public Magus Mage { get; private set; }
-        public uint AgeToCompleteBy { get; set; }
-        public ushort ConditionDepth { get; protected set; }
+        protected Magus _mage;
+        protected uint _ageToCompleteBy;
+        protected ushort _conditionDepth;
 
         public AHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null)
         {
-            Mage = mage;
-            AgeToCompleteBy = ageToCompleteBy;
-            ConditionDepth = conditionDepth;
+            _mage = mage;
+            _ageToCompleteBy = ageToCompleteBy;
+            _conditionDepth = conditionDepth;
             _desireFunc = desireFunc;
         }
 

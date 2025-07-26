@@ -54,8 +54,6 @@ namespace WizardMonks.Decisions.Conditions
                 {
                     desires.VisDesires.First(d => d.Art == visType).Quantity += _visStillNeeded;
                 }
-                // add an interest in MagicLore here, just to have it somewhere?
-                desires.BookDesires.Add(new BookDesire(this.Character, Abilities.MagicLore, this.Character.GetAbility(Abilities.MagicLore).Value));
 
                 // extract
                 if (_vimSufficient)

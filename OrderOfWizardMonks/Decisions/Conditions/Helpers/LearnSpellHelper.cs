@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
+using WizardMonks.Economy;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
@@ -17,31 +18,31 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         }
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            if(Mage.Laboratory == null)
+            if(_mage.Laboratory == null)
             {
-                if (AgeToCompleteBy - 1 > Mage.SeasonalAge)
+                if (_ageToCompleteBy - 1 > _mage.SeasonalAge)
                 {
                     HasLabCondition labCondition = 
-                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1));
+                        new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1));
                     labCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
             }
-            else if (AgeToCompleteBy > Mage.SeasonalAge)
+            else if (_ageToCompleteBy > _mage.SeasonalAge)
             {
                 double minLevel = 0;
                 // see if the mage already knows a spell
-                Spell bestSpell = Mage.GetBestSpell(_spellBase);
+                Spell bestSpell = _mage.GetBestSpell(_spellBase);
                 if(bestSpell != null)
                 {
                     minLevel = bestSpell.Level;
                 }
                 else
                 {
-                    minLevel = Mage.GetSpontaneousCastingTotal(_spellBase.ArtPair);
+                    minLevel = _mage.GetSpontaneousCastingTotal(_spellBase.ArtPair);
                 }
 
                 // determine the level of a spell the mage can invent in a single season
-                double labTotal = Mage.GetLabTotal(_spellBase.ArtPair, Activity.InventSpells);
+                double labTotal = _mage.GetLabTotal(_spellBase.ArtPair, Activity.InventSpells);
                 if(bestSpell != null)
                 {
                     // account for already knowing a similar spell in the lab total
@@ -60,7 +61,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // if the mage has a lab text with this effect of level between singleSeasonSpellLevel and labTotal, invent that instead
                 double minimumLabTextLevel = Math.Max(singleSeasonSpellLevel, minLevel);
-                var labTexts = Mage.GetLabTexts(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= minimumLabTextLevel);
+                var labTexts = _mage.GetLabTexts(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= minimumLabTextLevel);
                 if(labTexts.Any())
                 {
                     ConsiderLearningSpell(alreadyConsidered, log, minLevel, labTexts);
@@ -72,12 +73,32 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 }
 
                 // increase Lab Total
-                if (AgeToCompleteBy > Mage.SeasonalAge && ConditionDepth < 10)
+                if (_ageToCompleteBy > _mage.SeasonalAge && _conditionDepth < 10)
                 {
                     LabTotalIncreaseHelper labTotalIncreaseHelper =
-                        new(Mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
+                        new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
                     labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
+
+                // add a desire for a lab text better than the best one the mage knows
+                double desiredLevelBaseline = minLevel;
+                if(labTexts.Any())
+                {
+                    double bestLabTextLevel = labTexts.Max(lt => lt.SpellContained.Level);
+                    if(bestLabTextLevel < 5)
+                    {
+                        bestLabTextLevel++;
+                    }
+                    else
+                    {
+                        bestLabTextLevel += 5;
+                    }
+                    if(bestLabTextLevel > desiredLevelBaseline)
+                    {
+                        desiredLevelBaseline = bestLabTextLevel;
+                    }
+                }
+                desires.LabTextDesires.Add(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline));
             }
         }
 
@@ -85,7 +106,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             // use the highest level lab text
             var labText = labTexts.OrderByDescending(t => t.SpellContained.Level).First();
-            double desire = _desireFunc((labText.SpellContained.Level - minLevel), ConditionDepth);
+            double desire = _desireFunc((labText.SpellContained.Level - minLevel), _conditionDepth);
             log.Add($"Learning lab text {labText.SpellContained.Name} {labText.SpellContained.Level} worth {desire:0.000}");
             alreadyConsidered.Add(new LearnSpellFromLabTextActivity(labText, Abilities.MagicTheory, desire));
         }
@@ -128,7 +149,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                         new Spell(EffectRanges.Personal, EffectDurations.Moon, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
                     break;
             }
-            double desire = _desireFunc((singleSeasonSpellLevel - minLevel), ConditionDepth);
+            double desire = _desireFunc((singleSeasonSpellLevel - minLevel), _conditionDepth);
             log.Add($"Inventing {newSpell.Name} {newSpell.Level} worth {desire:0.000}");
             alreadyConsidered.Add(new InventSpellActivity(newSpell, Abilities.MagicTheory, desire));
         }

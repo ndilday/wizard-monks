@@ -24,7 +24,7 @@ namespace SkillViewer
         private Ability _magicTheory;
         private Ability _artLib;
         private Ability _areaLore;
-        private Die _die = new Die();
+        //private Die _die = new Die();
         private List<string> _log;
         private Random _rand = new Random();
 
@@ -127,8 +127,6 @@ namespace SkillViewer
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
-            var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
-            GlobalEconomy.DesiredBooksList = magiDesires.SelectMany(md => md.BookDesires.Values).Distinct().ToList();
             _log.Add("Advancing Season");
             Parallel.ForEach(_magusArray.Where(m => m != null && !m.WantsToFollow), character =>
             {
@@ -184,6 +182,9 @@ namespace SkillViewer
                 _magusCount++;
             }
             _log.Add("Done Advancing Season");
+
+            var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
+            GlobalEconomy.DesiredBooksList = magiDesires.SelectMany(md => md.BookDesires.Values).Distinct().ToList();
 
             _log.Add("Considering vis and book trades");
             foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))

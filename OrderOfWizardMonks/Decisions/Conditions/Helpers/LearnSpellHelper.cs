@@ -98,7 +98,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                         desiredLevelBaseline = bestLabTextLevel;
                     }
                 }
-                desires.LabTextDesires.Add(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline));
+                desires.AddLabTextDesire(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline));
             }
         }
 

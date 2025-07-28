@@ -45,8 +45,7 @@ namespace WizardMonks.Decisions.Conditions
             _currentTotal = GetTotal();
             if (!ConditionFulfilled)
             {
-                ModifyBookDesires(desires.BookDesires);
-                ModifyVisDesires(desires.VisDesires);
+                ModifyDesires(desires);
                 // the basic structure is (portion of necessary gain action provides) * (desire / time left until needed)
                 foreach (Ability ability in Abilities)
                 {
@@ -69,24 +68,7 @@ namespace WizardMonks.Decisions.Conditions
             }
         }
 
-        private void ModifyBookDesires(IList<BookDesire> bookDesires)
-        {
-            foreach (Ability ability in this.Abilities)
-            {
-                //see if bookDesires already has a desire for this ability
-                if (bookDesires.Any(bd => bd.Ability == ability))
-                {
-                    continue; // we already have a desire for this ability
-                }
-                double abilityLevel = this.Character.GetAbilityMaximumFromReading(ability);
-                if (abilityLevel < TotalNeeded)
-                {
-                    bookDesires.Add(new BookDesire(this.Character, ability, abilityLevel));
-                }
-            }
-        }
-
-        private void ModifyVisDesires(VisDesire[] desires)
+        private void ModifyDesires(Desires desires)
         {
             foreach (Ability ability in this.Abilities)
             {
@@ -94,14 +76,13 @@ namespace WizardMonks.Decisions.Conditions
                 if (MagicArts.IsArt(ability) && this.Character.GetBestSummaToRead(ability) == null)
                 {
                     double visNeed = 0.5 + (this.Character.GetAbility(ability).Value / 10.0);
-                    foreach (VisDesire visDesire in desires)
-                    {
-                        if (visDesire.Art == ability)
-                        {
-                            visDesire.Quantity += visNeed;
-                            break;
-                        }
-                    }
+                    desires.AddVisDesire(ability, visNeed);
+                }
+
+                double abilityLevel = this.Character.GetAbilityMaximumFromReading(ability);
+                if (abilityLevel < TotalNeeded)
+                {
+                    desires.AddBookDesire(new BookDesire(this.Character, ability, abilityLevel));
                 }
             }
         }

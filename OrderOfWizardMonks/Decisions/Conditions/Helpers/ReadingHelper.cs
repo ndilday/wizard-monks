@@ -29,7 +29,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             else if(_conditionDepth < 10 && _ageToCompleteBy > _mage.SeasonalAge)
             {
                 // add a book in this topic to the desired list
-                desires.BookDesires.Add(new BookDesire(_mage, _ability, _mage.GetAbility(_ability).Value));
+                desires.AddBookDesire(new BookDesire(_mage, _ability, _mage.GetAbility(_ability).Value));
 
                 // consider both writing and vis to provide the capital to trade for a book?
                 WritingHelper writingHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);

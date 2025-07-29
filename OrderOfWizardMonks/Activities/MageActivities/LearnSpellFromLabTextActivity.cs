@@ -30,6 +30,10 @@ namespace WizardMonks.Activities.MageActivities
             {
                 return false;
             }
+            if(action.GetType() != typeof(LearnSpellFromLabTextActivity))
+            {
+                return false;
+            }
             LearnSpellFromLabTextActivity invent = (LearnSpellFromLabTextActivity)action;
             // TODO: fix this later
             return invent.LabText.SpellContained == LabText.SpellContained;

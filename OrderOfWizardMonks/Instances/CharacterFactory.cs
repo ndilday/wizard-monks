@@ -61,11 +61,24 @@ namespace WizardMonks.Instances
             return magus;
         }
 
-        public static Magus GenerateNewApprentice()
+        public static Magus GenerateNewApprentice(int bonusPoints)
         {
             Magus magus = new(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
             NormalizeAttributes(magus);
             magus.GetAbility(Abilities.English).AddExperience(75);
+            // TODO: Implement a full point-buy system for apprentice generation.
+            // For now, as a placeholder, we will convert bonus points directly into
+            // bonus Intelligence, as it's the most impactful stat for a future lab assistant.
+            // Each 5 bonus points grants +1 Intelligence.
+            if (bonusPoints > 0)
+            {
+                double intelligenceBonus = Math.Floor(bonusPoints / 5.0);
+                if (intelligenceBonus > 0)
+                {
+                    magus.GetAttribute(AttributeType.Intelligence).BaseValue += intelligenceBonus;
+                    magus.Log.Add($"Generated with +{intelligenceBonus} Intelligence due to master's skilled search.");
+                }
+            }
             // randomly assign 45 points to childhood skills in 5 point blocks
             // Area Lore, Athletics, Awareness, Brawl, Charm, Folk Ken, Guile, Stealth, Survival, Swim
             double experienceBlock = 5.0;

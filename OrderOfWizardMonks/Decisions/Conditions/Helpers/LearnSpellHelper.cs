@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
+using WizardMonks.Core;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 
@@ -29,16 +30,17 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             }
             else if (_ageToCompleteBy > _mage.SeasonalAge)
             {
-                double minLevel = 0;
-                // see if the mage already knows a spell
+                ushort existingLevel = 0;
                 Spell bestSpell = _mage.GetBestSpell(_spellBase);
-                if(bestSpell != null)
+                if (bestSpell != null)
                 {
-                    minLevel = bestSpell.Level;
+                    existingLevel = bestSpell.Level;
                 }
-                else
+
+                ushort spontLevel = SpellLevelMath.GetLevelFromMagnitude(SpellLevelMath.GetMagnitudesFromLevel(_mage.GetSpontaneousCastingTotal(_spellBase.ArtPair)));
+                if (spontLevel > existingLevel)
                 {
-                    minLevel = _mage.GetSpontaneousCastingTotal(_spellBase.ArtPair);
+                    existingLevel = spontLevel;
                 }
 
                 // determine the level of a spell the mage can invent in a single season
@@ -48,28 +50,20 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     // account for already knowing a similar spell in the lab total
                     labTotal += bestSpell.Level / 5.0;
                 }
-                double singleSeasonSpellLevel = labTotal / 2.0;
-                if (singleSeasonSpellLevel > 5)
-                {
-                    // round off to a multiple of 5
-                    singleSeasonSpellLevel = Math.Floor(singleSeasonSpellLevel / 5) * 5;
-                }
-                else
-                {
-                    singleSeasonSpellLevel = Math.Floor(singleSeasonSpellLevel);
-                }
+                double singleSeasonPowerLevel = labTotal / 2.0;
+                ushort singleSeasonSpellLevel = SpellLevelMath.GetLevelFromMagnitude(SpellLevelMath.GetMagnitudesFromLevel(singleSeasonPowerLevel));
 
                 // if the mage has a lab text with this effect of level between singleSeasonSpellLevel and labTotal, invent that instead
-                double minimumLabTextLevel = Math.Max(singleSeasonSpellLevel, minLevel);
-                var labTexts = _mage.GetLabTexts(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= minimumLabTextLevel);
+                double minimumLabTextLevel = Math.Max(singleSeasonSpellLevel, existingLevel);
+                var labTexts = _mage.GetLabTextsFromCollection(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= minimumLabTextLevel);
                 if(labTexts.Any())
                 {
-                    ConsiderLearningSpell(alreadyConsidered, log, minLevel, labTexts);
+                    ConsiderLearningSpell(alreadyConsidered, log, existingLevel, labTexts);
                 }
                 // TODO: we're going to have to put a lot of design thought into making this flexible
-                else if(singleSeasonSpellLevel > minLevel && singleSeasonSpellLevel >= _spellBase.Level)
+                else if(singleSeasonSpellLevel > existingLevel && singleSeasonSpellLevel >= SpellLevelMath.GetLevelFromMagnitude(_spellBase.Magnitude))
                 {
-                    ConsiderInventingSpell(alreadyConsidered, log, minLevel, singleSeasonSpellLevel);
+                    ConsiderInventingSpell(alreadyConsidered, log, existingLevel, singleSeasonSpellLevel);
                 }
 
                 // increase Lab Total
@@ -81,7 +75,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 }
 
                 // add a desire for a lab text better than the best one the mage knows
-                double desiredLevelBaseline = minLevel;
+                double desiredLevelBaseline = existingLevel;
                 if(labTexts.Any())
                 {
                     double bestLabTextLevel = labTexts.Max(lt => lt.SpellContained.Level);
@@ -98,58 +92,63 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                         desiredLevelBaseline = bestLabTextLevel;
                     }
                 }
-                desires.AddLabTextDesire(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline));
+                desires.AddLabTextDesire(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline, labTotal));
             }
         }
 
-        private void ConsiderLearningSpell(ConsideredActions alreadyConsidered, IList<string> log, double minLevel, IEnumerable<LabText> labTexts)
+        private void ConsiderLearningSpell(ConsideredActions alreadyConsidered, IList<string> log, ushort existingLevel, IEnumerable<LabText> labTexts)
         {
             // use the highest level lab text
             var labText = labTexts.OrderByDescending(t => t.SpellContained.Level).First();
-            double desire = _desireFunc((labText.SpellContained.Level - minLevel), _conditionDepth);
+            double magnitudeGain = labText.SpellContained.Level - existingLevel;
+
+            double desire = _desireFunc(magnitudeGain, _conditionDepth);
             log.Add($"Learning lab text {labText.SpellContained.Name} {labText.SpellContained.Level} worth {desire:0.000}");
             alreadyConsidered.Add(new LearnSpellFromLabTextActivity(labText, Abilities.MagicTheory, desire));
         }
 
-        private void ConsiderInventingSpell(ConsideredActions alreadyConsidered, IList<string> log, double minLevel, double singleSeasonSpellLevel)
+        private void ConsiderInventingSpell(ConsideredActions alreadyConsidered, IList<string> log, ushort existingLevel, ushort singleSeasonSpellLevel)
         {
             Spell newSpell;
-            switch (singleSeasonSpellLevel - _spellBase.Level)
+            ushort availableMagnitudes = (ushort)(SpellLevelMath.GetMagnitudesFromLevel(singleSeasonSpellLevel) - _spellBase.Magnitude);
+            string spellName = $"{_mage.Name}'s {_spellBase.Name} {availableMagnitudes}";
+            switch (availableMagnitudes)
             {
                 case 0:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Taste, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Taste, _spellBase, 0, false, spellName);
                     break;
                 case 1:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Touch, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Touch, _spellBase, 0, false, spellName);
                     break;
                 case 2:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Smell, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Smell, _spellBase, 0, false, spellName);
                     break;
                 case 3:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Hearing, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Hearing, _spellBase, 0, false, spellName);
                     break;
                 case 4:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Sight, _spellBase, 0, false, spellName);
                     break;
                 case 5:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Diameter, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Diameter, EffectTargets.Sight, _spellBase, 0, false, spellName);
                     break;
-                case 10:
+                case 6:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Sight, _spellBase, 0, false, spellName);
                     break;
                 default:
                     newSpell =
-                        new Spell(EffectRanges.Personal, EffectDurations.Moon, EffectTargets.Sight, _spellBase, 0, false, _spellBase.Name);
+                        new Spell(EffectRanges.Personal, EffectDurations.Moon, EffectTargets.Sight, _spellBase, 0, false, spellName);
                     break;
             }
-            double desire = _desireFunc((singleSeasonSpellLevel - minLevel), _conditionDepth);
+            ushort magnitudeGain = SpellLevelMath.GetMagnitudeDifferenceBetweenLevels(singleSeasonSpellLevel, existingLevel);
+            double desire = _desireFunc(magnitudeGain, _conditionDepth);
             log.Add($"Inventing {newSpell.Name} {newSpell.Level} worth {desire:0.000}");
             alreadyConsidered.Add(new InventSpellActivity(newSpell, Abilities.MagicTheory, desire));
         }

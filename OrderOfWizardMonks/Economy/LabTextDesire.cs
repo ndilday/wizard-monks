@@ -3,13 +3,15 @@
     public class LabTextDesire
     {
         public SpellBase SpellBase { get; private set; }
-        public double CurrentLevel { get; private set; }
+        public double MinimumLevel { get; private set; }
+        public double MaximumLevel { get; private set; }
         public Character Character { get; private set; }
-        public LabTextDesire(Character character, SpellBase spellBase, double curLevel = 0)
+        public LabTextDesire(Character character, SpellBase spellBase, double minimumLevel, double maximumLevel)
         {
             SpellBase = spellBase;
-            CurrentLevel = curLevel;
             Character = character;
+            MinimumLevel = minimumLevel;
+            MaximumLevel = maximumLevel;
         }
 
         public override bool Equals(object obj)
@@ -29,7 +31,7 @@
 
         public override string ToString()
         {
-            return $"{SpellBase.ToString()} {CurrentLevel.ToString()}";
+            return $"{SpellBase.ToString()} {MinimumLevel.ToString("#0.0")}-{MaximumLevel.ToString("#0.0")}";
         }
     }
 }

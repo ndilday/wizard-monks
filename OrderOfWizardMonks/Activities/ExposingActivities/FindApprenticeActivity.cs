@@ -1,64 +1,81 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WizardMonks.Core;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Activities.ExposingActivities
 {
     [Serializable]
-    public class FindApprentice : AExposingActivity
+    public class FindApprenticeActivity : AExposingActivity
     {
-        public FindApprentice(Ability exposureAbility, double desire) : base(exposureAbility, desire)
+        private const double EASE_FACTOR = 9.0;
+
+        public FindApprenticeActivity(Ability exposureAbility, double desire) : base(exposureAbility, desire)
         {
             Action = Activity.FindApprentice;
         }
 
         protected override void DoAction(Character character)
         {
-            // TODO: see if the character can safely spont gift-finding spells
-            if (typeof(Magus) == character.GetType())
+            if (character is not Magus mage)
             {
-                MageApprenticeSearch((Magus)character);
+                // Non-magi cannot search for magically Gifted apprentices at this time.
+                character.Log.Add("Cannot search for an apprentice without the Gift.");
+                return;
+            }
+
+            mage.Log.Add("Searching for a potential apprentice...");
+
+            // Step 1: Calculate the Search Total
+            double searchTotal = 0;
+            searchTotal += mage.GetAbility(Abilities.FolkKen).Value;
+            searchTotal += mage.GetAttributeValue(AttributeType.Perception);
+            // Area Lore and Etiquette provide a smaller, supporting bonus.
+            searchTotal += mage.GetAbility(Abilities.AreaLore).Value / 2.0;
+            searchTotal += mage.GetAbility(Abilities.Etiquette).Value / 2.0;
+
+            // Step 2: Add Magic Bonus
+            SpellBase giftFindingBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift);
+            Spell bestGiftFindingSpell = mage.GetBestSpell(giftFindingBase);
+            double giftFindingBonus = 0;
+
+            if (bestGiftFindingSpell != null)
+            {
+                giftFindingBonus = (bestGiftFindingSpell.Level / 5.0) - 5;
+                mage.Log.Add($"Using '{bestGiftFindingSpell.Name}' to aid the search.");
             }
             else
             {
-                CharacterApprenticeSearch(character);
+                // If no spell is known, use spontaneous magic potential.
+                giftFindingBonus = (mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0) - 5;
             }
-        }
+            searchTotal += giftFindingBonus;
 
-        private void CharacterApprenticeSearch(Character character)
-        {
-            // TODO: eventually characters will be able to use magical items to do the search
-            // making them work similar to the mage
-        }
+            // Step 3: Make the Roll and Determine Outcome
+            double roll = Die.Instance.RollStressDie(0, out _); // Botch has no special effect for now.
 
-        private void MageApprenticeSearch(Magus mage)
-        {
-            // add bonus to area lore equal to casting total div 5?
-            double folkKen = mage.GetAbility(Abilities.FolkKen).Value;
-            folkKen += mage.GetAttribute(AttributeType.Perception).Value;
-            Spell bestApprenticeSearchSpell =
-                mage.GetBestSpell(SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift));
-            // add 1 per magnitude of detection spell to the total
-            if (bestApprenticeSearchSpell != null)
+            if (roll == 0) // A botch is treated as a simple failure.
             {
-                folkKen += bestApprenticeSearchSpell.Level / 5.0;
+                mage.Log.Add("The search for an apprentice was fruitless this season.");
+                return;
+            }
+
+            if (roll + searchTotal > EASE_FACTOR)
+            {
+                // Success! Calculate the margin of success for the bonus points.
+                double marginOfSuccess = (roll + searchTotal) - EASE_FACTOR;
+                int bonusPoints = (int)Math.Floor(marginOfSuccess);
+
+                mage.Log.Add($"Success! An apprentice has been found with {bonusPoints} bonus points for character generation.");
+
+                Magus newApprentice = CharacterFactory.GenerateNewApprentice(bonusPoints);
+                newApprentice.Name = "Apprentice filius " + mage.Name;
+                mage.TakeApprentice(newApprentice);
             }
             else
             {
-                folkKen += mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+                // Failure
+                mage.Log.Add("The search for an apprentice was fruitless this season.");
             }
-            double roll = Die.Instance.RollExplodingDie() + folkKen;
-            if (roll > 12)
-            {
-                mage.Log.Add("Apprentice found");
-                mage.TakeApprentice(CharacterFactory.GenerateNewApprentice());
-                mage.Apprentice.Name = "Apprentice filius " + mage.Name;
-            }
-            // TODO: gradual reduction in chance?
         }
 
         public override bool Matches(IActivity action)
@@ -71,5 +88,4 @@ namespace WizardMonks.Activities.ExposingActivities
             return "Finding apprentice worth " + Desire.ToString("0.000");
         }
     }
-
 }

@@ -67,8 +67,8 @@ namespace WizardMonks.Decisions
 
             if (existingDesire != null)
             {
-                // Update the level if the new desire is higher.
-                if (newLabTextDesire.CurrentLevel > existingDesire.CurrentLevel)
+                // Update the level if the new desire is more restrictive
+                if (newLabTextDesire.MinimumLevel > existingDesire.MinimumLevel || newLabTextDesire.MaximumLevel < existingDesire.MaximumLevel)
                 {
                     _labTextDesires.Remove(existingDesire);
                     _labTextDesires.Add(newLabTextDesire);

@@ -11,6 +11,7 @@ namespace WizardMonks.Economy
         public Dictionary<Ability, BookDesire> BookDesires { get; private set; }
         public IEnumerable<BookForTrade> BooksForTrade { get; private set; }
         public IEnumerable<LabTextForTrade> LabTextsForTrade { get; private set; }
+        public Dictionary<SpellBase, LabTextDesire> LabTextDesires { get; private set; }
         public Magus Mage { get; private set; }
 
         public MagusTradingDesires(Magus magus, VisDesire[] visDesires, 
@@ -22,6 +23,7 @@ namespace WizardMonks.Economy
             BookDesires = booksDesired.ToDictionary(l => l.Ability);
             LabTextsForTrade = labTextsForTrade;
             BooksForTrade = booksForTrade;
+            LabTextDesires = labTextsDesired.ToDictionary(l => l.SpellBase);
         }
 
         public IList<VisTradeOffer> GenerateVisOffers(MagusTradingDesires otherDesires)
@@ -113,6 +115,122 @@ namespace WizardMonks.Economy
                 }
             }
             return bookTradeOffers;
+        }
+
+        public IList<VisForLabTextOffer> GenerateBuyLabTextOffers(MagusTradingDesires otherDesires)
+        {
+            List<VisForLabTextOffer> offers = new();
+            if (LabTextDesires.Any() && otherDesires.LabTextsForTrade.Any())
+            {
+                // They have lab texts, we want lab texts
+                foreach (LabTextForTrade labTextForTrade in otherDesires.LabTextsForTrade)
+                {
+                    // If we're interested in the spell base of this lab text...
+                    if (LabTextDesires.TryGetValue(labTextForTrade.LabText.SpellContained.Base, out var desire) &&
+                        desire.MinimumLevel <= labTextForTrade.LabText.SpellContained.Level &&
+                        desire.MaximumLevel >= labTextForTrade.LabText.SpellContained.Level)
+                    {
+                        // ...evaluate its value to us.
+                        double labTextVisValue = Mage.RateLifetimeLabTextValue(labTextForTrade.LabText);
+                        if (labTextVisValue > 0)
+                        {
+                            // Improve pricing mechanics later, for now value + minimum price
+                            double price = Math.Round(labTextVisValue + labTextForTrade.MinimumPrice + 0.5, 0) / 2.0;
+                            var visPayment = GenerateVisOffer(price, otherDesires.VisDesires, this.VisDesires);
+
+                            if (visPayment != null)
+                            {
+                                // We can afford it, so make an offer.
+                                offers.Add(new VisForLabTextOffer(otherDesires.Mage, visPayment, price, labTextForTrade.LabText));
+                            }
+                        }
+                    }
+                }
+            }
+            return offers;
+        }
+
+        /// <summary>
+        /// Generates offers to sell lab texts from this magus to another magus who desires them.
+        /// </summary>
+        /// <param name="otherDesires">The trading desires of the potential buyer.</param>
+        /// <returns>A list of VisForLabTextOffer where this magus is the seller and the otherDesires.Mage is the buyer.</returns>
+        public IList<VisForLabTextOffer> GenerateSellLabTextOffers(MagusTradingDesires otherDesires)
+        {
+            List<VisForLabTextOffer> offers = new();
+            if (LabTextsForTrade.Any() && otherDesires.LabTextDesires.Any())
+            {
+                // We have lab texts to sell (LabTextsForTrade), and they (otherDesires) desire lab texts.
+                foreach (LabTextForTrade myLabTextForTrade in LabTextsForTrade)
+                {
+                    // Check if the other magus is interested in this specific lab text's spell base.
+                    if (otherDesires.LabTextDesires.TryGetValue(myLabTextForTrade.LabText.SpellContained.Base, out var theirDesire))
+                    {
+                        // Ensure the lab text offered is actually better than what they currently know/desire.
+                        if (theirDesire.MinimumLevel <= myLabTextForTrade.LabText.SpellContained.Level && theirDesire.MaximumLevel >= myLabTextForTrade.LabText.SpellContained.Level)
+                        {
+                            // Evaluate the value of this lab text to the *other* magus (the potential buyer).
+                            double theirValuation = otherDesires.Mage.RateLifetimeLabTextValue(myLabTextForTrade.LabText);
+
+                            // Only proceed if the lab text has real value to the buyer.
+                            if (theirValuation > 0)
+                            {
+                                // Calculate a proposed price based on their valuation and our minimum acceptable price.
+                                // We round to the nearest half-vis to make trade quantities more manageable.
+                                double price = Math.Round(theirValuation + myLabTextForTrade.MinimumPrice + 0.5, 0) / 2.0;
+
+                                // Generate the vis payment offer from the buyer's (otherDesires.Mage) perspective.
+                                // We ask what vis they can offer that we desire (this.VisDesires) in exchange for the vis they want to use (otherDesires.VisDesires).
+                                var visPayment = otherDesires.GenerateVisOffer(price, this.VisDesires, otherDesires.VisDesires);
+
+                                if (visPayment != null)
+                                {
+                                    // If they can make a valid vis payment, add this as a sell offer.
+                                    // The 'buyer' in this offer is the 'otherDesires.Mage'.
+                                    offers.Add(new VisForLabTextOffer(otherDesires.Mage, visPayment, price, myLabTextForTrade.LabText));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return offers;
+        }
+
+        public IList<LabTextTradeOffer> GenerateLabTextTradeOffers(MagusTradingDesires otherDesires)
+        {
+            List<LabTextTradeOffer> offers = new();
+            if (LabTextsForTrade.Any() && otherDesires.LabTextsForTrade.Any())
+            {
+                foreach (var myTextForTrade in LabTextsForTrade)
+                {
+                    // Check if the other party desires our text
+                    if (otherDesires.LabTextDesires.TryGetValue(myTextForTrade.LabText.SpellContained.Base, out var theirDesire) &&
+                        theirDesire.MinimumLevel <= myTextForTrade.LabText.SpellContained.Level &&
+                        theirDesire.MaximumLevel >= myTextForTrade.LabText.SpellContained.Level)
+                    {
+                        foreach (var theirTextForTrade in otherDesires.LabTextsForTrade)
+                        {
+                            // Check if we desire their text
+                            if (LabTextDesires.TryGetValue(theirTextForTrade.LabText.SpellContained.Base, out var myDesire) &&
+                                myDesire.MinimumLevel <= theirTextForTrade.LabText.SpellContained.Level &&
+                                myDesire.MaximumLevel >= theirTextForTrade.LabText.SpellContained.Level)
+                            {
+                                // Both parties are interested. Evaluate if the trade is equitable.
+                                double myValuationOfTheirText = Mage.RateLifetimeLabTextValue(theirTextForTrade.LabText);
+                                double theirValuationOfMyText = otherDesires.Mage.RateLifetimeLabTextValue(myTextForTrade.LabText);
+
+                                // If the values are within 25% of each other, consider it a fair swap.
+                                if (Math.Abs(myValuationOfTheirText - theirValuationOfMyText) < (myValuationOfTheirText * 0.25))
+                                {
+                                    offers.Add(new LabTextTradeOffer(otherDesires.Mage, myTextForTrade.LabText, theirTextForTrade.LabText));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return offers;
         }
 
         /// <summary>

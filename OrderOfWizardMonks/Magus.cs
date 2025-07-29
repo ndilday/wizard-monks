@@ -5,6 +5,7 @@ using WizardMonks.Activities;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WizardMonks
 {
@@ -152,7 +153,7 @@ namespace WizardMonks
                 // check to see if we could even write a summa of a level that would meet this desire
                 // TODO: make sure our book level is sufficiently higher than the current level that our quality will be worthwhile
                 CharacterAbilityBase ability = GetAbility(bookDesire.Ability);
-                if (ability.Value > bookDesire.CurrentLevel * 2 && ability.Experience >= 15)
+                if (ability.Value > bookDesire.CurrentLevel * 2 && ability.Experience >= 21)
                 {
                     CharacterAbilityBase buyerAbility;
                     if (bookDesire.Ability.AbilityType != AbilityType.Art)
@@ -276,6 +277,112 @@ namespace WizardMonks
         }
         #endregion
 
+        #region Lab Text Functions
+        public IEnumerable<LabText> GetLabTextsFromCollection(SpellBase spellBase)
+        {
+            return _labTextsOwned.Where(t => t.SpellContained.Base == spellBase);
+        }
+
+        public void AddLabTextToCollection(LabText labText)
+        {
+            _labTextsOwned.Add(labText);
+        }
+
+        public void RemoveLabTextFromCollection(LabText labText)
+        {
+            _labTextsOwned.Remove(labText);
+        }
+
+        public IEnumerable<LabText> GetUnneededLabTextsFromCollection()
+        {
+            List<LabText> unneededLabTexts = [];
+            foreach(LabText labText in _labTextsOwned)
+            {
+                bool unneeded = false;
+                foreach(Spell spell in this.SpellList)
+                {
+                    // if the mage already knows the spell, the lab text is unneeded
+                    if (spell == labText.SpellContained)
+                    {
+                        unneeded = true;
+                        break;
+                    }
+                    // if the mage already knows a better version of the spell, the lab text is unneeded
+                    else if (spell.Base == labText.SpellContained.Base && spell.Level > labText.SpellContained.Level)
+                    {
+                        unneeded = true;
+                    }
+                }
+                if (unneeded)
+                {
+                    unneededLabTexts.Add(labText);
+                }
+
+            }
+            return unneededLabTexts;
+        }
+
+        /// <summary>
+        /// Determines the value of a given lab text to this magus in an equivalent pawn-value of Vim vis.
+        /// The value is based on the number of seasons the magus would save by learning from the text
+        /// instead of inventing the spell from scratch.
+        /// </summary>
+        /// <param name="labText">The lab text to evaluate.</param>
+        /// <returns>The value of the lab text in pawns of Vim vis. Returns 0 if the text is unusable or not beneficial.</returns>
+        public double RateLifetimeLabTextValue(LabText labText)
+        {
+            // If we already know this spell or a better version of it, the text has no value.
+            if (this.SpellList.Any(s => s.Base == labText.SpellContained.Base && s.Level >= labText.SpellContained.Level))
+            {
+                return 0;
+            }
+
+            // To learn from a lab text, the magus's Lab Total must be greater than the spell's level.
+            double labTotal = this.GetSpellLabTotal(labText.SpellContained);
+            if (labTotal <= labText.SpellContained.Level)
+            {
+                return 0;
+            }
+
+            // --- Step 2: Calculate the seasons required to invent the spell from scratch ---
+
+            // Invention requires accumulating 'Level' points of progress.
+            double inventionPointsNeeded = labText.SpellContained.Level;
+
+            // Progress per season is the amount the Lab Total exceeds the spell's level.
+            double inventionProgressPerSeason = labTotal - labText.SpellContained.Level;
+
+            // This case should be caught by the labTotal check above, but as a safeguard against division by zero.
+            if (inventionProgressPerSeason <= 0)
+            {
+                return 0;
+            }
+
+            // Calculate how many full seasons it would take to gain the required points.
+            // A fraction of a season's work still consumes the entire season.
+            double seasonsToInvent = Math.Ceiling(inventionPointsNeeded / inventionProgressPerSeason);
+
+            // --- Step 3: Calculate seasons saved and convert to vis value ---
+
+            // Learning from a lab text takes a single season.
+            int seasonsToLearnFromText = labText.IsShorthand ? 2 : 1;
+            double seasonsSaved = seasonsToInvent - seasonsToLearnFromText;
+
+            // If it takes 1 or fewer seasons to invent, the lab text provides no time savings and has no value.
+            if (seasonsSaved <= 0)
+            {
+                return 0;
+            }
+
+            // The value of a saved season is equivalent to the amount of Vim vis that could be distilled in that time.
+            // This serves as our universal "opportunity cost" currency for the AI.
+            double visDistilledPerSeason = this.GetVisDistillationRate();
+            double visValue = seasonsSaved * visDistilledPerSeason;
+
+            return visValue;
+        }
+        #endregion
+
         #region Goal/Preference Functions
 
         /// <summary>
@@ -346,9 +453,26 @@ namespace WizardMonks
             }
             return list;
         }
-        
-        public override void ReprioritizeGoals()
+
+        protected IEnumerable<LabTextForTrade> EvaluateLabTextValuesAsSeller(IEnumerable<LabText> labTexts)
         {
+            List<LabTextForTrade> list = [];
+            double distillRate = GetVisDistillationRate();
+            foreach (LabText labText in labTexts)
+            {
+                if (labText.IsShorthand)
+                {
+                    // the lab text was generated for free as part of inventing the spell
+                    list.Add(new LabTextForTrade(labText, Math.Min(distillRate, 0.5)));
+                }
+                else
+                {
+                    // the lab text was manually written, worth Level * distill rate / (Latin * 20)
+                    double writeRate = GetAbility(_writingLanguage).Value * 20;
+                    list.Add(new LabTextForTrade(labText, distillRate * labText.SpellContained.Level / writeRate));
+                }
+            }
+            return list;
         }
 
         public MagusTradingDesires GenerateTradingDesires()
@@ -359,8 +483,8 @@ namespace WizardMonks
                 _desires.VisDesires,
                 _desires.BookDesires,
                 EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection()),
-                null,// lab texts desired,
-                null// lab texts for trade)
+                _desires.LabTextDesires,
+                EvaluateLabTextValuesAsSeller(GetUnneededLabTextsFromCollection())
             );
             if (_tradeDesires == null)
             {
@@ -384,8 +508,11 @@ namespace WizardMonks
         {
             List<VisTradeOffer> visTradeOffers = new();
             List<BookTradeOffer> bookTradeOffers = new();
-            List<VisForBookOffer> buyBookOffers = new();
+            //List<VisForBookOffer> buyBookOffers = new();
             List<VisForBookOffer> sellBookOffers = new();
+            List<VisForLabTextOffer> sellLabTextOffers = new();
+            List<LabTextTradeOffer> labTextTradeOffers = new();
+
             foreach (MagusTradingDesires tradeDesires in mageTradeDesires)
             {
                 if (tradeDesires.Mage == this)
@@ -396,11 +523,11 @@ namespace WizardMonks
                 var bookTrades = _tradeDesires.GenerateBookTradeOffers(tradeDesires);
                 bookTradeOffers.AddRange(bookTrades);
 
-                var bookBuyOffers = _tradeDesires.GenerateBuyBookOffers(tradeDesires);
+                /*var bookBuyOffers = _tradeDesires.GenerateBuyBookOffers(tradeDesires);
                 if (bookBuyOffers != null)
                 {
                     buyBookOffers.AddRange(bookBuyOffers);
-                }
+                }*/
 
                 var bookSellOffers = _tradeDesires.GenerateSellBookOffers(tradeDesires);
                 if (bookSellOffers != null)
@@ -413,12 +540,20 @@ namespace WizardMonks
                 {
                     visTradeOffers.AddRange(visOffersGenerated);
                 }
+
+                var labTextSales = _tradeDesires.GenerateSellLabTextOffers(tradeDesires);
+                if (labTextSales != null) sellLabTextOffers.AddRange(labTextSales);
+
+                var labTextSwaps = _tradeDesires.GenerateLabTextTradeOffers(tradeDesires);
+                if (labTextSwaps != null) labTextTradeOffers.AddRange(labTextSwaps);
             }
 
             ProcessVisOffers(visTradeOffers);
             ProcessBookSwaps(bookTradeOffers);
             ProcessBookSales(sellBookOffers);
-            ProcessBookPurchases(buyBookOffers);
+            //ProcessBookPurchases(buyBookOffers);
+            ProcessLabTextSwaps(labTextTradeOffers);
+            ProcessLabTextSales(sellLabTextOffers);
             // figure out book for book
         }
 
@@ -500,20 +635,24 @@ namespace WizardMonks
             while (sales.Any())
             {
                 var sellOffer = sales.First();
+                // Check if seller still owns the book and buyer can afford it.
                 if (GetBooksFromCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
                     sellOffer.TradingPartner.HasSufficientVis(sellOffer.VisOffers))
                 {
-                    // enact trade
+                    // Enact trade
                     Log.Add("Selling " + sellOffer.BookDesired.Title + " to " + sellOffer.TradingPartner.Name);
                     Log.Add("for " + sellOffer.VisValue.ToString("0.000") + " worth of vis");
                     sellOffer.TradingPartner.Log.Add("Buying " + sellOffer.BookDesired.Title + " from " + Name);
                     sellOffer.TradingPartner.Log.Add("for " + sellOffer.VisValue.ToString("0.000") + " worth of vis");
 
+                    // State changes are correctly handled by the participants.
                     sellOffer.TradingPartner.AddBookToCollection(sellOffer.BookDesired);
-                    RemoveBookFromCollection(sellOffer.BookDesired);
+                    RemoveBookFromCollection(sellOffer.BookDesired); // Seller removes from own inventory.
                     sellOffer.TradingPartner.UseVis(sellOffer.VisOffers);
                     GainVis(sellOffer.VisOffers);
                 }
+                // This logic had a bug. If the 'if' fails, the loop becomes infinite.
+                // It must be moved outside the 'if' block.
                 sales = sales.Where(s => s.BookDesired != sellOffer.BookDesired).OrderBy(bto => bto.VisValue);
             }
         }
@@ -546,6 +685,83 @@ namespace WizardMonks
                 }
             }
         }
+
+        /// <summary>
+        /// Processes offers from other magi to buy lab texts from this magus.
+        /// This method is authoritative for executing lab text sales.
+        /// </summary>
+        /// <param name="offers">A collection of VisForLabTextOffer where this magus is the potential seller.</param>
+        private void ProcessLabTextSales(IEnumerable<VisForLabTextOffer> offers)
+        {
+            // Prioritize offers that provide the most vis, as this is a direct gain for us.
+            var sortedOffers = offers.OrderByDescending(o => o.VisValue).ToList();
+
+            // Iterate through offers, attempting to sell.
+            // Use a 'while' loop with explicit removal to handle concurrent offers and changing inventory.
+            while (sortedOffers.Any())
+            {
+                var sellOffer = sortedOffers.First(); // Get the current best offer
+
+                // Check if:
+                // 1. We (the seller) still possess the specific lab text being offered.
+                // 2. The buyer (sellOffer.TradingPartner) still has enough vis to pay.
+                // 3. The buyer still needs/desires this specific lab text (e.g., they haven't acquired a better one elsewhere).
+                bool weStillHaveTheText = GetLabTextsFromCollection(sellOffer.LabTextDesired.SpellContained.Base).Contains(sellOffer.LabTextDesired);
+                bool buyerCanAfford = sellOffer.TradingPartner.HasSufficientVis(sellOffer.VisOffers);
+
+                // Buyer still needs logic: Check if they don't have this spell base, or if they have it but at a lower level.
+                bool buyerStillNeedsText = !sellOffer.TradingPartner.GetLabTextsFromCollection(sellOffer.LabTextDesired.SpellContained.Base).Any(l => l.SpellContained.Level >= sellOffer.LabTextDesired.SpellContained.Level);
+
+                if (weStillHaveTheText && buyerCanAfford && buyerStillNeedsText)
+                {
+                    // Execute the trade:
+                    Log.Add($"Selling Lab Text for '{sellOffer.LabTextDesired.SpellContained.Name}' to {sellOffer.TradingPartner.Name} for {sellOffer.VisValue:0.00} vis value.");
+                    sellOffer.TradingPartner.Log.Add($"Buying Lab Text for '{sellOffer.LabTextDesired.SpellContained.Name}' from {this.Name}.");
+
+                    // Transfer ownership of the lab text:
+                    sellOffer.TradingPartner.AddLabTextToCollection(sellOffer.LabTextDesired);
+                    RemoveLabTextFromCollection(sellOffer.LabTextDesired); // Seller removes from their own inventory.
+
+                    // Transfer vis:
+                    sellOffer.TradingPartner.UseVis(sellOffer.VisOffers); // Buyer spends vis.
+                    GainVis(sellOffer.VisOffers); // Seller gains vis.
+
+                    // Remove this specific offer and any other offers that involve the now-sold lab text.
+                    sortedOffers = sortedOffers.Where(o => o.LabTextDesired != sellOffer.LabTextDesired).ToList();
+                }
+                else
+                {
+                    // If the offer cannot be executed (e.g., text was already sold, buyer ran out of vis, buyer no longer needs),
+                    // remove this specific offer and proceed to the next best one.
+                    sortedOffers.Remove(sellOffer);
+                }
+            }
+        }
+
+        private void ProcessLabTextSwaps(IEnumerable<LabTextTradeOffer> offers)
+        {
+            var sortedOffers = offers.OrderBy(o => this.RateLifetimeLabTextValue(o.LabTextDesired));
+
+            foreach (var offer in sortedOffers)
+            {
+                // Check if we still need their text and have our text to offer
+                bool needTheirText = !this.GetLabTextsFromCollection(offer.LabTextDesired.SpellContained.Base).Any();
+                bool haveOurText = this.GetLabTextsFromCollection(offer.LabTextOffered.SpellContained.Base).Contains(offer.LabTextOffered);
+                bool theyHaveTheirText = offer.Mage.GetLabTextsFromCollection(offer.LabTextDesired.SpellContained.Base).Contains(offer.LabTextDesired);
+
+                if (needTheirText && haveOurText && theyHaveTheirText)
+                {
+                    Log.Add($"Swapping Lab Text '{offer.LabTextOffered.SpellContained.Name}' with {offer.Mage.Name} for '{offer.LabTextDesired.SpellContained.Name}'.");
+                    offer.Mage.Log.Add($"Swapping Lab Text '{offer.LabTextDesired.SpellContained.Name}' with {this.Name} for '{offer.LabTextOffered.SpellContained.Name}'.");
+
+                    // Execute swap
+                    this.AddLabTextToCollection(offer.LabTextDesired);
+                    this.RemoveLabTextFromCollection(offer.LabTextOffered);
+                    offer.Mage.AddLabTextToCollection(offer.LabTextOffered);
+                    offer.Mage.RemoveLabTextFromCollection(offer.LabTextDesired);
+                }
+            }
+        }
         #endregion
 
         #region Magic Functions
@@ -559,11 +775,6 @@ namespace WizardMonks
         public Spell GetBestSpell(SpellBase spellBase)
         {
             return SpellList.Where(s => s.Base == spellBase).OrderByDescending(s => s.Level).FirstOrDefault();
-        }
-
-        public IEnumerable<LabText> GetLabTexts(SpellBase spellBase)
-        {
-            return _labTextsOwned.Where(t => t.SpellContained.Base == spellBase);
         }
 
         public double GetSpontaneousCastingTotal(ArtPair artPair)

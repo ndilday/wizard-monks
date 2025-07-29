@@ -341,11 +341,11 @@ namespace WizardMonks
 
        public virtual void ReprioritizeGoals()
        {
-           foreach (IGoal goal in _goals)
+           foreach (IGoal goal in _goals.ToList())
            {
                if (!goal.IsComplete())
                {
-                   if (goal.AgeToCompleteBy > SeasonalAge)
+                   if (goal.AgeToCompleteBy < SeasonalAge)
                    {
                        Log.Add("Failed to achieve a goal");
                        _goals.Remove(goal);
@@ -472,7 +472,7 @@ namespace WizardMonks
         
         public virtual bool ValidToRead(ABook book)
         {
-            return book.Author != this && (!this._booksRead.Contains(book) || (GetAbility(book.Topic).Value < book.Level));
+            return book.Author != this && (!this._booksRead.Contains(book) || (book.Level != 1000 && GetAbility(book.Topic).Value < book.Level));
         }
 
         public virtual double GetBookLevelGain(ABook book)

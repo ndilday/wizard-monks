@@ -25,9 +25,13 @@ namespace WizardMonks.Activities.MageActivities
             {
                 return false;
             }
+            if (action.GetType() != typeof(InventSpellActivity))
+            {
+                return false;
+            }
             InventSpellActivity invent = (InventSpellActivity)action;
             // TODO: fix this later
-            return invent.Spell.Base == Spell.Base;
+            return invent.Spell.Base == Spell.Base && invent.Spell.Range == Spell.Range && invent.Spell.Duration == Spell.Duration && invent.Spell.Target == Spell.Target;
         }
 
         public override string Log()

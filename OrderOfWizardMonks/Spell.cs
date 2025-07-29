@@ -1,4 +1,5 @@
 ﻿using System;
+using WizardMonks.Core;
 
 //using WizardMonks.Instances;
 
@@ -133,25 +134,23 @@ namespace WizardMonks
         public SpellArts RequisiteArts { get; private set; }
         public string Name { get; private set; }
 
-        public double Level
+        public ushort Level
         {
             get
             {
-                int totalModifier = Range.Level + Duration.Level + Target.Level;
-                if (Base.Level + totalModifier > 5)
-                {
-                    return (Base.Level + totalModifier - 4) * 5;
-                }
-                return Base.Level + totalModifier;
+                int rdtMagnitudes = Range.Level + Duration.Level + Target.Level;
+                double totalMagnitudes = Base.Magnitude + rdtMagnitudes;
+
+                return SpellLevelMath.GetLevelFromMagnitude(totalMagnitudes);
             }
         }
 
-        public Spell(EffectRange range, EffectDuration duration, EffectTarget target, SpellBase baseLevel, byte modifiers, bool isRitual, string name)
+        public Spell(EffectRange range, EffectDuration duration, EffectTarget target, SpellBase spellBase, byte modifiers, bool isRitual, string name)
         {
             Range = range;
             Duration = duration;
             Target = target;
-            Base = baseLevel;
+            Base = spellBase;
             Modifiers = modifiers;
             IsRitual = isRitual;
             Name = name;
@@ -166,15 +165,15 @@ namespace WizardMonks
         public TechniqueEffects TechniqueEffects { get; private set; }
         public FormEffects FormEffects { get; private set; }
 
-        public ushort Level { get; protected set; }
+        public ushort Magnitude { get; protected set; }
 
         public string Name { get; private set; }
 
-        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, byte level, string name)
+        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, ushort magnitude, string name)
         {
             TechniqueEffects = techniqueEffects;
             FormEffects = formEffects;
-            Level = level;
+            Magnitude = magnitude;
             Arts = arts;
             ArtPair = artPair;
             Name = name;

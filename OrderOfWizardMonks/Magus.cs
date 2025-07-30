@@ -36,6 +36,8 @@ namespace WizardMonks
         private Houses _house;
         private bool _isBestBookCached;
         private ABook _bestBookCache;
+        private Dictionary<Character, ushort> _decipheredShorthandLevels;
+        private Dictionary<LabText, double> _shorthandTranslationProgress;
         #endregion
 
         #region Public Properties
@@ -69,9 +71,11 @@ namespace WizardMonks
             Arts = new Arts(InvalidateWritableTopicsCache);
             Covenant = null;
             Laboratory = null;
-            _visStock = new Dictionary<Ability, double>();
-            SpellList = new List<Spell>();
-            _labTextsOwned = new List<LabText>();
+            _visStock = [];
+            SpellList = [];
+            _labTextsOwned = [];
+            _decipheredShorthandLevels = [];
+            _shorthandTranslationProgress = [];
             //_tractatusGoals = new List<TractatusGoal>();
             //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
@@ -354,6 +358,61 @@ namespace WizardMonks
             double visValue = seasonsSaved * visDistilledPerSeason;
 
             return visValue;
+        }
+
+        public bool CanUseLabText(LabText text)
+        {
+            if (!text.IsShorthand)
+            {
+                return true; // Not shorthand, so it's usable by anyone with Magic Theory.
+            }
+
+            // If it's our own shorthand, we can always use it.
+            if (text.Author == this)
+            {
+                return true;
+            }
+
+            // Check if we've deciphered this author's shorthand to a sufficient level.
+            if (_decipheredShorthandLevels.TryGetValue(text.Author, out ushort decipheredLevel))
+            {
+                return text.SpellContained.Level <= decipheredLevel;
+            }
+
+            return false; // We have no understanding of this author's shorthand.
+        }
+
+        public ushort? GetDeciperedLabTextLevel(Character author)
+        {
+            if (_decipheredShorthandLevels.TryGetValue(author, out ushort currentProgress)) return currentProgress;
+            return null;
+        }
+
+        public double? GetLabTextTranslationProgress(LabText text)
+        {
+            if(_shorthandTranslationProgress.TryGetValue(text, out double currentProgress)) return currentProgress;
+            return null;
+        }
+
+        public void SetLabTextTranslationProgress(LabText text, double progress)
+        {
+            _shorthandTranslationProgress[text] = progress;
+        }
+
+        public void AddDecipheredLabTextLevel(Character author, ushort level)
+        {
+            // remove any partial translations of this author of this level or below
+            foreach(var kvp in _shorthandTranslationProgress)
+            {
+                if(kvp.Key.Author == author && kvp.Key.SpellContained.Level <= level)
+                {
+                    _shorthandTranslationProgress.Remove(kvp.Key);
+                }
+            }
+            if(!_decipheredShorthandLevels.ContainsKey(author) || _decipheredShorthandLevels[author] < level)
+            {
+                _decipheredShorthandLevels[author] = level;
+            }
         }
         #endregion
 

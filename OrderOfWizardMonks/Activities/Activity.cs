@@ -23,6 +23,7 @@ namespace WizardMonks.Activities
 		StudyVis,
         Teach,
         Train,
+		TranslateLabText,
         Learn,
 		WriteBook,
 		CopyBook,

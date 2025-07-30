@@ -58,7 +58,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 var labTexts = _mage.GetLabTextsFromCollection(_spellBase).Where(t => t.SpellContained.Level < labTotal && t.SpellContained.Level >= minimumLabTextLevel);
                 if(labTexts.Any())
                 {
-                    ConsiderLearningSpell(alreadyConsidered, log, existingLevel, labTexts);
+                    ConsiderLearningSpell(alreadyConsidered, log, existingLevel, labTexts, desires);
                 }
                 // TODO: we're going to have to put a lot of design thought into making this flexible
                 else if(singleSeasonSpellLevel > existingLevel && singleSeasonSpellLevel >= SpellLevelMath.GetLevelFromMagnitude(_spellBase.Magnitude))
@@ -96,15 +96,44 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             }
         }
 
-        private void ConsiderLearningSpell(ConsideredActions alreadyConsidered, IList<string> log, ushort existingLevel, IEnumerable<LabText> labTexts)
+        private void ConsiderLearningSpell(ConsideredActions alreadyConsidered, IList<string> log, ushort existingLevel, IEnumerable<LabText> labTexts, Desires desires)
         {
             // use the highest level lab text
-            var labText = labTexts.OrderByDescending(t => t.SpellContained.Level).First();
+            var labText = labTexts.OrderByDescending(t => t.SpellContained.Level).ThenBy(t => t.IsShorthand).First();
             double magnitudeGain = labText.SpellContained.Level - existingLevel;
+            if (_mage.CanUseLabText(labText))
+            {
+                double desire = _desireFunc(magnitudeGain, _conditionDepth);
+                log.Add($"Learning lab text {labText.SpellContained.Name} {labText.SpellContained.Level} worth {desire:0.000}");
+                alreadyConsidered.Add(new LearnSpellFromLabTextActivity(labText, Abilities.MagicTheory, desire));
+            }
+            else
+            {
+                double labTotal = _mage.GetLabTotal(labText.SpellContained.Base.ArtPair, Activity.TranslateLabText);
+                ushort? shorthandLearned = _mage.GetDeciperedLabTextLevel(labText.Author);
+                if(shorthandLearned.HasValue)
+                {
+                    labTotal += (ushort)shorthandLearned;
+                }
+                // We cannot use this text. The prerequisite action is to translate it.
+                log.Add($"Cannot use lab text for '{labText.SpellContained.Name}', must decipher shorthand first.");
 
-            double desire = _desireFunc(magnitudeGain, _conditionDepth);
-            log.Add($"Learning lab text {labText.SpellContained.Name} {labText.SpellContained.Level} worth {desire:0.000}");
-            alreadyConsidered.Add(new LearnSpellFromLabTextActivity(labText, Abilities.MagicTheory, desire));
+                // Calculate desire for translating. The value is tied to the ultimate goal of learning the spell.
+                double seasonsToTranslate = Math.Ceiling(labText.SpellContained.Level / labTotal);
+
+                // The desire is inherited from the parent desire, but deferred by the time it takes to translate.
+                double effectiveDesire = _desireFunc(labText.SpellContained.Level, (ushort)(_conditionDepth + seasonsToTranslate));
+
+                var translateActivity = new TranslateShorthandActivity(labText, Abilities.MagicTheory, effectiveDesire);
+                alreadyConsidered.Add(translateActivity);
+
+                // Also, consider actions to speed up translation (i.e., increase Lab Total).
+                if (seasonsToTranslate > 1)
+                {
+                    var labTotalHelper = new LabTotalIncreaseHelper(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), labText.SpellContained.Base.ArtPair, CalculateScoreGainDesire);
+                    labTotalHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
+                }
+            }
         }
 
         private void ConsiderInventingSpell(ConsideredActions alreadyConsidered, IList<string> log, ushort existingLevel, ushort singleSeasonSpellLevel)

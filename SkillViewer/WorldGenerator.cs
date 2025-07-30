@@ -184,7 +184,10 @@ namespace SkillViewer
             _log.Add("Done Advancing Season");
 
             var magiDesires = fullMagi.Select(m => m.GenerateTradingDesires()).ToList();
-            GlobalEconomy.DesiredBooksList = magiDesires.SelectMany(md => md.BookDesires.Values).Distinct().ToList();
+            GlobalEconomy.DesiredBooksByTopic = magiDesires
+                .SelectMany(md => md.BookDesires.Values)
+                .GroupBy(d => d.Ability)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             _log.Add("Considering vis and book trades");
             foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))

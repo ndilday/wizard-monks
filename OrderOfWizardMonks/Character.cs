@@ -79,6 +79,8 @@ namespace WizardMonks
         protected readonly List<ABook> _booksOwned;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
+        protected List<CharacterAbilityBase> _writableTopicsCache;
+        protected bool _isWritableTopicsCacheValid;
 
         protected IActivity _mandatoryAction;
         #endregion
@@ -142,6 +144,7 @@ namespace WizardMonks
             _booksWritten = new List<ABook>();
             _booksOwned = new List<ABook>();
             _verboseLog = new List<string>();
+            _isWritableTopicsCacheValid = false;
 
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
@@ -164,6 +167,7 @@ namespace WizardMonks
             if (!_abilityMap.ContainsKey(ability.AbilityId))
             {
                 _abilityMap[ability.AbilityId] = new CharacterAbility(ability);
+                _abilityMap[ability.AbilityId].Changed += (s, a) => InvalidateWritableTopicsCache();
             }
             
             return _abilityMap[ability.AbilityId];
@@ -643,6 +647,12 @@ namespace WizardMonks
         public virtual ABook GetBestBookToWrite()
         {
             return null;
+        }
+
+        protected void InvalidateWritableTopicsCache()
+        {
+            _isWritableTopicsCacheValid = false;
+            _writableTopicsCache = null;
         }
         #endregion
 

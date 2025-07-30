@@ -10,9 +10,9 @@ namespace WizardMonks.Economy
     public static class GlobalEconomy
     {
         // needs to know about all books available for trade
-        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = new();
+        public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = [];
         // needs to know about all topics people have expressed wanting a book for
-        public static List<BookDesire> DesiredBooksList = new();
+        public static Dictionary<Ability, List<BookDesire>> DesiredBooksByTopic = [];
         // needs to know about all vis desires
         public static double[] GlobalVisDemandMap = new double[MagicArts.Count];
         // needs to have some sense of the average value of a tractatus
@@ -22,7 +22,7 @@ namespace WizardMonks.Economy
         {
             get
             {
-                return DesiredBooksList.Select(b => b.Ability).Distinct();
+                return DesiredBooksByTopic.Keys;
             }
         }
     }

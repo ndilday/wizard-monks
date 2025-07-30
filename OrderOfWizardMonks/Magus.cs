@@ -34,6 +34,7 @@ namespace WizardMonks
         //private List<SummaGoal> _summaGoals;
         //private List<TractatusGoal> _tractatusGoals;
         private Houses _house;
+        private ABook _bestBookCache;
         #endregion
 
         #region Public Properties
@@ -64,7 +65,7 @@ namespace WizardMonks
             : base(writingLanguage, writingAbility, areaAbility, baseAge)
         {
             _magicAbility = magicAbility;
-            Arts = new Arts();
+            Arts = new Arts(InvalidateWritableTopicsCache);
             Covenant = null;
             Laboratory = null;
             _visStock = new Dictionary<Ability, double>();
@@ -137,142 +138,111 @@ namespace WizardMonks
 
         public override ABook GetBestBookToWrite()
         {
-            double currentBestBookValue = 0;
-            ABook bestBook = null;
-            HashSet<int> consideredTopics = new();
-
-            // since the value of a tractatus is independent of topic,
-            // calculate the value of writing a tractatus now, so that we don't have to keep doing it
-            double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
-            double writingRate = GetAttributeValue(AttributeType.Communication) + _writingLanguageCharacterAbility.Value;
-            var unneededBookTopics = GetUnneededBooksFromCollection().Select(b => b.Topic).Distinct();
-            foreach (BookDesire bookDesire in GlobalEconomy.DesiredBooksList)
+            if (_bestBookCache != null) return _bestBookCache;
+            // --- Step A: Populate the cache of writable topics if it's dirty ---
+            if (!_isWritableTopicsCacheValid)
             {
-                // if we already have a suitable book for this topic, let's not try to write another
-                if (unneededBookTopics.Contains(bookDesire.Ability) || bookDesire.Character == this) continue;
-                // check to see if we could even write a summa of a level that would meet this desire
-                // TODO: make sure our book level is sufficiently higher than the current level that our quality will be worthwhile
-                CharacterAbilityBase ability = GetAbility(bookDesire.Ability);
-                if (ability.Value > bookDesire.CurrentLevel * 2 && ability.Experience >= 21)
-                {
-                    CharacterAbilityBase buyerAbility;
-                    if (bookDesire.Ability.AbilityType != AbilityType.Art)
-                    {
-                        buyerAbility = new CharacterAbility(bookDesire.Ability);
-                    }
-                    else
-                    {
-                        buyerAbility = new AcceleratedAbility(bookDesire.Ability);
-                    }
-                    buyerAbility.Experience = buyerAbility.GetExperienceUntilLevel(bookDesire.CurrentLevel);
-
-                    // see if we have started a summa on this topic
-                    var relatedIncompleteBooks = _incompleteBooks.Where(b => b.Topic == bookDesire.Ability && b.Level > bookDesire.CurrentLevel);
-                    if (relatedIncompleteBooks.Any())
-                    {
-                        foreach (Summa incompleteBook in relatedIncompleteBooks)
-                        {
-                            // the effective value is based on time to finish, not time already invested
-                            double experienceValue = buyerAbility.GetExperienceUntilLevel(incompleteBook.Level);
-                            double seasonsOfStudy = Math.Ceiling(experienceValue / incompleteBook.Quality);
-                            double effectiveQuality = experienceValue / seasonsOfStudy;
-                            // at a minimum, the book is worth the vis it would take, on average, to gain that experience
-                            double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
-                            double studySeasons = experienceValue / VisStudyRate;
-                            double visNeeded = studySeasons * visUsedPerStudySeason;
-                            // scale visNeeded according to vis type
-                            if(MagicArts.IsTechnique(bookDesire.Ability))
-                            {
-                                visNeeded *= 4;
-                            }
-                            else if(MagicArts.IsArt(bookDesire.Ability) && bookDesire.Ability != MagicArts.Vim)
-                            {
-                                visNeeded *= 2;
-                            }
-
-                            // for now, scale vis according to quality of book vs. quality of vis study
-                            visNeeded *= incompleteBook.Quality / VisStudyRate;
-
-                            // divide this visNeed valuation by how many seasons are left for writing
-                            double writingNeeded = incompleteBook.GetWritingPointsNeeded() - incompleteBook.PointsComplete;
-                            double seasonsLeft = Math.Ceiling(writingNeeded / writingRate);
-                            double writingValue = visNeeded / seasonsLeft;
-                            if(writingValue > currentBestBookValue)
-                            {
-                                // continue writing this summa
-                                bestBook = incompleteBook;
-                                currentBestBookValue = writingValue;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // NOTE: this could lead us down a strange rabbit hole of starting a bunch of 
-                        // summae on a subject of varying levels, but I think that's unlikely enough
-                        // to not try and protect from for now
-                        double maxLevel = GetAbility(bookDesire.Ability).Value / 2.0;
-
-                        for (double l = maxLevel; l > bookDesire.CurrentLevel; l--)
-                        {
-                            double q = 6 + GetAttributeValue(AttributeType.Communication) + maxLevel - l;
-                            // the effective value is based on time to finish, not time already invested
-                            double experienceValue = buyerAbility.GetExperienceUntilLevel(l);
-                            double seasonsOfStudy = Math.Ceiling(experienceValue / q);
-                            double effectiveQuality = experienceValue / seasonsOfStudy;
-                            // at a minimum, the book is worth the vis it would take, on average, to gain that experience
-                            double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
-                            double studySeasons = experienceValue / VisStudyRate;
-                            double visNeeded = studySeasons * visUsedPerStudySeason;
-                            // scale visNeeded according to vis type
-                            if (MagicArts.IsTechnique(bookDesire.Ability))
-                            {
-                                visNeeded *= 4;
-                            }
-                            else if (MagicArts.IsArt(bookDesire.Ability) && bookDesire.Ability != MagicArts.Vim)
-                            {
-                                visNeeded *= 2;
-                            }
-
-                            // for now, scale vis according to quality of book vs. quality of vis study
-                            visNeeded *= q / VisStudyRate;
-
-                            // divide this visNeed valuation by how many seasons are left for writing
-                            double seasonsLeft = Math.Ceiling(l / writingRate);
-                            double writingValue = visNeeded / seasonsLeft;
-                            if (writingValue > currentBestBookValue)
-                            {
-                                // write this summa
-                                bestBook = new Summa
-                                {
-                                    Quality = q,
-                                    Level = l,
-                                    Topic = bookDesire.Ability,
-                                    Title = bookDesire.Ability.AbilityName + l.ToString("0.0") + " Summa " + SeasonalAge + " by " + Name,
-                                    Value = writingValue
-                                };
-                                currentBestBookValue = writingValue;
-                            }
-                        }
-                    }
-                }
-
-                // consider the value of writing a tractatus
-                var charAbility = GetAbility(bookDesire.Ability);
-                if (!consideredTopics.Contains(bookDesire.Ability.AbilityId) && tractatusValue > currentBestBookValue && CanWriteTractatus(charAbility))
-                {
-                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(bookDesire.Ability);
-                    string name = Name + " " + bookDesire.Ability.AbilityName + " T" + previouslyWrittenCount.ToString();
-                    bestBook = new Tractatus
-                    {
-                        Topic = bookDesire.Ability,
-                        Title = name,
-                        Value = tractatusValue
-                    };
-                    currentBestBookValue = tractatusValue;
-                }
-                consideredTopics.Add(bookDesire.Ability.AbilityId);
+                // A mage can write a tractatus if their skill is > 0 and they haven't hit their limit.
+                // A mage can write a summa if their experience is at least 21 (Level 2).
+                _writableTopicsCache = GetAbilities().Where(a => a.Experience >= 15).ToList();
+                _isWritableTopicsCacheValid = true;
             }
 
+            // --- Step B: Initialize variables for finding the best book ---
+            ABook bestBook = null;
+            double currentBestBookValue = 0;
+            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
+
+            // --- Step C: Evaluate writing a Tractatus (once, outside the loop) ---
+            double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
+
+            // --- Step D: Main Loop - Iterate over OUR skills, not GLOBAL demand ---
+            foreach (var charAbility in _writableTopicsCache)
+            {
+                // Check if there is any demand for this topic. This is now an O(1) lookup.
+                if (!GlobalEconomy.DesiredBooksByTopic.TryGetValue(charAbility.Ability, out var desiresForTopic))
+                {
+                    continue; // No one wants a book on this, move on.
+                }
+
+                // We only care about the highest demand (lowest current level) for a topic.
+                var highestDemandDesire = desiresForTopic.OrderBy(d => d.CurrentLevel).Where(d => d.Character != this).FirstOrDefault();
+                if (highestDemandDesire == null) continue;
+
+                CharacterAbilityBase buyerAbility;
+                if (highestDemandDesire.Ability.AbilityType != AbilityType.Art)
+                {
+                    buyerAbility = new CharacterAbility(highestDemandDesire.Ability);
+                }
+                else
+                {
+                    buyerAbility = new AcceleratedAbility(highestDemandDesire.Ability);
+                }
+                buyerAbility.Experience = buyerAbility.GetExperienceUntilLevel(highestDemandDesire.CurrentLevel);
+
+                // --- Evaluate Summa ---
+                // NOTE: this could lead us down a strange rabbit hole of starting a bunch of 
+                // summae on a subject of varying levels, but I think that's unlikely enough
+                // to not try and protect from for now
+                double maxLevel = GetAbility(highestDemandDesire.Ability).Value / 2.0;
+
+                for (double l = maxLevel; l > highestDemandDesire.CurrentLevel; l--)
+                {
+                    double q = 6 + GetAttributeValue(AttributeType.Communication) + maxLevel - l;
+                    // the effective value is based on time to finish, not time already invested
+                    double experienceValue = buyerAbility.GetExperienceUntilLevel(l);
+                    double seasonsOfStudy = Math.Ceiling(experienceValue / q);
+                    double effectiveQuality = experienceValue / seasonsOfStudy;
+                    // at a minimum, the book is worth the vis it would take, on average, to gain that experience
+                    double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
+                    double studySeasons = experienceValue / VisStudyRate;
+                    double visNeeded = studySeasons * visUsedPerStudySeason;
+                    // scale visNeeded according to vis type
+                    if (MagicArts.IsTechnique(highestDemandDesire.Ability))
+                    {
+                        visNeeded *= 4;
+                    }
+                    else if (MagicArts.IsArt(highestDemandDesire.Ability) && highestDemandDesire.Ability != MagicArts.Vim)
+                    {
+                        visNeeded *= 2;
+                    }
+
+                    // for now, scale vis according to quality of book vs. quality of vis study
+                    visNeeded *= q / VisStudyRate;
+
+                    // divide this visNeed valuation by how many seasons are left for writing
+                    double seasonsLeft = Math.Ceiling(l / writingRate);
+                    double writingValue = visNeeded / seasonsLeft;
+                    if (writingValue > currentBestBookValue)
+                    {
+                        // write this summa
+                        bestBook = new Summa
+                        {
+                            Quality = q,
+                            Level = l,
+                            Topic = highestDemandDesire.Ability,
+                            Title = $"{highestDemandDesire.Ability.AbilityName} L{l.ToString("0.0")}Q{q.ToString("0.0")} Summa {SeasonalAge} by {Name}",
+                            Value = writingValue
+                        };
+                        currentBestBookValue = writingValue;
+                    }
+                }
+
+                // --- Evaluate Tractatus ---
+                if (tractatusValue > currentBestBookValue && CanWriteTractatus(charAbility))
+                {
+                    currentBestBookValue = tractatusValue;
+                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(highestDemandDesire.Ability);
+                    bestBook = new Tractatus
+                    {
+                        Topic = charAbility.Ability,
+                        Title = $"{Name} {highestDemandDesire.Ability.AbilityName} T{previouslyWrittenCount}",
+                        Value = tractatusValue
+                    };
+                }
+            }
+
+            _bestBookCache = bestBook;
             return bestBook;
         }
         #endregion
@@ -1065,6 +1035,7 @@ namespace WizardMonks
         #region Seasonal Functions
         public override void Advance()
         {
+            _bestBookCache = null;
             // harvest vis
             foreach (Aura aura in KnownAuras)
             {

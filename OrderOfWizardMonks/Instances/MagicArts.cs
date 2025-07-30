@@ -342,6 +342,25 @@ namespace WizardMonks.Instances
             vim = new AcceleratedAbility(MagicArts.Vim);
         }
 
+        public Arts(Action changeListener) : this()
+        {
+            creo.Changed += (s, e) => changeListener();
+            intellego.Changed += (s, e) => changeListener();
+            muto.Changed += (s, e) => changeListener();
+            perdo.Changed += (s, e) => changeListener();
+            rego.Changed += (s, e) => changeListener();
+            animal.Changed += (s, e) => changeListener();
+            aquam.Changed += (s, e) => changeListener();
+            auram.Changed += (s, e) => changeListener();
+            corpus.Changed += (s, e) => changeListener();
+            herbam.Changed += (s, e) => changeListener();
+            ignem.Changed += (s, e) => changeListener();
+            imaginem.Changed += (s, e) => changeListener();
+            mentem.Changed += (s, e) => changeListener();
+            terram.Changed += (s, e) => changeListener();
+            vim.Changed += (s, e) => changeListener();
+        }
+
         public IEnumerator<CharacterAbilityBase> GetEnumerator()
         {
             yield return creo;

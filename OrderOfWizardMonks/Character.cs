@@ -61,7 +61,9 @@ namespace WizardMonks
         private uint _noAgingSeasons;
         private uint _baseAge;
         protected Ability _writingAbility;
+        protected CharacterAbilityBase _writingCharacterAbility;
         protected Ability _writingLanguage;
+        protected CharacterAbilityBase _writingLanguageCharacterAbility;
         protected Ability _areaAbility;
         protected List<IGoal> _goals;
         protected Desires _desires;
@@ -70,10 +72,10 @@ namespace WizardMonks
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
 
-        private readonly Dictionary<int, CharacterAbilityBase> _abilityList;
+        private readonly Dictionary<int, CharacterAbilityBase> _abilityMap;
         protected readonly List<IActivity> _seasonList;
         protected readonly List<ABook> _booksWritten;
-        protected readonly List<ABook> _booksRead;
+        protected readonly HashSet<ABook> _booksRead;
         protected readonly List<ABook> _booksOwned;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
@@ -134,9 +136,9 @@ namespace WizardMonks
             _baseAge = baseSeasonableAge;
             _mandatoryAction = null;
 
-            _abilityList = new Dictionary<int, CharacterAbilityBase>();
+            _abilityMap = new Dictionary<int, CharacterAbilityBase>();
             _seasonList = new List<IActivity>();
-            _booksRead = new List<ABook>();
+            _booksRead = new HashSet<ABook>();
             _booksWritten = new List<ABook>();
             _booksOwned = new List<ABook>();
             _verboseLog = new List<string>();
@@ -144,6 +146,8 @@ namespace WizardMonks
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
             _writingLanguage = writingLanguage;
+            _writingCharacterAbility = GetAbility(writingAbility);
+            _writingLanguageCharacterAbility = GetAbility(writingLanguage);
             _writingAbilities = new List<Ability>();
             _writingAbilities.Add(_writingAbility);
             _writingAbilities.Add(_writingLanguage);
@@ -157,28 +161,28 @@ namespace WizardMonks
         #region Ability Functions
         public virtual CharacterAbilityBase GetAbility(Ability ability)
         {
-            if (!_abilityList.ContainsKey(ability.AbilityId))
+            if (!_abilityMap.ContainsKey(ability.AbilityId))
             {
-                _abilityList[ability.AbilityId] = new CharacterAbility(ability);
+                _abilityMap[ability.AbilityId] = new CharacterAbility(ability);
             }
             
-            return _abilityList[ability.AbilityId];
+            return _abilityMap[ability.AbilityId];
         }
 
         public virtual IEnumerable<CharacterAbilityBase> GetAbilities()
         {
-            return _abilityList.Values;
+            return _abilityMap.Values;
         }
         
         protected virtual void AddAbility(Ability ability)
         {
             if (ability.AbilityType == AbilityType.Art)
             {
-                _abilityList.Add(ability.AbilityId, new AcceleratedAbility(ability));
+                _abilityMap.Add(ability.AbilityId, new AcceleratedAbility(ability));
             }
             else
             {
-                _abilityList.Add(ability.AbilityId, new CharacterAbility(ability));
+                _abilityMap.Add(ability.AbilityId, new CharacterAbility(ability));
             }
         }
 
@@ -524,14 +528,13 @@ namespace WizardMonks
         {
             Log.Add("Reading " + book.Title);
             CharacterAbilityBase ability = GetAbility(book.Topic);
-            bool previouslyRead = _booksRead.Contains(book);
+
+            // Hashset returns false if the item was already in the set
+            bool previouslyRead = !_booksRead.Add(book);
+            
             if (!previouslyRead || (book.Level != 1000 && ability.Value < book.Level))
             {
                 ability.AddExperience(book.Quality, book.Level);
-            }
-            if (!previouslyRead)
-            {
-                _booksRead.Add(book);
             }
         }
 

@@ -38,7 +38,7 @@ namespace WizardMonks.Core
                 return shortMag;
             }
             // For magnitude > 5, it's the base 5 magnitudes plus five for every level above that.
-            return (ushort)((shortMag - 5)*5);
+            return (ushort)(shortMag * 5 - 20);
         }
 
         /// <summary>

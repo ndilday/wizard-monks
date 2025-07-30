@@ -86,7 +86,7 @@ namespace WizardMonks
 
         private void InitializeGoals()
         {
-            _goals.Add(new LongevityRitualGoal(this, 140, 1));
+            _goals.Add(new AvoidDecrepitudeGoal(this, 1.0));
         }
         #endregion
 
@@ -144,7 +144,7 @@ namespace WizardMonks
             // since the value of a tractatus is independent of topic,
             // calculate the value of writing a tractatus now, so that we don't have to keep doing it
             double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
-            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
+            double writingRate = GetAttributeValue(AttributeType.Communication) + _writingLanguageCharacterAbility.Value;
             var unneededBookTopics = GetUnneededBooksFromCollection().Select(b => b.Topic).Distinct();
             foreach (BookDesire bookDesire in GlobalEconomy.DesiredBooksList)
             {

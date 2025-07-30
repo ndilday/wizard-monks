@@ -4,7 +4,6 @@ using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Goals
 {
-    
     public class LongevityRitualGoal : AGoal
     {
         // TODO: Make this configurable

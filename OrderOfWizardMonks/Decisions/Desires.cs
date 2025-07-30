@@ -49,6 +49,7 @@ namespace WizardMonks.Decisions
                     _bookDesires.Remove(existingDesire);
                     _bookDesires.Add(newBookDesire);
                 }
+                existingDesire.Desire += newBookDesire.Desire;
             }
             else
             {

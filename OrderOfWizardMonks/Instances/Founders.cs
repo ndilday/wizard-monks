@@ -446,10 +446,10 @@ namespace WizardMonks.Instances
             AbilityScoreGoal goal = new(Jerbiton, null, 1, MagicArts.Imaginem, 20);
             Jerbiton.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Jerbiton, null, 1, Abilities.ArtesLiberales, 5);
+            goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.ArtesLiberales, 5);
             Jerbiton.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Jerbiton, null, 1, Abilities.Etiquette, 5);
+            goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.Etiquette, 5);
             Jerbiton.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Jerbiton, null, 1.01, Abilities.Finesse, 5);
@@ -502,7 +502,7 @@ namespace WizardMonks.Instances
             AbilityScoreGoal goal = new(Mercere, null, 1, MagicArts.Mentem, 20);
             Mercere.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Mercere, null, 5, Abilities.Etiquette, 5);
+            goal = new AbilityScoreGoal(Mercere, null, 0.1, Abilities.Etiquette, 5);
             Mercere.AddGoal(goal);
 
             ApprenticeGoal app = new(Mercere, null, 1);

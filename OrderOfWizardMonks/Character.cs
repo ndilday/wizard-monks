@@ -79,7 +79,7 @@ namespace WizardMonks
         protected readonly List<ABook> _booksOwned;
         protected List<Summa> _incompleteBooks;
         private readonly List<Ability> _writingAbilities;
-        protected List<CharacterAbilityBase> _writableTopicsCache;
+        protected HashSet<CharacterAbilityBase> _writableTopicsCache;
         protected bool _isWritableTopicsCacheValid;
 
         protected IActivity _mandatoryAction;

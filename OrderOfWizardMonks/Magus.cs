@@ -34,6 +34,7 @@ namespace WizardMonks
         //private List<SummaGoal> _summaGoals;
         //private List<TractatusGoal> _tractatusGoals;
         private Houses _house;
+        private bool _isBestBookCached;
         private ABook _bestBookCache;
         #endregion
 
@@ -138,13 +139,14 @@ namespace WizardMonks
 
         public override ABook GetBestBookToWrite()
         {
-            if (_bestBookCache != null) return _bestBookCache;
+            if (_isBestBookCached) return _bestBookCache;
+            if(GlobalEconomy.MostDesiredBookTopics == null) return null;
             // --- Step A: Populate the cache of writable topics if it's dirty ---
             if (!_isWritableTopicsCacheValid)
             {
                 // A mage can write a tractatus if their skill is > 0 and they haven't hit their limit.
                 // A mage can write a summa if their experience is at least 21 (Level 2).
-                _writableTopicsCache = GetAbilities().Where(a => a.Experience >= 15).ToList();
+                _writableTopicsCache = GetAbilities().Where(a => a.Experience >= 15).ToHashSet();
                 _isWritableTopicsCacheValid = true;
             }
 
@@ -156,15 +158,16 @@ namespace WizardMonks
             // --- Step C: Evaluate writing a Tractatus (once, outside the loop) ---
             double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
 
-            // --- Step D: Main Loop - Iterate over OUR skills, not GLOBAL demand ---
-            foreach (var charAbility in _writableTopicsCache)
+            // --- Step D: Main Loop ---
+            foreach (Ability ability in GlobalEconomy.MostDesiredBookTopics)
             {
+                var charAbility = _writableTopicsCache.FirstOrDefault(a => a.Ability == ability);
                 // Check if there is any demand for this topic. This is now an O(1) lookup.
-                if (!GlobalEconomy.DesiredBooksByTopic.TryGetValue(charAbility.Ability, out var desiresForTopic))
+                if (charAbility == null)
                 {
                     continue; // No one wants a book on this, move on.
                 }
-
+                var desiresForTopic = GlobalEconomy.DesiredBooksByTopic[ability];
                 // We only care about the highest demand (lowest current level) for a topic.
                 var highestDemandDesire = desiresForTopic.OrderBy(d => d.CurrentLevel).Where(d => d.Character != this).FirstOrDefault();
                 if (highestDemandDesire == null) continue;
@@ -242,6 +245,7 @@ namespace WizardMonks
                 }
             }
 
+            _isBestBookCached = true;
             _bestBookCache = bestBook;
             return bestBook;
         }
@@ -1035,7 +1039,7 @@ namespace WizardMonks
         #region Seasonal Functions
         public override void Advance()
         {
-            _bestBookCache = null;
+            _isBestBookCached = false;
             // harvest vis
             foreach (Aura aura in KnownAuras)
             {

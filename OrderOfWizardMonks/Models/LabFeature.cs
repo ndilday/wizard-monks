@@ -1,0 +1,33 @@
+﻿using System.Collections.Generic;
+using WizardMonks.Activities;
+
+namespace WizardMonks.Models
+{
+    public class LabFeature
+    {
+        public string Name { get; protected set; }
+        public byte Size { get; protected set; }
+        public double Aesthetics { get; protected set; }
+        public double Health { get; protected set; }
+        public double Quality { get; protected set; }
+        public double Safety { get; protected set; }
+        public double Upkeep { get; protected set; }
+        public double Warping { get; protected set; }
+        public Dictionary<Ability, double> ArtModifiers { get; protected set; }
+        public Dictionary<Activity, double> ActivityModifiers { get; protected set; }
+
+        public LabFeature(string name, byte size, double aesthetics, double health, double quality, double safety, double upkeep, double warping, Dictionary<Ability, double> artMods, Dictionary<Activity, double> activityMods)
+        {
+            Name = name;
+            Size = size;
+            Aesthetics = aesthetics;
+            Health = health;
+            Quality = quality;
+            Safety = safety;
+            Upkeep = upkeep;
+            Warping = warping;
+            ArtModifiers = artMods;
+            ActivityModifiers = activityMods;
+        }
+    }
+}

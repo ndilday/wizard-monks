@@ -4,48 +4,24 @@ using System.Linq;
 using System.Text;
 using WizardMonks.Activities;
 
-namespace WizardMonks
+namespace WizardMonks.Models
 {
-    public class Feature
+    public class Laboratory : LabFeature
     {
-        public double Refinement { get; protected set; }
-        public double Aesthetics { get; protected set; }
-        public double Quality { get; protected set; }
-        public double Safety { get; protected set; }
-        public double Upkeep { get; protected set; }
-        public double Warping { get; protected set; }
-        public Dictionary<Ability, double> ArtModifiers { get; protected set; }
-        public Dictionary<Activity, double> ActivityModifiers { get; protected set; }
+        public double TotalSize { get; private set; }
+        public double Refinement { get; private set; }
 
-        public Feature()
-        {
-            ArtModifiers = new Dictionary<Ability, double>();
-            ActivityModifiers = new Dictionary<Activity, double>();
-            Refinement = 0;
-            Aesthetics = 0;
-            Quality = 0;
-            Safety = 0;
-            Upkeep = 0;
-            Warping = 0;
-        }
-    }
-
-    public class Laboratory : Feature
-    {
-        public double Size { get; private set; }
-
-        private List<Feature> _features;
+        private List<LabFeature> _features;
         private Magus _owner;
         private Aura _aura;
-        private double _availableRefinement;
 
-        public Laboratory(Magus owner, Aura aura, double size) : base()
+        public Laboratory(Magus owner, Aura aura, double size) : base("Laboratory", 0, 0, 0, 0, 0, 0, 0, [], [])
         {
-            _features = new List<Feature>();
+            _features = [];
             _owner = owner;
-            Size = size;
-            _availableRefinement = size;
+            TotalSize = size;
             _aura = aura;
+            Refinement = 0;
         }
 
         public double GetModifier(ArtPair artPair, Activity activity)
@@ -70,10 +46,9 @@ namespace WizardMonks
         public void Refine()
         {
             Refinement++;
-            _availableRefinement++;
         }
 
-        public void AddFeature(Feature feature)
+        public void AddFeature(LabFeature feature)
         {
             _features.Add(feature);
             AddFeatureStats(feature);
@@ -87,7 +62,7 @@ namespace WizardMonks
             }
         }
 
-        private void AddFeatureStats(Feature feature)
+        private void AddFeatureStats(LabFeature feature)
         {
             Aesthetics += feature.Aesthetics;
             Quality += feature.Quality;
@@ -96,7 +71,7 @@ namespace WizardMonks
             Warping += feature.Warping;
         }
 
-        public void RemoveFeature(Feature feature)
+        public void RemoveFeature(LabFeature feature)
         {
             if (_features.Contains(feature))
             {
@@ -113,7 +88,7 @@ namespace WizardMonks
             }
         }
 
-        private void SubtractFeatureStats(Feature feature)
+        private void SubtractFeatureStats(LabFeature feature)
         {
             Aesthetics -= feature.Aesthetics;
             Quality -= feature.Quality;

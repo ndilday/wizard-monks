@@ -5,6 +5,7 @@ using WizardMonks.Activities;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WizardMonks
@@ -991,7 +992,7 @@ namespace WizardMonks
             Laboratory.Refine();
         }
 
-        public void AddFeatureToLaboratory(Feature feature)
+        public void AddFeatureToLaboratory(LabFeature feature)
         {
             if (Laboratory == null)
             {

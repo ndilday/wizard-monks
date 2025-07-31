@@ -84,8 +84,13 @@ namespace WizardMonks.Decisions.Conditions
                                 // and the desire of starting after gaining experience
                                 // is the effective value of raising skills
                                 double labTotal = _mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis);
-                                LabTotalIncreaseHelper helper =
-                                    new(_mage, AgeToCompleteBy - 1, (ushort)(ConditionDepth + 1), MagicArtPairs.CrVi, GetDesirabilityOfLabTotalGain);
+                                LabTotalIncreaseHelper helper = new(
+                                    _mage, 
+                                    AgeToCompleteBy - 1, 
+                                    (ushort)(ConditionDepth + 1), 
+                                    MagicArtPairs.CrVi, 
+                                    Activity.DistillVis,
+                                    GetDesirabilityOfLabTotalGain);
                                 helper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                             }
                         }

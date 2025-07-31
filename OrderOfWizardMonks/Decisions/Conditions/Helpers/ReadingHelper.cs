@@ -22,6 +22,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = _mage.GetBookLevelGain(bestBook);
                 double effectiveDesire = _desireFunc(gain, _conditionDepth);
+                // TODO: should we add the resale value of the book 
                 log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 ReadActivity readingAction = new(bestBook, effectiveDesire);
                 alreadyConsidered.Add(readingAction);

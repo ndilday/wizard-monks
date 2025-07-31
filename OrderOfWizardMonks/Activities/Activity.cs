@@ -29,6 +29,7 @@ namespace WizardMonks.Activities
 		CopyBook,
 		BuildLaboratory,
 		RefineLaboratory,
+		InstallLaboratoryFeature,
 		FindApprentice,
         GauntletApprentice,
         FindAura,

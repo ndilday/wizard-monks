@@ -1,14 +1,20 @@
 ﻿using System.Collections.Generic;
-
+using WizardMonks.Activities;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class LabTotalIncreaseHelper : ArtIncreaseHelper
     {
-        public LabTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
+        ArtPair _arts;
+        Activity _activity;
+
+        public LabTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
-        { }
+        {
+            _arts = arts;
+            _activity = activity;
+        }
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
@@ -21,6 +27,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // increase Int
             // improve lab
+            LabImprovementHelper labImprovementHelper = 
+                new(Abilities.MagicTheory, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _arts, _activity, _desireFunc);
+            labImprovementHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             // find better aura.
             if (_ageToCompleteBy - 1 > _mage.SeasonalAge)
             {
@@ -34,7 +43,6 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 FindApprenticeHelper apprenticeHelper = new(_mage, _ageToCompleteBy - 3, (ushort)(_conditionDepth + 3), _desireFunc);
                 apprenticeHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
-
         }
     }
 }

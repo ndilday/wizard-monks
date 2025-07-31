@@ -69,8 +69,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // increase Lab Total
                 if (_ageToCompleteBy > _mage.SeasonalAge && _conditionDepth < 10)
                 {
-                    LabTotalIncreaseHelper labTotalIncreaseHelper =
-                        new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _spellBase.ArtPair, CalculateScoreGainDesire);
+                    LabTotalIncreaseHelper labTotalIncreaseHelper = new(
+                        _mage, 
+                        _ageToCompleteBy - 1, 
+                        (ushort)(_conditionDepth + 1), 
+                        _spellBase.ArtPair, 
+                        Activity.InventSpells, 
+                        CalculateScoreGainDesire);
                     labTotalIncreaseHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
 
@@ -130,7 +135,13 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 // Also, consider actions to speed up translation (i.e., increase Lab Total).
                 if (seasonsToTranslate > 1)
                 {
-                    var labTotalHelper = new LabTotalIncreaseHelper(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), labText.SpellContained.Base.ArtPair, CalculateScoreGainDesire);
+                    var labTotalHelper = new LabTotalIncreaseHelper(
+                        _mage, 
+                        _ageToCompleteBy - 1, 
+                        (ushort)(_conditionDepth + 1), 
+                        labText.SpellContained.Base.ArtPair, 
+                        Activity.InventSpells,
+                        CalculateScoreGainDesire);
                     labTotalHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
             }

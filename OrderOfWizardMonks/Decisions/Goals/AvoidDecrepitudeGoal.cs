@@ -93,6 +93,7 @@ public class AvoidDecrepitudeGoal : AGoal
             deadlineSeason - 1, // Must improve *before* the deadline
             1,
             MagicArtPairs.CrVi,
+            Activity.LongevityRitual,
             desireFunc
         );
         labTotalHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);

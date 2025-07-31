@@ -43,22 +43,53 @@ namespace WizardMonks.Models
             return totalModifier;
         }
 
+        public double GetAvailableSpace()
+        {
+            return TotalSize + Refinement - Size;
+        }
+
         public void Refine()
         {
             Refinement++;
         }
 
+        public bool HasFeature(LabFeature feature)
+        {
+            return _features.Contains(feature);
+        }
+
         public void AddFeature(LabFeature feature)
         {
-            _features.Add(feature);
-            AddFeatureStats(feature);
-            foreach (KeyValuePair<Ability, double> artModifier in feature.ArtModifiers)
+            if (GetAvailableSpace() < feature.Size)
             {
-                ArtModifiers[artModifier.Key] += artModifier.Value;
+                throw new ArgumentException("Feature too large for lab");
             }
-            foreach (KeyValuePair<Activity, double> activityModifier in feature.ActivityModifiers)
+            else
             {
-                ActivityModifiers[activityModifier.Key] += activityModifier.Value;
+                _features.Add(feature);
+                AddFeatureStats(feature);
+                foreach (KeyValuePair<Ability, double> artModifier in feature.ArtModifiers)
+                {
+                    if (!ArtModifiers.ContainsKey(artModifier.Key))
+                    {
+                        ArtModifiers[artModifier.Key] = artModifier.Value;
+                    }
+                    else
+                    {
+                        ArtModifiers[artModifier.Key] += artModifier.Value;
+                    }
+                }
+                foreach (KeyValuePair<Activity, double> activityModifier in feature.ActivityModifiers)
+                {
+                    if (!ActivityModifiers.ContainsKey(activityModifier.Key))
+                    {
+                        ActivityModifiers[activityModifier.Key] = activityModifier.Value;
+                    }
+                    else
+                    {
+                        ActivityModifiers[activityModifier.Key] += activityModifier.Value;
+                    }
+                }
             }
         }
 

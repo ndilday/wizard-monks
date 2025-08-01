@@ -34,7 +34,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             var candidates = new List<LabFeature>();
             if (LabFeatures.FeaturesByArt.TryGetValue(_arts.Technique, out var techFeatures)) candidates.AddRange(techFeatures);
             if (LabFeatures.FeaturesByArt.TryGetValue(_arts.Form, out var formFeatures)) candidates.AddRange(formFeatures);
-            if (_activity != null && LabFeatures.FeaturesByActivity.TryGetValue(_activity, out var activityFeatures)) candidates.AddRange(activityFeatures);
+            if (LabFeatures.FeaturesByActivity.TryGetValue(_activity, out var activityFeatures)) candidates.AddRange(activityFeatures);
 
             foreach (var featureDef in candidates.Distinct())
             {
@@ -42,6 +42,11 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 double bonus = featureDef.ArtModifiers.Sum(kvp =>
                     (kvp.Key == _arts.Technique || kvp.Key == _arts.Form) ? kvp.Value : 0);
+                if(featureDef.ActivityModifiers.TryGetValue(_activity, out var activityModifiers))
+                {
+                    bonus += activityModifiers;
+                }
+                bonus += featureDef.Quality;
 
                 if (bonus > bestBonus)
                 {

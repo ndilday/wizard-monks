@@ -3,14 +3,13 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
-using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class LabImprovementHelper : AHelper
     {
         private readonly ArtPair _arts;
-        private readonly Activity _activity; // Can be null if not relevant
+        private readonly Activity _activity;
 
         public LabImprovementHelper(Ability exposureAbility, Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc)
             : base(mage, ageToCompleteBy, conditionDepth, desireFunc)
@@ -25,66 +24,55 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 return;
             }
-
-            // --- Find the single most desirable feature we could install ---
-            LabFeature bestFeature = null;
-            double bestBonus = 0;
-
-            // Get all candidate features for the required Arts and Activity
-            var candidates = new List<LabFeature>();
-            if (LabFeatures.FeaturesByArt.TryGetValue(_arts.Technique, out var techFeatures)) candidates.AddRange(techFeatures);
-            if (LabFeatures.FeaturesByArt.TryGetValue(_arts.Form, out var formFeatures)) candidates.AddRange(formFeatures);
-            if (LabFeatures.FeaturesByActivity.TryGetValue(_activity, out var activityFeatures)) candidates.AddRange(activityFeatures);
-
-            foreach (var featureDef in candidates.Distinct())
+            if (_mage.Laboratory.Specialization != null)
             {
-                if (_mage.Laboratory.HasFeature(featureDef)) continue;
-
-                double bonus = featureDef.ArtModifiers.Sum(kvp =>
-                    (kvp.Key == _arts.Technique || kvp.Key == _arts.Form) ? kvp.Value : 0);
-                if(featureDef.ActivityModifiers.TryGetValue(_activity, out var activityModifiers))
+                var prereqs = _mage.Laboratory.Specialization.GetPrerequisitesForNextStage();
+                if(prereqs.MagicTheory > _mage.GetAbility(Abilities.MagicTheory).Value)
                 {
-                    bonus += activityModifiers;
+                    // need to improve magic theory first
+                    // increase Magic Theory via practice
+                    PracticeHelper practiceHelper = new(Abilities.MagicTheory, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
+                    practiceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
+                    // increase Magic Theory via reading
+                    ReadingHelper readingHelper = new(Abilities.MagicTheory, _mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
+                    readingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
                 }
-                bonus += featureDef.Quality;
-
-                if (bonus > bestBonus)
+                // lab already specialized, see if this lab activity aligns with that specialization
+                else if (_mage.Laboratory.Specialization.ArtTopic != null)
                 {
-                    bestBonus = bonus;
-                    bestFeature = featureDef;
+                    if (_arts.Technique == _mage.Laboratory.Specialization.ArtTopic)
+                    {
+                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                    }
+                    else if (_arts.Technique == _mage.Laboratory.Specialization.ArtTopic)
+                    {
+                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                    }
+
                 }
-            }
-
-            // --- Decide what to do based on the best feature found ---
-            if (bestFeature == null)
-            {
-                // No known features provide the bonus we need.
-                return;
-            }
-
-            double availableSpace = _mage.Laboratory.GetAvailableSpace();
-
-            if (availableSpace >= bestFeature.Size)
-            {
-                // We have space! Consider installing it.
-                double desire = _desireFunc(bestBonus, (ushort)(_conditionDepth + 1));
-                log.Add($"Considering installing '{bestFeature.Name}' for a +{bestBonus} bonus, worth {desire:0.000}");
-                alreadyConsidered.Add(new InstallLabFeatureActivity(bestFeature, Abilities.MagicTheory, desire));
+                else if (_mage.Laboratory.Specialization.ActivityTopic == _activity)
+                {
+                    alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                }
+                else if(_mage.Laboratory.Specialization.GetCurrentBonuses().Quality < 0)
+                {
+                    // specializing will get rid of the negative quality of the current specialization
+                    if (_mage.Laboratory.Specialization.ArtTopic != null)
+                    {
+                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ArtTopic, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                    }
+                    else
+                    {
+                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ActivityTopic, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                    }
+                }
             }
             else
             {
-                // Not enough space. Your point #2: only consider refinement now.
-                log.Add($"Want to install '{bestFeature.Name}', but need {bestFeature.Size - availableSpace} more points of space.");
-
-                if (_mage.GetAbility(Abilities.MagicTheory).Value >= _mage.Laboratory.Refinement + 1)
-                {
-                    // A season of refinement adds 1 point of space.
-                    // The value is the proportional gain towards our goal.
-                    double valueOfRefinement = bestBonus / (bestFeature.Size - availableSpace);
-                    double desire = _desireFunc(valueOfRefinement, (ushort)(_conditionDepth + 1));
-                    log.Add($"Considering refining the lab to create space, worth {desire:0.000}");
-                    alreadyConsidered.Add(new RefineLaboratoryActivity(Abilities.MagicTheory, desire));
-                }
+                // consider all three types of specialization
+                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
             }
         }
     }

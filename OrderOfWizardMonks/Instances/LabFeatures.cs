@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Models;
 
@@ -16,37 +17,37 @@ namespace WizardMonks.Instances
         public static readonly LabFeature HighlyOrganized;
         public static readonly LabFeature Spotless;
         public static readonly LabFeature HiddenDefect;
-        public static readonly LabFeature Altar;
 
         static LabFeatures()
         {
             //Altar = new LabFeature("Altar", 3, )
-            HighlyOrganized = new LabFeature("Highly Organized", 0, 0, 0, 1, 0, 0, 0, [], []);
+            HighlyOrganized = new LabFeature("Highly Organized", 0, 0, 0, 1, 0, 0, 0, null, null);
 
-            Spotless = new LabFeature("Spotless", 0, 1, 1, 0, 0, 0, 0, new Dictionary<Ability, double> { { MagicArts.Creo, 1 } }, []);
+            Spotless = new LabFeature("Spotless", 0, 1, 1, 0, 0, 0, 0, new Tuple<Ability, double>(MagicArts.Creo, 1), null);
 
-            HiddenDefect = new LabFeature("Hidden Defect", 0, 0, 0, 0, -3, 0, 0, [], []);
+            HiddenDefect = new LabFeature("Hidden Defect", 0, 0, 0, 0, -3, 0, 0, null, null);
 
             AllFeatures = [HighlyOrganized, Spotless, HiddenDefect];
             FeaturesByArt = [];
             FeaturesByActivity = [];
             foreach (var feature in AllFeatures)
             {
-                foreach(var art in feature.ArtModifiers.Keys)
+                if (feature.ArtModifier != null)
                 {
-                    if(!FeaturesByArt.ContainsKey(art))
+                    if (!FeaturesByArt.ContainsKey(feature.ArtModifier.Item1))
                     {
-                        FeaturesByArt[art] = [];
+                        FeaturesByArt[feature.ArtModifier.Item1] = [];
                     }
-                    FeaturesByArt[art].Add(feature);
+
+                    FeaturesByArt[feature.ArtModifier.Item1].Add(feature);
                 }
-                foreach(var activity in feature.ActivityModifiers.Keys)
+                if (feature.ActivityModifier != null)
                 {
-                    if(!FeaturesByActivity.ContainsKey(activity))
+                    if (!FeaturesByActivity.ContainsKey(feature.ActivityModifier.Item1))
                     {
-                        FeaturesByActivity[activity] = [];
+                        FeaturesByActivity[feature.ActivityModifier.Item1] = [];
                     }
-                    FeaturesByActivity[activity].Add(feature);
+                    FeaturesByActivity[feature.ActivityModifier.Item1].Add(feature);
                 }
             }
         }

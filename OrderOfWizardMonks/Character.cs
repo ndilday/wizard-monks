@@ -6,6 +6,7 @@ using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks
 {
@@ -90,6 +91,7 @@ namespace WizardMonks
         #endregion
 
         #region Public Properties
+        public Personality Personality { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
         public CharacterAbility Warping { get; private set; }
@@ -116,7 +118,7 @@ namespace WizardMonks
         public bool WantsToFollow { get; protected set; }
         #endregion
 
-        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20)
+        public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20, Personality personality = null)
         {
             Die die = new();
             _attributes[(short)AttributeType.Strength] = new Attribute(die.RollNormal());
@@ -159,6 +161,7 @@ namespace WizardMonks
             _goals = new List<IGoal>();
             Log = new List<string>();
             Warping = new CharacterAbility(Abilities.Warping);
+            Personality = personality ?? new Personality();
         }
 
         #region Ability Functions

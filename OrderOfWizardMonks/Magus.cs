@@ -63,10 +63,10 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, 80) { }
-        public Magus(uint age) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, age) { }
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseAge = 20)
-            : base(writingLanguage, writingAbility, areaAbility, baseAge)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, 80, null) { }
+        public Magus(uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, age, personality) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseAge = 20, Personality personality = null)
+            : base(writingLanguage, writingAbility, areaAbility, baseAge, personality)
         {
             _magicAbility = magicAbility;
             Arts = new Arts(InvalidateWritableTopicsCache);

@@ -125,6 +125,13 @@ namespace WizardMonks.Models
             // Optional: Add validation to keep value within a specific range, e.g., [0, 2].
             _facets[facet] = value;
         }
+
+        public double GetDesireMultiplier(HexacoFacet facet)
+        {
+            // Center the score around 0 (range becomes -1.0 to +1.0)
+            double centeredScore = _facets[facet] - 1.0;
+            return 1.0 + (centeredScore * 0.5);
+        }
         #endregion
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using WizardMonks.Decisions.Goals;
+using WizardMonks.Models;
 
 namespace WizardMonks.Instances
 {
@@ -56,9 +57,46 @@ namespace WizardMonks.Instances
 
         public static void BuildBjornaer()
         {
-            Bjornaer = new Magus(80);
-            Bjornaer.Name = "Bjornaer";
-            Bjornaer.House = Houses.Bjornaer;
+            var bjornaerPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Not driven by human social contracts, Modesty is low due to animal pride.
+                [HexacoFacet.Sincerity] = 0.8,
+                [HexacoFacet.Fairness] = 0.6,
+                [HexacoFacet.GreedAvoidance] = 1.2,
+                [HexacoFacet.Modesty] = 0.4,
+                // E: High. Driven by instinct, fear, and strong attachments (to pack/beast, not people).
+                [HexacoFacet.Fearfulness] = 1.7,
+                [HexacoFacet.Anxiety] = 1.3,
+                [HexacoFacet.Dependence] = 0.5,
+                [HexacoFacet.Sentimentality] = 1.8,
+                // X: Very Low. Reclusive and uncomfortable in human society.
+                [HexacoFacet.SocialSelfEsteem] = 0.4,
+                [HexacoFacet.SocialBoldness] = 0.6,
+                [HexacoFacet.Sociability] = 0.2,
+                [HexacoFacet.Liveliness] = 1.4,
+                // A: Very Low. Territorial, unforgiving, and impatient with social niceties.
+                [HexacoFacet.Forgiveness] = 0.3,
+                [HexacoFacet.Gentleness] = 0.2,
+                [HexacoFacet.Flexibility] = 0.5,
+                [HexacoFacet.Patience] = 0.4,
+                // C: Low. Relies on instinct and raw power over meticulous planning.
+                [HexacoFacet.Organization] = 0.6,
+                [HexacoFacet.Diligence] = 1.1,
+                [HexacoFacet.Perfectionism] = 0.5,
+                [HexacoFacet.Prudence] = 0.7,
+                // O: High but focused. Inquisitive about the natural world, but not human arts. Highly unconventional.
+                [HexacoFacet.AestheticAppreciation] = 0.8,
+                [HexacoFacet.Inquisitiveness] = 1.8,
+                [HexacoFacet.Creativity] = 1.3,
+                [HexacoFacet.Unconventionality] = 1.9
+            });
+
+
+            Bjornaer = new(80, bjornaerPersonality)
+            {
+                Name = "Bjornaer",
+                House = Houses.Bjornaer
+            };
 
             Bjornaer.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Bjornaer.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -111,9 +149,40 @@ namespace WizardMonks.Instances
 
         public static void BuildBonisagus()
         {
-            Bonisgaus = new Magus(80);
-            Bonisgaus.Name = "Bonisagus";
-            Bonisgaus.House = Houses.Bonisagus;
+            var bonisagusPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // High Conscientiousness, High Openness, Low Agreeableness - a driven, brilliant, and difficult man.
+                [HexacoFacet.Sincerity] = 1.5,
+                [HexacoFacet.Fairness] = 1.4,
+                [HexacoFacet.GreedAvoidance] = 1.0,
+                [HexacoFacet.Modesty] = 0.5,
+                [HexacoFacet.Fearfulness] = 1.0,
+                [HexacoFacet.Anxiety] = 1.0,
+                [HexacoFacet.Dependence] = 0.5,
+                [HexacoFacet.Sentimentality] = 0.5,
+                [HexacoFacet.SocialSelfEsteem] = 1.8,
+                [HexacoFacet.SocialBoldness] = 1.9,
+                [HexacoFacet.Sociability] = 0.5,
+                [HexacoFacet.Liveliness] = 1.0,
+                [HexacoFacet.Forgiveness] = 1.0,
+                [HexacoFacet.Gentleness] = 1.0,
+                [HexacoFacet.Flexibility] = 1.0,
+                [HexacoFacet.Patience] = 0.4,
+                [HexacoFacet.Organization] = 1.8,
+                [HexacoFacet.Diligence] = 1.8,
+                [HexacoFacet.Perfectionism] = 1.9,
+                [HexacoFacet.Prudence] = 1.2,
+                [HexacoFacet.AestheticAppreciation] = 1.0,
+                [HexacoFacet.Inquisitiveness] = 1.9,
+                [HexacoFacet.Creativity] = 1.8,
+                [HexacoFacet.Unconventionality] = 1.8
+            });
+
+            Bonisgaus = new(80, bonisagusPersonality)
+            {
+                Name = "Bonisagus",
+                House = Houses.Bonisagus
+            };
 
             Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -158,9 +227,45 @@ namespace WizardMonks.Instances
 
         public static void BuildCriamon()
         {
-            Criamon = new Magus(80);
-            Criamon.Name = "Criamon";
-            Criamon.House = Houses.Criamon;
+            var criamonPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: High. Genuinely modest and sincere, though his sincerity is veiled in riddles.
+                [HexacoFacet.Sincerity] = 1.8,
+                [HexacoFacet.Fairness] = 1.4,
+                [HexacoFacet.GreedAvoidance] = 1.9,
+                [HexacoFacet.Modesty] = 2.0,
+                // E: Extremely Low. The ideal of emotional detachment. Unmoved by fear, anxiety, or sentiment.
+                [HexacoFacet.Fearfulness] = 0.1,
+                [HexacoFacet.Anxiety] = 0.1,
+                [HexacoFacet.Dependence] = 0.1,
+                [HexacoFacet.Sentimentality] = 0.2,
+                // X: Extremely Low. The ultimate hermit. He has no need for society or social validation.
+                [HexacoFacet.SocialSelfEsteem] = 0.2,
+                [HexacoFacet.SocialBoldness] = 0.1,
+                [HexacoFacet.Sociability] = 0.1,
+                [HexacoFacet.Liveliness] = 0.3,
+                // A: High. Patient and gentle, as conflict is a worldly distraction.
+                [HexacoFacet.Forgiveness] = 1.6,
+                [HexacoFacet.Gentleness] = 1.8,
+                [HexacoFacet.Flexibility] = 1.5,
+                [HexacoFacet.Patience] = 1.9,
+                // C: Low. Worldly organization, diligence, and prudence are irrelevant to the Path of the Soul.
+                [HexacoFacet.Organization] = 0.4,
+                [HexacoFacet.Diligence] = 0.6,
+                [HexacoFacet.Perfectionism] = 0.5,
+                [HexacoFacet.Prudence] = 0.3,
+                // O: Extremely High. The embodiment of seeking new and unconventional experiences and ideas.
+                [HexacoFacet.AestheticAppreciation] = 1.5,
+                [HexacoFacet.Inquisitiveness] = 2.0,
+                [HexacoFacet.Creativity] = 1.8,
+                [HexacoFacet.Unconventionality] = 2.0
+            });
+
+            Criamon = new(80, criamonPersonality)
+            {
+                Name = "Criamon",
+                House = Houses.Criamon
+            };
 
             Criamon.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Criamon.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -213,9 +318,44 @@ namespace WizardMonks.Instances
 
         public static void BuildDiedne()
         {
-            Diedne = new Magus(80);
-            Diedne.Name = "Diedne";
-            Diedne.House = Houses.Diedne;
+            var diednePersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Capricious and proud, her sincerity is fleeting and she is not modest.
+                [HexacoFacet.Sincerity] = 0.4,
+                [HexacoFacet.Fairness] = 0.7,
+                [HexacoFacet.GreedAvoidance] = 0.8,
+                [HexacoFacet.Modesty] = 0.3,
+                // E: High. Prone to anxiety (paranoia) and powerful sentimental attachments.
+                [HexacoFacet.Fearfulness] = 1.2,
+                [HexacoFacet.Anxiety] = 1.7,
+                [HexacoFacet.Dependence] = 1.1,
+                [HexacoFacet.Sentimentality] = 1.8,
+                // X: Very High. A charismatic and socially dominant leader who thrives in the spotlight.
+                [HexacoFacet.SocialSelfEsteem] = 1.9,
+                [HexacoFacet.SocialBoldness] = 1.8,
+                [HexacoFacet.Sociability] = 1.9,
+                [HexacoFacet.Liveliness] = 2.0,
+                // A: Low. Quick to anger, holds grudges, and is inflexible when her authority is challenged.
+                [HexacoFacet.Forgiveness] = 0.4,
+                [HexacoFacet.Gentleness] = 0.6,
+                [HexacoFacet.Flexibility] = 0.5,
+                [HexacoFacet.Patience] = 0.3,
+                // C: Very Low. Famously imprudent, she acted on passion rather than careful planning.
+                [HexacoFacet.Organization] = 0.7,
+                [HexacoFacet.Diligence] = 1.2,
+                [HexacoFacet.Perfectionism] = 0.8,
+                [HexacoFacet.Prudence] = 0.1,
+                // O: High. Creative, appreciative of beauty, and deeply unconventional due to her fae ties.
+                [HexacoFacet.AestheticAppreciation] = 1.9,
+                [HexacoFacet.Inquisitiveness] = 1.4,
+                [HexacoFacet.Creativity] = 1.8,
+                [HexacoFacet.Unconventionality] = 1.7
+            });
+            Diedne = new(80, diednePersonality)
+            {
+                Name = "Diedne",
+                House = Houses.Diedne
+            };
 
             Diedne.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Diedne.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -251,57 +391,51 @@ namespace WizardMonks.Instances
             Diedne.GetAbility(Abilities.Penetration).AddExperience(30);
             Diedne.GetAbility(Abilities.Concentration).AddExperience(30);
 
-            AbilityScoreGoal goal = new(Diedne, null, 5, MagicArts.Creo, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Intellego, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Muto, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Perdo, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Rego, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1.05, MagicArts.Animal, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Aquam, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Corpus, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Herbam, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Ignem, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Imaginem, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Mentem, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Terram, 5);
-            Diedne.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Diedne, null, 1, MagicArts.Vim, 5);
-            Diedne.AddGoal(goal);
-
             ApprenticeGoal app = new(Diedne, null, 1);
             Diedne.AddGoal(app);
         }
 
         public static void BuildFlambeau()
         {
-            Flambeau = new Magus(80);
-            Flambeau.Name = "Flambeau";
-            Flambeau.House = Houses.Flambeau;
+            var flambeauPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Extremely immodest and proud, though he holds to a warrior's code of fairness.
+                [HexacoFacet.Sincerity] = 0.7,
+                [HexacoFacet.Fairness] = 1.5,
+                [HexacoFacet.GreedAvoidance] = 1.1,
+                [HexacoFacet.Modesty] = 0.1,
+                // E: Very Low. Unflappable, fearless, and not given to sentiment.
+                [HexacoFacet.Fearfulness] = 0.1,
+                [HexacoFacet.Anxiety] = 0.2,
+                [HexacoFacet.Dependence] = 0.2,
+                [HexacoFacet.Sentimentality] = 0.3,
+                // X: High. Not sociable in a friendly way, but bold, lively, and dominant in social settings.
+                [HexacoFacet.SocialSelfEsteem] = 1.8,
+                [HexacoFacet.SocialBoldness] = 2.0,
+                [HexacoFacet.Sociability] = 1.1,
+                [HexacoFacet.Liveliness] = 1.7,
+                // A: Rock Bottom. He solves problems through force, not forgiveness, gentleness, or patience.
+                [HexacoFacet.Forgiveness] = 0.1,
+                [HexacoFacet.Gentleness] = 0.1,
+                [HexacoFacet.Flexibility] = 0.2,
+                [HexacoFacet.Patience] = 0.1,
+                // C: High, but focused on martial pursuits. Diligent in training, but can be imprudent.
+                [HexacoFacet.Organization] = 1.1,
+                [HexacoFacet.Diligence] = 1.8,
+                [HexacoFacet.Perfectionism] = 1.4,
+                [HexacoFacet.Prudence] = 0.6,
+                // O: Low. He is interested in perfecting the art of destruction, not in new ideas or aesthetics.
+                [HexacoFacet.AestheticAppreciation] = 0.4,
+                [HexacoFacet.Inquisitiveness] = 0.5,
+                [HexacoFacet.Creativity] = 0.6,
+                [HexacoFacet.Unconventionality] = 0.8
+            });
+
+            Flambeau = new(80, flambeauPersonality)
+            {
+                Name = "Flambeau",
+                House = Houses.Flambeau
+            };
 
             Flambeau.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Flambeau.GetAttribute(AttributeType.Strength).BaseValue = 2;
@@ -352,9 +486,45 @@ namespace WizardMonks.Instances
 
         public static void BuildGuernicus()
         {
-            Guernicus = new Magus(80);
-            Guernicus.Name = "Guernicus";
-            Guernicus.House = Houses.Guernicus;
+            var guernicusPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Extremely High. The cornerstone of his character is absolute fairness and sincerity.
+                [HexacoFacet.Sincerity] = 2.0,
+                [HexacoFacet.Fairness] = 2.0,
+                [HexacoFacet.GreedAvoidance] = 1.8,
+                [HexacoFacet.Modesty] = 1.4,
+                // E: Very Low. An impartial judge cannot be swayed by fear, anxiety, or sentiment.
+                [HexacoFacet.Fearfulness] = 0.3,
+                [HexacoFacet.Anxiety] = 0.2,
+                [HexacoFacet.Dependence] = 0.4,
+                [HexacoFacet.Sentimentality] = 0.1,
+                // X: Low. He is an authority figure, not a socialite. His presence commands respect, not friendship.
+                [HexacoFacet.SocialSelfEsteem] = 1.4,
+                [HexacoFacet.SocialBoldness] = 1.1,
+                [HexacoFacet.Sociability] = 0.5,
+                [HexacoFacet.Liveliness] = 0.6,
+                // A: Extremely Low. The law is not gentle, patient, or flexible. He does not forgive, he sentences.
+                [HexacoFacet.Forgiveness] = 0.1,
+                [HexacoFacet.Gentleness] = 0.2,
+                [HexacoFacet.Flexibility] = 0.1,
+                [HexacoFacet.Patience] = 0.4,
+                // C: Extremely High. Meticulously organized, diligent in his duties, and supremely prudent.
+                [HexacoFacet.Organization] = 2.0,
+                [HexacoFacet.Diligence] = 2.0,
+                [HexacoFacet.Perfectionism] = 1.7,
+                [HexacoFacet.Prudence] = 1.9,
+                // O: Very Low. He values precedent and tradition (the Code) over creativity and unconventional ideas.
+                [HexacoFacet.AestheticAppreciation] = 0.5,
+                [HexacoFacet.Inquisitiveness] = 0.7,
+                [HexacoFacet.Creativity] = 0.3,
+                [HexacoFacet.Unconventionality] = 0.1
+            });
+
+            Guernicus = new(80, guernicusPersonality)
+            {
+                Name = "Guernicus",
+                House = Houses.Guernicus
+            };
 
             Guernicus.GetAttribute(AttributeType.Stamina).BaseValue = 2;
             Guernicus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -405,9 +575,44 @@ namespace WizardMonks.Instances
 
         public static void BuildJerbiton()
         {
-            Jerbiton = new Magus(80);
-            Jerbiton.Name = "Jerbiton";
-            Jerbiton.House = Houses.Jerbiton;
+            var jerbitonPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: High. Sincere and modest, avoids the greed and arrogance common among magi.
+                [HexacoFacet.Sincerity] = 1.6,
+                [HexacoFacet.Fairness] = 1.3,
+                [HexacoFacet.GreedAvoidance] = 1.7,
+                [HexacoFacet.Modesty] = 1.5,
+                // E: High. A sensitive soul, emotionally responsive and sentimental.
+                [HexacoFacet.Fearfulness] = 1.1,
+                [HexacoFacet.Anxiety] = 1.3,
+                [HexacoFacet.Dependence] = 1.4,
+                [HexacoFacet.Sentimentality] = 1.8,
+                // X: High. Sociable, lively, and comfortable in mundane society.
+                [HexacoFacet.SocialSelfEsteem] = 1.6,
+                [HexacoFacet.SocialBoldness] = 1.1,
+                [HexacoFacet.Sociability] = 1.8,
+                [HexacoFacet.Liveliness] = 1.7,
+                // A: Very High. The diplomat of the Founders; patient, gentle, and flexible.
+                [HexacoFacet.Forgiveness] = 1.7,
+                [HexacoFacet.Gentleness] = 1.9,
+                [HexacoFacet.Flexibility] = 1.6,
+                [HexacoFacet.Patience] = 1.8,
+                // C: Average. He is not lazy, but his focus is not on ruthless efficiency.
+                [HexacoFacet.Organization] = 1.3,
+                [HexacoFacet.Diligence] = 1.0,
+                [HexacoFacet.Perfectionism] = 1.2,
+                [HexacoFacet.Prudence] = 1.1,
+                // O: Very High. The patron of the arts is defined by his appreciation for aesthetics and creativity.
+                [HexacoFacet.AestheticAppreciation] = 2.0,
+                [HexacoFacet.Inquisitiveness] = 1.6,
+                [HexacoFacet.Creativity] = 1.9,
+                [HexacoFacet.Unconventionality] = 1.2
+            });
+            Jerbiton = new(80, jerbitonPersonality)
+            {
+                Name = "Jerbiton",
+                House = Houses.Jerbiton
+            };
 
             Jerbiton.GetAttribute(AttributeType.Stamina).BaseValue = -1;
             Jerbiton.GetAttribute(AttributeType.Strength).BaseValue = -2;
@@ -446,11 +651,11 @@ namespace WizardMonks.Instances
             AbilityScoreGoal goal = new(Jerbiton, null, 1, MagicArts.Imaginem, 20);
             Jerbiton.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.ArtesLiberales, 5);
+            /*goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.ArtesLiberales, 5);
             Jerbiton.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.Etiquette, 5);
-            Jerbiton.AddGoal(goal);
+            Jerbiton.AddGoal(goal);*/
 
             goal = new AbilityScoreGoal(Jerbiton, null, 1.01, Abilities.Finesse, 5);
             Jerbiton.AddGoal(goal);
@@ -461,9 +666,45 @@ namespace WizardMonks.Instances
 
         public static void BuildMercere()
         {
-            Mercere = new Magus(80);
-            Mercere.Name = "Mercere";
-            Mercere.House = Houses.Mercere;
+            var mercerePersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: High. Sincerity and fairness are the currency of a trusted messenger.
+                [HexacoFacet.Sincerity] = 1.8,
+                [HexacoFacet.Fairness] = 1.7,
+                [HexacoFacet.GreedAvoidance] = 1.4,
+                [HexacoFacet.Modesty] = 1.6,
+                // E: Low. Must be fearless to travel the roads, and not overly anxious or dependent.
+                [HexacoFacet.Fearfulness] = 0.3,
+                [HexacoFacet.Anxiety] = 0.5,
+                [HexacoFacet.Dependence] = 0.4,
+                [HexacoFacet.Sentimentality] = 0.8,
+                // X: Mid-to-High. Sociable enough to deal with people everywhere, but not a boisterous leader.
+                [HexacoFacet.SocialSelfEsteem] = 1.2,
+                [HexacoFacet.SocialBoldness] = 1.4,
+                [HexacoFacet.Sociability] = 1.6,
+                [HexacoFacet.Liveliness] = 1.3,
+                // A: High. Must be patient and flexible to deal with the demands of his clients and the dangers of the road.
+                [HexacoFacet.Forgiveness] = 1.4,
+                [HexacoFacet.Gentleness] = 1.3,
+                [HexacoFacet.Flexibility] = 1.5,
+                [HexacoFacet.Patience] = 1.7,
+                // C: Very High. The entire House is built on the diligence and prudence of its members.
+                [HexacoFacet.Organization] = 1.6,
+                [HexacoFacet.Diligence] = 1.9,
+                [HexacoFacet.Perfectionism] = 1.1,
+                [HexacoFacet.Prudence] = 1.8,
+                // O: Low. He is a practical man focused on his task, not on abstract ideas or art.
+                [HexacoFacet.AestheticAppreciation] = 0.8,
+                [HexacoFacet.Inquisitiveness] = 0.9,
+                [HexacoFacet.Creativity] = 0.7,
+                [HexacoFacet.Unconventionality] = 0.6
+            });
+
+            Mercere = new(80, mercerePersonality)
+            {
+                Name = "Mercere",
+                House = Houses.Mercere
+            };
 
             Mercere.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Mercere.GetAttribute(AttributeType.Strength).BaseValue = 1;
@@ -511,9 +752,45 @@ namespace WizardMonks.Instances
 
         public static void BuildMerinita()
         {
-            Merinita = new Magus(80);
-            Merinita.Name = "Merinita";
-            Merinita.House = Houses.Merinita;
+            var merinitaPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Faerie morality is not human morality. Sincerity is questionable, and she is proud.
+                [HexacoFacet.Sincerity] = 0.5,
+                [HexacoFacet.Fairness] = 0.6,
+                [HexacoFacet.GreedAvoidance] = 1.3,
+                [HexacoFacet.Modesty] = 0.4,
+                // E: Very High. Prone to powerful, sweeping emotions, both terrifying and beautiful.
+                [HexacoFacet.Fearfulness] = 1.4,
+                [HexacoFacet.Anxiety] = 1.1,
+                [HexacoFacet.Dependence] = 1.6,
+                [HexacoFacet.Sentimentality] = 2.0,
+                // X: Mid-range. Can be sociable and lively, but also withdrawn and mysterious.
+                [HexacoFacet.SocialSelfEsteem] = 1.5,
+                [HexacoFacet.SocialBoldness] = 0.9,
+                [HexacoFacet.Sociability] = 1.2,
+                [HexacoFacet.Liveliness] = 1.7,
+                // A: Low. Can be gentle one moment and unforgivingly cruel the next, like nature itself.
+                [HexacoFacet.Forgiveness] = 0.6,
+                [HexacoFacet.Gentleness] = 1.7,
+                [HexacoFacet.Flexibility] = 0.8,
+                [HexacoFacet.Patience] = 0.5,
+                // C: Low. Not driven by human concepts of organization or diligence. Acts on whims.
+                [HexacoFacet.Organization] = 0.5,
+                [HexacoFacet.Diligence] = 0.8,
+                [HexacoFacet.Perfectionism] = 1.4,
+                [HexacoFacet.Prudence] = 0.4,
+                // O: Extremely High. The ultimate font of creativity, beauty, and strange, unconventional ideas.
+                [HexacoFacet.AestheticAppreciation] = 2.0,
+                [HexacoFacet.Inquisitiveness] = 1.7,
+                [HexacoFacet.Creativity] = 2.0,
+                [HexacoFacet.Unconventionality] = 1.9
+            });
+
+            Merinita = new(80, merinitaPersonality)
+            {
+                Name = "Merinita",
+                House = Houses.Merinita
+            };
 
             Merinita.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Merinita.GetAttribute(AttributeType.Strength).BaseValue = -1;
@@ -576,9 +853,45 @@ namespace WizardMonks.Instances
 
         public static void BuildTremere()
         {
-            Tremere = new Magus(80);
-            Tremere.Name = "Tremere";
-            Tremere.House = Houses.Tremere;
+            var tremerePersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Politics and ambition require a flexible relationship with sincerity and modesty.
+                [HexacoFacet.Sincerity] = 0.3,
+                [HexacoFacet.Fairness] = 0.6,
+                [HexacoFacet.GreedAvoidance] = 0.2,
+                [HexacoFacet.Modesty] = 0.4,
+                // E: Low. A successful leader cannot afford to be ruled by fear or anxiety.
+                [HexacoFacet.Fearfulness] = 1.4,
+                [HexacoFacet.Anxiety] = 1.0,
+                [HexacoFacet.Dependence] = 1.4,
+                [HexacoFacet.Sentimentality] = 0.5,
+                // X: Very High. A master of social maneuvering, bold and self-confident.
+                [HexacoFacet.SocialSelfEsteem] = 1.3,
+                [HexacoFacet.SocialBoldness] = 1.9,
+                [HexacoFacet.Sociability] = 1.3,
+                [HexacoFacet.Liveliness] = 1.3,
+                // A: Low. Not a gentle or forgiving leader; demands loyalty and is inflexible in his goals.
+                [HexacoFacet.Forgiveness] = 0.5,
+                [HexacoFacet.Gentleness] = 0.4,
+                [HexacoFacet.Flexibility] = 0.3,
+                [HexacoFacet.Patience] = 1.5,
+                // C: Extremely High. The defining trait of House Tremere is meticulous organization and diligence.
+                [HexacoFacet.Organization] = 1.8,
+                [HexacoFacet.Diligence] = 1.9,
+                [HexacoFacet.Perfectionism] = 1.6,
+                [HexacoFacet.Prudence] = 1.7,
+                // O: Low. Values established power structures and proven methods over new, risky ideas.
+                [HexacoFacet.AestheticAppreciation] = 0.6,
+                [HexacoFacet.Inquisitiveness] = 0.8,
+                [HexacoFacet.Creativity] = 0.7,
+                [HexacoFacet.Unconventionality] = 1.2
+            });
+
+            Tremere = new(80, tremerePersonality)
+            {
+                Name = "Tremere",
+                House = Houses.Tremere
+            };
 
             Tremere.GetAttribute(AttributeType.Stamina).BaseValue = 0;
             Tremere.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -626,9 +939,45 @@ namespace WizardMonks.Instances
 
         public static void BuildTytalus()
         {
-            Tytalus = new Magus(80);
-            Tytalus.Name = "Tytalus";
-            Tytalus.House = Houses.Tytalus;
+            var tytalusPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Low. Is not above manipulation (low sincerity) and is exceptionally proud (low modesty).
+                [HexacoFacet.Sincerity] = 0.3,
+                [HexacoFacet.Fairness] = 0.9,
+                [HexacoFacet.GreedAvoidance] = 0.5,
+                [HexacoFacet.Modesty] = 0.1,
+                // E: Low. Fearless and not prone to anxiety; he thrives on stress.
+                [HexacoFacet.Fearfulness] = 0.2,
+                [HexacoFacet.Anxiety] = 0.3,
+                [HexacoFacet.Dependence] = 0.1,
+                [HexacoFacet.Sentimentality] = 0.4,
+                // X: High. Seeks out social interaction as a venue for conflict and debate. Extremely bold.
+                [HexacoFacet.SocialSelfEsteem] = 1.9,
+                [HexacoFacet.SocialBoldness] = 2.0,
+                [HexacoFacet.Sociability] = 1.5,
+                [HexacoFacet.Liveliness] = 1.6,
+                // A: Extremely Low. The core of his philosophy. He is unforgiving, inflexible, impatient, and certainly not gentle.
+                [HexacoFacet.Forgiveness] = 0.1,
+                [HexacoFacet.Gentleness] = 0.1,
+                [HexacoFacet.Flexibility] = 0.2,
+                [HexacoFacet.Patience] = 0.2,
+                // C: High. Requires diligence and prudence to survive a life of constant conflict.
+                [HexacoFacet.Organization] = 1.2,
+                [HexacoFacet.Diligence] = 1.7,
+                [HexacoFacet.Perfectionism] = 1.3,
+                [HexacoFacet.Prudence] = 1.6,
+                // O: High. Intellectually curious and creative in finding new ways to challenge himself and others.
+                [HexacoFacet.AestheticAppreciation] = 0.9,
+                [HexacoFacet.Inquisitiveness] = 1.9,
+                [HexacoFacet.Creativity] = 1.6,
+                [HexacoFacet.Unconventionality] = 1.5
+            });
+
+            Tytalus = new(80, tytalusPersonality)
+            {
+                Name = "Tytalus",
+                House = Houses.Tytalus
+            };
 
             Tytalus.GetAttribute(AttributeType.Stamina).BaseValue = 3;
             Tytalus.GetAttribute(AttributeType.Strength).BaseValue = 0;
@@ -682,9 +1031,45 @@ namespace WizardMonks.Instances
 
         public static void BuildVerditius()
         {
-            Verditius = new Magus(80);
-            Verditius.Name = "Verditius";
-            Verditius.House = Houses.Verditius;
+            var verditiusPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // H: Very Low. Plagued by jealousy (low modesty, high greed) and not always sincere.
+                [HexacoFacet.Sincerity] = 0.6,
+                [HexacoFacet.Fairness] = 0.8,
+                [HexacoFacet.GreedAvoidance] = 0.2,
+                [HexacoFacet.Modesty] = 0.1,
+                // E: High. Anxious about his status and the quality of his work; sentimental about his creations.
+                [HexacoFacet.Fearfulness] = 0.8,
+                [HexacoFacet.Anxiety] = 1.8,
+                [HexacoFacet.Dependence] = 1.3,
+                [HexacoFacet.Sentimentality] = 1.6,
+                // X: Low. A reclusive craftsman who prefers the workshop to the salon.
+                [HexacoFacet.SocialSelfEsteem] = 0.7,
+                [HexacoFacet.SocialBoldness] = 0.6,
+                [HexacoFacet.Sociability] = 0.4,
+                [HexacoFacet.Liveliness] = 0.9,
+                // A: Low. Impatient with lesser artisans, inflexible in his methods, and not gentle with his rivals.
+                [HexacoFacet.Forgiveness] = 0.5,
+                [HexacoFacet.Gentleness] = 0.4,
+                [HexacoFacet.Flexibility] = 0.6,
+                [HexacoFacet.Patience] = 0.3,
+                // C: Extremely High. The ultimate perfectionist, organized and diligent in his craft.
+                [HexacoFacet.Organization] = 1.8,
+                [HexacoFacet.Diligence] = 2.0,
+                [HexacoFacet.Perfectionism] = 2.0,
+                [HexacoFacet.Prudence] = 1.4,
+                // O: High. Must be creative and inquisitive to be a master inventor and enchanter.
+                [HexacoFacet.AestheticAppreciation] = 1.7,
+                [HexacoFacet.Inquisitiveness] = 1.6,
+                [HexacoFacet.Creativity] = 1.9,
+                [HexacoFacet.Unconventionality] = 1.1
+            });
+
+            Verditius = new(80, verditiusPersonality)
+            {
+                Name = "Verditius",
+                House = Houses.Verditius
+            };
 
             Verditius.GetAttribute(AttributeType.Stamina).BaseValue = 1;
             Verditius.GetAttribute(AttributeType.Strength).BaseValue = 0;

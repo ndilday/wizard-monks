@@ -157,7 +157,7 @@ namespace WizardMonks.Models
 
         public void Specialize(Activity activity)
         {
-            if (Specialization != null && Specialization.ActivityTopic != null && Specialization.ActivityTopic == activity)
+            if (Specialization != null && Specialization.ActivityTopic == activity)
             {
                 var prereqs = Specialization.GetPrerequisitesForNextStage();
                 if(prereqs.MagicTheory > this._owner.GetAbility(Abilities.MagicTheory).Value)

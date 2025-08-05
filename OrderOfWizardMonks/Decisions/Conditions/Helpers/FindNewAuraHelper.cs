@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -29,6 +30,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (_averageGain > 0)
             {
                 double desire = _desireFunc(_averageGain, _conditionDepth);
+                desire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Liveliness);
 
                 log.Add("Finding a better aura to build a lab in worth " + desire.ToString("0.000"));
                 alreadyConsidered.Add(new FindAuraActivity(Abilities.AreaLore, desire));

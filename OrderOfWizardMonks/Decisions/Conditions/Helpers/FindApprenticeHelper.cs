@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -29,6 +30,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (chanceOfSuccess > 0)
             {
                 double effectiveDesire = _desireFunc(chanceOfSuccess, _conditionDepth);
+                effectiveDesire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Sociability);
                 log.Add($"Considering search for apprentice with {chanceOfSuccess:P1} chance of success, worth {effectiveDesire:0.000}");
                 alreadyConsidered.Add(new FindApprenticeActivity(Abilities.FolkKen, effectiveDesire));
             }

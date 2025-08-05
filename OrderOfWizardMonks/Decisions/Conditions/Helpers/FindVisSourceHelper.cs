@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -71,6 +72,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                     // in this version, unaccecptable vis types get half credit
                     averageFind = averageFind * (_visTypes.Count+15) / 30;
                     double desire = _desireFunc(averageFind, _conditionDepth);
+                    desire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Liveliness);
 
                     // TODO: modify by lifelong value of source?
                     log.Add("Looking for vis source worth " + (desire).ToString("0.000"));

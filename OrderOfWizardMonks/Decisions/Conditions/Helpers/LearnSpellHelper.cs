@@ -6,6 +6,7 @@ using WizardMonks.Activities.MageActivities;
 using WizardMonks.Core;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -128,6 +129,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 
                 // The desire is inherited from the parent desire, but deferred by the time it takes to translate.
                 double effectiveDesire = _desireFunc(labText.SpellContained.Level, (ushort)(_conditionDepth + seasonsToTranslate));
+                // unconventional magi will prefer to make something new over using existing spells
+                effectiveDesire *= _mage.Personality.GetInverseDesireMultiplier(HexacoFacet.Unconventionality);
 
                 var translateActivity = new TranslateShorthandActivity(labText, Abilities.MagicTheory, effectiveDesire);
                 alreadyConsidered.Add(translateActivity);
@@ -189,6 +192,8 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             }
             ushort magnitudeGain = SpellLevelMath.GetMagnitudeDifferenceBetweenLevels(singleSeasonSpellLevel, existingLevel);
             double desire = _desireFunc(magnitudeGain, _conditionDepth);
+            // creative magi like inventing new spells
+            desire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Creativity);
             log.Add($"Inventing {newSpell.Name} {newSpell.Level} worth {desire:0.000}");
             alreadyConsidered.Add(new InventSpellActivity(newSpell, Abilities.MagicTheory, desire));
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using WizardMonks.Core;
 
 namespace WizardMonks.Models
@@ -130,6 +131,13 @@ namespace WizardMonks.Models
         {
             // Center the score around 0 (range becomes -1.0 to +1.0)
             double centeredScore = _facets[facet] - 1.0;
+            return 1.0 + (centeredScore * 0.5);
+        }
+
+        public double GetInverseDesireMultiplier(HexacoFacet facet)
+        {
+            // Center the score around 0(range becomes - 1.0 to + 1.0)
+            double centeredScore = (_facets[facet] - 1.0) * -1.0;
             return 1.0 + (centeredScore * 0.5);
         }
         #endregion

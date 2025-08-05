@@ -1,16 +1,17 @@
 ﻿using WizardMonks.Decisions.Conditions;
-using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Goals
 {
     class ApprenticeGoal : AGoal
     {
-        public ApprenticeGoal(Character character, uint? dueDate, double desire) : base(character, dueDate, desire)
+        public ApprenticeGoal(Magus mage, uint? dueDate, double desire) : base(mage, dueDate, desire)
         {
             foreach (Ability ability in MagicArts.GetEnumerator())
             {
-                Conditions.Add(new AbilityScoreCondition(character, dueDate == null ? 200 : (uint)(dueDate - 1), desire, ability, 5));
+                double effectiveDesire = desire * mage.Personality.GetDesireMultiplier(HexacoFacet.Sociability);
+                Conditions.Add(new AbilityScoreCondition(mage, dueDate == null ? 200 : (uint)(dueDate - 1), desire, ability, 5));
             }
         }
     }

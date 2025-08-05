@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -24,9 +24,14 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 return;
             }
+
+            // organized and perfectionistic magi are most likely to want to keep tweaking their lab
+            double desire = _mage.Personality.GetDesireMultiplier(HexacoFacet.Organization) * _mage.Personality.GetDesireMultiplier(HexacoFacet.Perfectionism);
+
             if (_mage.Laboratory.Specialization != null)
             {
                 var prereqs = _mage.Laboratory.Specialization.GetPrerequisitesForNextStage();
+                
                 if(prereqs.MagicTheory > _mage.GetAbility(Abilities.MagicTheory).Value)
                 {
                     // need to improve magic theory first
@@ -42,37 +47,37 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 {
                     if (_arts.Technique == _mage.Laboratory.Specialization.ArtTopic)
                     {
-                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
                     }
                     else if (_arts.Technique == _mage.Laboratory.Specialization.ArtTopic)
                     {
-                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                        alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
                     }
 
                 }
                 else if (_mage.Laboratory.Specialization.ActivityTopic == _activity)
                 {
-                    alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
-                }
+                    alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
+                }   
                 else if(_mage.Laboratory.Specialization.GetCurrentBonuses().Quality < 0)
                 {
                     // specializing will get rid of the negative quality of the current specialization
                     if (_mage.Laboratory.Specialization.ArtTopic != null)
                     {
-                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ArtTopic, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ArtTopic, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
                     }
                     else
                     {
-                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ActivityTopic, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                        alreadyConsidered.Add(new SpecializeLabActivity(_mage.Laboratory.Specialization.ActivityTopic, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
                     }
                 }
             }
             else
             {
                 // consider all three types of specialization
-                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
-                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
-                alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(1, _conditionDepth)));
+                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Technique, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
+                alreadyConsidered.Add(new SpecializeLabActivity(_arts.Form, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
+                alreadyConsidered.Add(new SpecializeLabActivity(_activity, Abilities.MagicTheory, _desireFunc(desire, _conditionDepth)));
             }
         }
     }

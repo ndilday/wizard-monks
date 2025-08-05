@@ -9,6 +9,7 @@ using WizardMonks.Decisions.Conditions;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 public class AvoidDecrepitudeGoal : AGoal
 {
@@ -20,6 +21,7 @@ public class AvoidDecrepitudeGoal : AGoal
         : base(magus, null, desire) // Due date is dynamic, so we set it to null here.
     {
         _mage = magus;
+        Desire = desire * _mage.Personality.GetDesireMultiplier(HexacoFacet.Prudence);
     }
 
     // The core logic will reside in the AddActionPreferencesToList method.

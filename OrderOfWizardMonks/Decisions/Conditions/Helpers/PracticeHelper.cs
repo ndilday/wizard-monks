@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Activities;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -18,6 +19,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = this._mage.GetAbility(_ability).GetValueGain(4);
                 double practiceDesire = _desireFunc(gain, _conditionDepth);
+                practiceDesire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Creativity) * _mage.Personality.GetDesireMultiplier(HexacoFacet.Unconventionality);
                 log.Add("Practicing " + _ability.AbilityName + " worth " + practiceDesire.ToString("0.000"));
                 alreadyConsidered.Add(new PracticeActivity(_ability, practiceDesire));
             }

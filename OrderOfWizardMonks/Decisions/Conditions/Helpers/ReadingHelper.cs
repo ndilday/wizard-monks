@@ -3,6 +3,7 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {
@@ -22,6 +23,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 double gain = _mage.GetBookLevelGain(bestBook);
                 double effectiveDesire = _desireFunc(gain, _conditionDepth);
+                effectiveDesire *= _mage.Personality.GetDesireMultiplier(HexacoFacet.Diligence) * _mage.Personality.GetDesireMultiplier(HexacoFacet.Inquisitiveness);
                 // TODO: should we add the resale value of the book 
                 log.Add("Reading " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 ReadActivity readingAction = new(bestBook, effectiveDesire);

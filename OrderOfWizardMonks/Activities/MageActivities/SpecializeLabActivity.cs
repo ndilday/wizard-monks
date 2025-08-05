@@ -16,6 +16,7 @@ namespace WizardMonks.Activities.MageActivities
         public SpecializeLabActivity(Ability art, Ability exposure, double desire)
             : base(exposure, desire)
         {
+            Action = Activity.RefineLaboratory;
             ArtSpecialization = art;
             ActivitySpecialization = Activity.Sundry;
         }
@@ -23,6 +24,7 @@ namespace WizardMonks.Activities.MageActivities
         public SpecializeLabActivity(Activity activity, Ability exposure, double desire)
             : base(exposure, desire)
         {
+            Action = Activity.RefineLaboratory;
             ArtSpecialization = null;
             ActivitySpecialization = activity;
         }

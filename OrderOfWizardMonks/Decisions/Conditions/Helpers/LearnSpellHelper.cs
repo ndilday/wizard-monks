@@ -7,6 +7,7 @@ using WizardMonks.Core;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

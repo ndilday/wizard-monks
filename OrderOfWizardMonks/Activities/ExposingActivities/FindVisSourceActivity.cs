@@ -2,6 +2,7 @@
 using System.Linq;
 using WizardMonks.Core;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

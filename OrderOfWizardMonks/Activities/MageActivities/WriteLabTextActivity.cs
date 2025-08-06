@@ -1,4 +1,5 @@
-﻿using WizardMonks;
+﻿using WizardMonks.Models;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Activities.MageActivities
 {

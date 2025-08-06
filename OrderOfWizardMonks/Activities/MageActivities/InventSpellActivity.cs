@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models.Spells;
+
 namespace WizardMonks.Activities.MageActivities
 {
     public class InventSpellActivity : AExposingMageActivity

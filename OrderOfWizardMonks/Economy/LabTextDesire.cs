@@ -1,4 +1,6 @@
-﻿namespace WizardMonks.Economy
+﻿using WizardMonks.Models.Spells;
+
+namespace WizardMonks.Economy
 {
     public class LabTextDesire
     {

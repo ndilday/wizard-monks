@@ -92,10 +92,9 @@ namespace WizardMonks.Instances
             });
 
 
-            Bjornaer = new(80, bjornaerPersonality)
+            Bjornaer = new(Houses.Bjornaer, 80, bjornaerPersonality)
             {
                 Name = "Bjornaer",
-                House = Houses.Bjornaer
             };
 
             Bjornaer.GetAttribute(AttributeType.Stamina).BaseValue = 3;
@@ -178,10 +177,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.8
             });
 
-            Bonisgaus = new(80, bonisagusPersonality)
+            Bonisgaus = new(Houses.Bonisagus, 80, bonisagusPersonality)
             {
-                Name = "Bonisagus",
-                House = Houses.Bonisagus
+                Name = "Bonisagus"
             };
 
             Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
@@ -261,10 +259,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 2.0
             });
 
-            Criamon = new(80, criamonPersonality)
+            Criamon = new(Houses.Criamon, 80, criamonPersonality)
             {
-                Name = "Criamon",
-                House = Houses.Criamon
+                Name = "Criamon"
             };
 
             Criamon.GetAttribute(AttributeType.Stamina).BaseValue = 1;
@@ -351,10 +348,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Creativity] = 1.8,
                 [HexacoFacet.Unconventionality] = 1.7
             });
-            Diedne = new(80, diednePersonality)
+            Diedne = new(Houses.Diedne, 80, diednePersonality)
             {
-                Name = "Diedne",
-                House = Houses.Diedne
+                Name = "Diedne"
             };
 
             Diedne.GetAttribute(AttributeType.Stamina).BaseValue = 1;
@@ -431,10 +427,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.8
             });
 
-            Flambeau = new(80, flambeauPersonality)
+            Flambeau = new(Houses.Flambeau, 80, flambeauPersonality)
             {
-                Name = "Flambeau",
-                House = Houses.Flambeau
+                Name = "Flambeau"
             };
 
             Flambeau.GetAttribute(AttributeType.Stamina).BaseValue = 2;
@@ -520,10 +515,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.1
             });
 
-            Guernicus = new(80, guernicusPersonality)
+            Guernicus = new(Houses.Guernicus, 80, guernicusPersonality)
             {
-                Name = "Guernicus",
-                House = Houses.Guernicus
+                Name = "Guernicus"            
             };
 
             Guernicus.GetAttribute(AttributeType.Stamina).BaseValue = 2;
@@ -608,10 +602,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Creativity] = 1.9,
                 [HexacoFacet.Unconventionality] = 1.2
             });
-            Jerbiton = new(80, jerbitonPersonality)
+            Jerbiton = new(Houses.Jerbiton, 80, jerbitonPersonality)
             {
-                Name = "Jerbiton",
-                House = Houses.Jerbiton
+                Name = "Jerbiton"            
             };
 
             Jerbiton.GetAttribute(AttributeType.Stamina).BaseValue = -1;
@@ -700,10 +693,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.6
             });
 
-            Mercere = new(80, mercerePersonality)
+            Mercere = new(Houses.Mercere, 80, mercerePersonality)
             {
-                Name = "Mercere",
-                House = Houses.Mercere
+                Name = "Mercere"
             };
 
             Mercere.GetAttribute(AttributeType.Stamina).BaseValue = 1;
@@ -786,10 +778,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.9
             });
 
-            Merinita = new(80, merinitaPersonality)
+            Merinita = new(Houses.Merinita, 80, merinitaPersonality)
             {
-                Name = "Merinita",
-                House = Houses.Merinita
+                Name = "Merinita"
             };
 
             Merinita.GetAttribute(AttributeType.Stamina).BaseValue = 0;
@@ -887,10 +878,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.2
             });
 
-            Tremere = new(80, tremerePersonality)
+            Tremere = new(Houses.Tremere, 80, tremerePersonality)
             {
-                Name = "Tremere",
-                House = Houses.Tremere
+                Name = "Tremere"
             };
 
             Tremere.GetAttribute(AttributeType.Stamina).BaseValue = 0;
@@ -973,10 +963,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.5
             });
 
-            Tytalus = new(80, tytalusPersonality)
+            Tytalus = new(Houses.Tytalus, 80, tytalusPersonality)
             {
-                Name = "Tytalus",
-                House = Houses.Tytalus
+                Name = "Tytalus"
             };
 
             Tytalus.GetAttribute(AttributeType.Stamina).BaseValue = 3;
@@ -1065,10 +1054,9 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.1
             });
 
-            Verditius = new(80, verditiusPersonality)
+            Verditius = new(Houses.Verditius, 80, verditiusPersonality)
             {
-                Name = "Verditius",
-                House = Houses.Verditius
+                Name = "Verditius"
             };
 
             Verditius.GetAttribute(AttributeType.Stamina).BaseValue = 1;

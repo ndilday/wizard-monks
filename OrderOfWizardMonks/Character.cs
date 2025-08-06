@@ -375,13 +375,14 @@ namespace WizardMonks
             }
         }
 
-        public virtual void Advance()
+        public virtual IActivity Advance()
         {
+            IActivity activity = null;
             if (!IsCollaborating)
             {
                 Log.Add("");
                 Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
-                IActivity activity = DecideSeasonalActivity();
+                activity = DecideSeasonalActivity();
                 _seasonList.Add(activity);
                 activity.Act(this);
                 if (SeasonalAge >= 140)
@@ -406,6 +407,7 @@ namespace WizardMonks
             }
             IsCollaborating = false;
             ReprioritizeGoals();
+            return activity;
         }
 
         internal virtual void Advance(IActivity activity)

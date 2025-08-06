@@ -6,7 +6,7 @@ using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models;
-using static System.Net.Mime.MediaTypeNames;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks
 {
@@ -39,6 +39,7 @@ namespace WizardMonks
         private ABook _bestBookCache;
         private Dictionary<Character, ushort> _decipheredShorthandLevels;
         private Dictionary<LabText, double> _shorthandTranslationProgress;
+        private List<Idea> _ideas;
         #endregion
 
         #region Public Properties
@@ -63,9 +64,9 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, 80, null) { }
-        public Magus(uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, age, personality) { }
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseAge = 20, Personality personality = null)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, Houses.Apprentice, 80, null) { }
+        public Magus(Houses house, uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, house, age, personality) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, Houses house, uint baseAge = 20, Personality personality = null)
             : base(writingLanguage, writingAbility, areaAbility, baseAge, personality)
         {
             _magicAbility = magicAbility;
@@ -81,8 +82,9 @@ namespace WizardMonks
             //_summaGoals = new List<SummaGoal>();
             _partialSpell = null;
             _partialSpellProgress = 0;
+            _ideas = [];
             VisStudyRate = 6.75;
-            House = Houses.Apprentice;
+            House = house;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
                 _visStock[art] = 0;
@@ -318,7 +320,7 @@ namespace WizardMonks
 
             // To learn from a lab text, the magus's Lab Total must be greater than the spell's level.
             double labTotal = this.GetSpellLabTotal(labText.SpellContained);
-            if (labTotal <= labText.SpellContained.Level)
+            if (labTotal < labText.SpellContained.Level)
             {
                 return 0;
             }
@@ -332,9 +334,9 @@ namespace WizardMonks
             double inventionProgressPerSeason = labTotal - labText.SpellContained.Level;
 
             // This case should be caught by the labTotal check above, but as a safeguard against division by zero.
-            if (inventionProgressPerSeason <= 0)
+            if (inventionProgressPerSeason == 0)
             {
-                return 0;
+                inventionProgressPerSeason = 1;
             }
 
             // Calculate how many full seasons it would take to gain the required points.
@@ -351,6 +353,11 @@ namespace WizardMonks
             if (seasonsSaved <= 0)
             {
                 return 0;
+            }
+            if(seasonsSaved > 2)
+            {
+                // decrement by one to account for how the inventing mage's Magic Theory will increase along the way
+                seasonsSaved -= 1;
             }
 
             // The value of a saved season is equivalent to the amount of Vim vis that could be distilled in that time.
@@ -426,6 +433,26 @@ namespace WizardMonks
         {
             // Profession: Scribe skill * 60 levels per season
             return GetAbility(Abilities.Scribing).Value * 60;
+        }
+        #endregion
+
+        #region Idea Functions
+        public IEnumerable<Idea> GetInspirations()
+        {
+            return _ideas;
+        }
+
+        public void AddIdea(Idea idea)
+        {
+            // Prevent adding duplicate ideas, if we later decide ideas can be shared
+            if (!_ideas.Any(i => i.Id == idea.Id))
+            {
+                _ideas.Add(idea);
+                Log.Add($"Gained a new idea: {idea.Description}");
+
+                // Add a new goal to pursue this inspiration
+                _goals.Add(new PursueIdeaGoal(this, idea));
+            }
         }
         #endregion
 
@@ -1109,7 +1136,7 @@ namespace WizardMonks
         #endregion
 
         #region Seasonal Functions
-        public override void Advance()
+        public override IActivity Advance()
         {
             _isBestBookCached = false;
             // harvest vis
@@ -1131,7 +1158,9 @@ namespace WizardMonks
                     Log.Add(art.AbilityName + ": " + _visStock[art].ToString("0.00"));
                 }
             }
-            base.Advance();
+            IActivity activity = base.Advance();
+            IdeaManager.CheckForIdea(this, activity);
+            return activity;
         }
         #endregion
 

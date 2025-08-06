@@ -1,7 +1,7 @@
 ﻿using System;
 using WizardMonks.Instances;
 
-namespace WizardMonks
+namespace WizardMonks.Models
 {
     [Serializable]
     public abstract class AWritable
@@ -14,14 +14,15 @@ namespace WizardMonks
                 return Author.Name;
             }
         }
+        public Idea EmbeddedIdea { get; set; }
     }
 
-	[Serializable]
-	public abstract class ABook : AWritable
-	{
+    [Serializable]
+    public abstract class ABook : AWritable
+    {
         public string Title { get; set; }
 
-		public Ability Topic { get; set; }
+        public Ability Topic { get; set; }
         public string TopicName
         {
             get
@@ -29,14 +30,14 @@ namespace WizardMonks
                 return Topic.AbilityName;
             }
         }
-		public double Quality { get; set; }
-		public virtual double Level { get; set; }
+        public double Quality { get; set; }
+        public virtual double Level { get; set; }
         public double Value { get; set; }
-	}
+    }
 
-	[Serializable]
-	public class Summa : ABook
-	{
+    [Serializable]
+    public class Summa : ABook
+    {
         public double GetWritingPointsNeeded()
         {
             return MagicArts.IsArt(Topic) ? Level : Level * 5;
@@ -50,17 +51,17 @@ namespace WizardMonks
                 return false;
             }
             Summa otherBook = (Summa)obj;
-            return 
-                this.Author == otherBook.Author && 
-                this.Level == otherBook.Level && 
-                this.Quality == otherBook.Quality && 
-                this.Title == otherBook.Title && 
-                this.Topic == otherBook.Topic;
+            return
+                Author == otherBook.Author &&
+                Level == otherBook.Level &&
+                Quality == otherBook.Quality &&
+                Title == otherBook.Title &&
+                Topic == otherBook.Topic;
         }
 
         public override int GetHashCode()
         {
-            return this.Author.GetHashCode() ^ this.Level.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
+            return Author.GetHashCode() ^ Level.GetHashCode() ^ Quality.GetHashCode() ^ Title.GetHashCode() ^ Topic.GetHashCode();
         }
     }
 
@@ -86,15 +87,15 @@ namespace WizardMonks
             }
             Tractatus otherBook = (Tractatus)obj;
             return
-                this.Author == otherBook.Author &&
-                this.Quality == otherBook.Quality &&
-                this.Title == otherBook.Title &&
-                this.Topic == otherBook.Topic;
+                Author == otherBook.Author &&
+                Quality == otherBook.Quality &&
+                Title == otherBook.Title &&
+                Topic == otherBook.Topic;
         }
 
         public override int GetHashCode()
         {
-            return this.Author.GetHashCode() ^ this.Quality.GetHashCode() ^ this.Title.GetHashCode() ^ this.Topic.GetHashCode();
+            return Author.GetHashCode() ^ Quality.GetHashCode() ^ Title.GetHashCode() ^ Topic.GetHashCode();
         }
     }
 

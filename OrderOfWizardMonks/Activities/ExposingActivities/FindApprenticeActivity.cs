@@ -1,6 +1,7 @@
 ﻿using System;
 using WizardMonks.Core;
 using WizardMonks.Instances;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

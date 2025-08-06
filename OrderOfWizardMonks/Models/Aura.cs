@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WizardMonks
+namespace WizardMonks.Models
 {
     public enum Domain
     {
@@ -24,10 +24,10 @@ namespace WizardMonks
 
     public class VisSource
     {
-        public Aura Aura {get; private set;}
-        public Ability Art {get; private set;}
-        public Season Seasons { get; private set;}
-        public double Amount {get; private set;}
+        public Aura Aura { get; private set; }
+        public Ability Art { get; private set; }
+        public Season Seasons { get; private set; }
+        public double Amount { get; private set; }
         public double AnnualAmount
         {
             get
@@ -64,7 +64,7 @@ namespace WizardMonks
 
     public class Aura
     {
-        public Domain Domain {get; private set;}
+        public Domain Domain { get; private set; }
         public double Strength { get; private set; }
         public List<VisSource> VisSources { get; private set; }
         // TODO: handle regiones

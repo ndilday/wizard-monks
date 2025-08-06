@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models;
+
 namespace WizardMonks.Activities.MageActivities
 {
     public class BuildLaboratoryActivity : AExposingMageActivity

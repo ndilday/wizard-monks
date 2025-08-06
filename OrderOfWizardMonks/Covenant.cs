@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks
 {
-	[Serializable]
+    [Serializable]
 	public class Covenant
 	{
 		protected List<Magus> _magi;

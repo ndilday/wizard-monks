@@ -2,7 +2,7 @@
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Activities;
 using WizardMonks.Decisions;
-using WizardMonks;
+using WizardMonks.Models;
 
 namespace WizardMonks.Activities.MageActivities
 {

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using WizardMonks;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Decisions.Goals
 {

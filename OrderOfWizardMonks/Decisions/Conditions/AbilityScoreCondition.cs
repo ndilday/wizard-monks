@@ -4,6 +4,7 @@ using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 
 namespace WizardMonks.Decisions.Conditions
 {

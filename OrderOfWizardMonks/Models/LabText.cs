@@ -1,5 +1,6 @@
-﻿
-namespace WizardMonks
+﻿using WizardMonks.Models.Spells;
+
+namespace WizardMonks.Models
 {
     public class LabText : AWritable
     {

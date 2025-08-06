@@ -415,6 +415,18 @@ namespace WizardMonks
                 _decipheredShorthandLevels[author] = level;
             }
         }
+
+        public double GetLabTextWritingRate()
+        {
+            // Latin skill * 20 levels per season
+            return GetAbility(_writingLanguage).Value * 20;
+        }
+
+        public double GetLabTextCopyingRate()
+        {
+            // Profession: Scribe skill * 60 levels per season
+            return GetAbility(Abilities.Scribing).Value * 60;
+        }
         #endregion
 
         #region Goal/Preference Functions

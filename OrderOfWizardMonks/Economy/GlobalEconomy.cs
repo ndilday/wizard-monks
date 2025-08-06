@@ -12,6 +12,7 @@ namespace WizardMonks.Economy
         private static Dictionary<Ability, List<BookDesire>> _desiredBooksByTopic;
         // needs to know about all books available for trade
         public static Dictionary<Ability, List<BookForTrade>> BooksForTradeByTopicMap = [];
+        public static Dictionary<SpellBase, List<LabTextDesire>> LabTextDesiresBySpellBase = [];
         // needs to know about all topics people have expressed wanting a book for
         public static Dictionary<Ability, List<BookDesire>> DesiredBooksByTopic
         {

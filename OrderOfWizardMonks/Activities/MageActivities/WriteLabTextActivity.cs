@@ -1,32 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WizardMonks;
 
 namespace WizardMonks.Activities.MageActivities
 {
     public class WriteLabTextActivity : AExposingMageActivity
     {
-        public WriteLabTextActivity(Ability exposure, double desire) : base(exposure, desire)
+        public Spell SpellToWrite { get; private set; }
+
+        public WriteLabTextActivity(Spell spell, Ability exposure, double desire)
+            : base(exposure, desire)
         {
             Action = Activity.WriteLabText;
+            SpellToWrite = spell;
         }
 
         protected override void DoMageAction(Magus mage)
         {
-            //TODO: implement
+            double progressThisSeason = mage.GetLabTextWritingRate();
+
+            if (progressThisSeason >= SpellToWrite.Level)
+            {
+                // Finished the lab text
+                LabText newText = new LabText
+                {
+                    Author = mage,
+                    SpellContained = SpellToWrite,
+                    IsShorthand = false // This is a clean, shareable copy
+                };
+                mage.AddLabTextToCollection(newText);
+                mage.Log.Add($"Completed writing a lab text for '{SpellToWrite.Name}'.");
+            }
         }
 
         public override bool Matches(IActivity action)
         {
-            return action.Action == Activity.WriteLabText;
+            if (action is not WriteLabTextActivity writeAction)
+            {
+                return false;
+            }
+            return writeAction.SpellToWrite == this.SpellToWrite;
         }
 
         public override string Log()
         {
-            throw new NotImplementedException();
+            return $"Writing lab text for '{SpellToWrite.Name}' worth {Desire:0.000}";
         }
     }
-
 }

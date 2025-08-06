@@ -188,6 +188,9 @@ namespace SkillViewer
                 .SelectMany(md => md.BookDesires.Values)
                 .GroupBy(d => d.Ability)
                 .ToDictionary(g => g.Key, g => g.ToList());
+            GlobalEconomy.LabTextDesiresBySpellBase = magiDesires.SelectMany(md => md.LabTextDesires.Values)
+                .GroupBy(d => d.SpellBase)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             _log.Add("Considering vis and book trades");
             foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))

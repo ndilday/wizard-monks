@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
+using WizardMonks.Beliefs;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
@@ -34,7 +35,7 @@ namespace WizardMonks
         private MagusTradingDesires _tradeDesires;
         //private List<SummaGoal> _summaGoals;
         //private List<TractatusGoal> _tractatusGoals;
-        private Houses _house;
+        private HousesEnum _house;
         private bool _isBestBookCached;
         private ABook _bestBookCache;
         private Dictionary<Character, ushort> _decipheredShorthandLevels;
@@ -46,7 +47,7 @@ namespace WizardMonks
         public Magus Apprentice { get; private set; }
         public Laboratory Laboratory { get; private set; }
         public List<Spell> SpellList { get; private set; }
-        public Houses House
+        public HousesEnum House
         {
             get
             {
@@ -64,9 +65,9 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, Houses.Apprentice, 80, null) { }
-        public Magus(Houses house, uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, house, age, personality) { }
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, Houses house, uint baseAge = 20, Personality personality = null)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, HousesEnum.Apprentice, 80, null) { }
+        public Magus(HousesEnum house, uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, house, age, personality) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, HousesEnum house, uint baseAge = 20, Personality personality = null)
             : base(writingLanguage, writingAbility, areaAbility, baseAge, personality)
         {
             _magicAbility = magicAbility;
@@ -1093,6 +1094,18 @@ namespace WizardMonks
             else
             {
                 LearnSpell(spell);
+                foreach (var belief in text.BeliefPayload)
+                {
+                    // Update belief about the author
+                    GetBeliefProfile(text.Author).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude));
+
+                    // Update stereotype about the author's house
+                    if (text.Author is Magus magus)
+                    {
+                        var houseSubject = Houses.GetSubject(magus.House);
+                        GetBeliefProfile(houseSubject).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude * 0.20)); // Stereotype is 20% strength
+                    }
+                }
             }
         }
 
@@ -1107,6 +1120,12 @@ namespace WizardMonks
                 IsShorthand = true,
                 SpellContained = spell
             };
+            // Generate Belief Payload for the shorthand lab text
+            double magnitude = spell.Level / 5.0;
+            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Technique.AbilityName, magnitude));
+            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Form.AbilityName, magnitude));
+
+            // Generate personality beliefs based on spell tags
             _labTextsOwned.Add(newLabText);
 
         }

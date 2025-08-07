@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using WizardMonks.Beliefs;
 using WizardMonks.Instances;
 using WizardMonks.Models;
 
 namespace WizardMonks
 {
     [Serializable]
-	public class Covenant
+	public class Covenant : IBeliefSubject
 	{
 		protected List<Magus> _magi;
 		protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<ABook> _library;
         public Aura Aura { get; private set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
         public string Name { get; set; }
 
         public Covenant()

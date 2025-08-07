@@ -2,6 +2,18 @@
 
 namespace WizardMonks.Models.Spells
 {
+    public enum SpellTag
+    {
+        None = 0,
+        Offensive = 1 << 0,
+        Defensive = 1 << 1,
+        Healing = 1 << 2,
+        Utility = 1 << 3,
+        Creation = 1 << 4,
+        Deception = 1 << 5,
+        Knowledge = 1 << 6
+    }
+
     [Flags]
     public enum TechniqueEffects : long
     {
@@ -96,12 +108,13 @@ namespace WizardMonks.Models.Spells
 
         public TechniqueEffects TechniqueEffects { get; private set; }
         public FormEffects FormEffects { get; private set; }
+        public SpellTag Tags { get; private set; }
 
         public ushort Magnitude { get; protected set; }
 
         public string Name { get; private set; }
 
-        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, ushort magnitude, string name)
+        public SpellBase(TechniqueEffects techniqueEffects, FormEffects formEffects, SpellArts arts, ArtPair artPair, SpellTag tags, ushort magnitude, string name)
         {
             TechniqueEffects = techniqueEffects;
             FormEffects = formEffects;
@@ -109,6 +122,7 @@ namespace WizardMonks.Models.Spells
             Arts = arts;
             ArtPair = artPair;
             Name = name;
+            Tags = tags;
         }
     }
 }

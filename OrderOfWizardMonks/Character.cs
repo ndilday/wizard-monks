@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using WizardMonks.Activities;
+using WizardMonks.Beliefs;
 using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
@@ -35,7 +37,7 @@ namespace WizardMonks
     public delegate void AgedEventHandler(object sender, AgingEventArgs e);
 
 	[Serializable]
-	public partial class Character
+	public partial class Character : IBeliefSubject
 	{
         #region Attributes
         protected Attribute[] _attributes = new Attribute[Enum.GetNames(typeof(AttributeType)).Length];
@@ -74,6 +76,7 @@ namespace WizardMonks
 		private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityMap;
+        private readonly Dictionary<Guid, BeliefProfile> _beliefs = [];
         protected readonly List<IActivity> _seasonList;
         protected readonly List<ABook> _booksWritten;
         protected readonly HashSet<ABook> _booksRead;
@@ -91,6 +94,7 @@ namespace WizardMonks
         #endregion
 
         #region Public Properties
+        public Guid Id { get; private set; } = Guid.NewGuid();
         public Personality Personality { get; private set; }
         public ushort LongevityRitual { get; private set; }
         public byte Decrepitude { get; private set; }
@@ -544,6 +548,21 @@ namespace WizardMonks
             if (!previouslyRead || (book.Level != 1000 && ability.Value < book.Level))
             {
                 ability.AddExperience(book.Quality, book.Level);
+                if(!previouslyRead)
+                {
+                    foreach (var belief in book.BeliefPayload)
+                    {
+                        // Update belief about the author
+                        GetBeliefProfile(book.Author).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude));
+
+                        // Update stereotype about the author's house
+                        if(book.Author is Magus magus)
+                        {
+                            var houseSubject = Houses.GetSubject(magus.House);
+                            GetBeliefProfile(houseSubject).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude * 0.20)); // Stereotype is 20% strength
+                        }
+                    }
+                }
             }
         }
 
@@ -587,6 +606,17 @@ namespace WizardMonks
                 Title = name
             };
             _booksWritten.Add(t);
+
+            // Generate Belief Payload
+            t.BeliefPayload.Add(new Belief(topic.AbilityName, BeliefNormalizer.CommunicationFromQuality(t.Quality) / 6.0));
+            t.BeliefPayload.Add(new Belief("Communication", BeliefNormalizer.FromAttributeScore(GetAttributeValue(AttributeType.Communication))));
+
+            if (Die.Instance.RollDouble() < 0.10) // Configurable constant here
+            {
+                // Add a random personality belief
+                var randomFacet = (HexacoFacet)(Die.Instance.RollDouble() * 24);
+                t.BeliefPayload.Add(new Belief(randomFacet.ToString(), BeliefNormalizer.FromPersonalityFacet(this.Personality.GetFacet(randomFacet))));
+            }
             return t;
         }
 
@@ -681,6 +711,18 @@ namespace WizardMonks
         public void AddGoal(IGoal goal)
         {
             _goals.Add(goal);
+        }
+        #endregion
+
+        #region Belief Functions
+        public BeliefProfile GetBeliefProfile(IBeliefSubject subject)
+        {
+            if (!_beliefs.TryGetValue(subject.Id, out var profile))
+            {
+                profile = new();
+                _beliefs[subject.Id] = profile;
+            }
+            return profile;
         }
         #endregion
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using WizardMonks.Beliefs;
 using WizardMonks.Instances;
 
 namespace WizardMonks.Models
@@ -15,6 +17,7 @@ namespace WizardMonks.Models
             }
         }
         public Idea EmbeddedIdea { get; set; }
+        public List<Belief> BeliefPayload { get; set; } = [];
     }
 
     [Serializable]

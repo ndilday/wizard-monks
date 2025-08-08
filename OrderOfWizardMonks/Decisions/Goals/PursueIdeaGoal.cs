@@ -50,7 +50,7 @@ namespace WizardMonks.Decisions.Goals
                     // This logic can become more sophisticated.
                     _targetSpell = new Spell(
                         EffectRanges.Touch, EffectDurations.Sun, EffectTargets.Individual,
-                        new SpellBase(TechniqueEffects.Manipulate, FormEffects.Animal, SpellArts.Rego | SpellArts.Animal, spellIdea.Arts, 2, "Inspired Spell"),
+                        new SpellBase(TechniqueEffects.Manipulate, FormEffects.Animal, SpellArts.Rego | SpellArts.Animal, spellIdea.Arts, SpellTag.Utility, 2, "Inspired Spell"),
                         0, false, $"Invention from {magus.Name}'s Insight");
                 }
 

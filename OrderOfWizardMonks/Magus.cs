@@ -65,10 +65,10 @@ namespace WizardMonks
         #endregion
 
         #region Initialization Functions
-        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, HousesEnum.Apprentice, 80, null) { }
-        public Magus(HousesEnum house, uint age, Personality personality) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, house, age, personality) { }
-        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, HousesEnum house, uint baseAge = 20, Personality personality = null)
-            : base(writingLanguage, writingAbility, areaAbility, baseAge, personality)
+        public Magus() : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, HousesEnum.Apprentice, 80, null, null) { }
+        public Magus(HousesEnum house, uint age, Personality personality, Dictionary<string, double> reputationFocuses) : this(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore, house, age, personality, reputationFocuses) { }
+        public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, HousesEnum house = HousesEnum.Apprentice, uint baseAge = 20, Personality personality = null, Dictionary<string, double> reputationFocuses = null)
+            : base(writingLanguage, writingAbility, areaAbility, baseAge, personality, reputationFocuses)
         {
             _magicAbility = magicAbility;
             Arts = new Arts(InvalidateWritableTopicsCache);
@@ -148,114 +148,128 @@ namespace WizardMonks
         public override ABook GetBestBookToWrite()
         {
             if (_isBestBookCached) return _bestBookCache;
-            if(GlobalEconomy.MostDesiredBookTopics == null) return null;
-            // --- Step A: Populate the cache of writable topics if it's dirty ---
+            if (GlobalEconomy.MostDesiredBookTopics == null) return null;
+
+            // --- Step 1: Initialize variables for the search ---
+            ABook bestBook = null;
+            double currentBestBookValue = 0;
+            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
+            double prestigeMotivation = Personality.GetPrestigeMotivation();
+
+            // --- Step 2: Ensure the cache of writable topics is populated ---
             if (!_isWritableTopicsCacheValid)
             {
-                // A mage can write a tractatus if their skill is > 0 and they haven't hit their limit.
-                // A mage can write a summa if their experience is at least 21 (Level 2).
                 _writableTopicsCache = GetAbilities().Where(a => a.Experience >= 15).ToHashSet();
                 _isWritableTopicsCacheValid = true;
             }
 
-            // --- Step B: Initialize variables for finding the best book ---
-            ABook bestBook = null;
-            double currentBestBookValue = 0;
-            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
-
-            // --- Step C: Evaluate writing a Tractatus (once, outside the loop) ---
-            double tractatusValue = (6 + GetAttributeValue(AttributeType.Communication)) * GlobalEconomy.GlobalTractatusValue / 6;
-
-            // --- Step D: Main Loop ---
+            // --- Step 3: Iterate through topics with known market demand ---
             foreach (Ability ability in GlobalEconomy.MostDesiredBookTopics)
             {
-                var charAbility = _writableTopicsCache.FirstOrDefault(a => a.Ability == ability);
-                // Check if there is any demand for this topic. This is now an O(1) lookup.
-                if (charAbility == null)
-                {
-                    continue; // No one wants a book on this, move on.
-                }
+                //var charAbility = _writableTopicsCache.FirstOrDefault(a => a.Ability == ability);
+                var charAbility = GetAbility(ability);
+                if (charAbility == null) continue;
+
                 var desiresForTopic = GlobalEconomy.DesiredBooksByTopic[ability];
-                // We only care about the highest demand (lowest current level) for a topic.
-                var highestDemandDesire = desiresForTopic.OrderBy(d => d.CurrentLevel).Where(d => d.Character != this).FirstOrDefault();
+                var highestDemandDesire = desiresForTopic.OrderBy(d => d.CurrentLevel).FirstOrDefault(d => d.Character != this);
                 if (highestDemandDesire == null) continue;
 
-                CharacterAbilityBase buyerAbility;
-                if (highestDemandDesire.Ability.AbilityType != AbilityType.Art)
-                {
-                    buyerAbility = new CharacterAbility(highestDemandDesire.Ability);
-                }
-                else
-                {
-                    buyerAbility = new AcceleratedAbility(highestDemandDesire.Ability);
-                }
-                buyerAbility.Experience = buyerAbility.GetExperienceUntilLevel(highestDemandDesire.CurrentLevel);
-
-                // --- Evaluate Summa ---
-                // NOTE: this could lead us down a strange rabbit hole of starting a bunch of 
-                // summae on a subject of varying levels, but I think that's unlikely enough
-                // to not try and protect from for now
+                // --- Step 4A: Evaluate writing a Summa for this topic ---
                 double maxLevel = GetAbility(highestDemandDesire.Ability).Value / 2.0;
-
-                for (double l = maxLevel; l > highestDemandDesire.CurrentLevel; l--)
+                for (double l = Math.Floor(maxLevel); l > highestDemandDesire.CurrentLevel; l--)
                 {
                     double q = 6 + GetAttributeValue(AttributeType.Communication) + maxLevel - l;
-                    // the effective value is based on time to finish, not time already invested
-                    double experienceValue = buyerAbility.GetExperienceUntilLevel(l);
-                    double seasonsOfStudy = Math.Ceiling(experienceValue / q);
-                    double effectiveQuality = experienceValue / seasonsOfStudy;
-                    // at a minimum, the book is worth the vis it would take, on average, to gain that experience
-                    double visUsedPerStudySeason = 0.5 + ((buyerAbility.Value + (buyerAbility.GetValueGain(experienceValue) / 2)) / 10.0);
-                    double studySeasons = experienceValue / VisStudyRate;
-                    double visNeeded = studySeasons * visUsedPerStudySeason;
-                    // scale visNeeded according to vis type
-                    if (MagicArts.IsTechnique(highestDemandDesire.Ability))
-                    {
-                        visNeeded *= 4;
-                    }
-                    else if (MagicArts.IsArt(highestDemandDesire.Ability) && highestDemandDesire.Ability != MagicArts.Vim)
-                    {
-                        visNeeded *= 2;
-                    }
 
-                    // for now, scale vis according to quality of book vs. quality of vis study
-                    visNeeded *= q / VisStudyRate;
+                    var prospectiveSumma = new Summa
+                    {
+                        Author = this,
+                        Quality = q,
+                        Level = l,
+                        Topic = highestDemandDesire.Ability,
+                        Title = $"{highestDemandDesire.Ability.AbilityName} L{l:0.0}Q{q:0.0} Summa"
+                    };
 
-                    // divide this visNeed valuation by how many seasons are left for writing
+                    // Calculate Economic Value (based on vis equivalence)
                     double seasonsLeft = Math.Ceiling(l / writingRate);
-                    double writingValue = visNeeded / seasonsLeft;
-                    if (writingValue > currentBestBookValue)
+                    if (!MagicArts.IsArt(prospectiveSumma.Topic)) seasonsLeft *= 5;
+                    double economicValue = RateLifetimeBookValue(prospectiveSumma) / seasonsLeft;
+
+                    // Calculate Prestige Value
+                    var payload = GenerateProspectiveBeliefPayload(prospectiveSumma);
+                    double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
+
+                    // Calculate Total Value, modulated by personality
+                    double totalValue = economicValue + (prestigeValue * prestigeMotivation);
+
+                    if (totalValue > currentBestBookValue)
                     {
-                        // write this summa
-                        bestBook = new Summa
-                        {
-                            Quality = q,
-                            Level = l,
-                            Topic = highestDemandDesire.Ability,
-                            Title = $"{highestDemandDesire.Ability.AbilityName} L{l.ToString("0.0")}Q{q.ToString("0.0")} Summa {SeasonalAge} by {Name}",
-                            Value = writingValue
-                        };
-                        currentBestBookValue = writingValue;
+                        currentBestBookValue = totalValue;
+                        prospectiveSumma.Value = totalValue; // Store the combined value
+                        bestBook = prospectiveSumma;
                     }
                 }
 
-                // --- Evaluate Tractatus ---
-                if (tractatusValue > currentBestBookValue && CanWriteTractatus(charAbility))
+                // --- Step 4B: Evaluate writing a Tractatus for this topic ---
+                if (CanWriteTractatus(charAbility))
                 {
-                    currentBestBookValue = tractatusValue;
                     ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(highestDemandDesire.Ability);
-                    bestBook = new Tractatus
+                    var prospectiveTractatus = new Tractatus
                     {
+                        Author = this,
+                        Quality = 6 + GetAttributeValue(AttributeType.Communication),
                         Topic = charAbility.Ability,
-                        Title = $"{Name} {highestDemandDesire.Ability.AbilityName} T{previouslyWrittenCount}",
-                        Value = tractatusValue
+                        Title = $"{Name} {charAbility.Ability.AbilityName} T{previouslyWrittenCount}"
                     };
+
+                    // Calculate Economic Value (vis value of 1 season of study)
+                    double economicValue = RateSeasonalExperienceGain(prospectiveTractatus.Topic, prospectiveTractatus.Quality);
+
+                    // Calculate Prestige Value
+                    var payload = GenerateProspectiveBeliefPayload(prospectiveTractatus);
+                    double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
+
+                    // Calculate Total Value, modulated by personality
+                    double totalValue = economicValue + (prestigeValue * prestigeMotivation);
+
+                    if (totalValue > currentBestBookValue)
+                    {
+                        currentBestBookValue = totalValue;
+                        prospectiveTractatus.Value = totalValue;
+                        bestBook = prospectiveTractatus;
+                    }
                 }
             }
 
+            // --- Step 5: Cache and return the result ---
             _isBestBookCached = true;
             _bestBookCache = bestBook;
             return bestBook;
+        }
+
+        /// <summary>
+        /// Generates the prospective BeliefPayload for a book that has not yet been written.
+        /// This is used for valuation purposes in the GetBestBookToWrite method.
+        /// </summary>
+        private List<Belief> GenerateProspectiveBeliefPayload(ABook book)
+        {
+            var payload = new List<Belief>();
+            var authorComm = GetAttributeValue(AttributeType.Communication);
+
+            if (book is Tractatus tract)
+            {
+                payload.Add(new Belief(tract.Topic.AbilityName, 5));
+            }
+            else if (book is Summa summa)
+            {
+                // For a Summa, the prestige is derived from both its Quality and its Level.
+                double magnitude = BeliefToReputationNormalizer.ArtFromSumma(summa.Quality, summa.Level);
+                payload.Add(new Belief(summa.Topic.AbilityName, magnitude));
+            }
+
+            // All books reflect on the author's Communication skill.
+            payload.Add(new Belief("Communication", BeliefToReputationNormalizer.FromAttributeScore(authorComm)));
+
+            return payload;
         }
         #endregion
 

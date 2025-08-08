@@ -39,6 +39,7 @@ namespace WizardMonks.Instances
         public static Ability CodeOfHermes { get; private set; }
         public static Ability Philosophae { get; private set; }
         public static Ability Craft { get; private set; }
+        public static Dictionary<string, Ability> AbilityDictionary { get; private set; }
 
         static Abilities()
         {
@@ -79,6 +80,7 @@ namespace WizardMonks.Instances
             BjornaerLore = new Ability(51, AbilityType.General, "Bjornaer Lore");
             MerinitaLore = new Ability(52, AbilityType.General, "Merinita Lore");
             VerditiusLore = new Ability(53, AbilityType.General, "Verditius Lore");
+            AbilityDictionary = GetEnumerator().ToDictionary(a => a.AbilityName, a => a);
         }
 
         public static IEnumerable<Ability> GetEnumerator()

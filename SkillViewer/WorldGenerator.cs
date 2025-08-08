@@ -126,7 +126,7 @@ namespace SkillViewer
             btnAdvance.Enabled = false;
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
-            var fullMagi = _magusArray.Where(m => m != null && m.House != Houses.Apprentice);
+            var fullMagi = _magusArray.Where(m => m != null && m.House != HousesEnum.Apprentice);
             _log.Add("Advancing Season");
             Parallel.ForEach(_magusArray.Where(m => m != null && !m.WantsToFollow), character =>
             {

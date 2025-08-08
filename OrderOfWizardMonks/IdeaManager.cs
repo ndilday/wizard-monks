@@ -46,27 +46,41 @@ namespace WizardMonks
 
         private static ArtPair GetContextualArts(Magus magus, IActivity activity)
         {
-            // Example of contextual logic
+            // Inventing a spell. The idea is for a related spell.
             if (activity is InventSpellActivity invent)
             {
                 return invent.Spell.Base.ArtPair;
             }
+
+            // Studying vis. The idea is inspired by the Art being studied.
             if (activity is StudyVisActivity study)
             {
-                // Idea is more likely to use the Art being studied as either Tech or Form
-                Ability otherArt = MagicArts.GetEnumerator().ElementAt(Die.Instance.RollSimpleDie() - 1 + Die.Instance.RollSimpleDie() - 1);
-                if (Die.Instance.RollDouble() < 0.5)
+                Ability technique, form;
+
+                // Determine if the studied Art is a Technique or a Form.
+                if (MagicArts.IsTechnique(study.Art))
                 {
-                    return new ArtPair(study.Art, otherArt);
+                    // The studied Art is the Technique. We must select a random Form.
+                    technique = study.Art;
+                    var forms = MagicArts.GetEnumerator().Where(MagicArts.IsForm).ToList();
+                    int randomIndex = (int)(Die.Instance.RollDouble() * forms.Count);
+                    form = forms[randomIndex];
                 }
-                else
+                else // The studied Art must be a Form.
                 {
-                    return new ArtPair(otherArt, study.Art);
+                    // The studied Art is the Form. We must select a random Technique.
+                    form = study.Art;
+                    var techniques = MagicArts.GetEnumerator().Where(MagicArts.IsTechnique).ToList();
+                    int randomIndex = (int)(Die.Instance.RollDouble() * techniques.Count);
+                    technique = techniques[randomIndex];
                 }
+
+                return new ArtPair(technique, form);
             }
+
             // Add more contexts for other activities...
 
-            // Fallback: base it on the magus's highest Arts
+            // Fallback: base it on the magus's highest Arts. This logic is sound.
             var topTech = magus.Arts.OrderByDescending(a => a.Value).First(a => MagicArts.IsTechnique(a.Ability));
             var topForm = magus.Arts.OrderByDescending(a => a.Value).First(a => MagicArts.IsForm(a.Ability));
             return new ArtPair(topTech.Ability, topForm.Ability);

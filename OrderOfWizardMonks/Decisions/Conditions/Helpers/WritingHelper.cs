@@ -23,7 +23,6 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             if (bestBook != null)
             {
                 double effectiveDesire = _desireFunc(bestBook.Value, _conditionDepth);
-                effectiveDesire *= _mage.Personality.GetInverseDesireMultiplier(HexacoFacet.Modesty);
                 log.Add("Writing " + bestBook.Title + " worth " + (effectiveDesire).ToString("0.000"));
                 WriteActivity writingAction = new(bestBook.Topic, bestBook.Title, Abilities.Latin, bestBook.Level, effectiveDesire);
                 alreadyConsidered.Add(writingAction);

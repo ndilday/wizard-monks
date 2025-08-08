@@ -141,5 +141,23 @@ namespace WizardMonks.Models
             return 1.0 + (centeredScore * 0.5);
         }
         #endregion
+
+        #region Motivation Accessors
+
+        public double GetPrestigeMotivation()
+        {
+            // A magus's desire for prestige is driven by low modesty (pride) and high social boldness.
+            // We invert the Modesty score (which is 0-2) and average it with Social Boldness.
+            // This results in a multiplier, typically between 0 and 2.
+            double invertedModesty = 2.0 - GetFacet(HexacoFacet.Modesty);
+            double socialBoldness = GetFacet(HexacoFacet.SocialBoldness);
+
+            double motivation = (invertedModesty + socialBoldness) / 2.0;
+
+            // Clamp to a safe range to prevent extreme values.
+            return Math.Max(0, Math.Min(2.0, motivation));
+        }
+
+        #endregion
     }
 }

@@ -91,8 +91,15 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.9
             });
 
+            Dictionary<string, double> reputation = new()
+            {
+                { "Bjornaer Lore", 2 },
+                { "Heartbeast", 2 },
+                { "Animal", 2}
+            };
 
-            Bjornaer = new(Houses.Bjornaer, 80, bjornaerPersonality)
+
+            Bjornaer = new(HousesEnum.Bjornaer, 80, bjornaerPersonality, reputation)
             {
                 Name = "Bjornaer",
             };
@@ -133,17 +140,17 @@ namespace WizardMonks.Instances
             Bjornaer.GetAbility(Abilities.Heartbeast).AddExperience(30);
             Bjornaer.GetAbility(Abilities.BjornaerLore).AddExperience(75);
 
-            AbilityScoreGoal goal = new(Bjornaer, null, 1, MagicArts.Animal, 20);
-            Bjornaer.AddGoal(goal);
-
             ApprenticeGoal apprentice = new(Bjornaer, null, 1);
             Bjornaer.AddGoal(apprentice);
 
-            goal = new AbilityScoreGoal(Bjornaer, null, 1.01, Abilities.BjornaerLore, 5);
+            /*AbilityScoreGoal goal = new(Bjornaer, null, 1, MagicArts.Animal, 20);
+            Bjornaer.AddGoal(goal);
+
+            AbilityScoreGoal goal = new AbilityScoreGoal(Bjornaer, null, 1.01, Abilities.BjornaerLore, 5);
             Bjornaer.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Bjornaer, null, 1.02, Abilities.Heartbeast, 5);
-            Bjornaer.AddGoal(goal);
+            Bjornaer.AddGoal(goal);*/
         }
 
         public static void BuildBonisagus()
@@ -177,7 +184,12 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.8
             });
 
-            Bonisgaus = new(Houses.Bonisagus, 80, bonisagusPersonality)
+            Dictionary<string, double> reputation = new()
+            {
+                { "Magic Theory", 2 }
+            };
+
+            Bonisgaus = new(HousesEnum.Bonisagus, 80, bonisagusPersonality, reputation)
             {
                 Name = "Bonisagus"
             };
@@ -216,8 +228,9 @@ namespace WizardMonks.Instances
             Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(5);
             Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(5);
 
-            AbilityScoreGoal goal = new(Bonisgaus, null, 1, Abilities.MagicTheory, 10);
-            Bonisgaus.AddGoal(goal);
+            //Testing to see whether the reputational modifiers make these ability score goals unnecessary
+            /*AbilityScoreGoal goal = new(Bonisgaus, null, 1, Abilities.MagicTheory, 10);
+            Bonisgaus.AddGoal(goal);*/
 
             ApprenticeGoal apprentice = new(Bonisgaus, null, 1);
             Bonisgaus.AddGoal(apprentice);
@@ -259,7 +272,13 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 2.0
             });
 
-            Criamon = new(Houses.Criamon, 80, criamonPersonality)
+            Dictionary<string, double> reputation = new()
+            {
+                { "Criamon Lore", 2 },
+                { "Enigmatic Wisdom", 2 }
+            };
+
+            Criamon = new(HousesEnum.Criamon, 80, criamonPersonality, reputation)
             {
                 Name = "Criamon"
             };
@@ -300,15 +319,6 @@ namespace WizardMonks.Instances
             Criamon.GetAbility(Abilities.EnigmaticWisdom).AddExperience(15);
             Criamon.GetAbility(Abilities.CriamonLore).AddExperience(30);
 
-            AbilityScoreGoal goal = new(Criamon, null, 1, Abilities.MagicTheory, 5);
-            Criamon.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Criamon, null, 1, Abilities.EnigmaticWisdom, 5);
-            Criamon.AddGoal(goal);
-
-            goal = new AbilityScoreGoal(Criamon, null, 1, Abilities.CriamonLore, 5);
-            Criamon.AddGoal(goal);
-
             ApprenticeGoal app = new(Criamon, null, 1);
             Criamon.AddGoal(app);
         }
@@ -348,7 +358,13 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Creativity] = 1.8,
                 [HexacoFacet.Unconventionality] = 1.7
             });
-            Diedne = new(Houses.Diedne, 80, diednePersonality)
+
+            Dictionary<string, double> reputation = new()
+            {
+
+            };
+
+            Diedne = new(HousesEnum.Diedne, 80, diednePersonality, reputation)
             {
                 Name = "Diedne"
             };
@@ -427,7 +443,14 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.8
             });
 
-            Flambeau = new(Houses.Flambeau, 80, flambeauPersonality)
+            Dictionary<string, double> reputation = new()
+            {
+                {"Ignem", 2.0 },
+                { "Penetration", 2.0 },
+                { "Parma Magica", 2.0 }
+            };
+
+            Flambeau = new(HousesEnum.Flambeau, 80, flambeauPersonality, reputation)
             {
                 Name = "Flambeau"
             };
@@ -466,14 +489,14 @@ namespace WizardMonks.Instances
             Flambeau.GetAbility(Abilities.Penetration).AddExperience(30);
             Flambeau.GetAbility(Abilities.Concentration).AddExperience(30);
 
-            AbilityScoreGoal goal = new(Flambeau, null, 1, MagicArts.Ignem, 20);
+            /*AbilityScoreGoal goal = new(Flambeau, null, 1, MagicArts.Ignem, 20);
             Flambeau.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Flambeau, null, 1, Abilities.Penetration, 5);
             Flambeau.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Flambeau, null, 1, Abilities.ParmaMagica, 5);
-            Flambeau.AddGoal(goal);
+            Flambeau.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Flambeau, null, 1);
             Flambeau.AddGoal(app);
@@ -515,7 +538,14 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.1
             });
 
-            Guernicus = new(Houses.Guernicus, 80, guernicusPersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Terram", 2.0 },
+                { "Code of Hermes", 2.0 },
+                { "Magic Theory", 1.5 }
+            };
+
+            Guernicus = new(HousesEnum.Guernicus, 80, guernicusPersonality, reputationMultipliers)
             {
                 Name = "Guernicus"            
             };
@@ -554,14 +584,14 @@ namespace WizardMonks.Instances
             Guernicus.GetAbility(Abilities.CodeOfHermes).AddExperience(5);
             Guernicus.GetAbility(Abilities.Concentration).AddExperience(5);
 
-            AbilityScoreGoal goal = new(Guernicus, null, 1, MagicArts.Terram, 20);
+            /*AbilityScoreGoal goal = new(Guernicus, null, 1, MagicArts.Terram, 20);
             Guernicus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Guernicus, null, 1.5, Abilities.CodeOfHermes, 5);
             Guernicus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Guernicus, null, 1, Abilities.MagicTheory, 5);
-            Guernicus.AddGoal(goal);
+            Guernicus.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Guernicus, null, 1);
             Guernicus.AddGoal(app);
@@ -602,7 +632,16 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Creativity] = 1.9,
                 [HexacoFacet.Unconventionality] = 1.2
             });
-            Jerbiton = new(Houses.Jerbiton, 80, jerbitonPersonality)
+
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Etiquette", 2.0 },
+                { "Artes Liberales", 2.0 },
+                { "Finesse", 2.0 },
+                { "Imaginem", 2.0 }
+            };
+
+            Jerbiton = new(HousesEnum.Jerbiton, 80, jerbitonPersonality, reputationMultipliers)
             {
                 Name = "Jerbiton"            
             };
@@ -641,17 +680,17 @@ namespace WizardMonks.Instances
             Jerbiton.GetAbility(Abilities.Penetration).AddExperience(0);
             Jerbiton.GetAbility(Abilities.Finesse).AddExperience(15);
 
-            AbilityScoreGoal goal = new(Jerbiton, null, 1, MagicArts.Imaginem, 20);
+            /*AbilityScoreGoal goal = new(Jerbiton, null, 1, MagicArts.Imaginem, 20);
             Jerbiton.AddGoal(goal);
 
-            /*goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.ArtesLiberales, 5);
+            goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.ArtesLiberales, 5);
             Jerbiton.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Jerbiton, null, 0.1, Abilities.Etiquette, 5);
-            Jerbiton.AddGoal(goal);*/
+            Jerbiton.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Jerbiton, null, 1.01, Abilities.Finesse, 5);
-            Jerbiton.AddGoal(goal);
+            Jerbiton.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Jerbiton, null, 1);
             Jerbiton.AddGoal(app);
@@ -693,7 +732,14 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 0.6
             });
 
-            Mercere = new(Houses.Mercere, 80, mercerePersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Mentem", 2.0 },
+                { "Etiquette", 1.5 },
+                { "Area Lore", 1.5 }
+            };
+
+            Mercere = new(HousesEnum.Mercere, 80, mercerePersonality, reputationMultipliers)
             {
                 Name = "Mercere"
             };
@@ -732,11 +778,11 @@ namespace WizardMonks.Instances
             Mercere.GetAbility(Abilities.Penetration).AddExperience(0);
             Mercere.GetAbility(Abilities.Concentration).AddExperience(0);
 
-            AbilityScoreGoal goal = new(Mercere, null, 1, MagicArts.Mentem, 20);
+            /*AbilityScoreGoal goal = new(Mercere, null, 1, MagicArts.Mentem, 20);
             Mercere.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Mercere, null, 0.1, Abilities.Etiquette, 5);
-            Mercere.AddGoal(goal);
+            Mercere.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Mercere, null, 1);
             Mercere.AddGoal(app);
@@ -778,7 +824,19 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.9
             });
 
-            Merinita = new(Houses.Merinita, 80, merinitaPersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Herbam", 2.0 },
+                { "Animal", 1.5 },
+                { "Creo", 1.5 },
+                { "Intelligo", 1.5 },
+                { "Muto", 1.5 },
+                { "Perdo", 1.5 },
+                { "Rego", 1.5 },
+                { "Merinita Lore", 2.0 }
+            };
+
+            Merinita = new(HousesEnum.Merinita, 80, merinitaPersonality, reputationMultipliers)
             {
                 Name = "Merinita"
             };
@@ -817,7 +875,7 @@ namespace WizardMonks.Instances
             Merinita.GetAbility(Abilities.Penetration).AddExperience(0);
             Merinita.GetAbility(Abilities.MerinitaLore).AddExperience(50);
 
-            AbilityScoreGoal goal = new(Merinita, null, 1, MagicArts.Herbam, 20);
+            /*AbilityScoreGoal goal = new(Merinita, null, 1, MagicArts.Herbam, 20);
             Merinita.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Merinita, null, 1, MagicArts.Animal, 15);
@@ -839,7 +897,7 @@ namespace WizardMonks.Instances
             Merinita.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Merinita, null, 1, Abilities.MerinitaLore, 5);
-            Merinita.AddGoal(goal);
+            Merinita.AddGoal(goal);*/
         }
 
         public static void BuildTremere()
@@ -878,7 +936,13 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.2
             });
 
-            Tremere = new(Houses.Tremere, 80, tremerePersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Penetration", 2.0 },
+                { "Parma Magica", 2.0 }
+            };
+
+            Tremere = new(HousesEnum.Tremere, 80, tremerePersonality, reputationMultipliers)
             {
                 Name = "Tremere"
             };
@@ -920,11 +984,11 @@ namespace WizardMonks.Instances
             IGoal goal = new ApprenticeGoal(Tremere, null, 5);
             Tremere.AddGoal(goal);
 
-            goal = new AbilityScoreGoal(Tremere, null, 1, Abilities.Penetration, 5);
+            /*goal = new AbilityScoreGoal(Tremere, null, 1, Abilities.Penetration, 5);
             Tremere.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Tremere, null, 1, Abilities.ParmaMagica, 5);
-            Tremere.AddGoal(goal);
+            Tremere.AddGoal(goal);*/
         }
 
         public static void BuildTytalus()
@@ -963,7 +1027,15 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.5
             });
 
-            Tytalus = new(Houses.Tytalus, 80, tytalusPersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Rego", 2.0 },
+                { "Mentem", 2.0 },
+                { "Penetration", 2.0 },
+                { "Finesse", 2.0 }
+            };
+
+            Tytalus = new(HousesEnum.Tytalus, 80, tytalusPersonality, reputationMultipliers)
             {
                 Name = "Tytalus"
             };
@@ -1002,7 +1074,7 @@ namespace WizardMonks.Instances
             Tytalus.GetAbility(Abilities.Penetration).AddExperience(30);
             Tytalus.GetAbility(Abilities.Concentration).AddExperience(15);
 
-            AbilityScoreGoal goal = new(Tytalus, null, 1, MagicArts.Rego, 20);
+            /*AbilityScoreGoal goal = new(Tytalus, null, 1, MagicArts.Rego, 20);
             Tytalus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Tytalus, null, 1, MagicArts.Mentem, 10);
@@ -1012,7 +1084,7 @@ namespace WizardMonks.Instances
             Tytalus.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Tytalus, null, 1, Abilities.Finesse, 5);
-            Tytalus.AddGoal(goal);
+            Tytalus.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Tytalus, null, 1);
             Tytalus.AddGoal(app);
@@ -1054,7 +1126,15 @@ namespace WizardMonks.Instances
                 [HexacoFacet.Unconventionality] = 1.1
             });
 
-            Verditius = new(Houses.Verditius, 80, verditiusPersonality)
+            Dictionary<string, double> reputationMultipliers = new()
+            {
+                { "Verditius Lore", 2.0 },
+                { "Craft", 2.0 },
+                { "Philosophae", 1.5 },
+                { "Terram", 1.5 }
+            };
+
+            Verditius = new(HousesEnum.Verditius, 80, verditiusPersonality, reputationMultipliers)
             {
                 Name = "Verditius"
             };
@@ -1094,7 +1174,7 @@ namespace WizardMonks.Instances
             Verditius.GetAbility(Abilities.Craft).AddExperience(30);
             Verditius.GetAbility(Abilities.Philosophae).AddExperience(5);
 
-            AbilityScoreGoal goal = new(Verditius, null, 1, MagicArts.Intellego, 5);
+            /*AbilityScoreGoal goal = new(Verditius, null, 1, MagicArts.Intellego, 5);
             Verditius.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Verditius, null, 1, MagicArts.Muto, 5);
@@ -1113,7 +1193,7 @@ namespace WizardMonks.Instances
             Verditius.AddGoal(goal);
 
             goal = new AbilityScoreGoal(Verditius, null, 1, Abilities.Craft, 5);
-            Verditius.AddGoal(goal);
+            Verditius.AddGoal(goal);*/
 
             ApprenticeGoal app = new(Verditius, null, 1);
             Verditius.AddGoal(app);

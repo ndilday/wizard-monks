@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WizardMonks.Models.Theory
+namespace WizardMonks.Models.Research
 {
     public class ResearchProject
     {

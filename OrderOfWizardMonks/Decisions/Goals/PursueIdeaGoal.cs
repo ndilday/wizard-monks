@@ -2,16 +2,17 @@
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Decisions.Goals
 {
     public class PursueIdeaGoal : AGoal
     {
-        private readonly Idea _idea;
+        private readonly AIdea _idea;
         private Spell _targetSpell; // The concrete spell we decide to invent
 
-        public PursueIdeaGoal(Magus magus, Idea idea, uint? ageToCompleteBy = null)
+        public PursueIdeaGoal(Magus magus, AIdea idea, uint? ageToCompleteBy = null)
             : base(magus, ageToCompleteBy, 0) // Desire is calculated dynamically
         {
             _idea = idea;

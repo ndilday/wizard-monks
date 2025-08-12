@@ -8,6 +8,7 @@ using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
 using WizardMonks.Models.Spells;
 
@@ -42,7 +43,7 @@ namespace WizardMonks
         private ABook _bestBookCache;
         private Dictionary<Character, ushort> _decipheredShorthandLevels;
         private Dictionary<LabText, double> _shorthandTranslationProgress;
-        private List<Idea> _ideas;
+        private List<AIdea> _ideas;
         #endregion
 
         #region Public Properties
@@ -454,12 +455,12 @@ namespace WizardMonks
         #endregion
 
         #region Idea Functions
-        public IEnumerable<Idea> GetInspirations()
+        public IEnumerable<AIdea> GetInspirations()
         {
             return _ideas;
         }
 
-        public void AddIdea(Idea idea)
+        public void AddIdea(AIdea idea)
         {
             // Prevent adding duplicate ideas, if we later decide ideas can be shared
             if (!_ideas.Any(i => i.Id == idea.Id))

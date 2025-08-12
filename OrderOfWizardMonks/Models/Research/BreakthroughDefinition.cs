@@ -1,7 +1,7 @@
 ﻿using System;
 
 
-namespace WizardMonks.Models.Theory
+namespace WizardMonks.Models.Research
 {
     public class BreakthroughDefinition
     {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Beliefs;
-using WizardMonks.Models.Theory;
+using WizardMonks.Models.Ideas;
+using WizardMonks.Models.Research;
 
 namespace WizardMonks.Models.Books
 {
@@ -16,7 +17,7 @@ namespace WizardMonks.Models.Books
                 return Author.Name;
             }
         }
-        public Idea EmbeddedIdea { get; set; }
+        public AIdea EmbeddedIdea { get; set; }
         public BreakthroughDefinition EmbeddedBreakthrough { get; set; }
         public List<Belief> BeliefPayload { get; set; } = [];
     }

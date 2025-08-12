@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Models.Spells;
 
-namespace WizardMonks.Models.Theory
+namespace WizardMonks.Models.Research
 {
     public class HermeticTheory
     {
@@ -14,13 +14,13 @@ namespace WizardMonks.Models.Theory
         {
             get
             {
-                return $"{_lineage}:{MageName}{_version}";
+                return $"{_lineage}:{Mage.Name}{_version}";
             }
         }
 
-        // Core Spell Parameters (What is known to be possible)
+        // Core Spell Parameters
 
-        public string MageName { get; set; }
+        public Magus Mage { get; set; }
         public HashSet<Ranges> KnownRanges { get; private set; }
         public HashSet<Targets> KnownTargets { get; private set; }
         public HashSet<Durations> KnownDurations { get; private set; }

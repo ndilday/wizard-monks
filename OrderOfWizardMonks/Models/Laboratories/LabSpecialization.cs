@@ -1,6 +1,6 @@
 ﻿using WizardMonks.Activities;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Laboratories
 {
     public enum SpecializationStage
     {

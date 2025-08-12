@@ -4,6 +4,7 @@ using System.Linq;
 using WizardMonks.Beliefs;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Books;
 
 namespace WizardMonks
 {

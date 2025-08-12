@@ -1,4 +1,4 @@
-﻿using WizardMonks.Models;
+﻿using WizardMonks.Models.Laboratories;
 
 namespace WizardMonks.Activities.MageActivities
 {

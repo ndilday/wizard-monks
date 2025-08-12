@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Activities;
-using WizardMonks.Models;
+using WizardMonks.Models.Laboratories;
 
 namespace WizardMonks.Instances
 {

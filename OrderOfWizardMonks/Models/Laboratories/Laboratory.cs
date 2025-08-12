@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Instances;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Laboratories
 {
     public class Laboratory : LabFeature
     {
@@ -45,11 +45,11 @@ namespace WizardMonks.Models
                 totalModifier += ActivityModifiers[activity];
             }
             totalModifier += _aura.Strength;
-            if (this.Specialization != null)
+            if (Specialization != null)
             {
-                var currentSpecialization = this.Specialization.GetCurrentBonuses();
+                var currentSpecialization = Specialization.GetCurrentBonuses();
                 totalModifier -= currentSpecialization.Quality;
-                if(artPair.Technique == this.Specialization.ArtTopic || artPair.Form == this.Specialization.ArtTopic || activity == this.Specialization.ActivityTopic)
+                if(artPair.Technique == Specialization.ArtTopic || artPair.Form == Specialization.ArtTopic || activity == Specialization.ActivityTopic)
                 {
                     totalModifier += currentSpecialization.Bonus;
                 }
@@ -84,19 +84,19 @@ namespace WizardMonks.Models
                 AddFeatureStats(feature);
                 if (feature.ArtModifier != null)
                 {
-                    if(!this.ArtModifiers.ContainsKey(feature.ArtModifier.Item1))
+                    if(!ArtModifiers.ContainsKey(feature.ArtModifier.Item1))
                     {
-                        this.ArtModifiers[feature.ArtModifier.Item1] = 0;
+                        ArtModifiers[feature.ArtModifier.Item1] = 0;
                     }
-                    this.ArtModifiers[feature.ArtModifier.Item1] += feature.ArtModifier.Item2;
+                    ArtModifiers[feature.ArtModifier.Item1] += feature.ArtModifier.Item2;
                 }
                 if (feature.ActivityModifier != null)
                 {
-                    if (!this.ActivityModifiers.ContainsKey(feature.ActivityModifier.Item1))
+                    if (!ActivityModifiers.ContainsKey(feature.ActivityModifier.Item1))
                     {
-                        this.ActivityModifiers[feature.ActivityModifier.Item1] = 0;
+                        ActivityModifiers[feature.ActivityModifier.Item1] = 0;
                     }
-                    this.ActivityModifiers[feature.ActivityModifier.Item1] += feature.ActivityModifier.Item2;
+                    ActivityModifiers[feature.ActivityModifier.Item1] += feature.ActivityModifier.Item2;
                 }
             }
         }
@@ -118,11 +118,11 @@ namespace WizardMonks.Models
                 SubtractFeatureStats(feature);
                 if (feature.ArtModifier != null)
                 {
-                    this.ArtModifiers[feature.ArtModifier.Item1] -= feature.ArtModifier.Item2;
+                    ArtModifiers[feature.ArtModifier.Item1] -= feature.ArtModifier.Item2;
                 }
                 if (feature.ActivityModifier != null)
                 {
-                    this.ActivityModifiers[feature.ActivityModifier.Item1] -= feature.ActivityModifier.Item2;
+                    ActivityModifiers[feature.ActivityModifier.Item1] -= feature.ActivityModifier.Item2;
                 }
             }
         }
@@ -142,7 +142,7 @@ namespace WizardMonks.Models
             {
                 // check prereqs
                 var prereqs = Specialization.GetPrerequisitesForNextStage();
-                if(prereqs.MagicTheory > this._owner.GetAbility(Abilities.MagicTheory).Value)
+                if(prereqs.MagicTheory > _owner.GetAbility(Abilities.MagicTheory).Value)
                 {
                     throw new InvalidOperationException($"{_owner.Name} does not have enough Magic Theory for this lab specialization, needs {prereqs.MagicTheory}");
                 }
@@ -160,7 +160,7 @@ namespace WizardMonks.Models
             if (Specialization != null && Specialization.ActivityTopic == activity)
             {
                 var prereqs = Specialization.GetPrerequisitesForNextStage();
-                if(prereqs.MagicTheory > this._owner.GetAbility(Abilities.MagicTheory).Value)
+                if(prereqs.MagicTheory > _owner.GetAbility(Abilities.MagicTheory).Value)
                 {
                     throw new InvalidOperationException($"{_owner.Name} does not have enough Magic Theory for this lab specialization, needs {prereqs.MagicTheory}");
                 }

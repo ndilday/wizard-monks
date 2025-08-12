@@ -3,23 +3,8 @@ using System.Collections.Generic;
 using WizardMonks.Beliefs;
 using WizardMonks.Instances;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Books
 {
-    [Serializable]
-    public abstract class AWritable
-    {
-        public Character Author { get; set; }
-        public string AuthorName
-        {
-            get
-            {
-                return Author.Name;
-            }
-        }
-        public Idea EmbeddedIdea { get; set; }
-        public List<Belief> BeliefPayload { get; set; } = [];
-    }
-
     [Serializable]
     public abstract class ABook : AWritable
     {
@@ -100,12 +85,5 @@ namespace WizardMonks.Models
         {
             return Author.GetHashCode() ^ Quality.GetHashCode() ^ Title.GetHashCode() ^ Topic.GetHashCode();
         }
-    }
-
-    public class EvaluatedBook
-    {
-        public ABook Book { get; set; }
-        public double PerceivedValue { get; set; }
-        public Ability ExposureAbility { get; set; }
     }
 }

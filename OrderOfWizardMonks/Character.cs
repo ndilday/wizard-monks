@@ -8,6 +8,7 @@ using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Books;
 
 namespace WizardMonks
 {

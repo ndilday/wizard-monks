@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Models.Spells;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Theory
 {
     public class HermeticTheory
     {
@@ -63,15 +63,15 @@ namespace WizardMonks.Models
         public HermeticTheory CloneTheory()
         {
             HermeticTheory newTheory = new(Lineage);
-            newTheory.KnownRanges = new(this.KnownRanges);
-            newTheory.KnownTargets = new(this.KnownTargets);
-            newTheory.KnownDurations = new(this.KnownDurations);
-            newTheory.KnownSpellBases = new(this.KnownSpellBases);
-            newTheory.KnownLabActivities = new(this.KnownLabActivities);
-            newTheory.KnownHermeticAbilities = new(this.KnownHermeticAbilities);
-            newTheory.RitualMagicIntegrated = this.RitualMagicIntegrated;
-            newTheory.SpontaneousMagicMultiplier = this.SpontaneousMagicMultiplier;
-            newTheory.ArcaneConnectionsIntegrated = this.ArcaneConnectionsIntegrated;
+            newTheory.KnownRanges = new(KnownRanges);
+            newTheory.KnownTargets = new(KnownTargets);
+            newTheory.KnownDurations = new(KnownDurations);
+            newTheory.KnownSpellBases = new(KnownSpellBases);
+            newTheory.KnownLabActivities = new(KnownLabActivities);
+            newTheory.KnownHermeticAbilities = new(KnownHermeticAbilities);
+            newTheory.RitualMagicIntegrated = RitualMagicIntegrated;
+            newTheory.SpontaneousMagicMultiplier = SpontaneousMagicMultiplier;
+            newTheory.ArcaneConnectionsIntegrated = ArcaneConnectionsIntegrated;
 
             return newTheory;
         }

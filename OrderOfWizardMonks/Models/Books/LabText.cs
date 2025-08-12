@@ -1,6 +1,6 @@
 ﻿using WizardMonks.Models.Spells;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Books
 {
     public class LabText : AWritable
     {

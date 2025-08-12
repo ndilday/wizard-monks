@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using WizardMonks.Activities;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Laboratories
 {
     public class LabFeature
     {

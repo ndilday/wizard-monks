@@ -3,6 +3,7 @@ using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

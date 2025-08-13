@@ -4,6 +4,7 @@ using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

@@ -168,7 +168,7 @@ namespace WizardMonks.Models.Characters
             {
                 return base.RateSeasonalExperienceGain(ability, gain);
             }
-            double baseDistillVisRate = GetVisDistillationRate();
+            double baseDistillVisRate = this.GetVisDistillationRate();
             double distillVisRate = baseDistillVisRate;
             if (MagicArts.IsTechnique(ability))
             {
@@ -202,7 +202,7 @@ namespace WizardMonks.Models.Characters
         protected IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(IEnumerable<ABook> books)
         {
             List<BookForTrade> list = new();
-            double distillRate = GetVisDistillationRate();
+            double distillRate = this.GetVisDistillationRate();
             foreach (ABook book in books)
             {
                 if (book.Level == 1000)
@@ -226,7 +226,7 @@ namespace WizardMonks.Models.Characters
         protected IEnumerable<LabTextForTrade> EvaluateLabTextValuesAsSeller(IEnumerable<LabText> labTexts)
         {
             List<LabTextForTrade> list = [];
-            double distillRate = GetVisDistillationRate();
+            double distillRate = this.GetVisDistillationRate();
             foreach (LabText labText in labTexts)
             {
                 if (labText.IsShorthand)
@@ -350,7 +350,7 @@ namespace WizardMonks.Models.Characters
                     var offer = bestOffers.First();
                     VisDesire mostDesired = _tradeDesires.VisDesires[offer.Ask.Art.AbilityId % 300];
                     VisDesire mostOverstocked = _tradeDesires.VisDesires[offer.Bid.Art.AbilityId % 300];
-                    if (GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
+                    if (this.GetVisCount(offer.Bid.Art) >= offer.Bid.Quantity && offer.Mage.GetVisCount(offer.Ask.Art) >= offer.Ask.Quantity)
                     {
                         Log.Add("Executing vis trade with " + offer.Mage.Name);
                         Log.Add("Trading " + offer.Bid.Quantity.ToString("0.000") + " pawns of " + offer.Bid.Art.AbilityName + " vis");
@@ -361,10 +361,10 @@ namespace WizardMonks.Models.Characters
                         
                         offer.Execute();
                         internalOffers = internalOffers.Where(o => o != offer);
-                        GainVis(offer.Ask.Art, offer.Ask.Quantity);
+                        this.GainVis(offer.Ask.Art, offer.Ask.Quantity);
                         mostDesired.Quantity -= offer.Ask.Quantity;
                         internalOffers = internalOffers.Where(o => o.Ask.Art != mostDesired.Art || o.Ask.Quantity <= mostDesired.Quantity);
-                        UseVis(offer.Bid.Art, offer.Bid.Quantity);
+                        this.UseVis(offer.Bid.Art, offer.Bid.Quantity);
                         mostOverstocked.Quantity += offer.Bid.Quantity;
                         internalOffers = internalOffers.Where(o => o.Bid.Art != mostOverstocked.Art || o.Bid.Quantity <= Math.Abs(mostOverstocked.Quantity));
                     }
@@ -396,7 +396,7 @@ namespace WizardMonks.Models.Characters
                     sellOffer.TradingPartner.AddBookToCollection(sellOffer.BookDesired);
                     RemoveBookFromCollection(sellOffer.BookDesired); // Seller removes from own inventory.
                     sellOffer.TradingPartner.UseVis(sellOffer.VisOffers);
-                    GainVis(sellOffer.VisOffers);
+                    this.GainVis(sellOffer.VisOffers);
                 }
                 // This logic had a bug. If the 'if' fails, the loop becomes infinite.
                 // It must be moved outside the 'if' block.
@@ -471,7 +471,7 @@ namespace WizardMonks.Models.Characters
 
                     // Transfer vis:
                     sellOffer.TradingPartner.UseVis(sellOffer.VisOffers); // Buyer spends vis.
-                    GainVis(sellOffer.VisOffers); // Seller gains vis.
+                    this.GainVis(sellOffer.VisOffers); // Seller gains vis.
 
                     // Remove this specific offer and any other offers that involve the now-sold lab text.
                     sortedOffers = sortedOffers.Where(o => o.LabTextDesired != sellOffer.LabTextDesired).ToList();
@@ -508,136 +508,6 @@ namespace WizardMonks.Models.Characters
                     offer.Mage.LabTextsOwned.Remove(offer.LabTextDesired);
                 }
             }
-        }
-        #endregion
-
-        #region Magic Functions
-        public double GetCastingTotal(ArtPair artPair)
-        {
-            double techValue = Arts.GetAbility(artPair.Technique).Value;
-            double formValue = Arts.GetAbility(artPair.Form).Value;
-            return techValue + formValue + GetAttribute(AttributeType.Stamina).Value;
-        }
-
-        public Spell GetBestSpell(SpellBase spellBase)
-        {
-            return SpellList.Where(s => s.Base == spellBase).OrderByDescending(s => s.Level).FirstOrDefault();
-        }
-
-        public double GetSpontaneousCastingTotal(ArtPair artPair)
-        {
-            // TODO: make the Diedne hack better
-            double divisor = Name == "Diedne" ? 2.0 : 5.0;
-            return GetCastingTotal(artPair) / divisor;
-        }
-
-        public double GetVisDistillationRate()
-        {
-            // TODO: One day, we'll make this more complicated
-            return this.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
-        }
-
-        public double GetAverageAuraFound()
-        {
-            double auraCount = KnownAuras.Count;
-            double areaLore = GetAbility(Abilities.AreaLore).Value;
-            areaLore += GetCastingTotal(MagicArtPairs.InVi) / 10;
-            areaLore += GetAttribute(AttributeType.Perception).Value;
-
-            double minRoll = (auraCount + 1) / areaLore;
-            double multiplier = Math.Sqrt(areaLore / (auraCount + 1)) * 2 / 3;
-            double areaUnder = (11.180339887498948482045868343656 - Math.Pow(minRoll, 1.5)) * multiplier;
-            return areaUnder / 5;
-        }
-
-        protected void CheckTwilight()
-        {
-        }
-
-        public double GetVisCount(Ability visArt)
-        {
-            double total = 0;
-            if (Covenant != null)
-            {
-                total += Covenant.GetVis(visArt);
-            }
-            if(VisStock.ContainsKey(visArt))
-            {
-                total += VisStock[visArt];
-            }
-            return total;
-        }
-
-        public double UseVis(Ability visType, double amount)
-        {
-            if (!MagicArts.IsArt(visType))
-            {
-                throw new ArgumentException("Only magic arts have vis!");
-            }
-            if (VisStock[visType] + (Covenant == null ? 0 : Covenant.GetVis(visType)) < amount)
-            {
-                throw new ArgumentException("Insufficient vis available!");
-            }
-            double covVis = Covenant == null ? 0 : Covenant.GetVis(visType);
-            if (covVis >= amount)
-            {
-                Covenant.RemoveVis(visType, amount);
-            }
-            else
-            {
-                if (Covenant != null)
-                {
-                    amount -= covVis;
-                    Covenant.RemoveVis(visType, covVis);
-                }
-                VisStock[visType] -= amount;
-            }
-            return VisStock[visType];
-        }
-
-        public void UseVis(List<VisOffer> visOffers)
-        {
-            foreach(VisOffer offer in visOffers)
-            {
-                UseVis(offer.Art, offer.Quantity);
-            }
-        }
-
-        public double GainVis(Ability visType, double amount)
-        {
-            if (!MagicArts.IsArt(visType))
-            {
-                throw new ArgumentException("Only magic arts have vis!");
-            }
-            if (VisStock.ContainsKey(visType))
-            {
-                VisStock[visType] += amount;
-            }
-            else
-            {
-                VisStock[visType] = amount;
-            }
-            return VisStock[visType];
-        }
-
-        public void GainVis(List<VisOffer> visOffers)
-        {
-            foreach(VisOffer offer in visOffers)
-            {
-                GainVis(offer.Art, offer.Quantity);
-            }
-        }
-        
-        private bool HasSufficientVis(List<VisOffer> visOffers)
-        {
-            foreach(VisOffer offer in visOffers)
-            {
-                if(GetVisCount(offer.Art) < offer.Quantity)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
         #endregion
 

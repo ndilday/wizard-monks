@@ -64,21 +64,12 @@ namespace WizardMonks.Models.Characters
         private uint _baseAge;
         protected Ability _writingAbility;
         protected Ability _areaAbility;
-        protected List<IGoal> _goals;
-        protected Desires _desires;
-        protected List<string> _verboseLog;
 
         private readonly string[] _virtueList = new string[10];
 		private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityMap;
         protected readonly List<IActivity> _seasonList;
-        public HashSet<CharacterAbilityBase> WritableTopicsCache { get; private set; }
-        public bool IsWritableTopicsCacheClean { get; set; }
-
-        protected IActivity _mandatoryAction;
-
-        
         #endregion
 
         #region Events
@@ -92,6 +83,8 @@ namespace WizardMonks.Models.Characters
         public ushort LongevityRitual { get; set; }
         public byte Decrepitude { get; set; }
         public CharacterAbility Warping { get; private set; }
+        public List<IGoal> Goals { get; private set; }
+        public Desires Desires { get; set; }
         public IList<Aura> KnownAuras { get; private set; }
         public string Name { get; set; }
         public Ability WritingLanguage { get; private set; }
@@ -104,10 +97,15 @@ namespace WizardMonks.Models.Characters
         public List<Summa> IncompleteBooks { get; private set; }
         public Dictionary<Guid, BeliefProfile> Beliefs { get; private set; }
         public Dictionary<string, double> ReputationFocuses { get; private set; }
-        public Season CurrentSeason { get; private set; }
+        public Season CurrentSeason { get; set; }
         public List<string> Log { get; private set; }
         public ABook BestBookCache { get; set; }
         public bool IsBestBookCacheClean { get; set; }
+        public HashSet<CharacterAbilityBase> WritableTopicsCache { get; private set; }
+        public bool IsWritableTopicsCacheClean { get; set; }
+        public bool IsCollaborating { get; set; }
+        public bool WantsToFollow { get; set; }
+        public IActivity MandatoryAction { get; set; }
 
         public IEnumerable<ABook> ReadableBooks
         {
@@ -117,8 +115,6 @@ namespace WizardMonks.Models.Characters
                     (!BooksRead.Contains(b) || (b.Level != 1000 && b.Level > GetAbility(b.Topic).Value)));
             }
         }
-        public bool IsCollaborating { get; private set; }
-        public bool WantsToFollow { get; protected set; }
         #endregion
 
         public Character(Ability writingLanguage, Ability writingAbility, Ability areaAbility, uint baseSeasonableAge = 20, Personality personality = null, Dictionary<string, double> reputationFocuses = null)
@@ -142,14 +138,13 @@ namespace WizardMonks.Models.Characters
 
             NoAgingSeasons = 0;
             _baseAge = baseSeasonableAge;
-            _mandatoryAction = null;
+            MandatoryAction = null;
 
             _abilityMap = new Dictionary<int, CharacterAbilityBase>();
             _seasonList = new List<IActivity>();
             BooksRead = new HashSet<ABook>();
             BooksWritten = new List<ABook>();
             Books = new List<ABook>();
-            _verboseLog = new List<string>();
             IsWritableTopicsCacheClean = false;
 
             _areaAbility = areaAbility;
@@ -160,7 +155,7 @@ namespace WizardMonks.Models.Characters
             WritingAbilities = [_writingAbility, WritingLanguage];
 
             IncompleteBooks = new List<Summa>();
-            _goals = new List<IGoal>();
+            Goals = new List<IGoal>();
             Log = new List<string>();
             Warping = new CharacterAbility(Abilities.Warping);
             Personality = personality ?? new Personality();
@@ -192,6 +187,16 @@ namespace WizardMonks.Models.Characters
             get { return SeasonalAge - NoAgingSeasons; }
         }
 
+        public void AddSeasonActivity(IActivity activity)
+        {
+            _seasonList.Add(activity);
+        }
+
+        public int GetSeasonActivityLength()
+        {
+            return _seasonList.Count;
+        }
+
         #region Ability Functions
         public virtual CharacterAbilityBase GetAbility(Ability ability)
         {
@@ -219,128 +224,6 @@ namespace WizardMonks.Models.Characters
             {
                 _abilityMap.Add(ability.AbilityId, new CharacterAbility(ability));
             }
-        }
-
-        #endregion
-
-        #region Seasonal Functions
-
-        IActivity DecideSeasonalActivity()
-        {
-            _desires = new Desires();
-            if (IsCollaborating)
-            {
-                return _mandatoryAction;
-            }
-            else
-            {
-                ConsideredActions actions = new();
-                _verboseLog.Add("----------");
-                foreach (IGoal goal in _goals)
-                {
-                    if (!goal.IsComplete())
-                    {
-                        //List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, _desires, _verboseLog);
-                    }
-                }
-                Log.AddRange(actions.Log());
-                return actions.GetBestAction();
-            }
-        }
-
-       public virtual void ReprioritizeGoals()
-       {
-           foreach (IGoal goal in _goals.ToList())
-           {
-               if (!goal.IsComplete())
-               {
-                   if (goal.AgeToCompleteBy < SeasonalAge)
-                   {
-                       Log.Add("Failed to achieve a goal");
-                       _goals.Remove(goal);
-                   }
-               }
-           }
-       }
-
-        public virtual void CommitAction(IActivity action)
-        {
-            _seasonList.Add(action);
-            action.Act(this);
-            if (SeasonalAge >= 140)
-            {
-                this.Age(LongevityRitual);
-            }
-        }
-
-        public virtual IActivity Advance()
-        {
-            IActivity activity = null;
-            if (!IsCollaborating)
-            {
-                Log.Add("");
-                Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
-                activity = DecideSeasonalActivity();
-                _seasonList.Add(activity);
-                activity.Act(this);
-                if (SeasonalAge >= 140)
-                {
-                    this.Age(LongevityRitual);
-                }
-                switch (CurrentSeason)
-                {
-                    case Season.Spring:
-                        CurrentSeason = Season.Summer;
-                        break;
-                    case Season.Summer:
-                        CurrentSeason = Season.Autumn;
-                        break;
-                    case Season.Autumn:
-                        CurrentSeason = Season.Winter;
-                        break;
-                    case Season.Winter:
-                        CurrentSeason = Season.Spring;
-                        break;
-                }
-            }
-            IsCollaborating = false;
-            ReprioritizeGoals();
-            return activity;
-        }
-
-        internal virtual void Advance(IActivity activity)
-        {
-            Log.Add("");
-            Log.Add(CurrentSeason.ToString() + " " + _seasonList.Count() / 4);
-            _seasonList.Add(activity);
-            activity.Act(this);
-            if (SeasonalAge >= 140)
-            {
-                this.Age(LongevityRitual);
-            }
-            switch (CurrentSeason)
-            {
-                case Season.Spring:
-                    CurrentSeason = Season.Summer;
-                    break;
-                case Season.Summer:
-                    CurrentSeason = Season.Autumn;
-                    break;
-                case Season.Autumn:
-                    CurrentSeason = Season.Winter;
-                    break;
-                case Season.Winter:
-                    CurrentSeason = Season.Spring;
-                    break;
-            }
-            IsCollaborating = true;
-        }
-
-        public virtual void PlanToBeTaught()
-        {
-            IsCollaborating = true;
-            //_mandatoryAction =
         }
         #endregion
 
@@ -375,7 +258,7 @@ namespace WizardMonks.Models.Characters
 
         public void AddGoal(IGoal goal)
         {
-            _goals.Add(goal);
+            Goals.Add(goal);
         }
         #endregion
 

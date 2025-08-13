@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using WizardMonks.Activities;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
@@ -77,8 +76,6 @@ namespace WizardMonks.Models.Characters
             LabTextsOwned = [];
             DecipheredShorthandLevels = [];
             ShorthandTranslationProgress = [];
-            //_tractatusGoals = new List<TractatusGoal>();
-            //_summaGoals = new List<SummaGoal>();
             PartialSpell = null;
             PartialSpellProgress = 0;
             _ideas = [];
@@ -94,7 +91,7 @@ namespace WizardMonks.Models.Characters
 
         private void InitializeGoals()
         {
-            _goals.Add(new AvoidDecrepitudeGoal(this, 1.0));
+            Goals.Add(new AvoidDecrepitudeGoal(this, 1.0));
         }
         #endregion
 
@@ -147,7 +144,7 @@ namespace WizardMonks.Models.Characters
                 Log.Add($"Gained a new idea: {idea.Description}");
 
                 // Add a new goal to pursue this inspiration
-                _goals.Add(new PursueIdeaGoal(this, idea));
+                Goals.Add(new PursueIdeaGoal(this, idea));
             }
         }
         #endregion
@@ -249,10 +246,10 @@ namespace WizardMonks.Models.Characters
             UpdateVisDesiresWithStock();
             _tradeDesires = new MagusTradingDesires(
                 this,
-                _desires.VisDesires,
-                _desires.BookDesires,
+                Desires.VisDesires,
+                Desires.BookDesires,
                 EvaluateBookValuesAsSeller(this.GetUnneededBooksFromCollection()),
-                _desires.LabTextDesires,
+                Desires.LabTextDesires,
                 EvaluateLabTextValuesAsSeller(this.GetUnneededLabTextsFromCollection())
             );
             if (_tradeDesires == null)
@@ -264,7 +261,7 @@ namespace WizardMonks.Models.Characters
 
         private void UpdateVisDesiresWithStock()
         {
-            foreach (VisDesire visDesire in _desires.VisDesires)
+            foreach (VisDesire visDesire in Desires.VisDesires)
             {
                 if (VisStock.ContainsKey(visDesire.Art))
                 {
@@ -521,45 +518,16 @@ namespace WizardMonks.Models.Characters
             {
                 uint dueDate = (uint)(i * 4);
                 IGoal teachingGoal = new TeachApprenticeGoal(this, SeasonalAge + i - 1, 1);
-                _goals.Add(teachingGoal);
+                Goals.Add(teachingGoal);
             }
             IGoal gauntletGoal = new GauntletApprenticeGoal(this, SeasonalAge + 60, 1);
-            _goals.Add(gauntletGoal);
+            Goals.Add(gauntletGoal);
         }
 
         public void GauntletApprentice()
         {
             Apprentice.House = House;
             Apprentice = null;
-        }
-        #endregion
-
-        #region Seasonal Functions
-        public override IActivity Advance()
-        {
-            IsBestBookCacheClean = false;
-            // harvest vis
-            foreach (Aura aura in KnownAuras)
-            {
-                foreach (VisSource source in aura.VisSources)
-                {
-                    if ((CurrentSeason & source.Seasons) == CurrentSeason)
-                    {
-                        VisStock[source.Art] += source.Amount;
-                    }
-                }
-            }
-            Log.Add("VIS STOCK");
-            foreach(Ability art in MagicArts.GetEnumerator())
-            {
-                if(VisStock[art] > 0)
-                {
-                    Log.Add(art.AbilityName + ": " + VisStock[art].ToString("0.00"));
-                }
-            }
-            IActivity activity = base.Advance();
-            IdeaManager.CheckForIdea(this, activity);
-            return activity;
         }
         #endregion
 

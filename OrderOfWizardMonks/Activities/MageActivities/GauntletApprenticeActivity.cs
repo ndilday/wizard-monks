@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models.Characters;
+
 namespace WizardMonks.Activities.MageActivities
 {
     public class GauntletApprentice(Ability exposure, double desire) : AExposingMageActivity(exposure, desire)

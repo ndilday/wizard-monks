@@ -1,4 +1,6 @@
-﻿namespace WizardMonks.Economy
+﻿using WizardMonks.Models.Characters;
+
+namespace WizardMonks.Economy
 {
     /// <summary>
     /// Container used in vis trades. Negative Quantities represent vis available to trade away

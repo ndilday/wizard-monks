@@ -2,7 +2,7 @@
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

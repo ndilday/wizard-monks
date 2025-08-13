@@ -6,8 +6,8 @@ using WizardMonks.Activities.MageActivities;
 using WizardMonks.Core;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
-using WizardMonks.Models;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Decisions.Conditions.Helpers

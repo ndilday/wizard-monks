@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WizardMonks.Beliefs
+namespace WizardMonks.Models.Beliefs
 {
     public class BeliefTopic
     {

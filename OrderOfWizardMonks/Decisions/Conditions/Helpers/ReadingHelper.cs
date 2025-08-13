@@ -3,7 +3,7 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

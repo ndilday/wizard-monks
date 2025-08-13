@@ -1,5 +1,4 @@
-﻿
-namespace WizardMonks.Beliefs
+﻿namespace WizardMonks.Models.Beliefs
 {
     public class Belief
     {

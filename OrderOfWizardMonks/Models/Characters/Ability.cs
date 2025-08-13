@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Runtime.Serialization;
-
 using WizardMonks.Core;
 using WizardMonks.Instances;
 
-namespace WizardMonks
+namespace WizardMonks.Models.Characters
 {
 	[DataContract]
 	public enum AbilityType
@@ -183,22 +182,22 @@ namespace WizardMonks
 
         public virtual void AddExperience(double amount)
         {
-            this.Experience += amount;
+            Experience += amount;
         }
 
         public virtual void AddExperience(double amount, double levelLimit = 0)
         {
-            double prevExperience = this.Experience;
+            double prevExperience = Experience;
             if (levelLimit == 0)
             {
-                this.Experience += amount;
+                Experience += amount;
             }
             else
             {
-                double experienceToLevel = this.GetExperienceUntilLevel(levelLimit);
-                this.Experience += experienceToLevel < amount ? experienceToLevel : amount;
+                double experienceToLevel = GetExperienceUntilLevel(levelLimit);
+                Experience += experienceToLevel < amount ? experienceToLevel : amount;
             }
-            if (prevExperience != this.Experience)
+            if (prevExperience != Experience)
             {
                 _cached = false;
                 OnChanged(new EventArgs());
@@ -213,11 +212,11 @@ namespace WizardMonks
     {
         public override CharacterAbilityBase MakeCopy()
         {
-            CharacterAbility retVal = new(this.Ability)
+            CharacterAbility retVal = new(Ability)
             {
-                Experience = this.Experience,
-                IsAffinity = this.IsAffinity,
-                IsPuissant = this.IsPuissant
+                Experience = Experience,
+                IsAffinity = IsAffinity,
+                IsPuissant = IsPuissant
             };
             return retVal;
         }
@@ -228,8 +227,8 @@ namespace WizardMonks
             {
                 return _value;
             }
-			double x = this.Experience;
-			if (this.IsAffinity)
+			double x = Experience;
+			if (IsAffinity)
 			{
 				x *= 1.5;
 			}
@@ -238,7 +237,7 @@ namespace WizardMonks
 			x += .25;
 			x = Math.Sqrt(x);
 			x -= .5;
-			if (this.IsPuissant)
+			if (IsPuissant)
 			{
 				x += 2;
 			}
@@ -249,7 +248,7 @@ namespace WizardMonks
         public override double GetExperienceUntilLevel(double level)
         {
             double totalExperience = level * (level + 1) * 5 / 2;
-            return totalExperience - this.Experience;
+            return totalExperience - Experience;
         }
 
         public override int GetTractatiiLimit()
@@ -264,19 +263,19 @@ namespace WizardMonks
     {
         public override CharacterAbilityBase MakeCopy()
         {
-            AcceleratedAbility retVal = new(this.Ability)
+            AcceleratedAbility retVal = new(Ability)
             {
-                Experience = this.Experience,
-                IsAffinity = this.IsAffinity,
-                IsPuissant = this.IsPuissant
+                Experience = Experience,
+                IsAffinity = IsAffinity,
+                IsPuissant = IsPuissant
             };
             return retVal;
         }
 
         protected override double GetValueHelper()
         {
-            double x = this.Experience;
-            if (this.IsAffinity)
+            double x = Experience;
+            if (IsAffinity)
             {
                 x *= 1.5;
             }
@@ -285,7 +284,7 @@ namespace WizardMonks
             x += .25;
             x = Math.Sqrt(x);
             x -= .5;
-            if (this.IsPuissant)
+            if (IsPuissant)
             {
                 x += 2;
             }
@@ -296,7 +295,7 @@ namespace WizardMonks
         public override double GetExperienceUntilLevel(double level)
         {
             double totalExperience = level * (level + 1) / 2;
-            return totalExperience - this.Experience;
+            return totalExperience - Experience;
         }
 
         public override int GetTractatiiLimit()

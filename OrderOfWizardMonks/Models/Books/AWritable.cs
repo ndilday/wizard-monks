@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using WizardMonks.Beliefs;
+using WizardMonks.Models.Beliefs;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Research;
 

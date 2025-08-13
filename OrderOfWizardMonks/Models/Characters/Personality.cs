@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using WizardMonks.Core;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Characters
 {
     public enum HexacoFactor
     {
@@ -78,7 +78,7 @@ namespace WizardMonks.Models
                 double standardNormalValue = Die.Instance.RollNormal();
 
                 // Scale and shift it to our desired mean and standard deviation
-                double generatedValue = MEAN + (standardNormalValue * STANDARD_DEVIATION);
+                double generatedValue = MEAN + standardNormalValue * STANDARD_DEVIATION;
 
                 // Clamp the result to our desired range [0.001, 2.0]
                 _facets[facet] = Math.Max(MIN_VALUE, Math.Min(MAX_VALUE, generatedValue));
@@ -131,14 +131,14 @@ namespace WizardMonks.Models
         {
             // Center the score around 0 (range becomes -1.0 to +1.0)
             double centeredScore = _facets[facet] - 1.0;
-            return 1.0 + (centeredScore * 0.5);
+            return 1.0 + centeredScore * 0.5;
         }
 
         public double GetInverseDesireMultiplier(HexacoFacet facet)
         {
             // Center the score around 0(range becomes - 1.0 to + 1.0)
             double centeredScore = (_facets[facet] - 1.0) * -1.0;
-            return 1.0 + (centeredScore * 0.5);
+            return 1.0 + centeredScore * 0.5;
         }
         #endregion
 

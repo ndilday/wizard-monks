@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
-using WizardMonks.Beliefs;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
 using WizardMonks.Models.Spells;
 
-namespace WizardMonks
+namespace WizardMonks.Models.Characters
 {
     public class TwilightEventArgs : EventArgs
     {
@@ -202,7 +201,7 @@ namespace WizardMonks
                     double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
 
                     // Calculate Total Value, modulated by personality
-                    double totalValue = economicValue + (prestigeValue * prestigeMotivation);
+                    double totalValue = economicValue + prestigeValue * prestigeMotivation;
 
                     if (totalValue > currentBestBookValue)
                     {
@@ -232,7 +231,7 @@ namespace WizardMonks
                     double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
 
                     // Calculate Total Value, modulated by personality
-                    double totalValue = economicValue + (prestigeValue * prestigeMotivation);
+                    double totalValue = economicValue + prestigeValue * prestigeMotivation;
 
                     if (totalValue > currentBestBookValue)
                     {
@@ -298,7 +297,7 @@ namespace WizardMonks
             foreach(LabText labText in _labTextsOwned)
             {
                 bool unneeded = false;
-                foreach(Spell spell in this.SpellList)
+                foreach(Spell spell in SpellList)
                 {
                     // if the mage already knows the spell, the lab text is unneeded
                     if (spell == labText.SpellContained)
@@ -331,13 +330,13 @@ namespace WizardMonks
         public double RateLifetimeLabTextValue(LabText labText)
         {
             // If we already know this spell or a better version of it, the text has no value.
-            if (this.SpellList.Any(s => s.Base == labText.SpellContained.Base && s.Level >= labText.SpellContained.Level))
+            if (SpellList.Any(s => s.Base == labText.SpellContained.Base && s.Level >= labText.SpellContained.Level))
             {
                 return 0;
             }
 
             // To learn from a lab text, the magus's Lab Total must be greater than the spell's level.
-            double labTotal = this.GetSpellLabTotal(labText.SpellContained);
+            double labTotal = GetSpellLabTotal(labText.SpellContained);
             if (labTotal < labText.SpellContained.Level)
             {
                 return 0;
@@ -380,7 +379,7 @@ namespace WizardMonks
 
             // The value of a saved season is equivalent to the amount of Vim vis that could be distilled in that time.
             // This serves as our universal "opportunity cost" currency for the AI.
-            double visDistilledPerSeason = this.GetVisDistillationRate();
+            double visDistilledPerSeason = GetVisDistillationRate();
             double visValue = seasonsSaved * visDistilledPerSeason;
 
             return visValue;
@@ -502,7 +501,7 @@ namespace WizardMonks
             }
 
             CharacterAbilityBase charAbility = GetAbility(ability);
-            double visUsedPerStudySeason = 0.5 + ((charAbility.Value + (charAbility.GetValueGain(gain)/2)) / 10.0);
+            double visUsedPerStudySeason = 0.5 + (charAbility.Value + charAbility.GetValueGain(gain)/2) / 10.0;
             // the gain per season depends on how the character views vis
             double studySeasons = gain / VisStudyRate;
             double visNeeded = studySeasons * visUsedPerStudySeason;
@@ -517,7 +516,7 @@ namespace WizardMonks
             CharacterAbilityBase vim = GetAbility(MagicArts.Vim);
             CharacterAbilityBase creo = GetAbility(MagicArts.Creo);
             CharacterAbilityBase exposureAbility = creo.Value < vim.Value ? creo : vim;
-            double visValueOfExposure = 0.5 + ((exposureAbility.Value + (exposureAbility.GetValueGain(exposureGained)/2)) / 10.0) * exposureSeasonsOfVis;
+            double visValueOfExposure = 0.5 + (exposureAbility.Value + exposureAbility.GetValueGain(exposureGained)/2) / 10.0 * exposureSeasonsOfVis;
             return totalVisEquivalent - visValueOfExposure;
         }
 
@@ -807,7 +806,7 @@ namespace WizardMonks
                 {
                     // Execute the trade:
                     Log.Add($"Selling Lab Text for '{sellOffer.LabTextDesired.SpellContained.Name}' to {sellOffer.TradingPartner.Name} for {sellOffer.VisValue:0.00} vis value.");
-                    sellOffer.TradingPartner.Log.Add($"Buying Lab Text for '{sellOffer.LabTextDesired.SpellContained.Name}' from {this.Name}.");
+                    sellOffer.TradingPartner.Log.Add($"Buying Lab Text for '{sellOffer.LabTextDesired.SpellContained.Name}' from {Name}.");
 
                     // Transfer ownership of the lab text:
                     sellOffer.TradingPartner.AddLabTextToCollection(sellOffer.LabTextDesired);
@@ -831,23 +830,23 @@ namespace WizardMonks
 
         private void ProcessLabTextSwaps(IEnumerable<LabTextTradeOffer> offers)
         {
-            var sortedOffers = offers.OrderBy(o => this.RateLifetimeLabTextValue(o.LabTextDesired));
+            var sortedOffers = offers.OrderBy(o => RateLifetimeLabTextValue(o.LabTextDesired));
 
             foreach (var offer in sortedOffers)
             {
                 // Check if we still need their text and have our text to offer
-                bool needTheirText = !this.GetLabTextsFromCollection(offer.LabTextDesired.SpellContained.Base).Any();
-                bool haveOurText = this.GetLabTextsFromCollection(offer.LabTextOffered.SpellContained.Base).Contains(offer.LabTextOffered);
+                bool needTheirText = !GetLabTextsFromCollection(offer.LabTextDesired.SpellContained.Base).Any();
+                bool haveOurText = GetLabTextsFromCollection(offer.LabTextOffered.SpellContained.Base).Contains(offer.LabTextOffered);
                 bool theyHaveTheirText = offer.Mage.GetLabTextsFromCollection(offer.LabTextDesired.SpellContained.Base).Contains(offer.LabTextDesired);
 
                 if (needTheirText && haveOurText && theyHaveTheirText)
                 {
                     Log.Add($"Swapping Lab Text '{offer.LabTextOffered.SpellContained.Name}' with {offer.Mage.Name} for '{offer.LabTextDesired.SpellContained.Name}'.");
-                    offer.Mage.Log.Add($"Swapping Lab Text '{offer.LabTextDesired.SpellContained.Name}' with {this.Name} for '{offer.LabTextOffered.SpellContained.Name}'.");
+                    offer.Mage.Log.Add($"Swapping Lab Text '{offer.LabTextDesired.SpellContained.Name}' with {Name} for '{offer.LabTextOffered.SpellContained.Name}'.");
 
                     // Execute swap
-                    this.AddLabTextToCollection(offer.LabTextDesired);
-                    this.RemoveLabTextFromCollection(offer.LabTextOffered);
+                    AddLabTextToCollection(offer.LabTextDesired);
+                    RemoveLabTextFromCollection(offer.LabTextOffered);
                     offer.Mage.AddLabTextToCollection(offer.LabTextOffered);
                     offer.Mage.RemoveLabTextFromCollection(offer.LabTextDesired);
                 }
@@ -1157,10 +1156,10 @@ namespace WizardMonks
             for (byte i = 2; i < 16; i++)
             {
                 uint dueDate = (uint)(i * 4);
-                IGoal teachingGoal = new TeachApprenticeGoal(this, this.SeasonalAge + i - 1, 1);
+                IGoal teachingGoal = new TeachApprenticeGoal(this, SeasonalAge + i - 1, 1);
                 _goals.Add(teachingGoal);
             }
-            IGoal gauntletGoal = new GauntletApprenticeGoal(this, this.SeasonalAge + 60, 1);
+            IGoal gauntletGoal = new GauntletApprenticeGoal(this, SeasonalAge + 60, 1);
             _goals.Add(gauntletGoal);
         }
 
@@ -1203,7 +1202,7 @@ namespace WizardMonks
         #region object Overrides
         public override string ToString()
         {
-            return this.Name + " ex " + this.House.ToString();
+            return Name + " ex " + House.ToString();
         }
         #endregion
     }

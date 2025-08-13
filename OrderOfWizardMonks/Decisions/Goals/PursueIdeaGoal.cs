@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Spells;
 

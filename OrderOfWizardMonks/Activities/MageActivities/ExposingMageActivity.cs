@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models.Characters;
+
 namespace WizardMonks.Activities.MageActivities
 {
     public abstract class AExposingMageActivity : AMageActivity

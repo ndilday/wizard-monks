@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
-
-using WizardMonks;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace SkillViewer
 {

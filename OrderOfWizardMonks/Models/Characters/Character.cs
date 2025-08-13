@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
-using WizardMonks.Beliefs;
 using WizardMonks.Core;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 
-namespace WizardMonks
+namespace WizardMonks.Models.Characters
 {
     public class AgingEventArgs : EventArgs
     {
@@ -51,7 +50,7 @@ namespace WizardMonks
             double value = _attributes[(short)attributeType].Value;
             if(SeasonalAge < 60)
             {
-                return value - ((60 - SeasonalAge) / 8.0);
+                return value - (60 - SeasonalAge) / 8.0;
             }
             else
             {
@@ -123,7 +122,7 @@ namespace WizardMonks
             get
             {
                 return _booksOwned.Where(b => b.Author != this && 
-                    ((!_booksRead.Contains(b)) || (b.Level != 1000 && b.Level > this.GetAbility(b.Topic).Value)));
+                    (!_booksRead.Contains(b) || b.Level != 1000 && b.Level > GetAbility(b.Topic).Value));
             }
         }
         public bool IsCollaborating { get; private set; }
@@ -496,12 +495,12 @@ namespace WizardMonks
 
         public virtual IEnumerable<ABook> GetUnneededBooksFromCollection()
         {
-            return _booksOwned.Where(b => b.Author == this || (_booksRead.Contains(b) && b.Level == 1000) || (GetAbility(b.Topic).Value >= b.Level));
+            return _booksOwned.Where(b => b.Author == this || _booksRead.Contains(b) && b.Level == 1000 || GetAbility(b.Topic).Value >= b.Level);
         }
         
         public virtual bool ValidToRead(ABook book)
         {
-            return book.Author != this && (!this._booksRead.Contains(book) || (book.Level != 1000 && GetAbility(book.Topic).Value < book.Level));
+            return book.Author != this && (!_booksRead.Contains(book) || book.Level != 1000 && GetAbility(book.Topic).Value < book.Level);
         }
 
         public virtual double GetBookLevelGain(ABook book)
@@ -557,7 +556,7 @@ namespace WizardMonks
             // Hashset returns false if the item was already in the set
             bool previouslyRead = !_booksRead.Add(book);
             
-            if (!previouslyRead || (book.Level != 1000 && ability.Value < book.Level))
+            if (!previouslyRead || book.Level != 1000 && ability.Value < book.Level)
             {
                 ability.AddExperience(book.Quality, book.Level);
                 if(!previouslyRead)
@@ -613,7 +612,7 @@ namespace WizardMonks
             Tractatus t = new()
             {
                 Author = this,
-                Quality = this.GetAttribute(AttributeType.Communication).Value + 6,
+                Quality = GetAttribute(AttributeType.Communication).Value + 6,
                 Topic = topic,
                 Title = name
             };
@@ -627,7 +626,7 @@ namespace WizardMonks
             {
                 // Add a random personality belief
                 var randomFacet = (HexacoFacet)(Die.Instance.RollDouble() * 24);
-                t.BeliefPayload.Add(new Belief(randomFacet.ToString(), BeliefToReputationNormalizer.FromPersonalityFacet(this.Personality.GetFacet(randomFacet))));
+                t.BeliefPayload.Add(new Belief(randomFacet.ToString(), BeliefToReputationNormalizer.FromPersonalityFacet(Personality.GetFacet(randomFacet))));
             }
             return t;
         }
@@ -647,7 +646,7 @@ namespace WizardMonks
             Summa previousWork = _incompleteBooks.Where(b => b.Title == name).FirstOrDefault();
             if (previousWork == null)
             {
-                double difference = (ability.Value / 2) - desiredLevel;
+                double difference = ability.Value / 2 - desiredLevel;
                 if (difference < 0)
                 {
                     throw new ArgumentOutOfRangeException();
@@ -659,8 +658,8 @@ namespace WizardMonks
                     Topic = topic,
                     Title = name,
                     Quality = MagicArts.IsArt(ability.Ability) ?
-                        this.GetAttribute(AttributeType.Communication).Value + difference + 6 :
-                        this.GetAttribute(AttributeType.Communication).Value + (difference * 3) + 6
+                        GetAttribute(AttributeType.Communication).Value + difference + 6 :
+                        GetAttribute(AttributeType.Communication).Value + difference * 3 + 6
                 };
             }
             else
@@ -668,7 +667,7 @@ namespace WizardMonks
                 s = previousWork;
             }
 
-            s.PointsComplete += this.GetAttribute(AttributeType.Communication).Value + GetAbility(_writingLanguage).Value;
+            s.PointsComplete += GetAttribute(AttributeType.Communication).Value + GetAbility(_writingLanguage).Value;
             if (s.PointsComplete >= s.GetWritingPointsNeeded())
             {
                 _booksWritten.Add(s);
@@ -754,7 +753,7 @@ namespace WizardMonks
             if (matchingAbility != null)
             {
                 // Step 1a: Determine the base weight by AbilityType.
-                baseWeight = (matchingAbility.AbilityType == AbilityType.Art) ? ART_PRESTIGE_WEIGHT : ABILITY_PRESTIGE_WEIGHT;
+                baseWeight = matchingAbility.AbilityType == AbilityType.Art ? ART_PRESTIGE_WEIGHT : ABILITY_PRESTIGE_WEIGHT;
 
                 // Step 1b: Check if this Ability is one of the magus's personal focuses.
                 if (_reputationFocuses.TryGetValue(matchingAbility.AbilityName, out double multiplier))
@@ -780,7 +779,7 @@ namespace WizardMonks
         #region object Overrides
         public override string ToString()
         {
-            return this.Name;
+            return Name;
         }
         #endregion
     }

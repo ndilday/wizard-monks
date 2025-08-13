@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using WizardMonks.Beliefs;
+using WizardMonks.Models.Beliefs;
 
-namespace WizardMonks
+namespace WizardMonks.Instances
 {
     [Serializable]
     public enum HousesEnum

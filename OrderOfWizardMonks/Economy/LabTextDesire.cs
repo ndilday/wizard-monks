@@ -1,4 +1,5 @@
-﻿using WizardMonks.Models.Spells;
+﻿using WizardMonks.Models.Characters;
+using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Economy
 {

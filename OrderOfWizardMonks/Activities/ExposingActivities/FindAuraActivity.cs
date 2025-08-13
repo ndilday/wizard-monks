@@ -2,6 +2,7 @@
 using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Activities.ExposingActivities

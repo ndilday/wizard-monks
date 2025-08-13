@@ -4,6 +4,7 @@ using System.Linq;
 
 using WizardMonks.Decisions.Conditions;
 using WizardMonks.Economy;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Goals
 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Economy

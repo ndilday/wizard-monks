@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models.Characters;
+
 namespace WizardMonks.Models.Books
 {
     public class EvaluatedBook

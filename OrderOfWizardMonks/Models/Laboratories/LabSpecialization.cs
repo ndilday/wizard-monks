@@ -1,4 +1,5 @@
 ﻿using WizardMonks.Activities;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Laboratories
 {

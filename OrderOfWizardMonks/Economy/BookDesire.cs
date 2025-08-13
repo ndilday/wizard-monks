@@ -1,4 +1,6 @@
-﻿namespace WizardMonks.Economy
+﻿using WizardMonks.Models.Characters;
+
+namespace WizardMonks.Economy
 {
     public class BookDesire
     {

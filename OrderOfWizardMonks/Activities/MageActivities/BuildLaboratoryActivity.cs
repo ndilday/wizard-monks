@@ -1,5 +1,6 @@
 ﻿
 using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {

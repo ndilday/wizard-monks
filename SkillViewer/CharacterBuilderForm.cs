@@ -3,8 +3,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-
-using WizardMonks;
+using WizardMonks.Models.Characters;
 
 namespace SkillViewer
 {

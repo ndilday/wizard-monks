@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 using WizardMonks.Decisions.Goals;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Instances
 {

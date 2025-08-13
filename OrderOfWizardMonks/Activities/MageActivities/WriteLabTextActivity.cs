@@ -1,6 +1,7 @@
 ﻿using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {
@@ -28,7 +29,7 @@ namespace WizardMonks.Activities.MageActivities
                     SpellContained = SpellToWrite,
                     IsShorthand = false // This is a clean, shareable copy
                 };
-                mage.AddLabTextToCollection(newText);
+                mage.LabTextsOwned.Add(newText);
                 mage.Log.Add($"Completed writing a lab text for '{SpellToWrite.Name}'.");
             }
         }

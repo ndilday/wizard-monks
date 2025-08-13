@@ -5,7 +5,6 @@ using WizardMonks.Activities;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
-using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
@@ -30,11 +29,6 @@ namespace WizardMonks.Models.Characters
 	public partial class Magus : Character
     {
         #region Private Fields
-        private Ability _magicAbility;
-        private Spell _partialSpell;
-        private double _partialSpellProgress;
-        private Dictionary<Ability, double> _visStock;
-        private List<LabText> _labTextsOwned;
         private MagusTradingDesires _tradeDesires;
         private HousesEnum _house;
         private Dictionary<Character, ushort> _decipheredShorthandLevels;
@@ -43,9 +37,14 @@ namespace WizardMonks.Models.Characters
         #endregion
 
         #region Public Properties
+        public Spell PartialSpell { get; set; }
+        public double PartialSpellProgress { get; set; }
+        public List<LabText> LabTextsOwned { get; private set; }
+        public Ability MagicAbility { get; private set; }
         public Magus Apprentice { get; private set; }
-        public Laboratory Laboratory { get; private set; }
+        public Laboratory Laboratory { get; set; }
         public List<Spell> SpellList { get; private set; }
+        public Dictionary<Ability, double> VisStock { get; private set; }
         public HousesEnum House
         {
             get
@@ -69,25 +68,25 @@ namespace WizardMonks.Models.Characters
         public Magus(Ability magicAbility, Ability writingLanguage, Ability writingAbility, Ability areaAbility, HousesEnum house = HousesEnum.Apprentice, uint baseAge = 20, Personality personality = null, Dictionary<string, double> reputationFocuses = null)
             : base(writingLanguage, writingAbility, areaAbility, baseAge, personality, reputationFocuses)
         {
-            _magicAbility = magicAbility;
+            MagicAbility = magicAbility;
             Arts = new Arts(this.InvalidateWritableTopicsCache);
             Covenant = null;
             Laboratory = null;
-            _visStock = [];
+            VisStock = [];
             SpellList = [];
-            _labTextsOwned = [];
+            LabTextsOwned = [];
             _decipheredShorthandLevels = [];
             _shorthandTranslationProgress = [];
             //_tractatusGoals = new List<TractatusGoal>();
             //_summaGoals = new List<SummaGoal>();
-            _partialSpell = null;
-            _partialSpellProgress = 0;
+            PartialSpell = null;
+            PartialSpellProgress = 0;
             _ideas = [];
             VisStudyRate = 6.75;
             House = house;
             foreach (Ability art in MagicArts.GetEnumerator())
             {
-                _visStock[art] = 0;
+                VisStock[art] = 0;
             }
 
             InitializeGoals();
@@ -136,23 +135,23 @@ namespace WizardMonks.Models.Characters
         #region Lab Text Functions
         public IEnumerable<LabText> GetLabTextsFromCollection(SpellBase spellBase)
         {
-            return _labTextsOwned.Where(t => t.SpellContained.Base == spellBase);
+            return LabTextsOwned.Where(t => t.SpellContained.Base == spellBase);
         }
 
         public void AddLabTextToCollection(LabText labText)
         {
-            _labTextsOwned.Add(labText);
+            LabTextsOwned.Add(labText);
         }
 
         public void RemoveLabTextFromCollection(LabText labText)
         {
-            _labTextsOwned.Remove(labText);
+            LabTextsOwned.Remove(labText);
         }
 
         public IEnumerable<LabText> GetUnneededLabTextsFromCollection()
         {
             List<LabText> unneededLabTexts = [];
-            foreach(LabText labText in _labTextsOwned)
+            foreach(LabText labText in LabTextsOwned)
             {
                 bool unneeded = false;
                 foreach(Spell spell in SpellList)
@@ -194,7 +193,7 @@ namespace WizardMonks.Models.Characters
             }
 
             // To learn from a lab text, the magus's Lab Total must be greater than the spell's level.
-            double labTotal = GetSpellLabTotal(labText.SpellContained);
+            double labTotal = this.GetSpellLabTotal(labText.SpellContained);
             if (labTotal < labText.SpellContained.Level)
             {
                 return 0;
@@ -445,9 +444,9 @@ namespace WizardMonks.Models.Characters
         {
             foreach (VisDesire visDesire in _desires.VisDesires)
             {
-                if (_visStock.ContainsKey(visDesire.Art))
+                if (VisStock.ContainsKey(visDesire.Art))
                 {
-                    visDesire.Quantity -= _visStock[visDesire.Art];
+                    visDesire.Quantity -= VisStock[visDesire.Art];
                 }
             }
         }
@@ -713,7 +712,7 @@ namespace WizardMonks.Models.Characters
         public double GetVisDistillationRate()
         {
             // TODO: One day, we'll make this more complicated
-            return GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
+            return this.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
         }
 
         public double GetAverageAuraFound()
@@ -740,9 +739,9 @@ namespace WizardMonks.Models.Characters
             {
                 total += Covenant.GetVis(visArt);
             }
-            if(_visStock.ContainsKey(visArt))
+            if(VisStock.ContainsKey(visArt))
             {
-                total += _visStock[visArt];
+                total += VisStock[visArt];
             }
             return total;
         }
@@ -753,7 +752,7 @@ namespace WizardMonks.Models.Characters
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            if (_visStock[visType] + (Covenant == null ? 0 : Covenant.GetVis(visType)) < amount)
+            if (VisStock[visType] + (Covenant == null ? 0 : Covenant.GetVis(visType)) < amount)
             {
                 throw new ArgumentException("Insufficient vis available!");
             }
@@ -769,9 +768,9 @@ namespace WizardMonks.Models.Characters
                     amount -= covVis;
                     Covenant.RemoveVis(visType, covVis);
                 }
-                _visStock[visType] -= amount;
+                VisStock[visType] -= amount;
             }
-            return _visStock[visType];
+            return VisStock[visType];
         }
 
         public void UseVis(List<VisOffer> visOffers)
@@ -788,15 +787,15 @@ namespace WizardMonks.Models.Characters
             {
                 throw new ArgumentException("Only magic arts have vis!");
             }
-            if (_visStock.ContainsKey(visType))
+            if (VisStock.ContainsKey(visType))
             {
-                _visStock[visType] += amount;
+                VisStock[visType] += amount;
             }
             else
             {
-                _visStock[visType] = amount;
+                VisStock[visType] = amount;
             }
-            return _visStock[visType];
+            return VisStock[visType];
         }
 
         public void GainVis(List<VisOffer> visOffers)
@@ -817,169 +816,6 @@ namespace WizardMonks.Models.Characters
                 }
             }
             return true;
-        }
-        #endregion
-
-        #region Lab Activities
-        public double GetLabTotal(ArtPair artPair, Activity activity)
-        {
-            double magicTheory = GetAbility(_magicAbility).Value;
-            double techValue = Arts.GetAbility(artPair.Technique).Value;
-            double formValue = Arts.GetAbility(artPair.Form).Value;
-            double labTotal = magicTheory + techValue + formValue + GetAttribute(AttributeType.Intelligence).Value;
-            if (Covenant != null)
-            {
-                labTotal += Covenant.Aura.Strength;
-
-                if (Laboratory != null)
-                {
-                    labTotal += Laboratory.GetModifier(artPair, activity);
-                }
-                if(Apprentice != null)
-                {
-                    labTotal += Apprentice.GetAbility(_magicAbility).Value + Apprentice.GetAttributeValue(AttributeType.Intelligence);
-                }
-            }
-
-            //TODO: foci
-            //TODO: lab assistant
-            //TODO: familiar
-            return labTotal;
-        }
-
-        public double GetSpellLabTotal(Spell spell)
-        {
-            double total = GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
-            // see if the mage knows a sell with the same base effect
-            Spell similarSpell = GetBestSpell(spell.Base);
-            if(similarSpell != null)
-            {
-                // if so, add the level of that spell to the lab total
-                total += similarSpell.Level / 5.0;
-            }
-            return total;
-        }
-
-        public void BuildLaboratory()
-        {
-            // TODO: flesh out laboratory specialization
-            Laboratory = new Laboratory(this, Covenant.Aura, 0);
-        }
-
-        public void BuildLaboratory(Aura aura)
-        {
-            Laboratory = new Laboratory(this, aura, 0);
-        }
-
-        public void RefineLaboratory()
-        {
-            if (Laboratory == null)
-            {
-                throw new NullReferenceException("The mage has no laboratory!");
-            }
-            if (GetAbility(_magicAbility).Value - 4 < Laboratory.Refinement)
-            {
-                throw new ArgumentOutOfRangeException("The mage's magical understanding is not high enough to refine this laboratory any further.");
-            }
-            Laboratory.Refine();
-        }
-
-        public void AddFeatureToLaboratory(LabFeature feature)
-        {
-            if (Laboratory == null)
-            {
-                throw new NullReferenceException("The mage has no laboratory!");
-            }
-            // TODO: Implement
-        }
-
-        public void ExtractVis(Ability exposureAbility)
-        {
-            // add vis to personal inventory or covenant inventory
-            _visStock[MagicArts.Vim] += GetVisDistillationRate();
-
-            // grant exposure experience
-            GetAbility(exposureAbility).AddExperience(2);
-        }
-
-        public void InventSpell(Spell spell)
-        {
-            // TODO: multiple spells in a season
-            // TODO: foci
-            double labTotal = GetSpellLabTotal(spell);
-            if (labTotal <= spell.Level)
-            {
-                throw new ArgumentException("This mage cannot invent this spell!");
-            }
-
-            if (spell == _partialSpell)
-            {
-                // continue previous spell work
-                _partialSpellProgress += labTotal - spell.Level;
-                if (_partialSpellProgress >= _partialSpell.Level)
-                {
-                    LearnSpell(_partialSpell);
-                }
-            }
-            
-            else if (labTotal >= spell.Level * 2)
-            {
-                LearnSpell(spell);
-            }
-            else
-            {
-                _partialSpell = spell;
-                _partialSpellProgress = labTotal - spell.Level;
-            }
-        }
-
-        public void LearnSpellFromLabText(LabText text)
-        {
-            // TODO: multiple spells in a season
-            // TODO: foci
-            Spell spell = text.SpellContained;
-            double labTotal = GetSpellLabTotal(spell);
-            if (labTotal < spell.Level)
-            {
-                throw new ArgumentException("This mage cannot invent this spell!");
-            }
-            else
-            {
-                LearnSpell(spell);
-                foreach (var belief in text.BeliefPayload)
-                {
-                    // Update belief about the author
-                    GetBeliefProfile(text.Author).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude));
-
-                    // Update stereotype about the author's house
-                    if (text.Author is Magus magus)
-                    {
-                        var houseSubject = Houses.GetSubject(magus.House);
-                        GetBeliefProfile(houseSubject).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude * 0.20)); // Stereotype is 20% strength
-                    }
-                }
-            }
-        }
-
-        private void LearnSpell(Spell spell)
-        {
-            SpellList.Add(spell);
-            _partialSpell = null;
-            _partialSpellProgress = 0;
-            LabText newLabText = new LabText
-            {
-                Author = this,
-                IsShorthand = true,
-                SpellContained = spell
-            };
-            // Generate Belief Payload for the shorthand lab text
-            double magnitude = spell.Level / 5.0;
-            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Technique.AbilityName, magnitude));
-            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Form.AbilityName, magnitude));
-
-            // Generate personality beliefs based on spell tags
-            _labTextsOwned.Add(newLabText);
-
         }
         #endregion
 
@@ -1017,16 +853,16 @@ namespace WizardMonks.Models.Characters
                 {
                     if ((CurrentSeason & source.Seasons) == CurrentSeason)
                     {
-                        _visStock[source.Art] += source.Amount;
+                        VisStock[source.Art] += source.Amount;
                     }
                 }
             }
             Log.Add("VIS STOCK");
             foreach(Ability art in MagicArts.GetEnumerator())
             {
-                if(_visStock[art] > 0)
+                if(VisStock[art] > 0)
                 {
-                    Log.Add(art.AbilityName + ": " + _visStock[art].ToString("0.00"));
+                    Log.Add(art.AbilityName + ": " + VisStock[art].ToString("0.00"));
                 }
             }
             IActivity activity = base.Advance();

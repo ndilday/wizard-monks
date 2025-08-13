@@ -7,7 +7,6 @@ using WizardMonks.Instances;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace WizardMonks.Services.Characters
 {

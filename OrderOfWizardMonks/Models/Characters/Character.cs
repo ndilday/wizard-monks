@@ -61,7 +61,6 @@ namespace WizardMonks.Models.Characters
         #endregion
 
         #region Private Fields
-        private uint _noAgingSeasons;
         private uint _baseAge;
         protected Ability _writingAbility;
         protected Ability _areaAbility;
@@ -73,20 +72,13 @@ namespace WizardMonks.Models.Characters
 		private readonly string[] _flawList = new string[10];
 
         private readonly Dictionary<int, CharacterAbilityBase> _abilityMap;
-        private readonly Dictionary<Guid, BeliefProfile> _beliefs = [];
-        private readonly Dictionary<string, double> _reputationFocuses = [];
         protected readonly List<IActivity> _seasonList;
         public HashSet<CharacterAbilityBase> WritableTopicsCache { get; private set; }
         public bool IsWritableTopicsCacheClean { get; set; }
 
         protected IActivity _mandatoryAction;
 
-        // These weights define the base value of different types of knowledge for prestige purposes.
-        // Arts are the most prestigious, followed by core Attributes, then general Abilities.
-        private const double ART_PRESTIGE_WEIGHT = 1.0;
-        private const double ATTRIBUTE_PRESTIGE_WEIGHT = 0.75;
-        private const double ABILITY_PRESTIGE_WEIGHT = 0.5;
-        private const double PERSONALITY_PRESTIGE_WEIGHT = 0.25; // Less about skill, more about character.
+        
         #endregion
 
         #region Events
@@ -95,9 +87,10 @@ namespace WizardMonks.Models.Characters
 
         #region Public Properties
         public Guid Id { get; private set; } = Guid.NewGuid();
+        public uint NoAgingSeasons { get; set; }
         public Personality Personality { get; private set; }
-        public ushort LongevityRitual { get; private set; }
-        public byte Decrepitude { get; private set; }
+        public ushort LongevityRitual { get; set; }
+        public byte Decrepitude { get; set; }
         public CharacterAbility Warping { get; private set; }
         public IList<Aura> KnownAuras { get; private set; }
         public string Name { get; set; }
@@ -109,6 +102,8 @@ namespace WizardMonks.Models.Characters
         public HashSet<ABook> BooksRead { get; private set; }
         public List<ABook> Books { get; private set; }
         public List<Summa> IncompleteBooks { get; private set; }
+        public Dictionary<Guid, BeliefProfile> Beliefs { get; private set; }
+        public Dictionary<string, double> ReputationFocuses { get; private set; }
         public Season CurrentSeason { get; private set; }
         public List<string> Log { get; private set; }
         public ABook BestBookCache { get; set; }
@@ -141,10 +136,11 @@ namespace WizardMonks.Models.Characters
             Decrepitude = 0;
             CurrentSeason = Season.Spring;
             KnownAuras = new List<Aura>();
+            Beliefs = [];
             IsCollaborating = false;
             WantsToFollow = true;
 
-            _noAgingSeasons = 0;
+            NoAgingSeasons = 0;
             _baseAge = baseSeasonableAge;
             _mandatoryAction = null;
 
@@ -170,8 +166,30 @@ namespace WizardMonks.Models.Characters
             Personality = personality ?? new Personality();
             if(reputationFocuses != null)
             {
-                _reputationFocuses = reputationFocuses;
+                ReputationFocuses = reputationFocuses;
             }
+            else
+            {
+                ReputationFocuses = [];
+            }
+        }
+
+        public void OnAged(AgingEventArgs e)
+        {
+            if (Aged != null)
+            {
+                Aged(this, e);
+            }
+        }
+
+        public uint SeasonalAge
+        {
+            get { return (uint)(_seasonList.Count + _baseAge); }
+        }
+
+        public uint ApparentAge
+        {
+            get { return SeasonalAge - NoAgingSeasons; }
         }
 
         #region Ability Functions
@@ -203,119 +221,6 @@ namespace WizardMonks.Models.Characters
             }
         }
 
-        #endregion
-
-        #region Aging
-        public virtual void OnAged(AgingEventArgs e)
-        {
-            if (Aged != null)
-            {
-                Aged(this, e);
-            }
-        }
-
-        public uint SeasonalAge
-        {
-            get { return (uint)(_seasonList.Count + _baseAge); }
-        }
-
-	    public uint ApparentAge
-	    {
-            get { return SeasonalAge - _noAgingSeasons; }
-	    }
-
-        public void ApplyLongevityRitual(ushort strength)
-        {
-            LongevityRitual = strength;
-        }
-
-        private void Age(ushort modifiers)
-        {
-            // roll exploding die for aging
-            if (LongevityRitual > 0)
-            {
-                Warping.AddExperience(0.25);
-            }
-            bool apparent = true;
-            bool crisis = false;
-            bool died = false;
-            ushort agingRoll = Die.Instance.RollExplodingDie();
-            agingRoll -= modifiers;
-            ushort ageModifier = (ushort)Math.Ceiling(SeasonalAge / 40.0m);
-            agingRoll += ageModifier;
-
-            if (agingRoll < 3)
-            {
-                _noAgingSeasons++;
-                apparent = false;
-            }
-
-            if (agingRoll == 13 || agingRoll > 21)
-            {
-                crisis = true;
-                LongevityRitual = 0;
-                IncreaseDecrepitudeToNextLevel();
-                int crisisRoll = Die.Instance.RollSimpleDie();
-                crisisRoll = crisisRoll + ageModifier + GetDecrepitudeScore();
-                if (crisisRoll > 14)
-                {
-                    int staDiff = 3 * (crisisRoll - 14);
-                    if(GetAttribute(AttributeType.Stamina).Value + Die.Instance.RollSimpleDie() < staDiff)
-                    {
-                        died = true;
-                        Decrepitude = 75;
-                    }
-                }
-            }
-            else if (agingRoll > 9)
-            {
-                Decrepitude++;
-            }
-
-            if(Decrepitude > 74)
-            {
-                died = true;
-            }
-
-            AgingEventArgs args = new(this, crisis, apparent, died);
-            OnAged(args);
-        }
-
-        private void IncreaseDecrepitudeToNextLevel()
-        {
-            // TODO: decrepitude points need to go to attributes
-            // TODO: add configuration option to choose between different methods of distributing decrepitude points
-            if(Decrepitude < 5)
-            {
-                Decrepitude = 5;
-            }
-            else if(Decrepitude < 15)
-            {
-                Decrepitude = 15;
-            }
-            else if(Decrepitude < 30)
-            {
-                Decrepitude = 30;
-            }
-            else if(Decrepitude < 50)
-            {
-                Decrepitude = 50;
-            }
-            else if(Decrepitude < 75)
-            {
-                Decrepitude = 75;
-            }
-        }
-
-        private byte GetDecrepitudeScore()
-        {
-            if (Decrepitude < 5) return 0;
-            if (Decrepitude < 15) return 1;
-            if (Decrepitude < 30) return 2;
-            if (Decrepitude < 50) return 3;
-            if (Decrepitude < 75) return 4;
-            return 5;
-        }
         #endregion
 
         #region Seasonal Functions
@@ -365,7 +270,7 @@ namespace WizardMonks.Models.Characters
             action.Act(this);
             if (SeasonalAge >= 140)
             {
-                Age(LongevityRitual);
+                this.Age(LongevityRitual);
             }
         }
 
@@ -381,7 +286,7 @@ namespace WizardMonks.Models.Characters
                 activity.Act(this);
                 if (SeasonalAge >= 140)
                 {
-                    Age(LongevityRitual);
+                    this.Age(LongevityRitual);
                 }
                 switch (CurrentSeason)
                 {
@@ -412,7 +317,7 @@ namespace WizardMonks.Models.Characters
             activity.Act(this);
             if (SeasonalAge >= 140)
             {
-                Age(LongevityRitual);
+                this.Age(LongevityRitual);
             }
             switch (CurrentSeason)
             {
@@ -471,57 +376,6 @@ namespace WizardMonks.Models.Characters
         public void AddGoal(IGoal goal)
         {
             _goals.Add(goal);
-        }
-        #endregion
-
-        #region Belief Functions
-        public BeliefProfile GetBeliefProfile(IBeliefSubject subject)
-        {
-            if (!_beliefs.TryGetValue(subject.Id, out var profile))
-            {
-                profile = new();
-                _beliefs[subject.Id] = profile;
-            }
-            return profile;
-        }
-
-        /// <summary>
-        /// Calculates the prestige value of a single Belief from this magus's perspective.
-        /// This is the core, centralized valuation function.
-        /// </summary>
-        /// <param name="belief">The belief to evaluate.</param>
-        /// <returns>A score representing the belief's contribution to prestige.</returns>
-        public double CalculateBeliefValue(Belief belief)
-        {
-            double baseWeight = 0;
-            double focusMultiplier = 1.0; // Default: no special focus.
-
-            // Step 1: Find the corresponding Ability to determine its type and check for focus.
-            Abilities.AbilityDictionary.TryGetValue(belief.Topic, out Ability matchingAbility);
-
-            if (matchingAbility != null)
-            {
-                // Step 1a: Determine the base weight by AbilityType.
-                baseWeight = matchingAbility.AbilityType == AbilityType.Art ? ART_PRESTIGE_WEIGHT : ABILITY_PRESTIGE_WEIGHT;
-
-                // Step 1b: Check if this Ability is one of the magus's personal focuses.
-                if (_reputationFocuses.TryGetValue(matchingAbility.AbilityName, out double multiplier))
-                {
-                    focusMultiplier = multiplier;
-                }
-            }
-            else if (Enum.TryParse<AttributeType>(belief.Topic, out _))
-            {
-                baseWeight = ATTRIBUTE_PRESTIGE_WEIGHT;
-            }
-            else if (Enum.TryParse<HexacoFacet>(belief.Topic, out _))
-            {
-                baseWeight = PERSONALITY_PRESTIGE_WEIGHT;
-            }
-
-            // The final value incorporates the belief's strength, its general importance (weight),
-            // and the magus's personal investment in the topic (focusMultiplier).
-            return belief.Magnitude * baseWeight * focusMultiplier;
         }
         #endregion
 

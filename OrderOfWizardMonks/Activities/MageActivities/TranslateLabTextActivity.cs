@@ -1,9 +1,6 @@
-﻿using System;
-using WizardMonks.Activities.MageActivities;
-using WizardMonks.Activities;
-using WizardMonks.Decisions;
-using WizardMonks.Models.Books;
+﻿using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {

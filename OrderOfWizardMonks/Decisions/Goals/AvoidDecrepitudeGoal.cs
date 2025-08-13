@@ -1,5 +1,4 @@
-﻿// In WizardMonks/Decisions/Goals/
-using System;
+﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
@@ -9,6 +8,7 @@ using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 public class AvoidDecrepitudeGoal : AGoal
 {

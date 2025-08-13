@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions.Conditions.Helpers;
-using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Conditions
 {

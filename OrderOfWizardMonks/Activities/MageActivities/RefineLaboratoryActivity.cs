@@ -1,7 +1,7 @@
-﻿
-using WizardMonks.Core;
+﻿using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {

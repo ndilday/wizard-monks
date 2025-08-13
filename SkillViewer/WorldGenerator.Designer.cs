@@ -1,4 +1,6 @@
-﻿namespace SkillViewer
+﻿using WizardMonks.Models.Characters;
+
+namespace SkillViewer
 {
     partial class WorldGenerator
     {
@@ -60,7 +62,7 @@
             // 
             // characterBindingSource
             // 
-            this.characterBindingSource.DataSource = typeof(WizardMonks.Character);
+            this.characterBindingSource.DataSource = typeof(Character);
             // 
             // btnAdvance
             // 

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Activities.MageActivities;
+using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

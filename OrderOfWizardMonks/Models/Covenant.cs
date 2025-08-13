@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using WizardMonks.Beliefs;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
 
-namespace WizardMonks
+namespace WizardMonks.Models
 {
     [Serializable]
 	public class Covenant : IBeliefSubject

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WizardMonks.Beliefs
+namespace WizardMonks.Models.Beliefs
 {
     public class BeliefProfile
     {

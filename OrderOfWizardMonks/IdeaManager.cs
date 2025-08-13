@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Core;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
+using WizardMonks.Models.Ideas;
 
 namespace WizardMonks
 {

@@ -1,4 +1,6 @@
 ﻿using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {
@@ -25,7 +27,7 @@ namespace WizardMonks.Activities.MageActivities
                     SpellContained = TextToCopy.SpellContained,
                     IsShorthand = false // Copies are always clean
                 };
-                mage.AddLabTextToCollection(newCopy);
+                mage.LabTextsOwned.Add(newCopy);
                 mage.Log.Add($"Completed copying the lab text for '{TextToCopy.SpellContained.Name}'.");
             }
         }

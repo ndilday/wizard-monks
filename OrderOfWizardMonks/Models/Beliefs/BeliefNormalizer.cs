@@ -1,4 +1,4 @@
-﻿namespace WizardMonks.Beliefs
+﻿namespace WizardMonks.Models.Beliefs
 {
     public static class BeliefToReputationNormalizer
     {
@@ -17,6 +17,6 @@
         // Art scores are the effective default
         public static double FromArtScore(double score) => score;
 
-        public static double ArtFromSumma(double quality, double level) => ((quality - 6) + level) * 2;
+        public static double ArtFromSumma(double quality, double level) => (quality - 6 + level) * 2;
     }
 }

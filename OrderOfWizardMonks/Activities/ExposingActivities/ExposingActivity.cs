@@ -1,4 +1,6 @@
 ﻿
+using WizardMonks.Models.Characters;
+
 namespace WizardMonks.Activities.ExposingActivities
 {
     public abstract class AExposingActivity(Ability exposure, double desire) : IActivity

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Instances

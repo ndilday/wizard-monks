@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using WizardMonks;
 using WizardMonks.Core;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Instances
 {

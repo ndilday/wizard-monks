@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Activities;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Laboratories
 {

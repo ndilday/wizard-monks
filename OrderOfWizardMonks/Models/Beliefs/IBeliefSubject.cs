@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WizardMonks.Beliefs
+namespace WizardMonks.Models.Beliefs
 {
     public interface IBeliefSubject
     {

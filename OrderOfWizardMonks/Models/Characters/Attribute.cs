@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WizardMonks
+namespace WizardMonks.Models.Characters
 {
     // TODO: create config option to switch between this attribute and an implementation based upon the strict AM rules
 

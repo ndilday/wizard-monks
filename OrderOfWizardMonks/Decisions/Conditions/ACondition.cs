@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Conditions
 {

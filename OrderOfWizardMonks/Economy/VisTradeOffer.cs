@@ -1,4 +1,7 @@
-﻿namespace WizardMonks.Economy
+﻿using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
+
+namespace WizardMonks.Economy
 {
     public class VisTradeOffer
     {

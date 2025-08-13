@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Decisions.Goals;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Instances
 {

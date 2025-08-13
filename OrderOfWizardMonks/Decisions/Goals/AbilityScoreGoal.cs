@@ -1,5 +1,6 @@
 ﻿using WizardMonks.Decisions.Conditions;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Goals
 {

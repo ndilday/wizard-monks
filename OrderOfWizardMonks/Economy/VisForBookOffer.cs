@@ -2,6 +2,7 @@
 using System.Linq;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Economy
 {

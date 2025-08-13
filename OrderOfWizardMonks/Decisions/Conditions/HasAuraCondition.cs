@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions.Conditions
 {

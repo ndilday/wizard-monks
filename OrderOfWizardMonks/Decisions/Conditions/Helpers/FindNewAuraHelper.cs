@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
-using WizardMonks.Models;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Conditions.Helpers
 {

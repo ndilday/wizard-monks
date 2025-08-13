@@ -1,4 +1,5 @@
 ﻿using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Economy
 {

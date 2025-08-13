@@ -2,6 +2,7 @@
 using System.Linq;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Decisions
 {

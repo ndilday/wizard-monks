@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WizardMonks.Models.Books;
+﻿using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
 {

@@ -1,5 +1,7 @@
 ﻿using System;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

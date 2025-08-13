@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Laboratories
 {

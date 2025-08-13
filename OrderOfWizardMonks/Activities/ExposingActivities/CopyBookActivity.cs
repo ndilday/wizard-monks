@@ -1,6 +1,7 @@
 ﻿using System;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

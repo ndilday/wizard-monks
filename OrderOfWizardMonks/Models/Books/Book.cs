@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using WizardMonks.Beliefs;
 using WizardMonks.Instances;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Books
 {

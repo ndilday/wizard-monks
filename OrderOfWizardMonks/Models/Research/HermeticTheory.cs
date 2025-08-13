@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Activities;
+using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Models.Research

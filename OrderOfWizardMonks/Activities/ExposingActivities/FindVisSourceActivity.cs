@@ -3,6 +3,8 @@ using System.Linq;
 using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.ExposingActivities
 {

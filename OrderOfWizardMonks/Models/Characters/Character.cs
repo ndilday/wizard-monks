@@ -241,21 +241,6 @@ namespace WizardMonks.Models.Characters
 
         #region Preference/Goal Functions
 
-        /// <summary>
-        /// Determines the value of an experience gain in terms of practice seasons
-        /// </summary>
-        /// <param name="ability"></param>
-        /// <param name="gain"></param>
-        /// <returns>the season equivalence of this gain</returns>
-        public virtual double RateSeasonalExperienceGain(Ability ability, double gain)
-        {
-            if (MagicArts.IsArt(ability))
-            {
-                return 0;
-            }
-            return gain / 4;
-        }
-
         public void AddGoal(IGoal goal)
         {
             Goals.Add(goal);

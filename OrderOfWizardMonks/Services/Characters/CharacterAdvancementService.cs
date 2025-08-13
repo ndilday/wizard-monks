@@ -12,6 +12,53 @@ namespace WizardMonks.Services.Characters
 {
     public static class CharacterAdvancementService
     {
+        /// <summary>
+        /// Determines the value of an experience gain in terms of practice seasons
+        /// </summary>
+        /// <param name="ability"></param>
+        /// <param name="gain"></param>
+        /// <returns>the season equivalence of this gain</returns>
+        public static double RateSeasonalExperienceGain(this Character character, Ability ability, double gain)
+        {
+            if (!MagicArts.IsArt(ability))
+            {
+                return gain / 4;
+            }
+            if (character is Magus mage)
+            {
+                double baseDistillVisRate = mage.GetVisDistillationRate();
+                double distillVisRate = baseDistillVisRate;
+                if (MagicArts.IsTechnique(ability))
+                {
+                    distillVisRate /= 4.0;
+                }
+                else if (ability != MagicArts.Vim)
+                {
+                    distillVisRate /= 2.0;
+                }
+
+                CharacterAbilityBase charAbility = mage.GetAbility(ability);
+                double visUsedPerStudySeason = 0.5 + (charAbility.Value + charAbility.GetValueGain(gain) / 2) / 10.0;
+                // the gain per season depends on how the character views vis
+                double studySeasons = gain / mage.VisStudyRate;
+                double visNeeded = studySeasons * visUsedPerStudySeason;
+                // compare to the number of seasons we would need to extract the vis
+                // plus the number of seasons we would need to study the extracted vis
+                double extractTime = visNeeded / distillVisRate;
+                double totalVisEquivalent = (extractTime + studySeasons) * baseDistillVisRate;
+
+                // credit back the value of the exposure gained in the process of distilling
+                double exposureGained = 2.0 * extractTime;
+                double exposureSeasonsOfVis = exposureGained / mage.VisStudyRate;
+                CharacterAbilityBase vim = mage.GetAbility(MagicArts.Vim);
+                CharacterAbilityBase creo = mage.GetAbility(MagicArts.Creo);
+                CharacterAbilityBase exposureAbility = creo.Value < vim.Value ? creo : vim;
+                double visValueOfExposure = 0.5 + (exposureAbility.Value + exposureAbility.GetValueGain(exposureGained) / 2) / 10.0 * exposureSeasonsOfVis;
+                return totalVisEquivalent - visValueOfExposure;
+            }
+            return 0;
+        }
+
         public static IActivity DecideSeasonalActivity(this Character character)
         {
             character.Desires = new Desires();

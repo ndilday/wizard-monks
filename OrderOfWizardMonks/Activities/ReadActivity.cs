@@ -1,6 +1,7 @@
 ﻿using System;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities
 {
@@ -21,7 +22,7 @@ namespace WizardMonks.Activities
 
         public void Act(Character character)
         {
-            character.ReadBook(Book);
+            CharacterBookService.ReadBook(character, Book);
         }
 
         public bool Matches(IActivity action)

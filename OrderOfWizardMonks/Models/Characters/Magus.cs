@@ -10,6 +10,7 @@ using WizardMonks.Models.Books;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Models.Characters
 {
@@ -35,11 +36,7 @@ namespace WizardMonks.Models.Characters
         private Dictionary<Ability, double> _visStock;
         private List<LabText> _labTextsOwned;
         private MagusTradingDesires _tradeDesires;
-        //private List<SummaGoal> _summaGoals;
-        //private List<TractatusGoal> _tractatusGoals;
         private HousesEnum _house;
-        private bool _isBestBookCached;
-        private ABook _bestBookCache;
         private Dictionary<Character, ushort> _decipheredShorthandLevels;
         private Dictionary<LabText, double> _shorthandTranslationProgress;
         private List<AIdea> _ideas;
@@ -73,7 +70,7 @@ namespace WizardMonks.Models.Characters
             : base(writingLanguage, writingAbility, areaAbility, baseAge, personality, reputationFocuses)
         {
             _magicAbility = magicAbility;
-            Arts = new Arts(InvalidateWritableTopicsCache);
+            Arts = new Arts(this.InvalidateWritableTopicsCache);
             Covenant = null;
             Laboratory = null;
             _visStock = [];
@@ -133,145 +130,6 @@ namespace WizardMonks.Models.Characters
             Covenant coventant = new(aura);
             Join(coventant);
             return coventant;
-        }
-        #endregion
-
-        #region Book Functions
-        public override IEnumerable<ABook> GetBooksFromCollection(Ability ability)
-        {
-            IEnumerable<ABook> books = _booksOwned.Where(b => b.Topic == ability);
-            if (Covenant != null)
-            {
-                books = books.Union(Covenant.GetLibrary(ability));
-            }
-            return books;
-        }
-
-        public override ABook GetBestBookToWrite()
-        {
-            if (_isBestBookCached) return _bestBookCache;
-            if (GlobalEconomy.MostDesiredBookTopics == null) return null;
-
-            // --- Step 1: Initialize variables for the search ---
-            ABook bestBook = null;
-            double currentBestBookValue = 0;
-            double writingRate = GetAttributeValue(AttributeType.Communication) + GetAbility(_writingLanguage).Value;
-            double prestigeMotivation = Personality.GetPrestigeMotivation();
-
-            // --- Step 2: Ensure the cache of writable topics is populated ---
-            if (!_isWritableTopicsCacheValid)
-            {
-                _writableTopicsCache = GetAbilities().Where(a => a.Experience >= 15).ToHashSet();
-                _isWritableTopicsCacheValid = true;
-            }
-
-            // --- Step 3: Iterate through topics with known market demand ---
-            foreach (Ability ability in GlobalEconomy.MostDesiredBookTopics)
-            {
-                //var charAbility = _writableTopicsCache.FirstOrDefault(a => a.Ability == ability);
-                var charAbility = GetAbility(ability);
-                if (charAbility == null) continue;
-
-                var desiresForTopic = GlobalEconomy.DesiredBooksByTopic[ability];
-                var highestDemandDesire = desiresForTopic.OrderBy(d => d.CurrentLevel).FirstOrDefault(d => d.Character != this);
-                if (highestDemandDesire == null) continue;
-
-                // --- Step 4A: Evaluate writing a Summa for this topic ---
-                double maxLevel = GetAbility(highestDemandDesire.Ability).Value / 2.0;
-                for (double l = Math.Floor(maxLevel); l > highestDemandDesire.CurrentLevel; l--)
-                {
-                    double q = 6 + GetAttributeValue(AttributeType.Communication) + maxLevel - l;
-
-                    var prospectiveSumma = new Summa
-                    {
-                        Author = this,
-                        Quality = q,
-                        Level = l,
-                        Topic = highestDemandDesire.Ability,
-                        Title = $"{highestDemandDesire.Ability.AbilityName} L{l:0.0}Q{q:0.0} Summa"
-                    };
-
-                    // Calculate Economic Value (based on vis equivalence)
-                    double seasonsLeft = Math.Ceiling(l / writingRate);
-                    if (!MagicArts.IsArt(prospectiveSumma.Topic)) seasonsLeft *= 5;
-                    double economicValue = RateLifetimeBookValue(prospectiveSumma) / seasonsLeft;
-
-                    // Calculate Prestige Value
-                    var payload = GenerateProspectiveBeliefPayload(prospectiveSumma);
-                    double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
-
-                    // Calculate Total Value, modulated by personality
-                    double totalValue = economicValue + prestigeValue * prestigeMotivation;
-
-                    if (totalValue > currentBestBookValue)
-                    {
-                        currentBestBookValue = totalValue;
-                        prospectiveSumma.Value = totalValue; // Store the combined value
-                        bestBook = prospectiveSumma;
-                    }
-                }
-
-                // --- Step 4B: Evaluate writing a Tractatus for this topic ---
-                if (CanWriteTractatus(charAbility))
-                {
-                    ushort previouslyWrittenCount = GetTractatiiWrittenOnTopic(highestDemandDesire.Ability);
-                    var prospectiveTractatus = new Tractatus
-                    {
-                        Author = this,
-                        Quality = 6 + GetAttributeValue(AttributeType.Communication),
-                        Topic = charAbility.Ability,
-                        Title = $"{Name} {charAbility.Ability.AbilityName} T{previouslyWrittenCount}"
-                    };
-
-                    // Calculate Economic Value (vis value of 1 season of study)
-                    double economicValue = RateSeasonalExperienceGain(prospectiveTractatus.Topic, prospectiveTractatus.Quality);
-
-                    // Calculate Prestige Value
-                    var payload = GenerateProspectiveBeliefPayload(prospectiveTractatus);
-                    double prestigeValue = payload.Sum(b => CalculateBeliefValue(b));
-
-                    // Calculate Total Value, modulated by personality
-                    double totalValue = economicValue + prestigeValue * prestigeMotivation;
-
-                    if (totalValue > currentBestBookValue)
-                    {
-                        currentBestBookValue = totalValue;
-                        prospectiveTractatus.Value = totalValue;
-                        bestBook = prospectiveTractatus;
-                    }
-                }
-            }
-
-            // --- Step 5: Cache and return the result ---
-            _isBestBookCached = true;
-            _bestBookCache = bestBook;
-            return bestBook;
-        }
-
-        /// <summary>
-        /// Generates the prospective BeliefPayload for a book that has not yet been written.
-        /// This is used for valuation purposes in the GetBestBookToWrite method.
-        /// </summary>
-        private List<Belief> GenerateProspectiveBeliefPayload(ABook book)
-        {
-            var payload = new List<Belief>();
-            var authorComm = GetAttributeValue(AttributeType.Communication);
-
-            if (book is Tractatus tract)
-            {
-                payload.Add(new Belief(tract.Topic.AbilityName, 5));
-            }
-            else if (book is Summa summa)
-            {
-                // For a Summa, the prestige is derived from both its Quality and its Level.
-                double magnitude = BeliefToReputationNormalizer.ArtFromSumma(summa.Quality, summa.Level);
-                payload.Add(new Belief(summa.Topic.AbilityName, magnitude));
-            }
-
-            // All books reflect on the author's Communication skill.
-            payload.Add(new Belief("Communication", BeliefToReputationNormalizer.FromAttributeScore(authorComm)));
-
-            return payload;
         }
         #endregion
 
@@ -443,7 +301,7 @@ namespace WizardMonks.Models.Characters
         public double GetLabTextWritingRate()
         {
             // Latin skill * 20 levels per season
-            return GetAbility(_writingLanguage).Value * 20;
+            return GetAbility(WritingLanguage).Value * 20;
         }
 
         public double GetLabTextCopyingRate()
@@ -532,7 +390,7 @@ namespace WizardMonks.Models.Characters
                 }
                 else
                 {
-                    double writeRate = GetAbility(_writingLanguage).Value + _attributes[(int)AttributeType.Communication].Value;
+                    double writeRate = GetAbility(WritingLanguage).Value + _attributes[(int)AttributeType.Communication].Value;
                     double seasons = book.Level / writeRate;
                     if (!MagicArts.IsArt(book.Topic))
                     {
@@ -558,7 +416,7 @@ namespace WizardMonks.Models.Characters
                 else
                 {
                     // the lab text was manually written, worth Level * distill rate / (Latin * 20)
-                    double writeRate = GetAbility(_writingLanguage).Value * 20;
+                    double writeRate = GetAbility(WritingLanguage).Value * 20;
                     list.Add(new LabTextForTrade(labText, distillRate * labText.SpellContained.Level / writeRate));
                 }
             }
@@ -572,7 +430,7 @@ namespace WizardMonks.Models.Characters
                 this,
                 _desires.VisDesires,
                 _desires.BookDesires,
-                EvaluateBookValuesAsSeller(GetUnneededBooksFromCollection()),
+                EvaluateBookValuesAsSeller(this.GetUnneededBooksFromCollection()),
                 _desires.LabTextDesires,
                 EvaluateLabTextValuesAsSeller(GetUnneededLabTextsFromCollection())
             );
@@ -697,28 +555,6 @@ namespace WizardMonks.Models.Characters
             } while (internalOffers.Any());
         }
 
-        private void ProcessBookPurchases(IEnumerable<VisForBookOffer> bookBuys)
-        {
-            var buys = bookBuys.OrderBy(bto => bto.BookDesired.Quality).ThenBy(bto => bto.VisValue);
-            while (buys.Any())
-            {
-                var buyOffer = buys.First();
-                if (HasSufficientVis(buyOffer.VisOffers))
-                {
-                    Log.Add("Buying " + buyOffer.BookDesired.Title + " from " + buyOffer.TradingPartner.Name);
-                    Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
-                    buyOffer.TradingPartner.Log.Add("Selling " + buyOffer.BookDesired.Title + " to " + Name);
-                    buyOffer.TradingPartner.Log.Add("for " + buyOffer.VisValue.ToString("0.000") + " worth of vis");
-
-                    buyOffer.TradingPartner.RemoveBookFromCollection(buyOffer.BookDesired);
-                    AddBookToCollection(buyOffer.BookDesired);
-                    buyOffer.TradingPartner.GainVis(buyOffer.VisOffers);
-                    UseVis(buyOffer.VisOffers);
-                }
-                buys = buys.Where(b => b.BookDesired != buyOffer.BookDesired).OrderBy(bto => bto.VisValue);
-            }
-        }
-
         private void ProcessBookSales(IEnumerable<VisForBookOffer> bookSales)
         {
             var sales = bookSales.OrderByDescending(bts => bts.VisValue);
@@ -726,7 +562,7 @@ namespace WizardMonks.Models.Characters
             {
                 var sellOffer = sales.First();
                 // Check if seller still owns the book and buyer can afford it.
-                if (GetBooksFromCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
+                if (this.GetBooksInCollection(sellOffer.BookDesired.Topic).Contains(sellOffer.BookDesired) &&
                     sellOffer.TradingPartner.HasSufficientVis(sellOffer.VisOffers))
                 {
                     // Enact trade
@@ -753,8 +589,8 @@ namespace WizardMonks.Models.Characters
             while (trades.Any())
             {
                 var tradeOffer = trades.First();
-                if (GetBooksFromCollection(tradeOffer.BookOffered.Topic).Contains(tradeOffer.BookOffered) &&
-                   tradeOffer.Mage.GetBooksFromCollection(tradeOffer.BookDesired.Topic).Contains(tradeOffer.BookDesired))
+                if (this.GetBooksInCollection(tradeOffer.BookOffered.Topic).Contains(tradeOffer.BookOffered) &&
+                   tradeOffer.Mage.GetBooksInCollection(tradeOffer.BookDesired.Topic).Contains(tradeOffer.BookDesired))
                 {
                     Log.Add("Trading " + tradeOffer.BookOffered.Title + " to " + tradeOffer.Mage.Name);
                     Log.Add("For " + tradeOffer.BookDesired.Title);
@@ -1173,7 +1009,7 @@ namespace WizardMonks.Models.Characters
         #region Seasonal Functions
         public override IActivity Advance()
         {
-            _isBestBookCached = false;
+            IsBestBookCacheClean = false;
             // harvest vis
             foreach (Aura aura in KnownAuras)
             {

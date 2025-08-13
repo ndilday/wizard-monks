@@ -4,6 +4,7 @@ using System.Linq;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Economy
 {

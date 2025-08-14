@@ -6,7 +6,7 @@ using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
 
-namespace WizardMonks.Models
+namespace WizardMonks.Models.Covenants
 {
     [Serializable]
 	public class Covenant : IBeliefSubject

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Research;
 
 namespace WizardMonks.Instances
 {

@@ -5,6 +5,7 @@ using WizardMonks.Decisions.Goals;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Covenants;
 using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
 using WizardMonks.Models.Spells;

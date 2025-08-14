@@ -8,11 +8,19 @@ using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Covenants
 {
+    public enum CovenantRole
+    {
+        Founder,
+        FullMember,
+        Apprentice,
+        Visitor // For magi staying for an extended period, like the hedge wizards
+    }
+
     [Serializable]
 	public class Covenant : IBeliefSubject
 	{
-		protected List<Magus> _magi;
-		protected Dictionary<Ability, double> _visSources;
+        protected Dictionary<Magus, CovenantRole> _inhabitants;
+        protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<ABook> _library;
         public Aura Aura { get; private set; }
@@ -21,7 +29,7 @@ namespace WizardMonks.Models.Covenants
 
         public Covenant()
         {
-            _magi = [];
+            _inhabitants = [];
             _visSources = [];
             _visStock = [];
             _library = [];
@@ -33,20 +41,39 @@ namespace WizardMonks.Models.Covenants
             Aura = aura;
         }
 
-        public void AddMagus(Magus mage)
+        public void AddMagus(Magus mage, CovenantRole role = CovenantRole.FullMember)
         {
-            if (!_magi.Contains(mage))
+            if (!_inhabitants.ContainsKey(mage))
             {
-                _magi.Add(mage);
+                _inhabitants.Add(mage, role);
+            }
+            else
+            {
+                // If they are already here, maybe just update their role
+                _inhabitants[mage] = role;
             }
         }
 
         public void RemoveMagus(Magus mage)
         {
-            if (_magi.Contains(mage))
+            if (_inhabitants.ContainsKey(mage))
             {
-                _magi.Remove(mage);
+                _inhabitants.Remove(mage);
             }
+        }
+
+        public IEnumerable<Magus> GetMagiByRole(CovenantRole role)
+        {
+            return _inhabitants.Where(kvp => kvp.Value == role).Select(kvp => kvp.Key);
+        }
+
+        public CovenantRole? GetRoleForMagus(Magus mage)
+        {
+            if (_inhabitants.TryGetValue(mage, out CovenantRole role))
+            {
+                return role;
+            }
+            return null;
         }
 
         public void AddBook(ABook book)

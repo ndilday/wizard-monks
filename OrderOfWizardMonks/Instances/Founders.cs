@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Research;
 
 namespace WizardMonks.Instances
 {
@@ -155,6 +152,12 @@ namespace WizardMonks.Instances
 
         public static void BuildBonisagus()
         {
+            HermeticTheory bonisagusTheory = new HermeticTheory("");
+            bonisagusTheory.KnownHermeticAbilities.Add(Abilities.ParmaMagica);
+            bonisagusTheory.KnownDurations.Add(Models.Spells.Durations.Instantaneous);
+            bonisagusTheory.KnownRanges.Add(Models.Spells.Ranges.Touch);
+            bonisagusTheory.KnownTargets.Add(Models.Spells.Targets.Individual);
+
             var bonisagusPersonality = new Personality(new Dictionary<HexacoFacet, double>
             {
                 // High Conscientiousness, High Openness, Low Agreeableness - a driven, brilliant, and difficult man.

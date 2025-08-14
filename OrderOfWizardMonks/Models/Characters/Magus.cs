@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Decisions.Goals;
-using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Ideas;

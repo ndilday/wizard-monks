@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using WizardMonks.Decisions;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;

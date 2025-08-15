@@ -33,6 +33,12 @@ namespace WizardMonks.Activities.ExposingActivities
                 amountTrained = abilityDifference;
             }
             Student.GetAbility(AbilityToTrain).AddExperience(amountTrained);
+
+            // If the trainer is a Magus and the student is their apprentice, update the timestamp.
+            if (character is Magus master && master.Apprentice == this.Student)
+            {
+                master.LastSeasonTrainedApprentice = master.SeasonalAge;
+            }
         }
 
         public override bool Matches(IActivity action)

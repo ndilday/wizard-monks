@@ -12,7 +12,7 @@ namespace WizardMonks.Activities
     {
         private readonly double _quality = quality;
         private readonly double _maxLevel = maxLevel;
-        private readonly Ability _topic = topic;
+        public Ability Topic { get; private set; } = topic;
         private readonly Character _teacher = teacher;
 
         public Activity Action
@@ -24,7 +24,7 @@ namespace WizardMonks.Activities
 
         public void Act(Character character)
         {
-            character.GetAbility(_topic).AddExperience(_quality, _maxLevel);
+            character.GetAbility(Topic).AddExperience(_quality, _maxLevel);
         }
 
         public bool Matches(IActivity action)

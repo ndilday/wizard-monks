@@ -24,5 +24,10 @@ namespace WizardMonks.Models.Beliefs
         {
             return _beliefs.TryGetValue(topic, out var belief) ? belief.Magnitude : 0.0;
         }
+
+        public IEnumerable<Belief> GetAllBeliefs()
+        {
+            return _beliefs.Values;
+        }
     }
 }

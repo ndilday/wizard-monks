@@ -6,13 +6,13 @@ using WizardMonks.Services.Characters;
 namespace WizardMonks.Activities.ExposingActivities
 {
     [Serializable]
-    public class Teach : AExposingActivity
+    public class TeachActivity : AExposingActivity
     {
         public bool Completed { get; private set; }
         // TODO: enable multiple students
         public Character Student { get; private set; }
         public Ability Topic { get; private set; }
-        public Teach(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
+        public TeachActivity(Character student, Ability abilityToTeach, Ability exposure, double desire) : base(exposure, desire)
         {
             Action = Activity.Teach;
             Student = student;
@@ -30,6 +30,12 @@ namespace WizardMonks.Activities.ExposingActivities
             double quality = character.GetAbility(Abilities.Teaching).Value + character.GetAttributeValue(AttributeType.Communication) + 6;
             Student.Advance(new LearnActivity(quality, character.GetAbility(Topic).Value, Topic, character));
             Completed = true;
+
+            // If the teacher is a Magus and the student is their apprentice, update the timestamp.
+            if (character is Magus master && master.Apprentice == this.Student)
+            {
+                master.LastSeasonTrainedApprentice = master.SeasonalAge;
+            }
         }
 
         public override bool Matches(IActivity action)
@@ -38,7 +44,7 @@ namespace WizardMonks.Activities.ExposingActivities
             {
                 return false;
             }
-            Teach teach = (Teach)action;
+            TeachActivity teach = (TeachActivity)action;
             return teach.Student == Student && teach.Topic == Topic;
         }
 

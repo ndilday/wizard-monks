@@ -69,7 +69,7 @@ namespace WizardMonks.Services.Characters
             else
             {
                 ConsideredActions actions = new();
-                foreach (IGoal goal in character.Goals)
+                foreach (IGoal goal in character.ActiveGoals)
                 {
                     if (!goal.IsComplete())
                     {
@@ -84,14 +84,14 @@ namespace WizardMonks.Services.Characters
 
         public static void ReprioritizeGoals(this Character character)
         {
-            foreach (IGoal goal in character.Goals.ToList())
+            foreach (IGoal goal in character.ActiveGoals.ToList())
             {
                 if (!goal.IsComplete())
                 {
                     if (goal.AgeToCompleteBy < character.SeasonalAge)
                     {
                         character.Log.Add("Failed to achieve a goal");
-                        character.Goals.Remove(goal);
+                        character.ActiveGoals.Remove(goal);
                     }
                 }
             }

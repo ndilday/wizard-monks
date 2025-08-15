@@ -38,6 +38,8 @@ namespace WizardMonks.Models.Characters
         public List<LabText> LabTextsOwned { get; private set; }
         public Ability MagicAbility { get; private set; }
         public Magus Apprentice { get; private set; }
+        public uint ApprenticeTrainingStartSeason { get; set; }
+        public uint LastSeasonTrainedApprentice { get; set; } 
         public Laboratory Laboratory { get; set; }
         public List<Spell> SpellList { get; private set; }
         public Dictionary<Ability, double> VisStock { get; private set; }
@@ -55,9 +57,9 @@ namespace WizardMonks.Models.Characters
                 WantsToFollow = false;
             }
         }
-        public Covenant Covenant { get; private set; }
+        public Covenant Covenant { get; set; }
         public Arts Arts { get; private set; }
-        public double VisStudyRate { get; private set; }
+        public double VisStudyRate { get; set; }
         #endregion
 
         #region Initialization Functions
@@ -90,7 +92,7 @@ namespace WizardMonks.Models.Characters
 
         private void InitializeGoals()
         {
-            Goals.Add(new AvoidDecrepitudeGoal(this, 1.0));
+            ActiveGoals.Add(new AvoidDecrepitudeGoal(this, 1.0));
         }
         #endregion
 
@@ -105,26 +107,6 @@ namespace WizardMonks.Models.Characters
             {
                 return base.GetAbility(ability);
             }
-        }
-        #endregion
-
-        #region Covenant Functions
-        public void Join(Covenant covenant)
-        {
-            if (Covenant != null)
-            {
-                Covenant.RemoveMagus(this);
-            }
-            Covenant = covenant;
-            covenant.AddMagus(this);
-            VisStudyRate = 6.75 + covenant.Aura.Strength;
-        }
-
-        public Covenant FoundCovenant(Aura aura)
-        {
-            Covenant coventant = new(aura);
-            Join(coventant);
-            return coventant;
         }
         #endregion
 
@@ -143,7 +125,7 @@ namespace WizardMonks.Models.Characters
                 Log.Add($"Gained a new idea: {idea.Description}");
 
                 // Add a new goal to pursue this inspiration
-                Goals.Add(new PursueIdeaGoal(this, idea));
+                ActiveGoals.Add(new PursueIdeaGoal(this, idea));
             }
         }
         #endregion
@@ -151,23 +133,30 @@ namespace WizardMonks.Models.Characters
         #region Apprentice Functions
         public void TakeApprentice(Magus apprentice)
         {
-            // TODO: what sort of error checking should go here?
-            Apprentice = apprentice;
-            // add a teaching goal for each year
-            for (byte i = 2; i < 16; i++)
+            if (Apprentice != null)
             {
-                uint dueDate = (uint)(i * 4);
-                IGoal teachingGoal = new TeachApprenticeGoal(this, SeasonalAge + i - 1, 1);
-                Goals.Add(teachingGoal);
+                // Can't take a new one while you still have one
+                return;
             }
-            IGoal gauntletGoal = new GauntletApprenticeGoal(this, SeasonalAge + 60, 1);
-            Goals.Add(gauntletGoal);
+            Apprentice = apprentice;
+
+            // The "Opening of the Arts" counts as the first year's training.
+            // We record the current season as the start and last-trained timestamp.
+            ApprenticeTrainingStartSeason = this.SeasonalAge;
+            LastSeasonTrainedApprentice = this.SeasonalAge;
         }
 
         public void GauntletApprentice()
         {
-            Apprentice.House = House;
-            Apprentice = null;
+            if (Apprentice != null)
+            {
+                Apprentice.House = this.House;
+                Apprentice = null;
+                Apprentice.Covenant.RemoveMagus(Apprentice);
+                Apprentice.Covenant.AddMagus(Apprentice, CovenantRole.Visitor);
+                ApprenticeTrainingStartSeason = 0;
+                LastSeasonTrainedApprentice = 0;
+            }
         }
         #endregion
 

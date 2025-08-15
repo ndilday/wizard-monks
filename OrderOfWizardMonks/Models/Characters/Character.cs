@@ -83,7 +83,8 @@ namespace WizardMonks.Models.Characters
         public ushort LongevityRitual { get; set; }
         public byte Decrepitude { get; set; }
         public CharacterAbility Warping { get; private set; }
-        public List<IGoal> Goals { get; private set; }
+        public List<IGoal> ActiveGoals { get; private set; }
+        public List<IGoal> CompletedGoals { get; private set; }
         public Desires Desires { get; set; }
         public IList<Aura> KnownAuras { get; private set; }
         public string Name { get; set; }
@@ -95,7 +96,7 @@ namespace WizardMonks.Models.Characters
         public HashSet<ABook> BooksRead { get; private set; }
         public List<ABook> Books { get; private set; }
         public List<Summa> IncompleteBooks { get; private set; }
-        public Dictionary<Guid, BeliefProfile> Beliefs { get; private set; }
+        public Dictionary<IBeliefSubject, BeliefProfile> Beliefs { get; private set; }
         public Dictionary<string, double> ReputationFocuses { get; private set; }
         public Season CurrentSeason { get; set; }
         public List<string> Log { get; private set; }
@@ -155,7 +156,7 @@ namespace WizardMonks.Models.Characters
             WritingAbilities = [_writingAbility, WritingLanguage];
 
             IncompleteBooks = new List<Summa>();
-            Goals = new List<IGoal>();
+            ActiveGoals = new List<IGoal>();
             Log = new List<string>();
             Warping = new CharacterAbility(Abilities.Warping);
             Personality = personality ?? new Personality();
@@ -195,6 +196,16 @@ namespace WizardMonks.Models.Characters
         public int GetSeasonActivityLength()
         {
             return _seasonList.Count;
+        }
+
+        public BeliefProfile GetBeliefProfile(IBeliefSubject subject)
+        {
+            if (!Beliefs.TryGetValue(subject, out var profile))
+            {
+                profile = new BeliefProfile();
+                Beliefs[subject] = profile;
+            }
+            return profile;
         }
 
         #region Ability Functions
@@ -243,7 +254,7 @@ namespace WizardMonks.Models.Characters
 
         public void AddGoal(IGoal goal)
         {
-            Goals.Add(goal);
+            ActiveGoals.Add(goal);
         }
         #endregion
 
@@ -251,6 +262,17 @@ namespace WizardMonks.Models.Characters
         public override string ToString()
         {
             return Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not Character other) return false;
+            return this.Name == other.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode();
         }
         #endregion
     }

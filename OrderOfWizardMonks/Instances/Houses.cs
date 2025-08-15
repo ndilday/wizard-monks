@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WizardMonks.Models.Beliefs;
+using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Instances
 {
@@ -50,6 +51,17 @@ namespace WizardMonks.Instances
                 // Use a deterministic GUID for enums so it's consistent across runs
                 Id = new Guid(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte)house });
                 Name = house.ToString();
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is not HouseSubject other) return false;
+                return this.Name == other.Name;
+            }
+
+            public override int GetHashCode()
+            {
+                return this.Name.GetHashCode();
             }
         }
     }

@@ -95,36 +95,6 @@ namespace WizardMonks.Services.Characters
             mage.GetAbility(exposureAbility).AddExperience(2);
         }
 
-        public static void InventSpell(this Magus mage, Spell spell)
-        {
-            // TODO: multiple spells in a season
-            // TODO: foci
-            double labTotal = mage.GetSpellLabTotal(spell);
-            if (labTotal <= spell.Level)
-            {
-                throw new ArgumentException("This mage cannot invent this spell!");
-            }
-
-            if (spell == mage.PartialSpell)
-            {
-                // continue previous spell work
-                mage.PartialSpellProgress += labTotal - spell.Level;
-                if (mage.PartialSpellProgress >= mage.PartialSpell.Level)
-                {
-                    mage.LearnSpell(mage.PartialSpell);
-                }
-            }
-            else if (labTotal >= spell.Level * 2)
-            {
-                mage.LearnSpell(spell);
-            }
-            else
-            {
-                mage.PartialSpell = spell;
-                mage.PartialSpellProgress = labTotal - spell.Level;
-            }
-        }
-
         public static void LearnSpellFromLabText(this Magus mage, LabText text)
         {
             // TODO: multiple spells in a season
@@ -154,12 +124,10 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        private static void LearnSpell(this Magus mage, Spell spell)
+        public static void LearnSpell(this Magus mage, Spell spell)
         {
             mage.SpellList.Add(spell);
-            mage.PartialSpell = null;
-            mage.PartialSpellProgress = 0;
-            LabText newLabText = new LabText
+            LabText newLabText = new()
             {
                 Author = mage,
                 IsShorthand = true,

@@ -5,6 +5,7 @@ using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Ideas;
+using WizardMonks.Models.Projects; // Add this using statement
 
 namespace WizardMonks
 {
@@ -31,10 +32,7 @@ namespace WizardMonks
 
         private static void GenerateRandomIdea(Magus magus, IActivity activity)
         {
-            // This is where the "mixed system" logic lives.
-            // For now, we will create a simple contextual Idea.
-            // This can be expanded with personality-driven logic later.
-
+            // Pass the magus object down to get context
             ArtPair inspiredArts = GetContextualArts(magus, activity);
             if (inspiredArts != null)
             {
@@ -49,7 +47,16 @@ namespace WizardMonks
             // Inventing a spell. The idea is for a related spell.
             if (activity is InventSpellActivity invent)
             {
-                return invent.Spell.Base.ArtPair;
+                // Look up the project using the ID from the activity
+                var project = magus.ActiveProjects
+                    .OfType<SpellInventionProject>()
+                    .FirstOrDefault(p => p.ProjectId == invent.ProjectId);
+
+                // If the project is found, get the ArtPair from the spell being invented
+                if (project != null)
+                {
+                    return project.SpellToInvent.Base.ArtPair;
+                }
             }
 
             // Studying vis. The idea is inspired by the Art being studied.
@@ -62,7 +69,7 @@ namespace WizardMonks
                 {
                     // The studied Art is the Technique. We must select a random Form.
                     technique = study.Art;
-                    var forms = MagicArts.GetEnumerator().Where(MagicArts.IsForm).ToList();
+                    var forms = MagicArts.GetEnumerator().Where(a => MagicArts.IsForm(a)).ToList();
                     int randomIndex = (int)(Die.Instance.RollDouble() * forms.Count);
                     form = forms[randomIndex];
                 }
@@ -70,7 +77,7 @@ namespace WizardMonks
                 {
                     // The studied Art is the Form. We must select a random Technique.
                     form = study.Art;
-                    var techniques = MagicArts.GetEnumerator().Where(MagicArts.IsTechnique).ToList();
+                    var techniques = MagicArts.GetEnumerator().Where(a => MagicArts.IsTechnique(a)).ToList();
                     int randomIndex = (int)(Die.Instance.RollDouble() * techniques.Count);
                     technique = techniques[randomIndex];
                 }
@@ -80,7 +87,7 @@ namespace WizardMonks
 
             // Add more contexts for other activities...
 
-            // Fallback: base it on the magus's highest Arts. This logic is sound.
+            // Fallback: base it on the magus's highest Arts.
             var topTech = magus.Arts.OrderByDescending(a => a.Value).First(a => MagicArts.IsTechnique(a.Ability));
             var topForm = magus.Arts.OrderByDescending(a => a.Value).First(a => MagicArts.IsForm(a.Ability));
             return new ArtPair(topTech.Ability, topForm.Ability);

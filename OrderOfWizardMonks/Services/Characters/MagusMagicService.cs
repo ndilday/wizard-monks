@@ -5,6 +5,7 @@ using WizardMonks.Activities;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 
@@ -138,6 +139,20 @@ namespace WizardMonks.Services.Characters
                 }
             }
             return true;
+        }
+
+        public static double CalculatePrestigeValueForSpell(this Magus magus, Spell spell)
+        {
+            var payload = new List<Belief>();
+            double magnitude = spell.Level / 5.0; // Prestige scales with magnitude
+
+            // A powerful spell reflects well on both of the Arts used to create it.
+            payload.Add(new Belief(spell.Base.ArtPair.Technique.AbilityName, magnitude));
+            payload.Add(new Belief(spell.Base.ArtPair.Form.AbilityName, magnitude));
+
+            // The total prestige value is the sum of the value of each belief,
+            // as calculated by the character's personal reputation focuses.
+            return payload.Sum(b => magus.CalculateBeliefValue(b));
         }
     }
 }

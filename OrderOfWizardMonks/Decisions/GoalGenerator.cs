@@ -115,11 +115,6 @@ namespace WizardMonks.Decisions
 
         private static IEnumerable<IGoal> GenerateGoalsFromPersonality(Magus magus)
         {
-            // This is where personality drives ambition.
-            // Example: A proud magus (low Modesty) wants to write books.
-            double prideFactor = magus.Personality.GetInverseDesireMultiplier(HexacoFacet.Modesty);
-           yield return new GainReputationGoal(magus, prideFactor);
-
             // Example: An inquisitive magus wants to do original research
             double curiosityFactor = magus.Personality.GetDesireMultiplier(HexacoFacet.Inquisitiveness);
             if (curiosityFactor > 1.1)

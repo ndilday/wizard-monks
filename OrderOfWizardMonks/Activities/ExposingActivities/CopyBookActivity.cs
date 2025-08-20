@@ -3,6 +3,7 @@ using System.Linq;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Projects;
 
 namespace WizardMonks.Activities.ExposingActivities
 {
@@ -11,13 +12,15 @@ namespace WizardMonks.Activities.ExposingActivities
     {
         // TODO: handle multiple books to copy
         public bool CopyQuickly { get; private set; }
+        public Guid? ProjectId { get; private set; }
         public ABook Book { get; private set; }
 
-        public CopyBookActivity(bool copyQuickly, ABook bookToCopy, Ability exposure, double desire)
+        public CopyBookActivity(bool copyQuickly, ABook bookToCopy, Guid? projectId, Ability exposure, double desire)
             : base(exposure, desire)
         {
             CopyQuickly = copyQuickly;
             Book = bookToCopy;
+            ProjectId = projectId;
             Action = Activity.CopyBook;
         }
 
@@ -36,56 +39,37 @@ namespace WizardMonks.Activities.ExposingActivities
                 character.AddBookToCollection(tract);
                 character.Log.Add($"Finished copying the tractatus '{Book.Title}'.");
             }
-            else if (Book is Summa summaToCopy)
+            else if (ProjectId.HasValue)
             {
-                // Find if a copy is already in progress. We identify it by the original's title and author.
-                Summa existingCopy = character.IncompleteCopies.FirstOrDefault(c => c.Title == summaToCopy.Title && c.Author == summaToCopy.Author);
-
-                if (existingCopy == null)
+                var project = character.ActiveProjects.OfType<SummaCopyingProject>().FirstOrDefault(p => p.ProjectId == ProjectId.Value);
+                if (project == null)
                 {
-                    // Start a new copy project
-                    existingCopy = new Summa
-                    {
-                        Author = summaToCopy.Author,
-                        Quality = summaToCopy.Quality,
-                        Title = summaToCopy.Title, // We use the original title to track the project
-                        Topic = summaToCopy.Topic,
-                        Level = summaToCopy.Level,
-                        PointsComplete = 0
-                    };
-                    character.IncompleteCopies.Add(existingCopy);
-                    character.Log.Add($"Started copying the summa '{summaToCopy.Title}'.");
+                    character.Log.Add("Attempted to work on a non-existent book copying project.");
+                    return;
                 }
 
-                // Calculate and add this season's progress
                 double progressThisSeason = 6 + character.GetAbility(Abilities.Scribing).Value;
-                existingCopy.PointsComplete += progressThisSeason;
+                project.AddProgress(progressThisSeason);
 
-                // Check for completion
-                if (existingCopy.PointsComplete >= existingCopy.GetWritingPointsNeeded())
+                if (project.IsComplete)
                 {
-                    // The copy is finished.
-                    existingCopy.Title = "Copy of " + existingCopy.Title; // Finalize the title
-                    character.AddBookToCollection(existingCopy);
-                    character.IncompleteCopies.Remove(existingCopy); // Remove from the in-progress list
-                    character.Log.Add($"Completed copying the summa '{summaToCopy.Title}'. Gained a book of L{existingCopy.Level}/Q{existingCopy.Quality}.");
+                    project.Summa.Title = "Copy of " + project.Summa.Title;
+                    character.AddBookToCollection(project.Summa);
+                    character.ActiveProjects.Remove(project);
+                    character.Log.Add($"Completed copying the summa '{Book.Title}'.");
                 }
                 else
                 {
-                    // Not finished yet, log the progress.
-                    character.Log.Add($"Continued copying '{summaToCopy.Title}'. Progress: {existingCopy.PointsComplete:F0}/{existingCopy.GetWritingPointsNeeded():F0}.");
+                    character.Log.Add($"Continued copying '{Book.Title}'. Progress: {project.Progress:F0}/{project.PointsNeeded:F0}.");
                 }
             }
         }
 
         public override bool Matches(IActivity action)
         {
-            if (action.Action != Activity.CopyBook)
-            {
-                return false;
-            }
-            CopyBookActivity copy = (CopyBookActivity)action;
-            return copy.Book == Book && copy.CopyQuickly == CopyQuickly;
+            if (action is not CopyBookActivity copy) return false;
+            // Match on project if it exists, otherwise on the book itself (for Tractatus)
+            return (copy.ProjectId.HasValue && copy.ProjectId == this.ProjectId) || (copy.Book == this.Book);
         }
 
         public override string Log()

@@ -8,6 +8,7 @@ using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Projects;
 using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Models.Characters
@@ -91,11 +92,10 @@ namespace WizardMonks.Models.Characters
         public CharacterAbilityBase WritingCharacterAbility { get; private set; }
         public CharacterAbilityBase WritingLanguageCharacterAbility { get; private set; }
         public List<Ability> WritingAbilities { get; private set; }
+        public List<AProject> ActiveProjects { get; private set; }
         public List<ABook> BooksWritten { get; private set; }
         public HashSet<ABook> BooksRead { get; private set; }
         public List<ABook> Books { get; private set; }
-        public List<Summa> IncompleteBooks { get; private set; }
-        public List<Summa> IncompleteCopies { get; private set; }
         public Dictionary<IBeliefSubject, BeliefProfile> Beliefs { get; private set; }
         public Dictionary<string, double> ReputationFocuses { get; private set; }
         public Season CurrentSeason { get; set; }
@@ -142,11 +142,10 @@ namespace WizardMonks.Models.Characters
 
             _abilityMap = [];
             _seasonList = [];
+            ActiveProjects = [];
             BooksRead = [];
             BooksWritten = [];
             Books = [];
-            IncompleteBooks = [];
-            IncompleteCopies = [];
             IsWritableTopicsCacheClean = false;
 
             _areaAbility = areaAbility;

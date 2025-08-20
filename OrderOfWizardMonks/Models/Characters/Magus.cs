@@ -33,8 +33,6 @@ namespace WizardMonks.Models.Characters
         #endregion
 
         #region Public Properties
-        public Spell PartialSpell { get; set; }
-        public double PartialSpellProgress { get; set; }
         public List<LabText> LabTextsOwned { get; private set; }
         public Ability MagicAbility { get; private set; }
         public Magus Apprentice { get; private set; }
@@ -77,8 +75,6 @@ namespace WizardMonks.Models.Characters
             LabTextsOwned = [];
             DecipheredShorthandLevels = [];
             ShorthandTranslationProgress = [];
-            PartialSpell = null;
-            PartialSpellProgress = 0;
             _ideas = [];
             VisStudyRate = 6.75;
             House = house;

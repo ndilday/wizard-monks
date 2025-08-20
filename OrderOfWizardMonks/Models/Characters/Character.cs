@@ -95,6 +95,7 @@ namespace WizardMonks.Models.Characters
         public HashSet<ABook> BooksRead { get; private set; }
         public List<ABook> Books { get; private set; }
         public List<Summa> IncompleteBooks { get; private set; }
+        public List<Summa> IncompleteCopies { get; private set; }
         public Dictionary<IBeliefSubject, BeliefProfile> Beliefs { get; private set; }
         public Dictionary<string, double> ReputationFocuses { get; private set; }
         public Season CurrentSeason { get; set; }
@@ -139,11 +140,13 @@ namespace WizardMonks.Models.Characters
             _baseAge = baseSeasonableAge;
             MandatoryAction = null;
 
-            _abilityMap = new Dictionary<int, CharacterAbilityBase>();
-            _seasonList = new List<IActivity>();
-            BooksRead = new HashSet<ABook>();
-            BooksWritten = new List<ABook>();
-            Books = new List<ABook>();
+            _abilityMap = [];
+            _seasonList = [];
+            BooksRead = [];
+            BooksWritten = [];
+            Books = [];
+            IncompleteBooks = [];
+            IncompleteCopies = [];
             IsWritableTopicsCacheClean = false;
 
             _areaAbility = areaAbility;
@@ -153,9 +156,8 @@ namespace WizardMonks.Models.Characters
             WritingLanguageCharacterAbility = GetAbility(writingLanguage);
             WritingAbilities = [_writingAbility, WritingLanguage];
 
-            IncompleteBooks = new List<Summa>();
-            ActiveGoals = new List<IGoal>();
-            Log = new List<string>();
+            ActiveGoals = [];
+            Log = [];
             Warping = new CharacterAbility(Abilities.Warping);
             Personality = personality ?? new Personality();
             if(reputationFocuses != null)

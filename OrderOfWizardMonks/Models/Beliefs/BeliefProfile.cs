@@ -2,9 +2,20 @@
 
 namespace WizardMonks.Models.Beliefs
 {
+    public enum SubjectType { Character, Covenant, Aura, Book, Spell, Idea, Other }
+
     public class BeliefProfile
     {
-        private readonly Dictionary<string, Belief> _beliefs = [];
+        public SubjectType Type { get; private set; }
+        public double Confidence { get; set; }
+        private readonly Dictionary<string, Belief> _beliefs;
+
+        public BeliefProfile(SubjectType type, double initialConfidence)
+        {
+            Type = type;
+            Confidence = initialConfidence;
+            _beliefs = [];
+        }
 
         public void AddOrUpdateBelief(Belief newBelief)
         {
@@ -28,6 +39,11 @@ namespace WizardMonks.Models.Beliefs
         public IEnumerable<Belief> GetAllBeliefs()
         {
             return _beliefs.Values;
+        }
+
+        public void RemoveBelief(string topic)
+        {
+            _beliefs?.Remove(topic);
         }
     }
 }

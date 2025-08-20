@@ -12,7 +12,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 {
     public class FindVisSourceHelper : AHelper
     {
-        private int _auraCount;
+        private IEnumerable<Aura> _auras;
         private double _currentAura;
         private double _currentVis;
         private double _currentScore;
@@ -25,8 +25,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         {
             _visTypes = visTypes;
             _findVisSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
-            _auraCount = mage.KnownAuras.Count;
-            if (_auraCount == 0)
+            _auras = mage.GetOwnedAuras();
+            int auraCount = _auras.Count();
+            if (auraCount == 0)
             {
                 _currentAura = 0;
                 _currentVis = 0;
@@ -35,7 +36,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 // find the aura with the most vis scource "capacity"
                 // this magic lore score builds in an assumed roll on the aura search of 2.5
-                Aura aura = _mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                Aura aura = _auras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 _currentAura = aura.Strength;
                 _currentVis = aura.VisSources.Sum(vs => vs.Amount);
             }
@@ -64,9 +65,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 _magicLoreTotal += _mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
             }
-            if (_mage.KnownAuras.Any())
+            if (_auras.Any())
             {
-                Aura aura = _mage.KnownAuras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
+                Aura aura = _auras.OrderByDescending(a => a.GetAverageVisSourceSize(_magicLoreTotal)).First();
                 double averageFind = aura.GetAverageVisSourceSize(_magicLoreTotal);
                 if (averageFind > 1.0)
                 {

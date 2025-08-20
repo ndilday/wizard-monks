@@ -10,5 +10,7 @@
             Topic = topic;
             Magnitude = magnitude;
         }
+
+        public Belief(BeliefTopic topic, double magnitude) : this(topic.Name, magnitude) { }
     }
 }

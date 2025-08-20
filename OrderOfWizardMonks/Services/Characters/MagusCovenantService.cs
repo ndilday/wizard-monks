@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Covenants;
 using static System.Net.Mime.MediaTypeNames;
@@ -28,10 +29,8 @@ namespace WizardMonks.Services.Characters
         {
             if (mage.Covenant != null)
             {
-                // basically, need to leave the covenant and forget all known Auras (until we come up with a notion of Aura ownership)
                 mage.Covenant.RemoveMagus(mage);
                 mage.Covenant = null;
-                mage.KnownAuras.Clear();
             }
 
         }
@@ -40,6 +39,9 @@ namespace WizardMonks.Services.Characters
         {
             Covenant coventant = new(aura);
             mage.JoinCovenant(coventant, CovenantRole.Founder);
+            var auraBeliefs = mage.GetBeliefProfile(aura);
+            // the mage now believes the aura is owned by the covenant
+            auraBeliefs.AddOrUpdateBelief(new(BeliefTopics.Owner, coventant.Id.GetHashCode()));
             return coventant;
         }
     }

@@ -91,6 +91,10 @@ namespace WizardMonks.Models.Beliefs
         public static readonly BeliefTopic Communication = new("Communication");
         public static readonly BeliefTopic Perception = new("Perception");
         public static readonly BeliefTopic Presence = new("Presence");
+
+        public static readonly BeliefTopic Owner = new("Owner");
+        public static readonly BeliefTopic HedgeMage = new("Hedge Mage");
+        public static readonly BeliefTopic HermeticTeacher = new("Hermetic Teacher");
         
         // ... etc. This can be expanded infinitely.
     }

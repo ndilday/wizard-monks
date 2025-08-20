@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using WizardMonks.Activities.ExposingActivities;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Conditions
 {
@@ -16,7 +18,7 @@ namespace WizardMonks.Decisions.Conditions
         {
             get
             {
-                return Character.KnownAuras != null && Character.KnownAuras.Count > 0;
+                return Character.GetOwnedAuras().Count() > 0;
             }
         }
 

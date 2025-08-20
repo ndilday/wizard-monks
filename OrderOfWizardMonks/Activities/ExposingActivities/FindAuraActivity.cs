@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
 using WizardMonks.Services.Characters;
@@ -41,6 +43,28 @@ namespace WizardMonks.Activities.ExposingActivities
 
         private void MageAuraSearch(Magus mage)
         {
+            double areaLore = CalculateSearchScore(mage);
+
+            double roll = Die.Instance.RollDouble() * 5;
+
+            // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
+            double auraFound = Math.Sqrt(roll * areaLore / (mage.GetOwnedAuras().Count() + 1));
+            if (auraFound >= 1)
+            {
+                Aura aura = new(Domain.Magic, auraFound);
+                mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.000"));
+                BeliefProfile auraBelief = new(SubjectType.Aura, 1.0);
+                auraBelief.AddOrUpdateBelief(new(BeliefTopics.Strength, aura.Strength));
+                mage.AddOrUpdateKnowledge(aura, auraBelief);
+                if (mage.Covenant == null || mage.Laboratory == null && mage.Covenant.Aura.Strength < aura.Strength)
+                {
+                    mage.FoundCovenant(aura);
+                }
+            }
+        }
+
+        private static double CalculateSearchScore(Magus mage)
+        {
             // add bonus to area lore equal to casting total div 10?
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetAttribute(AttributeType.Perception).Value;
@@ -57,20 +81,7 @@ namespace WizardMonks.Activities.ExposingActivities
                 areaLore += mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
             }
 
-            double roll = Die.Instance.RollDouble() * 5;
-
-            // die roll will be 0-5; area lore will be between 0 and 15, giving auras between 0 and 9
-            double auraFound = Math.Sqrt(roll * areaLore / (mage.KnownAuras.Count + 1));
-            if (auraFound >= 1)
-            {
-                Aura aura = new(Domain.Magic, auraFound);
-                mage.Log.Add("Found an aura of strength " + auraFound.ToString("0.000"));
-                mage.KnownAuras.Add(aura);
-                if (mage.Covenant == null || mage.Laboratory == null && mage.Covenant.Aura.Strength < aura.Strength)
-                {
-                    mage.FoundCovenant(aura);
-                }
-            }
+            return areaLore;
         }
 
         public override bool Matches(IActivity action)

@@ -39,7 +39,7 @@ namespace WizardMonks.Services.Characters
 
         public static double GetAverageAuraFound(this Magus mage)
         {
-            double auraCount = mage.KnownAuras.Count;
+            double auraCount = mage.GetOwnedAuras().Count();
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
             areaLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 10;
             areaLore += mage.GetAttribute(AttributeType.Perception).Value;

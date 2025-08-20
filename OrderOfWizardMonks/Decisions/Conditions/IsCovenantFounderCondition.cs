@@ -41,7 +41,7 @@ namespace WizardMonks.Decisions.Conditions
                 }
                 else
                 {
-                    _mage.FoundCovenant(_mage.KnownAuras.OrderByDescending(a => a.Strength).First());
+                    _mage.FoundCovenant(_mage.GetOwnedAuras().OrderByDescending(a => a.Strength).First());
                     BuildLaboratoryActivity buildLabAction = new(Abilities.MagicTheory, this.Desire / (AgeToCompleteBy - Character.SeasonalAge));
                     alreadyConsidered.Add(buildLabAction);
                     log.Add("Building a lab worth " + this.Desire.ToString("0.000"));

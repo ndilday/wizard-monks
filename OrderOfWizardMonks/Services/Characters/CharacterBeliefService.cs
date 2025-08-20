@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using WizardMonks.Instances;
+using WizardMonks.Models;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 
@@ -16,11 +19,7 @@ namespace WizardMonks.Services.Characters
 
         public static BeliefProfile GetBeliefProfile(this Character character, IBeliefSubject subject)
         {
-            if (!character.Beliefs.TryGetValue(subject.Id, out var profile))
-            {
-                profile = new();
-                character.Beliefs[subject.Id] = profile;
-            }
+            character.Beliefs.TryGetValue(subject, out var profile);
             return profile;
         }
 
@@ -61,6 +60,45 @@ namespace WizardMonks.Services.Characters
             // The final value incorporates the belief's strength, its general importance (weight),
             // and the magus's personal investment in the topic (focusMultiplier).
             return belief.Magnitude * baseWeight * focusMultiplier;
+        }
+
+
+
+        public static IEnumerable<Aura> GetKnownAuras(this Character character)
+        {
+            return character.Beliefs
+                .Where(kvp => kvp.Value.Type == SubjectType.Aura && kvp.Value.Confidence > 0.5) // Only return "known" auras
+                .Select(kvp => (Aura)kvp.Key);
+        }
+
+        public static IEnumerable<Aura> GetOwnedAuras(this Character character)
+        {
+            int charHash = character.Id.GetHashCode();
+            bool hasCov = false;
+            int covHash = 0;
+            if (character is Magus mage && mage.Covenant != null)
+            {
+                hasCov = true;
+                covHash = mage.Covenant.Id.GetHashCode();
+            }
+            return character.Beliefs
+                .Where(kvp => kvp.Value.Type == SubjectType.Aura 
+                    && kvp.Value.Confidence > 0.5 
+                    && (kvp.Value.GetBeliefMagnitude(BeliefTopics.Owner.Name) == charHash || (hasCov && kvp.Value.GetBeliefMagnitude(BeliefTopics.Owner.Name) == covHash))) // Only return "known" auras
+                .Select(kvp => (Aura)kvp.Key);
+        }
+
+        public static IEnumerable<HedgeMagus> GetKnownHedgeMagi(this Character character)
+        {
+            return character.Beliefs
+                .Where(kvp => kvp.Value.Type == SubjectType.Character && kvp.Value.GetAllBeliefs().Any(b => b.Topic=="HedgeMage") && kvp.Value.Confidence > 0.5)
+                .Select(kvp => (HedgeMagus)kvp.Key);
+        }
+
+        // Universal method to "learn of" something
+        public static void AddOrUpdateKnowledge(this Character character, IBeliefSubject subject, BeliefProfile profile)
+        {
+            character.Beliefs[subject] = profile;
         }
     }
 }

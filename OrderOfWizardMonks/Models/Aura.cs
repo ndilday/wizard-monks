@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models
@@ -23,8 +24,10 @@ namespace WizardMonks.Models
         Winter = 0x8
     }
 
-    public class VisSource
+    public class VisSource : IBeliefSubject
     {
+        public Guid Id { get; private set; } = Guid.NewGuid();
+        public string Name { get; set; }
         public Aura Aura { get; private set; }
         public Ability Art { get; private set; }
         public Season Seasons { get; private set; }
@@ -63,8 +66,10 @@ namespace WizardMonks.Models
         }
     }
 
-    public class Aura
+    public class Aura : IBeliefSubject
     {
+        public Guid Id { get; private set; }
+        public string Name { get; private set; }
         public Domain Domain { get; private set; }
         public double Strength { get; private set; }
         public List<VisSource> VisSources { get; private set; }
@@ -74,6 +79,8 @@ namespace WizardMonks.Models
             Domain = type;
             Strength = strength;
             VisSources = new List<VisSource>();
+            Id = Guid.NewGuid();
+            Name = "Generic Aura Name";
         }
 
         public double GetAverageVisSourceSize(double magicLoreRoll)

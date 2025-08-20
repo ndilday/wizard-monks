@@ -27,31 +27,7 @@ namespace WizardMonks.Activities.ExposingActivities
             }
 
             mage.Log.Add("Searching for a potential apprentice...");
-
-            // Step 1: Calculate the Search Total
-            double searchTotal = 0;
-            searchTotal += mage.GetAbility(Abilities.FolkKen).Value;
-            searchTotal += mage.GetAttributeValue(AttributeType.Perception);
-            // Area Lore and Etiquette provide a smaller, supporting bonus.
-            searchTotal += mage.GetAbility(Abilities.AreaLore).Value / 2.0;
-            searchTotal += mage.GetAbility(Abilities.Etiquette).Value / 2.0;
-
-            // Step 2: Add Magic Bonus
-            SpellBase giftFindingBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift);
-            Spell bestGiftFindingSpell = mage.GetBestSpell(giftFindingBase);
-            double giftFindingBonus = 0;
-
-            if (bestGiftFindingSpell != null)
-            {
-                giftFindingBonus = (bestGiftFindingSpell.Level / 5.0) - 5;
-                mage.Log.Add($"Using '{bestGiftFindingSpell.Name}' to aid the search.");
-            }
-            else
-            {
-                // If no spell is known, use spontaneous magic potential.
-                giftFindingBonus = (mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0) - 5;
-            }
-            searchTotal += giftFindingBonus;
+            double searchTotal = CalculateSearchTotal(mage);
 
             // Step 3: Make the Roll and Determine Outcome
             double roll = Die.Instance.RollStressDie(0, out _); // Botch has no special effect for now.
@@ -79,6 +55,35 @@ namespace WizardMonks.Activities.ExposingActivities
                 // Failure
                 mage.Log.Add("The search for an apprentice was fruitless this season.");
             }
+        }
+
+        private static double CalculateSearchTotal(Magus mage)
+        {
+            // Step 1: Calculate the Search Total
+            double searchTotal = 0;
+            searchTotal += mage.GetAbility(Abilities.FolkKen).Value;
+            searchTotal += mage.GetAttributeValue(AttributeType.Perception);
+            // Area Lore and Etiquette provide a smaller, supporting bonus.
+            searchTotal += mage.GetAbility(Abilities.AreaLore).Value / 2.0;
+            searchTotal += mage.GetAbility(Abilities.Etiquette).Value / 2.0;
+
+            // Step 2: Add Magic Bonus
+            SpellBase giftFindingBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift);
+            Spell bestGiftFindingSpell = mage.GetBestSpell(giftFindingBase);
+            double giftFindingBonus = 0;
+
+            if (bestGiftFindingSpell != null)
+            {
+                giftFindingBonus = (bestGiftFindingSpell.Level / 5.0) - 5;
+                mage.Log.Add($"Using '{bestGiftFindingSpell.Name}' to aid the search.");
+            }
+            else
+            {
+                // If no spell is known, use spontaneous magic potential.
+                giftFindingBonus = (mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0) - 5;
+            }
+            searchTotal += giftFindingBonus;
+            return searchTotal;
         }
 
         public override bool Matches(IActivity action)

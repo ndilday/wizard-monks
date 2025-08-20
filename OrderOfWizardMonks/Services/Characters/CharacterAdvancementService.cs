@@ -146,7 +146,7 @@ namespace WizardMonks.Services.Characters
         {
             mage.IsBestBookCacheClean = false;
             // harvest vis
-            foreach (Aura aura in mage.KnownAuras)
+            foreach (Aura aura in mage.GetOwnedAuras())
             {
                 foreach (VisSource source in aura.VisSources)
                 {

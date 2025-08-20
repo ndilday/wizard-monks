@@ -86,7 +86,6 @@ namespace WizardMonks.Models.Characters
         public List<IGoal> ActiveGoals { get; private set; }
         public List<IGoal> CompletedGoals { get; private set; }
         public Desires Desires { get; set; }
-        public IList<Aura> KnownAuras { get; private set; }
         public string Name { get; set; }
         public Ability WritingLanguage { get; private set; }
         public CharacterAbilityBase WritingCharacterAbility { get; private set; }
@@ -132,7 +131,6 @@ namespace WizardMonks.Models.Characters
 
             Decrepitude = 0;
             CurrentSeason = Season.Spring;
-            KnownAuras = new List<Aura>();
             Beliefs = [];
             IsCollaborating = false;
             WantsToFollow = true;
@@ -196,16 +194,6 @@ namespace WizardMonks.Models.Characters
         public int GetSeasonActivityLength()
         {
             return _seasonList.Count;
-        }
-
-        public BeliefProfile GetBeliefProfile(IBeliefSubject subject)
-        {
-            if (!Beliefs.TryGetValue(subject, out var profile))
-            {
-                profile = new BeliefProfile();
-                Beliefs[subject] = profile;
-            }
-            return profile;
         }
 
         #region Ability Functions

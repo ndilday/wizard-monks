@@ -21,8 +21,9 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _findAuraSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
-            _currentAura = _mage.KnownAuras.Any() ? _mage.KnownAuras.Max(a => a.Strength) : 0;
-            _auraCount = _mage.KnownAuras.Count;
+            var auras = _mage.GetOwnedAuras();
+            _currentAura = auras.Any() ? auras.Max(a => a.Strength) : 0;
+            _auraCount = auras.Count();
             _currentScore = CalculateFindAuraScore();
             _averageGain = GetAverageNewAura(_currentScore);
         }

@@ -149,7 +149,7 @@ namespace WizardMonks.Services.Characters
                     BeliefToReputationNormalizer.CommunicationFromQuality(t.Quality) / 6.0));
             t.BeliefPayload.Add(
                 new Belief(
-                    "Communication", 
+                    BeliefTopics.Communication.Name, 
                     BeliefToReputationNormalizer.FromAttributeScore(author.GetAttributeValue(AttributeType.Communication))));
 
             if (Die.Instance.RollDouble() < 0.10) // Configurable constant here
@@ -307,7 +307,7 @@ namespace WizardMonks.Services.Characters
             }
 
             // All books reflect on the author's Communication skill.
-            payload.Add(new Belief("Communication", BeliefToReputationNormalizer.FromAttributeScore(authorComm)));
+            payload.Add(new Belief(BeliefTopics.Communication, BeliefToReputationNormalizer.FromAttributeScore(authorComm)));
 
             return payload;
         }

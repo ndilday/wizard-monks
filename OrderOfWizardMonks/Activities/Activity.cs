@@ -32,6 +32,8 @@ namespace WizardMonks.Activities
 		RefineLaboratory,
 		InstallLaboratoryFeature,
 		FindApprentice,
+		FindHedgeMage,
+		RecruitHedgeMage,
         GauntletApprentice,
         FindAura,
 		FindVisSource,

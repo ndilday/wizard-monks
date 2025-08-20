@@ -60,6 +60,11 @@ namespace WizardMonks.Instances
             return magus;
         }
 
+        public static Magus GenerateNewHedgeMage()
+        {
+            return null;
+        }
+
         public static Magus GenerateNewApprentice(int bonusPoints)
         {
             Magus magus = new(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);

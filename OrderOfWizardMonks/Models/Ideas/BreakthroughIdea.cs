@@ -1,4 +1,4 @@
-﻿using WizardMonks.Models.Research;
+﻿using WizardMonks.Models.Projects;
 
 namespace WizardMonks.Models.Ideas
 {

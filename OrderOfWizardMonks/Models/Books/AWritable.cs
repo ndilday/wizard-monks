@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Ideas;
-using WizardMonks.Models.Research;
+using WizardMonks.Models.Projects;
 
 namespace WizardMonks.Models.Books
 {

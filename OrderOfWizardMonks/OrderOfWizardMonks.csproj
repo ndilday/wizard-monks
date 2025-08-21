@@ -59,4 +59,7 @@
     <Compile Remove="Decisions\GoalHelpers.cs" />
     <Compile Remove="Goal.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Research\" />
+  </ItemGroup>
 </Project>

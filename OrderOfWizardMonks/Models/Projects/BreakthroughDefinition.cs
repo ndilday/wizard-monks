@@ -2,7 +2,7 @@
 using WizardMonks.Models.Characters;
 
 
-namespace WizardMonks.Models.Research
+namespace WizardMonks.Models.Projects
 {
     public class BreakthroughDefinition
     {

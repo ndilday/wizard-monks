@@ -28,6 +28,11 @@
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Models\Research\**" />
+    <EmbeddedResource Remove="Models\Research\**" />
+    <None Remove="Models\Research\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Update="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -58,8 +63,5 @@
   <ItemGroup>
     <Compile Remove="Decisions\GoalHelpers.cs" />
     <Compile Remove="Goal.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Research\" />
   </ItemGroup>
 </Project>

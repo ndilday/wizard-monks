@@ -7,7 +7,7 @@ using WizardMonks.Models.Spells;
 namespace WizardMonks.Instances
 {
     // TODO: serialize this class
-    static class SpellBases
+    public static class SpellBases
     {
         private static Dictionary<Ability, Dictionary<Ability, List<SpellBase>>> _spellBasesByArts;
         private static Dictionary<TechniqueEffects, Dictionary<FormEffects, SpellBase>> _spellBasesByEffects;
@@ -67,7 +67,7 @@ namespace WizardMonks.Instances
             }
         }
 
-        static IOrderedEnumerable<SpellBase> GetSpellBasesByArtPair(ArtPair pair)
+        public static IOrderedEnumerable<SpellBase> GetSpellBasesByArtPair(ArtPair pair)
         {
             if (!_spellBasesByArts.ContainsKey(pair.Technique) || !_spellBasesByArts[pair.Technique].ContainsKey(pair.Form))
             {

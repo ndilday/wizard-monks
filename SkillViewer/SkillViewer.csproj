@@ -9,9 +9,7 @@
     <StartupObject>SkillViewer.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="ListViewExpanded.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="ListViewExpanded.cs" />
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>

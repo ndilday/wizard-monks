@@ -12,11 +12,11 @@ using WizardMonks.Services.Characters;
 
 public class AvoidDecrepitudeGoal : AGoal
 {
-    private Magus _mage;
+    private HermeticMagus _mage;
     private const ushort FIRST_AGING_SEASON = 140; // Age 35
     private readonly List<Ability> visTypes = [MagicArts.Creo, MagicArts.Vim];
 
-    public AvoidDecrepitudeGoal(Magus magus, double desire)
+    public AvoidDecrepitudeGoal(HermeticMagus magus, double desire)
         : base(magus, null, desire) // Due date is dynamic, so we set it to null here.
     {
         _mage = magus;

@@ -63,7 +63,7 @@ namespace WizardMonks.Decisions.Conditions
                         AddPracticeToActionList(ability, alreadyConsidered, log);
                     }
                     // should we only study vis if we don't have a book?
-                    else if (Character.GetType() == typeof(Magus))
+                    else if (Character.GetType() == typeof(HermeticMagus))
                     {
                         AddVisUseToActionList(ability, alreadyConsidered, desires, log);
                     }
@@ -135,9 +135,9 @@ namespace WizardMonks.Decisions.Conditions
 
         private void AddVisUseToActionList(Ability ability, ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
-            Magus mage = (Magus)Character;
+            HermeticMagus mage = (HermeticMagus)Character;
             CharacterAbilityBase magicArt = mage.GetAbility(ability);
-            double effectiveDesire = GetDesirabilityOfIncrease(magicArt.GetValueGain(mage.VisStudyRate));
+            double effectiveDesire = GetDesirabilityOfIncrease(magicArt.GetValueGain(mage.GetVisStudyAuraBonus()));
             if (!double.IsNaN(effectiveDesire) && effectiveDesire > 0)
             {
                 // see if the mage has enough vis of this type
@@ -157,7 +157,7 @@ namespace WizardMonks.Decisions.Conditions
                 {
                     List<Ability> visType = new();
                     visType.Add(magicArt.Ability);
-                    // Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
+                    // HermeticMagus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth
                     VisCondition visCondition =
                         new(mage, AgeToCompleteBy - 1, effectiveDesire, ability, visNeed, (ushort)(ConditionDepth + 1));
                     visCondition.AddActionPreferencesToList(alreadyConsidered, desires, log);

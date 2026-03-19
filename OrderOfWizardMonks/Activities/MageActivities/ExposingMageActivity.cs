@@ -19,7 +19,7 @@ namespace WizardMonks.Activities.MageActivities
             character.GetAbility(_exposure).AddExperience(2);
         }
 
-        protected abstract void DoMageAction(Magus mage);
+        protected abstract void DoMageAction(HermeticMagus mage);
     }
 
 }

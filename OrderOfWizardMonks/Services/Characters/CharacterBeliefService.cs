@@ -76,7 +76,7 @@ namespace WizardMonks.Services.Characters
             int charHash = character.Id.GetHashCode();
             bool hasCov = false;
             int covHash = 0;
-            if (character is Magus mage && mage.Covenant != null)
+            if (character is HermeticMagus mage && mage.Covenant != null)
             {
                 hasCov = true;
                 covHash = mage.Covenant.Id.GetHashCode();

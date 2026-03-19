@@ -15,9 +15,9 @@ namespace WizardMonks.Economy
         public IEnumerable<BookForTrade> BooksForTrade { get; private set; }
         public IEnumerable<LabTextForTrade> LabTextsForTrade { get; private set; }
         public Dictionary<SpellBase, LabTextDesire> LabTextDesires { get; private set; }
-        public Magus Mage { get; private set; }
+        public HermeticMagus Mage { get; private set; }
 
-        public MagusTradingDesires(Magus magus, VisDesire[] visDesires, 
+        public MagusTradingDesires(HermeticMagus magus, VisDesire[] visDesires, 
                                    IEnumerable<BookDesire> booksDesired, IEnumerable<BookForTrade> booksForTrade,
                                    IEnumerable<LabTextDesire> labTextsDesired, IEnumerable<LabTextForTrade> labTextsForTrade)
         {
@@ -297,7 +297,7 @@ namespace WizardMonks.Economy
             return offerSegments;
         }
 
-        private IList<VisTradeOffer> VisForVis(Magus mage, VisDesire[] otherVisDesires)
+        private IList<VisTradeOffer> VisForVis(HermeticMagus mage, VisDesire[] otherVisDesires)
         {
             // TODO: need to take Vis type into account
             List<VisOffer> bids = new();

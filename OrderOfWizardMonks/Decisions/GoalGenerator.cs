@@ -12,7 +12,7 @@ namespace WizardMonks.Decisions
 {
     public static class GoalGenerator
     {
-        public static void GenerateAndReviewGoals(Magus magus)
+        public static void GenerateAndReviewGoals(HermeticMagus magus)
         {
             // Step 1: Review and remove completed goals
            foreach(IGoal goal in magus.ActiveGoals)
@@ -49,7 +49,7 @@ namespace WizardMonks.Decisions
             }
         }
 
-        private static IEnumerable<IGoal> GenerateFoundationalGoals(Magus magus)
+        private static IEnumerable<IGoal> GenerateFoundationalGoals(HermeticMagus magus)
         {
             // Every magus needs these for survival and basic function.
             if (magus.LongevityRitual == 0 && magus.SeasonalAge >= 120) // age 30
@@ -59,11 +59,11 @@ namespace WizardMonks.Decisions
             // Add other universals here, like "Build a Lab if you don't have one"
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromState(Magus magus)
+        private static IEnumerable<IGoal> GenerateGoalsFromState(HermeticMagus magus)
         {
             // Goals based on "gaps" in the character's status.
 
-            // The "Leaving the Nest" Goal for the newly-minted Hermetic Magus
+            // The "Leaving the Nest" Goal for the newly-minted Hermetic HermeticMagus
             bool hasLearnedHermeticBasics = magus.GetAbility(Abilities.ParmaMagica).Value > 0 && magus.GetAbility(Abilities.MagicTheory).Value > 0;
             if (hasLearnedHermeticBasics && magus.Covenant != null && magus.Covenant.GetRoleForMagus(magus) == CovenantRole.Visitor)
             {
@@ -113,7 +113,7 @@ namespace WizardMonks.Decisions
             }
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromPersonality(Magus magus)
+        private static IEnumerable<IGoal> GenerateGoalsFromPersonality(HermeticMagus magus)
         {
             // Example: An inquisitive magus wants to do original research
             double curiosityFactor = magus.Personality.GetDesireMultiplier(HexacoFacet.Inquisitiveness);
@@ -126,7 +126,7 @@ namespace WizardMonks.Decisions
             }
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromBeliefs(Magus magus)
+        private static IEnumerable<IGoal> GenerateGoalsFromBeliefs(HermeticMagus magus)
         {
             // This is the key for the Founding scenario.
             // A hedge wizard arrives with a strong belief in Bonisagus.
@@ -140,7 +140,7 @@ namespace WizardMonks.Decisions
             }
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromIdeas(Magus magus)
+        private static IEnumerable<IGoal> GenerateGoalsFromIdeas(HermeticMagus magus)
         {
             foreach (var idea in magus.GetInspirations())
             {

@@ -8,7 +8,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
 {
     class CastingTotalIncreaseHelper : ArtIncreaseHelper
     {
-        public CastingTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
+        public CastingTotalIncreaseHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
         { }
 

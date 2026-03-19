@@ -11,14 +11,17 @@ namespace WizardMonks.Activities.MageActivities
     {
         public Guid ProjectId { get; private set; }
 
-        public OriginalResearchActivity(Guid projectId, Ability exposure, double desire)
+        private readonly ResearchService _researchService;
+
+        public OriginalResearchActivity(Guid projectId, ResearchService researchService, Ability exposure, double desire)
             : base(exposure, desire)
         {
             ProjectId = projectId;
+            _researchService = researchService ?? throw new ArgumentNullException(nameof(researchService));
             Action = Activity.OriginalResearch;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             var project = mage.ActiveProjects.OfType<ResearchProject>().FirstOrDefault(p => p.ProjectId == ProjectId);
             if (project == null)
@@ -26,19 +29,25 @@ namespace WizardMonks.Activities.MageActivities
                 mage.Log.Add("Attempted to work on a non-existent research project.");
                 return;
             }
+
             if (project.CurrentPhase == null)
             {
-                // This would be the point to create the first phase if needed.
-                mage.Log.Add($"Research project '{project.Description}' has no active phase to work on.");
-                // project.StartNewPhase(); // Example of what a helper might do.
-                return;
+                // Generate the first phase if none exists yet.
+                var firstPhase = _researchService.GenerateExperimentalSpellPhase(project.Breakthrough, mage);
+                if (firstPhase == null)
+                {
+                    mage.Log.Add($"Research project '{project.Description}' could not generate a first phase.");
+                    return;
+                }
+                project.StartNewPhase(firstPhase);
+                mage.Log.Add($"Began first research phase on '{project.Description}'.");
             }
 
             var phase = project.CurrentPhase;
 
             if (!phase.IsInvented)
             {
-                // Work on inventing the experimental spell
+                // Work on inventing the experimental spell.
                 double labTotal = mage.GetSpellLabTotal(phase.ExperimentalSpell);
                 double progress = labTotal - phase.ExperimentalSpell.Level;
                 if (progress <= 0)
@@ -55,7 +64,7 @@ namespace WizardMonks.Activities.MageActivities
             }
             else if (!phase.IsStabilized)
             {
-                // Work on stabilizing the spell
+                // Work on stabilizing the spell.
                 phase.WorkOnStabilization();
                 mage.Log.Add($"Worked on stabilizing '{phase.ExperimentalSpell.Name}'. Seasons remaining: {phase.SeasonsToStabilize}");
                 if (phase.IsStabilized)
@@ -71,8 +80,14 @@ namespace WizardMonks.Activities.MageActivities
                     }
                     else
                     {
-                        // Start the next phase
-                        project.StartNewPhase();
+                        // Generate and start the next phase.
+                        var nextPhase = _researchService.GenerateExperimentalSpellPhase(project.Breakthrough, mage);
+                        if (nextPhase == null)
+                        {
+                            mage.Log.Add($"Could not generate next research phase for '{project.Description}'.");
+                            return;
+                        }
+                        project.StartNewPhase(nextPhase);
                         mage.Log.Add("Beginning the next phase of research.");
                     }
                 }

@@ -23,9 +23,9 @@ namespace WizardMonks.Activities.ExposingActivities
         {
             character.Log.Add("Searched for an aura");
             // see if the character can safely spont aura-finding spells
-            if (typeof(Magus) == character.GetType())
+            if (typeof(HermeticMagus) == character.GetType())
             {
-                MageAuraSearch((Magus)character);
+                MageAuraSearch((HermeticMagus)character);
             }
             else
             {
@@ -41,7 +41,7 @@ namespace WizardMonks.Activities.ExposingActivities
             // making them work similar to the mage
         }
 
-        private void MageAuraSearch(Magus mage)
+        private void MageAuraSearch(HermeticMagus mage)
         {
             double areaLore = CalculateSearchScore(mage);
 
@@ -63,7 +63,7 @@ namespace WizardMonks.Activities.ExposingActivities
             }
         }
 
-        private static double CalculateSearchScore(Magus mage)
+        private static double CalculateSearchScore(HermeticMagus mage)
         {
             // add bonus to area lore equal to casting total div 10?
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;

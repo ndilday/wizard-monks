@@ -18,7 +18,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     /// </summary>
     public class WriteLabTextHelper : AHelper
     {
-        public WriteLabTextHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc)
+        public WriteLabTextHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc)
             : base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
         }
@@ -44,7 +44,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 double bestOffer = 0;
                 foreach (var buyerDesire in potentialBuyers)
                 {
-                    if (buyerDesire.Character is Magus buyerMage)
+                    if (buyerDesire.Character is HermeticMagus buyerMage)
                     {
                         double buyerValuation = buyerMage.RateLifetimeLabTextValue(new LabText { SpellContained = spell });
                         if (buyerValuation > bestOffer)

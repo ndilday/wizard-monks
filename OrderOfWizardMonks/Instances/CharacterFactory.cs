@@ -53,21 +53,21 @@ namespace WizardMonks.Instances
             character.GetAttribute(AttributeType.Communication).BaseValue = doubles[7] * scale;
         }
 
-        public static Magus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
+        public static HermeticMagus GenerateNewMagus(Ability magicAbility, Ability langAbility, Ability writingAbility, Ability areaAbility)
         {
-            Magus magus = new(magicAbility, langAbility, writingAbility, areaAbility);
+            HermeticMagus magus = new(magicAbility, langAbility, writingAbility, areaAbility);
             NormalizeAttributes(magus);
             return magus;
         }
 
-        public static Magus GenerateNewHedgeMage()
+        public static HermeticMagus GenerateNewHedgeMage()
         {
             return null;
         }
 
-        public static Magus GenerateNewApprentice(int bonusPoints)
+        public static HermeticMagus GenerateNewApprentice(int bonusPoints)
         {
-            Magus magus = new(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
+            HermeticMagus magus = new(Abilities.MagicTheory, Abilities.Latin, Abilities.ArtesLiberales, Abilities.AreaLore);
             NormalizeAttributes(magus);
             magus.GetAbility(Abilities.English).AddExperience(75);
             // TODO: Implement a full point-buy system for apprentice generation.
@@ -140,7 +140,7 @@ namespace WizardMonks.Instances
             return magus;
         }
 
-        private static void DistributeExperience(Magus mage, int extraXP, bool isAcademic, bool isMartial)
+        private static void DistributeExperience(HermeticMagus mage, int extraXP, bool isAcademic, bool isMartial)
         {
             var abilities = Abilities.GetEnumerator()
                                      .Where(a => a.AbilityType == AbilityType.General || 
@@ -175,7 +175,7 @@ namespace WizardMonks.Instances
             }
         }
 
-        private static void InitializeApprenticeGoals(Magus magus)
+        private static void InitializeApprenticeGoals(HermeticMagus magus)
         {
         }
     }

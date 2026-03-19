@@ -11,7 +11,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private readonly ArtPair _arts;
         private readonly Activity _activity;
 
-        public LabImprovementHelper(Ability exposureAbility, Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc)
+        public LabImprovementHelper(Ability exposureAbility, HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc)
             : base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _arts = arts;

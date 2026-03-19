@@ -24,7 +24,7 @@ namespace WizardMonks.Activities.MageActivities
 
         public override void Act(Character character)
         {
-            Magus mage = ConfirmCharacterIsMage(character);
+            HermeticMagus mage = ConfirmCharacterIsMage(character);
 
             // determine the amount of vis needed
             CharacterAbilityBase charAbility = mage.GetAbility(Art);

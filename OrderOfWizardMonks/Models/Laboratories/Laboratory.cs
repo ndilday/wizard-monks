@@ -15,10 +15,10 @@ namespace WizardMonks.Models.Laboratories
         public Dictionary<Activity, double> ActivityModifiers { get; private set; }
 
         private List<LabFeature> _features;
-        private Magus _owner;
+        private HermeticMagus _owner;
         private Aura _aura;
 
-        public Laboratory(Magus owner, Aura aura, double size) : base("Laboratory", 0, 0, 0, 0, 0, 0, 0, null, null)
+        public Laboratory(HermeticMagus owner, Aura aura, double size) : base("Laboratory", 0, 0, 0, 0, 0, 0, 0, null, null)
         {
             _features = [];
             _owner = owner;

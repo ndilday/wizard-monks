@@ -19,7 +19,7 @@ namespace WizardMonks.Models.Covenants
     [Serializable]
 	public class Covenant : IBeliefSubject
 	{
-        protected Dictionary<Magus, CovenantRole> _inhabitants;
+        protected Dictionary<HermeticMagus, CovenantRole> _inhabitants;
         protected Dictionary<Ability, double> _visSources;
         protected Dictionary<Ability, double> _visStock;
 		protected List<ABook> _library;
@@ -41,7 +41,7 @@ namespace WizardMonks.Models.Covenants
             Aura = aura;
         }
 
-        public void AddMagus(Magus mage, CovenantRole role = CovenantRole.FullMember)
+        public void AddMagus(HermeticMagus mage, CovenantRole role = CovenantRole.FullMember)
         {
             if (!_inhabitants.ContainsKey(mage))
             {
@@ -54,7 +54,7 @@ namespace WizardMonks.Models.Covenants
             }
         }
 
-        public void RemoveMagus(Magus mage)
+        public void RemoveMagus(HermeticMagus mage)
         {
             if (_inhabitants.ContainsKey(mage))
             {
@@ -62,12 +62,12 @@ namespace WizardMonks.Models.Covenants
             }
         }
 
-        public IEnumerable<Magus> GetMagiByRole(CovenantRole role)
+        public IEnumerable<HermeticMagus> GetMagiByRole(CovenantRole role)
         {
             return _inhabitants.Where(kvp => kvp.Value == role).Select(kvp => kvp.Key);
         }
 
-        public CovenantRole? GetRoleForMagus(Magus mage)
+        public CovenantRole? GetRoleForMagus(HermeticMagus mage)
         {
             if (_inhabitants.TryGetValue(mage, out CovenantRole role))
             {

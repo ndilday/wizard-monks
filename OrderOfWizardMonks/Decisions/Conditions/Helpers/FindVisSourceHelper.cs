@@ -20,7 +20,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _magicLoreTotal;
         private SpellBase _findVisSpellBase;
 
-        public FindVisSourceHelper(Magus mage, List<Ability> visTypes, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
+        public FindVisSourceHelper(HermeticMagus mage, List<Ability> visTypes, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _visTypes = visTypes;

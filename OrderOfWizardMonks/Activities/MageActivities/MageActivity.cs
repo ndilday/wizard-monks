@@ -11,13 +11,13 @@ namespace WizardMonks.Activities.MageActivities
 
         public abstract void Act(Character character);
 
-        protected static Magus ConfirmCharacterIsMage(Character character)
+        protected static HermeticMagus ConfirmCharacterIsMage(Character character)
         {
-            if (typeof(Magus) != character.GetType())
+            if (typeof(HermeticMagus) != character.GetType())
             {
                 throw new InvalidCastException("Only magi can perform this action!");
             }
-            return (Magus)character;
+            return (HermeticMagus)character;
         }
 
         public abstract bool Matches(IActivity action);

@@ -10,9 +10,9 @@ namespace WizardMonks.Decisions.Goals
 {
     public class LearnFromMasterGoal : AGoal
     {
-        public Magus Master { get; private set; }
+        public HermeticMagus Master { get; private set; }
 
-        public LearnFromMasterGoal(Magus student, Magus master, double desire)
+        public LearnFromMasterGoal(HermeticMagus student, HermeticMagus master, double desire)
             : base(student, student.SeasonalAge + 60, desire) // Deadline: 15 years (60 seasons)
         {
             Master = master;
@@ -30,7 +30,7 @@ namespace WizardMonks.Decisions.Goals
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             // This goal is unique. Its purpose is to set up a mandatory collaboration.
-            var student = (Magus)Character;
+            var student = (HermeticMagus)Character;
 
             // If the core learning is not yet done, we enforce the teaching/learning actions.
             if (!Conditions.TrueForAll(c => c.ConditionFulfilled))
@@ -61,7 +61,7 @@ namespace WizardMonks.Decisions.Goals
             }
         }
 
-        private double GetTeachingQuality(Magus teacher, Ability topic)
+        private double GetTeachingQuality(HermeticMagus teacher, Ability topic)
         {
             return teacher.GetAbility(Abilities.Teaching).Value + teacher.GetAttributeValue(AttributeType.Communication) + 6;
         }

@@ -21,7 +21,7 @@ namespace WizardMonks.Activities.MageActivities
             _aura = aura;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             // TODO: build size
             // TODO: pre-existing conditions

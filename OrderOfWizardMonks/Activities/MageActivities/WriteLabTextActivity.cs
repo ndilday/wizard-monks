@@ -16,7 +16,7 @@ namespace WizardMonks.Activities.MageActivities
             SpellToWrite = spell;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             double progressThisSeason = mage.GetLabTextWritingRate();
 

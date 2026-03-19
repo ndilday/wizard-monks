@@ -79,7 +79,7 @@ namespace SkillViewer
 
         private void DisplayVis()
         {
-            Magus mage = (Magus)_character;
+            HermeticMagus mage = (HermeticMagus)_character;
             txtCreoVis.Text = mage.GetVisCount(MagicArts.Creo).ToString(FORMAT_STRING);
             txtIntellegoVis.Text = mage.GetVisCount(MagicArts.Intellego).ToString(FORMAT_STRING);
             txtMutoVis.Text = mage.GetVisCount(MagicArts.Muto).ToString(FORMAT_STRING);

@@ -12,7 +12,7 @@ namespace WizardMonks.Activities.MageActivities
             Action = Activity.LongevityRitual;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             uint strength = Convert.ToUInt16(mage.GetLabTotal(MagicArtPairs.CrVi, Activity.LongevityRitual));
             mage.Log.Add("Created a longevity ritual of strength " + strength);

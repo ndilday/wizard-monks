@@ -14,24 +14,59 @@ namespace WizardMonks.Services.Characters
 {
     public static class MagusLabService
     {
-        public static double GetLabTotal(this Magus mage, ArtPair artPair, Activity activity)
+        /// <summary>
+        /// Computes the Lab Total for a given art pair and activity.
+        ///
+        /// If the mage's tradition defines a TraditionActivityFormula for this
+        /// activity, that formula is evaluated. Otherwise the standard Hermetic
+        /// formula is used: Technique + Form + Intelligence + MagicTheory +
+        /// aura + lab modifier + apprentice contribution.
+        ///
+        /// The formula-driven path allows non-standard traditions to have
+        /// structurally different lab totals without requiring separate service
+        /// classes.
+        /// </summary>
+        public static double GetLabTotal(this HermeticMagus mage, ArtPair artPair, Activity activity)
         {
+            double auraStrength = mage.Covenant?.Aura.Strength ?? 0;
+            double labBonus = mage.Laboratory?.GetModifier(artPair, activity) ?? 0;
+
+            // If the tradition defines a formula for this activity, use it.
+            if (mage.IsOpened)
+            {
+                var formula = mage.Tradition.GetFormula(activity);
+                if (formula != null)
+                {
+                    double formulaTotal = formula.Evaluate(mage, auraStrength, labBonus);
+
+                    // Apprentice contribution is always additive on top of formula total,
+                    // as it represents a lab helper bonus independent of tradition structure.
+                    if (mage.Apprentice != null)
+                    {
+                        formulaTotal += mage.Apprentice.GetAbility(mage.MagicAbility).Value
+                                      + mage.Apprentice.GetAttributeValue(AttributeType.Intelligence);
+                    }
+
+                    //TODO: foci
+                    //TODO: lab assistant (non-apprentice)
+                    //TODO: familiar
+                    return formulaTotal;
+                }
+            }
+
+            // Standard Hermetic formula fallback.
             double magicTheory = mage.GetAbility(mage.MagicAbility).Value;
             double techValue = mage.Arts.GetAbility(artPair.Technique).Value;
             double formValue = mage.Arts.GetAbility(artPair.Form).Value;
-            double labTotal = magicTheory + techValue + formValue + mage.GetAttribute(AttributeType.Intelligence).Value;
-            if (mage.Covenant != null)
-            {
-                labTotal += mage.Covenant.Aura.Strength;
+            double labTotal = magicTheory + techValue + formValue
+                            + mage.GetAttribute(AttributeType.Intelligence).Value
+                            + auraStrength
+                            + labBonus;
 
-                if (mage.Laboratory != null)
-                {
-                    labTotal += mage.Laboratory.GetModifier(artPair, activity);
-                }
-                if (mage.Apprentice != null)
-                {
-                    labTotal += mage.Apprentice.GetAbility(mage.MagicAbility).Value + mage.Apprentice.GetAttributeValue(AttributeType.Intelligence);
-                }
+            if (mage.Apprentice != null)
+            {
+                labTotal += mage.Apprentice.GetAbility(mage.MagicAbility).Value
+                          + mage.Apprentice.GetAttributeValue(AttributeType.Intelligence);
             }
 
             //TODO: foci
@@ -40,91 +75,132 @@ namespace WizardMonks.Services.Characters
             return labTotal;
         }
 
-        public static double GetSpellLabTotal(this Magus mage, Spell spell)
+        public static double GetSpellLabTotal(this HermeticMagus mage, Spell spell)
         {
             double total = mage.GetLabTotal(spell.Base.ArtPair, Activity.InventSpells);
-            // see if the mage knows a sell with the same base effect
             Spell similarSpell = mage.GetBestSpell(spell.Base);
             if (similarSpell != null)
             {
-                // if so, add the level of that spell to the lab total
                 total += similarSpell.Level / 5.0;
             }
             return total;
         }
 
-        public static void BuildLaboratory(this Magus mage)
+        /// <summary>
+        /// Returns the vis distillation rate for this mage — the number of pawns
+        /// of Vim vis they can extract from their aura in a single season.
+        ///
+        /// Uses the tradition's formula for DistillVis if defined, otherwise
+        /// falls back to the standard Hermetic formula: CrVi Lab Total / 10.
+        /// </summary>
+        public static double GetVisDistillationRate(this HermeticMagus mage)
         {
-            // TODO: flesh out laboratory specialization
+            if (mage.IsOpened)
+            {
+                var formula = mage.Tradition.GetFormula(Activity.DistillVis);
+                if (formula != null)
+                {
+                    double auraStrength = mage.Covenant?.Aura.Strength ?? 0;
+                    double labBonus = mage.Laboratory?.GetModifier(MagicArtPairs.CrVi, Activity.DistillVis) ?? 0;
+                    return formula.Evaluate(mage, auraStrength, labBonus);
+                }
+            }
+
+            // Standard Hermetic fallback.
+            return mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10.0;
+        }
+
+        /// <summary>
+        /// Returns the vis study quality for this mage — the effective source
+        /// quality when studying a magical Art from raw vis.
+        ///
+        /// Studying vis is not a lab activity (it can be done anywhere), but its
+        /// quality is tradition-gated: only traditions that support StudyVis can
+        /// use this method. Throws if the mage's tradition does not support vis
+        /// study.
+        ///
+        /// The base quality is a stress die result + aura strength. The formula
+        /// on the tradition captures the aura contribution; the die roll is
+        /// handled at the activity layer. This method returns the non-random
+        /// component (the aura contribution) for use in AI planning.
+        ///
+        /// Standard Hermetic formula: aura strength (die roll handled separately).
+        /// </summary>
+        public static double GetVisStudyAuraBonus(this HermeticMagus mage)
+        {
+            if (!mage.IsOpened || !mage.Tradition.SupportsActivity(Activity.StudyVis))
+                throw new InvalidOperationException(
+                    $"{mage.Name}'s tradition does not support studying vis.");
+
+            var formula = mage.Tradition.GetFormula(Activity.StudyVis);
+            if (formula != null)
+            {
+                double auraStrength = mage.Covenant?.Aura.Strength ?? 0;
+                return formula.Evaluate(mage, auraStrength, 0);
+            }
+
+            // Standard Hermetic: aura bonus only (no fixed ability components).
+            return mage.Covenant?.Aura.Strength ?? 0;
+        }
+
+        public static void BuildLaboratory(this HermeticMagus mage)
+        {
             mage.Laboratory = new Laboratory(mage, mage.Covenant.Aura, 0);
         }
 
-        public static void BuildLaboratory(this Magus mage, Aura aura)
+        public static void BuildLaboratory(this HermeticMagus mage, Aura aura)
         {
             mage.Laboratory = new Laboratory(mage, aura, 0);
         }
 
-        public static void RefineLaboratory(this Magus mage)
+        public static void RefineLaboratory(this HermeticMagus mage)
         {
             if (mage.Laboratory == null)
-            {
                 throw new NullReferenceException("The mage has no laboratory!");
-            }
             if (mage.GetAbility(mage.MagicAbility).Value - 4 < mage.Laboratory.Refinement)
-            {
-                throw new ArgumentOutOfRangeException("The mage's magical understanding is not high enough to refine this laboratory any further.");
-            }
+                throw new ArgumentOutOfRangeException(
+                    "The mage's magical understanding is not high enough to refine this laboratory any further.");
             mage.Laboratory.Refine();
         }
 
-        public static void AddFeatureToLaboratory(this Magus mage, LabFeature feature)
+        public static void AddFeatureToLaboratory(this HermeticMagus mage, LabFeature feature)
         {
             if (mage.Laboratory == null)
-            {
                 throw new NullReferenceException("The mage has no laboratory!");
-            }
             // TODO: Implement
         }
 
-        public static void ExtractVis(this Magus mage, Ability exposureAbility)
+        public static void ExtractVis(this HermeticMagus mage, Ability exposureAbility)
         {
-            // add vis to personal inventory or covenant inventory
             mage.VisStock[MagicArts.Vim] += mage.GetVisDistillationRate();
-
-            // grant exposure experience
             mage.GetAbility(exposureAbility).AddExperience(2);
         }
 
-        public static void LearnSpellFromLabText(this Magus mage, LabText text)
+        public static void LearnSpellFromLabText(this HermeticMagus mage, LabText text)
         {
             // TODO: multiple spells in a season
             // TODO: foci
             Spell spell = text.SpellContained;
             double labTotal = mage.GetSpellLabTotal(spell);
             if (labTotal < spell.Level)
-            {
                 throw new ArgumentException("This mage cannot invent this spell!");
-            }
-            else
-            {
-                mage.LearnSpell(spell);
-                foreach (var belief in text.BeliefPayload)
-                {
-                    // Update belief about the author
-                    mage.GetBeliefProfile(text.Author).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude));
 
-                    // Update stereotype about the author's house
-                    // TODO: should sterotypes really apply to arts or attributes?
-                    if (text.Author is Magus magus)
-                    {
-                        var houseSubject = Houses.GetSubject(magus.House);
-                        mage.GetBeliefProfile(houseSubject).AddOrUpdateBelief(new Belief(belief.Topic, belief.Magnitude * 0.20)); // Stereotype is 20% strength
-                    }
+            mage.LearnSpell(spell);
+            foreach (var belief in text.BeliefPayload)
+            {
+                mage.GetBeliefProfile(text.Author).AddOrUpdateBelief(
+                    new Belief(belief.Topic, belief.Magnitude));
+
+                if (text.Author is HermeticMagus authorMagus)
+                {
+                    var houseSubject = Houses.GetSubject(authorMagus.House);
+                    mage.GetBeliefProfile(houseSubject).AddOrUpdateBelief(
+                        new Belief(belief.Topic, belief.Magnitude * 0.20));
                 }
             }
         }
 
-        public static void LearnSpell(this Magus mage, Spell spell)
+        public static void LearnSpell(this HermeticMagus mage, Spell spell)
         {
             mage.SpellList.Add(spell);
             LabText newLabText = new()
@@ -133,24 +209,20 @@ namespace WizardMonks.Services.Characters
                 IsShorthand = true,
                 SpellContained = spell
             };
-            // Generate Belief Payload for the shorthand lab text
             double magnitude = spell.Level / 5.0;
-            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Technique.AbilityName, magnitude));
-            newLabText.BeliefPayload.Add(new Belief(spell.Base.ArtPair.Form.AbilityName, magnitude));
-
-            // Generate personality beliefs based on spell tags
+            newLabText.BeliefPayload.Add(
+                new Belief(spell.Base.ArtPair.Technique.AbilityName, magnitude));
+            newLabText.BeliefPayload.Add(
+                new Belief(spell.Base.ArtPair.Form.AbilityName, magnitude));
             mage.LabTextsOwned.Add(newLabText);
-
         }
 
-        public static IEnumerable<LabText> GetLabTextsFromCollection(this Magus mage, SpellBase spellBase)
+        public static IEnumerable<LabText> GetLabTextsFromCollection(this HermeticMagus mage, SpellBase spellBase)
         {
             return mage.LabTextsOwned.Where(t => t.SpellContained.Base == spellBase);
         }
 
-        
-
-        public static IEnumerable<LabText> GetUnneededLabTextsFromCollection(this Magus mage)
+        public static IEnumerable<LabText> GetUnneededLabTextsFromCollection(this HermeticMagus mage)
         {
             List<LabText> unneededLabTexts = [];
             foreach (LabText labText in mage.LabTextsOwned)
@@ -158,156 +230,106 @@ namespace WizardMonks.Services.Characters
                 bool unneeded = false;
                 foreach (Spell spell in mage.SpellList)
                 {
-                    // if the mage already knows the spell, the lab text is unneeded
                     if (spell == labText.SpellContained)
                     {
                         unneeded = true;
                         break;
                     }
-                    // if the mage already knows a better version of the spell, the lab text is unneeded
-                    else if (spell.Base == labText.SpellContained.Base && spell.Level > labText.SpellContained.Level)
+                    else if (spell.Base == labText.SpellContained.Base
+                             && spell.Level > labText.SpellContained.Level)
                     {
                         unneeded = true;
                     }
                 }
                 if (unneeded)
-                {
                     unneededLabTexts.Add(labText);
-                }
-
             }
             return unneededLabTexts;
         }
 
         /// <summary>
-        /// Determines the value of a given lab text to this magus in an equivalent pawn-value of Vim vis.
-        /// The value is based on the number of seasons the magus would save by learning from the text
-        /// instead of inventing the spell from scratch.
+        /// Determines the lifetime value of a lab text to this mage in
+        /// equivalent Vim vis, based on seasons saved versus inventing
+        /// the spell from scratch.
         /// </summary>
-        /// <param name="labText">The lab text to evaluate.</param>
-        /// <returns>The value of the lab text in pawns of Vim vis. Returns 0 if the text is unusable or not beneficial.</returns>
-        public static double RateLifetimeLabTextValue(this Magus mage, LabText labText)
+        public static double RateLifetimeLabTextValue(this HermeticMagus mage, LabText labText)
         {
-            // If we already know this spell or a better version of it, the text has no value.
-            if (mage.SpellList.Any(s => s.Base == labText.SpellContained.Base && s.Level >= labText.SpellContained.Level))
-            {
+            if (mage.SpellList.Any(s =>
+                    s.Base == labText.SpellContained.Base
+                    && s.Level >= labText.SpellContained.Level))
                 return 0;
-            }
 
-            // To learn from a lab text, the magus's Lab Total must be greater than the spell's level.
             double labTotal = mage.GetSpellLabTotal(labText.SpellContained);
             if (labTotal < labText.SpellContained.Level)
-            {
                 return 0;
-            }
 
-            // --- Step 2: Calculate the seasons required to invent the spell from scratch ---
-
-            // Invention requires accumulating 'Level' points of progress.
             double inventionPointsNeeded = labText.SpellContained.Level;
-
-            // Progress per season is the amount the Lab Total exceeds the spell's level.
             double inventionProgressPerSeason = labTotal - labText.SpellContained.Level;
 
-            // This case should be caught by the labTotal check above, but as a safeguard against division by zero.
             if (inventionProgressPerSeason == 0)
-            {
                 inventionProgressPerSeason = 1;
-            }
 
-            // Calculate how many full seasons it would take to gain the required points.
-            // A fraction of a season's work still consumes the entire season.
             double seasonsToInvent = Math.Ceiling(inventionPointsNeeded / inventionProgressPerSeason);
-
-            // --- Step 3: Calculate seasons saved and convert to vis value ---
-
-            // Learning from a lab text takes a single season.
             int seasonsToLearnFromText = labText.IsShorthand ? 2 : 1;
             double seasonsSaved = seasonsToInvent - seasonsToLearnFromText;
 
-            // If it takes 1 or fewer seasons to invent, the lab text provides no time savings and has no value.
-            if (seasonsSaved <= 0)
-            {
-                return 0;
-            }
-            if (seasonsSaved > 2)
-            {
-                // decrement by one to account for how the inventing mage's Magic Theory will increase along the way
-                seasonsSaved -= 1;
-            }
+            if (seasonsSaved <= 0) return 0;
+            if (seasonsSaved > 2) seasonsSaved -= 1;
 
-            // The value of a saved season is equivalent to the amount of Vim vis that could be distilled in that time.
-            // This serves as our universal "opportunity cost" currency for the AI.
-            double visDistilledPerSeason = mage.GetVisDistillationRate();
-            double visValue = seasonsSaved * visDistilledPerSeason;
-
-            return visValue;
+            return seasonsSaved * mage.GetVisDistillationRate();
         }
 
-        public static bool CanUseLabText(this Magus mage, LabText text)
+        public static bool CanUseLabText(this HermeticMagus mage, LabText text)
         {
-            if (!text.IsShorthand)
-            {
-                return true; // Not shorthand, so it's usable by anyone with Magic Theory.
-            }
+            if (!text.IsShorthand) return true;
+            if (text.Author == mage) return true;
 
-            // If it's our own shorthand, we can always use it.
-            if (text.Author == mage)
-            {
-                return true;
-            }
-
-            // Check if we've deciphered this author's shorthand to a sufficient level.
             if (mage.DecipheredShorthandLevels.TryGetValue(text.Author, out ushort decipheredLevel))
-            {
                 return text.SpellContained.Level <= decipheredLevel;
-            }
 
-            return false; // We have no understanding of this author's shorthand.
+            return false;
         }
 
-        public static ushort? GetDeciperedLabTextLevel(this Magus mage, Character author)
+        public static ushort? GetDecipheredLabTextLevel(this HermeticMagus mage, Character author)
         {
-            if (mage.DecipheredShorthandLevels.TryGetValue(author, out ushort currentProgress)) return currentProgress;
+            if (mage.DecipheredShorthandLevels.TryGetValue(author, out ushort currentProgress))
+                return currentProgress;
             return null;
         }
 
-        public static double? GetLabTextTranslationProgress(this Magus mage, LabText text)
+        public static double? GetLabTextTranslationProgress(this HermeticMagus mage, LabText text)
         {
-            if (mage.ShorthandTranslationProgress.TryGetValue(text, out double currentProgress)) return currentProgress;
+            if (mage.ShorthandTranslationProgress.TryGetValue(text, out double currentProgress))
+                return currentProgress;
             return null;
         }
 
-        public static void SetLabTextTranslationProgress(this Magus mage, LabText text, double progress)
+        public static void SetLabTextTranslationProgress(this HermeticMagus mage, LabText text, double progress)
         {
             mage.ShorthandTranslationProgress[text] = progress;
         }
 
-        public static void AddDecipheredLabTextLevel(this Magus mage, Character author, ushort level)
+        public static void AddDecipheredLabTextLevel(this HermeticMagus mage, Character author, ushort level)
         {
-            // remove any partial translations of this author of this level or below
-            foreach (var kvp in mage.ShorthandTranslationProgress)
+            foreach (var kvp in mage.ShorthandTranslationProgress.ToList())
             {
                 if (kvp.Key.Author == author && kvp.Key.SpellContained.Level <= level)
-                {
                     mage.ShorthandTranslationProgress.Remove(kvp.Key);
-                }
             }
-            if (!mage.DecipheredShorthandLevels.ContainsKey(author) || mage.DecipheredShorthandLevels[author] < level)
+            if (!mage.DecipheredShorthandLevels.ContainsKey(author)
+                || mage.DecipheredShorthandLevels[author] < level)
             {
                 mage.DecipheredShorthandLevels[author] = level;
             }
         }
 
-        public static double GetLabTextWritingRate(this Magus mage)
+        public static double GetLabTextWritingRate(this HermeticMagus mage)
         {
-            // Latin skill * 20 levels per season
             return mage.GetAbility(mage.WritingLanguage).Value * 20;
         }
 
-        public static double GetLabTextCopyingRate(this Magus mage)
+        public static double GetLabTextCopyingRate(this HermeticMagus mage)
         {
-            // Profession: Scribe skill * 60 levels per season
             return mage.GetAbility(Abilities.Scribing).Value * 60;
         }
     }

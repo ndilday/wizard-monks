@@ -18,7 +18,7 @@ namespace SkillViewer
     [SupportedOSPlatform("windows7.0")]
     public partial class WorldGenerator : Form
     {
-        private Magus[] _magusArray = new Magus[40];
+        private HermeticMagus[] _magusArray = new HermeticMagus[40];
         private int _magusCount = 0;
         private Ability _latin;
         private Ability _magicTheory;
@@ -56,7 +56,7 @@ namespace SkillViewer
 
             InitializeComponent();
 
-            foreach (Magus founder in Founders.GetEnumerator())
+            foreach (HermeticMagus founder in Founders.GetEnumerator())
             {
                 _magusArray[_magusCount] = founder;
                 _magusCount++;
@@ -117,7 +117,7 @@ namespace SkillViewer
                 case 9:
                     return "Novus";
                 default:
-                    return "Magus " + nameNumber.ToString();
+                    return "HermeticMagus " + nameNumber.ToString();
             }
         }
 
@@ -176,7 +176,7 @@ namespace SkillViewer
             var newApprentices = _magusArray.Where(m => m != null && m.Apprentice != null)
                                             .Select(m => m.Apprentice)
                                             .Where(a => !_magusArray.Contains(a));
-            foreach (Magus apprentice in newApprentices)
+            foreach (HermeticMagus apprentice in newApprentices)
             {
                 _magusArray[_magusCount] = apprentice;
                 _magusCount++;
@@ -193,7 +193,7 @@ namespace SkillViewer
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             _log.Add("Considering vis and book trades");
-            foreach (Magus mage in fullMagi.OrderBy(m => _rand.NextDouble()))
+            foreach (HermeticMagus mage in fullMagi.OrderBy(m => _rand.NextDouble()))
             {
                 if (mage == null) continue;
                 mage.EvaluateTradingDesires(magiDesires);

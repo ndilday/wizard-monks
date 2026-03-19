@@ -10,7 +10,7 @@ namespace WizardMonks.Services.Characters
 {
     public static class CharacterTradingService
     {
-        public static IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(this Magus mage, IEnumerable<ABook> books)
+        public static IEnumerable<BookForTrade> EvaluateBookValuesAsSeller(this HermeticMagus mage, IEnumerable<ABook> books)
         {
             List<BookForTrade> list = new();
             double distillRate = mage.GetVisDistillationRate();
@@ -34,7 +34,7 @@ namespace WizardMonks.Services.Characters
             return list;
         }
 
-        public static IEnumerable<LabTextForTrade> EvaluateLabTextValuesAsSeller(this Magus mage, IEnumerable<LabText> labTexts)
+        public static IEnumerable<LabTextForTrade> EvaluateLabTextValuesAsSeller(this HermeticMagus mage, IEnumerable<LabText> labTexts)
         {
             List<LabTextForTrade> list = [];
             double distillRate = mage.GetVisDistillationRate();
@@ -55,7 +55,7 @@ namespace WizardMonks.Services.Characters
             return list;
         }
 
-        public static MagusTradingDesires GenerateTradingDesires(this Magus mage)
+        public static MagusTradingDesires GenerateTradingDesires(this HermeticMagus mage)
         {
             mage.UpdateVisDesiresWithStock();
             var tradeDesires = new MagusTradingDesires(
@@ -73,7 +73,7 @@ namespace WizardMonks.Services.Characters
             return tradeDesires;
         }
 
-        public static void UpdateVisDesiresWithStock(this Magus mage)
+        public static void UpdateVisDesiresWithStock(this HermeticMagus mage)
         {
             foreach (VisDesire visDesire in mage.Desires.VisDesires)
             {
@@ -84,7 +84,7 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        public static void EvaluateTradingDesires(this Magus mage, IEnumerable<MagusTradingDesires> mageTradeDesires)
+        public static void EvaluateTradingDesires(this HermeticMagus mage, IEnumerable<MagusTradingDesires> mageTradeDesires)
         {
             List<VisTradeOffer> visTradeOffers = new();
             List<BookTradeOffer> bookTradeOffers = new();
@@ -137,7 +137,7 @@ namespace WizardMonks.Services.Characters
             // figure out book for book
         }
 
-        private static void ProcessVisOffers(this Magus mage, List<VisTradeOffer> offers, MagusTradingDesires desires)
+        private static void ProcessVisOffers(this HermeticMagus mage, List<VisTradeOffer> offers, MagusTradingDesires desires)
         {
             IEnumerable<VisTradeOffer> internalOffers = offers;
             // now we have to determine which offers to accept
@@ -187,7 +187,7 @@ namespace WizardMonks.Services.Characters
             } while (internalOffers.Any());
         }
 
-        private static void ProcessBookSales(this Magus mage, IEnumerable<VisForBookOffer> bookSales)
+        private static void ProcessBookSales(this HermeticMagus mage, IEnumerable<VisForBookOffer> bookSales)
         {
             var sales = bookSales.OrderByDescending(bts => bts.VisValue);
             while (sales.Any())
@@ -215,7 +215,7 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        private static void ProcessBookSwaps(this Magus mage, IEnumerable<BookTradeOffer> bookTradeOffers)
+        private static void ProcessBookSwaps(this HermeticMagus mage, IEnumerable<BookTradeOffer> bookTradeOffers)
         {
             var trades = bookTradeOffers.OrderBy(bto => bto.BookDesired.Quality);
             while (trades.Any())
@@ -249,7 +249,7 @@ namespace WizardMonks.Services.Characters
         /// This method is authoritative for executing lab text sales.
         /// </summary>
         /// <param name="offers">A collection of VisForLabTextOffer where this magus is the potential seller.</param>
-        private static void ProcessLabTextSales(this Magus mage, IEnumerable<VisForLabTextOffer> offers)
+        private static void ProcessLabTextSales(this HermeticMagus mage, IEnumerable<VisForLabTextOffer> offers)
         {
             // Prioritize offers that provide the most vis, as this is a direct gain for us.
             var sortedOffers = offers.OrderByDescending(o => o.VisValue).ToList();
@@ -296,7 +296,7 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        private static void ProcessLabTextSwaps(this Magus mage, IEnumerable<LabTextTradeOffer> offers)
+        private static void ProcessLabTextSwaps(this HermeticMagus mage, IEnumerable<LabTextTradeOffer> offers)
         {
             var sortedOffers = offers.OrderBy(o => mage.RateLifetimeLabTextValue(o.LabTextDesired));
 

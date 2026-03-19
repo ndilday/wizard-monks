@@ -13,7 +13,7 @@ namespace WizardMonks.Activities.MageActivities
             Action = Activity.RefineLaboratory;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             if (mage.Laboratory == null) return;
 

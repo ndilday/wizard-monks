@@ -21,10 +21,10 @@ namespace WizardMonks.Activities.ExposingActivities
 
         protected override void DoAction(Character character)
         {
-            if (character.GetType() == typeof(Magus))
+            if (character.GetType() == typeof(HermeticMagus))
             {
                 character.Log.Add("Searching for a vis site in aura " + Aura.Strength.ToString("0.000"));
-                Magus mage = (Magus)character;
+                HermeticMagus mage = (HermeticMagus)character;
                 // add bonus to area lore equal to casting total div 5?
                 // TODO: once spells are implemented, increase finding chances based on aura-detection spells
                 double magicLore = mage.GetAbility(Abilities.MagicLore).Value;

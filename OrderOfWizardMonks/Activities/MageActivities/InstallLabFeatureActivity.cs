@@ -14,7 +14,7 @@ namespace WizardMonks.Activities.MageActivities
             FeatureToInstall = feature;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             if (mage.Laboratory == null)
             {

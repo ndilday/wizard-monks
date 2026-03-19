@@ -13,7 +13,7 @@ namespace WizardMonks
     {
         private const double BASE_IDEA_CHANCE = 0.05; // 5% chance per season
 
-        public static void CheckForIdea(Magus magus, IActivity activity)
+        public static void CheckForIdea(HermeticMagus magus, IActivity activity)
         {
             // 1. Check for embedded Idea from reading
             if (activity is ReadActivity readActivity && readActivity.Book.EmbeddedIdea != null)
@@ -30,7 +30,7 @@ namespace WizardMonks
             }
         }
 
-        private static void GenerateRandomIdea(Magus magus, IActivity activity)
+        private static void GenerateRandomIdea(HermeticMagus magus, IActivity activity)
         {
             // Pass the magus object down to get context
             ArtPair inspiredArts = GetContextualArts(magus, activity);
@@ -42,7 +42,7 @@ namespace WizardMonks
             }
         }
 
-        private static ArtPair GetContextualArts(Magus magus, IActivity activity)
+        private static ArtPair GetContextualArts(HermeticMagus magus, IActivity activity)
         {
             // Inventing a spell. The idea is for a related spell.
             if (activity is InventSpellActivity invent)

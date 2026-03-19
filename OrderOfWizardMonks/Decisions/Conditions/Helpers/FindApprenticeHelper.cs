@@ -13,7 +13,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private const double EASE_FACTOR = 9.0;
         private readonly SpellBase _giftFindingBase;
 
-        public FindApprenticeHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc)
+        public FindApprenticeHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc)
             : base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _giftFindingBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Gift);

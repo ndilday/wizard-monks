@@ -20,7 +20,7 @@ namespace WizardMonks.Models.Projects
         public bool HasAchievedDiscovery { get; set; } = false;
 
         // Modified constructor to call the base constructor
-        public ResearchProject(Magus researcher, BreakthroughDefinition target) : base(researcher)
+        public ResearchProject(HermeticMagus researcher, BreakthroughDefinition target) : base(researcher)
         {
             Breakthrough = target;
             CompletedPhases = new List<ResearchProjectPhase>();

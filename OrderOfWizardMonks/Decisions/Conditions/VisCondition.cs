@@ -11,7 +11,7 @@ namespace WizardMonks.Decisions.Conditions
 {
     public class VisCondition : ACondition
     {
-        private Magus _mage;
+        private HermeticMagus _mage;
         private bool _vimSufficient;
         HasLabCondition _labCondition;
         HasAuraCondition _auraCondition;
@@ -20,7 +20,7 @@ namespace WizardMonks.Decisions.Conditions
         public List<Ability> VisTypes { get; private set; }
         public double AmountNeeded { get; private set; }
 
-        public VisCondition(Magus magus, uint ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded, ushort conditionDepth) :
+        public VisCondition(HermeticMagus magus, uint ageToCompleteBy, double desire, List<Ability> abilities, double totalNeeded, ushort conditionDepth) :
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
@@ -31,7 +31,7 @@ namespace WizardMonks.Decisions.Conditions
             _vimSufficient = VisTypes.Contains(MagicArts.Vim);
         }
 
-        public VisCondition(Magus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth) :
+        public VisCondition(HermeticMagus magus, uint ageToCompleteBy, double desire, Ability ability, double totalNeeded, ushort conditionDepth) :
             base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;

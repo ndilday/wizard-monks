@@ -11,7 +11,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     class ReadingHelper : AHelper
     {
         private Ability _ability;
-        public ReadingHelper(Ability ability, Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
+        public ReadingHelper(Ability ability, HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc = null) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _ability = ability;

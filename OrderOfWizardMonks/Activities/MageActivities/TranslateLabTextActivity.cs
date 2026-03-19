@@ -14,7 +14,7 @@ namespace WizardMonks.Activities.MageActivities
             TargetText = textToTranslate;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             mage.Log.Add($"Working to decipher the shorthand for '{TargetText.SpellContained.Name}' by {TargetText.Author.Name}.");
 
@@ -27,7 +27,7 @@ namespace WizardMonks.Activities.MageActivities
             {
                 currentProgress += (double)previousProgress;
             }
-            ushort? previousTranslation = mage.GetDeciperedLabTextLevel(TargetText.Author);
+            ushort? previousTranslation = mage.GetDecipheredLabTextLevel(TargetText.Author);
             if(previousTranslation != null )
             {
                 currentProgress += (ushort)previousTranslation;

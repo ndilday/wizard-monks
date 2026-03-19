@@ -8,7 +8,7 @@ namespace WizardMonks.Decisions.Goals
     {
         // This goal could be for the magus themself, or for another.
         // For now, we'll assume it's for the character pursuing the goal.
-        public FindApprenticeGoal(Magus magus, double desire)
+        public FindApprenticeGoal(HermeticMagus magus, double desire)
             : base(magus, magus.SeasonalAge + 20, desire) // Deadline: find one within 5 years.
         {
             // The desire for an apprentice increases with age and is influenced by sociability.
@@ -16,13 +16,13 @@ namespace WizardMonks.Decisions.Goals
         }
 
         // The goal is complete once the magus has an apprentice.
-        public override bool IsComplete() => ((Magus)Character).Apprentice != null;
+        public override bool IsComplete() => ((HermeticMagus)Character).Apprentice != null;
 
         public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
         {
             if (IsComplete()) return;
 
-            var magus = (Magus)Character;
+            var magus = (HermeticMagus)Character;
 
             log.Add($"[Goal] Seeking an apprentice. Desire: {Desire:F2}");
 

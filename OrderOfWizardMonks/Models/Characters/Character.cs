@@ -169,6 +169,55 @@ namespace WizardMonks.Models.Characters
             }
         }
 
+        // copy constructor for use in the arts opening workflow
+        protected Character(Character source)
+        {
+            // 1. Maintain Identity
+            this.Id = source.Id;
+            this.Name = source.Name;
+            this.Personality = source.Personality;
+            this.ReputationFocuses = new Dictionary<string, double>(source.ReputationFocuses);
+
+            // 2. Copy Time/Aging state
+            this.CurrentSeason = source.CurrentSeason;
+            this._baseAge = source._baseAge;
+            this.NoAgingSeasons = source.NoAgingSeasons;
+            this.LongevityRitual = source.LongevityRitual;
+            this.Decrepitude = source.Decrepitude;
+            this.Warping = (CharacterAbility)source.Warping.MakeCopy();
+
+            // 3. Deep Copy Internal Mutable State (Attributes & Abilities)
+            for (int i = 0; i < source._attributes.Length; i++)
+            {
+                this._attributes[i] = new Attribute(source._attributes[i].BaseValue, source._attributes[i].Decrepitude);
+            }
+
+            this._abilityMap = new Dictionary<int, CharacterAbilityBase>();
+            foreach (var kvp in source._abilityMap)
+            {
+                this._abilityMap[kvp.Key] = kvp.Value.MakeCopy();
+            }
+
+            // 4. Shallow Copy External Collections
+            // We want the new HermeticMagus pointing to the exact same books/projects, not clones of them.
+            this.ActiveGoals = new List<IGoal>(source.ActiveGoals);
+            this.CompletedGoals = new List<IGoal>(source.CompletedGoals);
+            this.Books = new List<ABook>(source.Books);
+            this.BooksRead = new HashSet<ABook>(source.BooksRead);
+            this.BooksWritten = new List<ABook>(source.BooksWritten);
+            this.ActiveProjects = new List<AProject>(source.ActiveProjects);
+            this.Log = new List<string>(source.Log);
+            this.Beliefs = new Dictionary<IBeliefSubject, BeliefProfile>(source.Beliefs);
+
+            // 5. Wire up the cached properties
+            this._writingAbility = source._writingAbility;
+            this._areaAbility = source._areaAbility;
+            this.WritingLanguage = source.WritingLanguage;
+            this.WritingCharacterAbility = this.GetAbility(this._writingAbility);
+            this.WritingLanguageCharacterAbility = this.GetAbility(this.WritingLanguage);
+            this.WritingAbilities = new List<Ability> { this._writingAbility, this.WritingLanguage };
+        }
+
         public void OnAged(AgingEventArgs e)
         {
             if (Aged != null)

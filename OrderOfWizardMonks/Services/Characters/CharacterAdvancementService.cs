@@ -24,7 +24,7 @@ namespace WizardMonks.Services.Characters
             {
                 return gain / 4;
             }
-            if (character is Magus mage)
+            if (character is HermeticMagus mage)
             {
                 double baseDistillVisRate = mage.GetVisDistillationRate();
                 double distillVisRate = baseDistillVisRate;
@@ -40,7 +40,7 @@ namespace WizardMonks.Services.Characters
                 CharacterAbilityBase charAbility = mage.GetAbility(ability);
                 double visUsedPerStudySeason = 0.5 + (charAbility.Value + charAbility.GetValueGain(gain) / 2) / 10.0;
                 // the gain per season depends on how the character views vis
-                double studySeasons = gain / mage.VisStudyRate;
+                double studySeasons = gain / mage.GetVisStudyAuraBonus();
                 double visNeeded = studySeasons * visUsedPerStudySeason;
                 // compare to the number of seasons we would need to extract the vis
                 // plus the number of seasons we would need to study the extracted vis
@@ -49,7 +49,7 @@ namespace WizardMonks.Services.Characters
 
                 // credit back the value of the exposure gained in the process of distilling
                 double exposureGained = 2.0 * extractTime;
-                double exposureSeasonsOfVis = exposureGained / mage.VisStudyRate;
+                double exposureSeasonsOfVis = exposureGained / mage.GetVisStudyAuraBonus();
                 CharacterAbilityBase vim = mage.GetAbility(MagicArts.Vim);
                 CharacterAbilityBase creo = mage.GetAbility(MagicArts.Creo);
                 CharacterAbilityBase exposureAbility = creo.Value < vim.Value ? creo : vim;
@@ -142,7 +142,7 @@ namespace WizardMonks.Services.Characters
             return activity;
         }
 
-        public static IActivity MageAdvance(this Magus mage)
+        public static IActivity MageAdvance(this HermeticMagus mage)
         {
             mage.IsBestBookCacheClean = false;
             // harvest vis

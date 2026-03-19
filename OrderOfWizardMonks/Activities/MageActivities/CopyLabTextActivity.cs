@@ -14,7 +14,7 @@ namespace WizardMonks.Activities.MageActivities
             TextToCopy = labText;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             double progressThisSeason = mage.GetLabTextCopyingRate();
 

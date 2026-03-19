@@ -10,8 +10,8 @@ namespace WizardMonks.Decisions.Conditions
 {
     public class IsCovenantFounderCondition : ACondition
     {
-        private Magus _mage;
-        public IsCovenantFounderCondition(Magus magus, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(magus, ageToCompleteBy, desire, conditionDepth)
+        private HermeticMagus _mage;
+        public IsCovenantFounderCondition(HermeticMagus magus, uint ageToCompleteBy, double desire, ushort conditionDepth = 1) : base(magus, ageToCompleteBy, desire, conditionDepth)
         {
             _mage = magus;
         }

@@ -8,8 +8,8 @@ namespace WizardMonks.Decisions.Goals
 {
     class GauntletApprenticeGoal : AGoal
     {
-        private Magus _mage;
-        public GauntletApprenticeGoal(Magus magus, uint ageToCompleteBy, double desire) :
+        private HermeticMagus _mage;
+        public GauntletApprenticeGoal(HermeticMagus magus, uint ageToCompleteBy, double desire) :
             base(magus, ageToCompleteBy, desire)
         {
             _mage = magus;

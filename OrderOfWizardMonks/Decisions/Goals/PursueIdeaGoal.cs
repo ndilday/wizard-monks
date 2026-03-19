@@ -12,14 +12,14 @@ namespace WizardMonks.Decisions.Goals
         private readonly AIdea _idea;
         private Spell _targetSpell; // The concrete spell we decide to invent
 
-        public PursueIdeaGoal(Magus magus, AIdea idea, uint? ageToCompleteBy = null)
+        public PursueIdeaGoal(HermeticMagus magus, AIdea idea, uint? ageToCompleteBy = null)
             : base(magus, ageToCompleteBy, 0) // Desire is calculated dynamically
         {
             _idea = idea;
             Desire = CalculateDesire(magus);
         }
 
-        private double CalculateDesire(Magus magus)
+        private double CalculateDesire(HermeticMagus magus)
         {
             // Add value based on projected future benefits
             // Placeholder for reputation gain. This makes it forward-compatible.
@@ -41,7 +41,7 @@ namespace WizardMonks.Decisions.Goals
         {
             if (_completed) return;
 
-            var magus = (Magus)Character;
+            var magus = (HermeticMagus)Character;
             if (_idea is SpellIdea spellIdea)
             {
                 // If we haven't defined a target spell yet, create one

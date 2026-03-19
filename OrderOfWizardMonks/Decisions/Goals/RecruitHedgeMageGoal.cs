@@ -7,9 +7,9 @@ using WizardMonks.Models.Characters;
 
 public class RecruitHedgeMageGoal : AGoal
 {
-    public Magus Master { get; private set; }
+    public HermeticMagus Master { get; private set; }
 
-    public RecruitHedgeMageGoal(Magus recruiter, Magus master, double desire)
+    public RecruitHedgeMageGoal(HermeticMagus recruiter, HermeticMagus master, double desire)
         : base(recruiter, null, desire)
     {
         Master = master;

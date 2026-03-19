@@ -31,8 +31,8 @@ namespace WizardMonks.Activities.ExposingActivities
             Student.Advance(new LearnActivity(quality, character.GetAbility(Topic).Value, Topic, character));
             Completed = true;
 
-            // If the teacher is a Magus and the student is their apprentice, update the timestamp.
-            if (character is Magus master && master.Apprentice == this.Student)
+            // If the teacher is a HermeticMagus and the student is their apprentice, update the timestamp.
+            if (character is HermeticMagus master && master.Apprentice == this.Student)
             {
                 master.LastSeasonTrainedApprentice = master.SeasonalAge;
             }

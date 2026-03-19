@@ -18,7 +18,7 @@ namespace WizardMonks.Activities.MageActivities
             Action = Activity.InventSpells;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             var project = mage.ActiveProjects
                 .OfType<SpellInventionProject>()

@@ -10,7 +10,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         ArtPair _arts;
         Activity _activity;
 
-        public LabTotalIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc) :
+        public LabTotalIncreaseHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, Activity activity, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, arts, desireFunc)
         {
             _arts = arts;

@@ -9,7 +9,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     {
         private ArtPair _arts;
 
-        public ArtIncreaseHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
+        public ArtIncreaseHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, ArtPair arts, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _arts = arts;
@@ -40,7 +40,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             // if so, assume vis will return an average of 6XP + aura
             if (stockpile > visNeed)
             {
-                double gain = magicArt.GetValueGain(_mage.VisStudyRate);
+                double gain = magicArt.GetValueGain(_mage.GetVisStudyAuraBonus());
                 double effectiveDesire = _desireFunc(gain, _conditionDepth);
                 StudyVisActivity visStudy = new(magicArt.Ability, effectiveDesire);
                 alreadyConsidered.Add(visStudy);

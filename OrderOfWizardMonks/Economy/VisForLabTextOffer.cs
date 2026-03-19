@@ -8,12 +8,12 @@ namespace WizardMonks.Economy
 {
     public class VisForLabTextOffer
     {
-        public Magus TradingPartner { get; private set; }
+        public HermeticMagus TradingPartner { get; private set; }
         public List<VisOffer> VisOffers { get; private set; }
         public double VisValue { get; private set; }
         public LabText LabTextDesired { get; private set; }
 
-        public VisForLabTextOffer(Magus buyer, IEnumerable<VisOffer> visOffers, double quantity, LabText labTextDesired)
+        public VisForLabTextOffer(HermeticMagus buyer, IEnumerable<VisOffer> visOffers, double quantity, LabText labTextDesired)
         {
             TradingPartner = buyer;
             VisOffers = visOffers.ToList();

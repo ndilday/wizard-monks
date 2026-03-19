@@ -9,10 +9,10 @@ namespace WizardMonks.Decisions.Goals
 {
     public class TrainApprenticeGoal : AGoal
     {
-        private readonly Magus _apprentice;
+        private readonly HermeticMagus _apprentice;
         private bool _seasonallyComplete = false;
 
-        public TrainApprenticeGoal(Magus master, uint deadline, double desire)
+        public TrainApprenticeGoal(HermeticMagus master, uint deadline, double desire)
          : base(master, deadline, desire)
         {
             _apprentice = master.Apprentice;
@@ -26,7 +26,7 @@ namespace WizardMonks.Decisions.Goals
 
         // The goal is truly complete only when the apprentice is gone.
         // The seasonal requirement is handled by the GoalGenerator creating/removing the goal.
-        public override bool IsComplete() => ((Magus)Character).Apprentice == null || _seasonallyComplete;
+        public override bool IsComplete() => ((HermeticMagus)Character).Apprentice == null || _seasonallyComplete;
 
         // New method for the GoalGenerator to call when training is done for the year.
         public void MarkAsSeasonallyComplete()
@@ -38,7 +38,7 @@ namespace WizardMonks.Decisions.Goals
         {
             if (IsComplete()) return;
 
-            var master = (Magus)Character;
+            var master = (HermeticMagus)Character;
 
             // Calculate urgency based on the deadline for THIS YEAR'S training.
             double seasonsRemaining = (AgeToCompleteBy ?? master.SeasonalAge + 1) - master.SeasonalAge;
@@ -65,7 +65,7 @@ namespace WizardMonks.Decisions.Goals
         /// <summary>
         /// Determines the most important subject to teach the apprentice this season based on a core curriculum.
         /// </summary>
-        private KeyValuePair<Ability, double> GetNextSubjectToTeach(Magus master, Magus apprentice)
+        private KeyValuePair<Ability, double> GetNextSubjectToTeach(HermeticMagus master, HermeticMagus apprentice)
         {
             // Core curriculum with target levels.
             var curriculum = new Dictionary<Ability, double>

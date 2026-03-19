@@ -19,7 +19,7 @@ namespace WizardMonks.Activities.ExposingActivities
 
         protected override void DoAction(Character character)
         {
-            if (character is not Magus mage)
+            if (character is not HermeticMagus mage)
             {
                 // Non-magi cannot search for magically Gifted apprentices at this time.
                 character.Log.Add("Cannot search for an apprentice without the Gift.");
@@ -46,7 +46,7 @@ namespace WizardMonks.Activities.ExposingActivities
 
                 mage.Log.Add($"Success! An apprentice has been found with {bonusPoints} bonus points for character generation.");
 
-                Magus newApprentice = CharacterFactory.GenerateNewApprentice(bonusPoints);
+                HermeticMagus newApprentice = CharacterFactory.GenerateNewApprentice(bonusPoints);
                 newApprentice.Name = "Apprentice filius " + mage.Name;
                 mage.TakeApprentice(newApprentice);
             }
@@ -57,7 +57,7 @@ namespace WizardMonks.Activities.ExposingActivities
             }
         }
 
-        private static double CalculateSearchTotal(Magus mage)
+        private static double CalculateSearchTotal(HermeticMagus mage)
         {
             // Step 1: Calculate the Search Total
             double searchTotal = 0;

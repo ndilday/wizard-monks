@@ -17,7 +17,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
         private double _averageGain;
         private SpellBase _findAuraSpellBase;
 
-        public FindNewAuraHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
+        public FindNewAuraHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _findAuraSpellBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);

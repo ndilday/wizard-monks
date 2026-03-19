@@ -17,7 +17,7 @@ namespace WizardMonks.Services.Characters
     /// </summary>
     public class ResearchService
     {
-        public ResearchProjectPhase GenerateExperimentalSpellPhase(BreakthroughDefinition breakthrough, Magus researcher)
+        public ResearchProjectPhase GenerateExperimentalSpellPhase(BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
             var researchablePrinciples = GetResearchablePrinciples(breakthrough);
             if (!researchablePrinciples.Any())
@@ -45,7 +45,7 @@ namespace WizardMonks.Services.Characters
             return pool;
         }
 
-        private ResearchProjectPhase GenerateForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, Magus researcher)
+        private ResearchProjectPhase GenerateForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, HermeticMagus researcher)
         {
             ArtPair chosenArts = SelectExperimentalArtPair(definition.AssociatedArtPairs, researcher);
             if (chosenArts == null) return null;
@@ -98,14 +98,14 @@ namespace WizardMonks.Services.Characters
                 "Generic Foundational Effect");
         }
 
-        private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, Magus researcher)
+        private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, HermeticMagus researcher)
         {
             Spell experimentalSpell = new Spell(EffectRanges.Touch, EffectDurations.Concentration, EffectTargets.Individual, principle, 0, false, "Unnamed Spell");
             ApplyInstabilityFactors(ref experimentalSpell, (ushort)(Die.Instance.RollSimpleDie() / 2));
             return new ResearchProjectPhase(experimentalSpell, 1);
         }
 
-        private ArtPair SelectExperimentalArtPair(List<ArtPair> candidates, Magus researcher)
+        private ArtPair SelectExperimentalArtPair(List<ArtPair> candidates, HermeticMagus researcher)
         {
             if (candidates == null || !candidates.Any()) return null;
 

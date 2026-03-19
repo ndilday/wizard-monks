@@ -166,7 +166,7 @@ namespace WizardMonks.Services.Characters
 
                         // Update stereotype about the author's house
                         // TODO: this should probably apply to personality, but not levels of skill
-                        if (book.Author is Magus magus)
+                        if (book.Author is HermeticMagus magus)
                         {
                             var houseSubject = Houses.GetSubject(magus.House);
                             reader.GetBeliefProfile(houseSubject).AddOrUpdateBelief(

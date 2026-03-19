@@ -30,7 +30,7 @@ namespace WizardMonks.Activities.MageActivities
             ActivitySpecialization = activity;
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             if (mage.Laboratory == null)
             {

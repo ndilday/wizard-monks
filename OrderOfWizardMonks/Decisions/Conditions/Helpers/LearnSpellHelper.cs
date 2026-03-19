@@ -18,7 +18,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
     {
         private readonly SpellBase _spellBase;
 
-        public LearnSpellHelper(Magus mage, uint ageToCompleteBy, ushort conditionDepth, SpellBase spellBase, CalculateDesireFunc desireFunc) :
+        public LearnSpellHelper(HermeticMagus mage, uint ageToCompleteBy, ushort conditionDepth, SpellBase spellBase, CalculateDesireFunc desireFunc) :
             base(mage, ageToCompleteBy, conditionDepth, desireFunc)
         {
             _spellBase = spellBase;
@@ -98,7 +98,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             {
                 // Cannot use the text, so the action is to translate it.
                 double translateLabTotal = _mage.GetLabTotal(bestLabText.SpellContained.Base.ArtPair, Activity.TranslateLabText)
-                                           + (_mage.GetDeciperedLabTextLevel(bestLabText.Author) ?? 0);
+                                           + (_mage.GetDecipheredLabTextLevel(bestLabText.Author) ?? 0);
 
                 double seasonsToTranslate = Math.Ceiling(bestLabText.SpellContained.Level / translateLabTotal);
                 double effectiveDesire = _desireFunc(bestLabText.SpellContained.Level, (ushort)(_conditionDepth + seasonsToTranslate));
@@ -172,7 +172,7 @@ namespace WizardMonks.Decisions.Conditions.Helpers
             desires.AddLabTextDesire(new LabTextDesire(_mage, _spellBase, desiredLevelBaseline, labTotal));
         }
 
-        private Spell CreateSpellFromLevel(Magus magus, SpellBase spellBase, ushort level)
+        private Spell CreateSpellFromLevel(HermeticMagus magus, SpellBase spellBase, ushort level)
         {
             ushort totalMagnitudes = SpellLevelMath.GetMagnitudesFromLevel(level);
             ushort availableMagnitudes = (ushort)(totalMagnitudes > spellBase.Magnitude ? totalMagnitudes - spellBase.Magnitude : 0);

@@ -15,7 +15,7 @@ namespace WizardMonks.Activities.MageActivities
             return "Gauntleting apprentice worth " + Desire.ToString("0.000");
         }
 
-        protected override void DoMageAction(Magus mage)
+        protected override void DoMageAction(HermeticMagus mage)
         {
             mage.GauntletApprentice();
         }

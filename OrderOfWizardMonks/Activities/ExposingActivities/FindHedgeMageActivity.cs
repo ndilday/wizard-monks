@@ -13,9 +13,9 @@ public class FindHedgeMageActivity : AExposingActivity
 {
     private const double EASE_FACTOR = 9.0;
 
-    public Magus TargetMaster { get; private set; }
+    public HermeticMagus TargetMaster { get; private set; }
 
-    public FindHedgeMageActivity(Magus targetMaster, Ability exposure, double desire) : base(exposure, desire)
+    public FindHedgeMageActivity(HermeticMagus targetMaster, Ability exposure, double desire) : base(exposure, desire)
     {
         TargetMaster = targetMaster;
         Action = Activity.FindHedgeMage; // New Activity enum value needed
@@ -23,7 +23,7 @@ public class FindHedgeMageActivity : AExposingActivity
 
     protected override void DoAction(Character character)
     {
-        var recruiter = (Magus)character;
+        var recruiter = (HermeticMagus)character;
         double searchTotal = CalculateSearchTotal(recruiter);
 
         // Step 3: Make the Roll and Determine Outcome
@@ -45,7 +45,7 @@ public class FindHedgeMageActivity : AExposingActivity
         }
     }
 
-    private static double CalculateSearchTotal(Magus recruiter)
+    private static double CalculateSearchTotal(HermeticMagus recruiter)
     {
         // Step 1: Calculate the Search Total
         double searchTotal = 0;

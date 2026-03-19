@@ -4,7 +4,6 @@ using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Economy;
 using WizardMonks.Instances;
-using WizardMonks.Models;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
@@ -13,32 +12,26 @@ namespace WizardMonks.Services.Characters
 {
     public static class MagusMagicService
     {
-        public static double GetCastingTotal(this Magus mage, ArtPair artPair)
+        public static double GetCastingTotal(this HermeticMagus mage, ArtPair artPair)
         {
             double techValue = mage.Arts.GetAbility(artPair.Technique).Value;
             double formValue = mage.Arts.GetAbility(artPair.Form).Value;
             return techValue + formValue + mage.GetAttribute(AttributeType.Stamina).Value;
         }
 
-        public static Spell GetBestSpell(this Magus mage, SpellBase spellBase)
+        public static Spell GetBestSpell(this HermeticMagus mage, SpellBase spellBase)
         {
             return mage.SpellList.Where(s => s.Base == spellBase).OrderByDescending(s => s.Level).FirstOrDefault();
         }
 
-        public static double GetSpontaneousCastingTotal(this Magus mage, ArtPair artPair)
+        public static double GetSpontaneousCastingTotal(this HermeticMagus mage, ArtPair artPair)
         {
             // TODO: make the Diedne hack better
             double divisor = mage.Name == "Diedne" ? 2.0 : 5.0;
             return mage.GetCastingTotal(artPair) / divisor;
         }
 
-        public static double GetVisDistillationRate(this Magus mage)
-        {
-            // TODO: One day, we'll make this more complicated
-            return mage.GetLabTotal(MagicArtPairs.CrVi, Activity.DistillVis) / 10;
-        }
-
-        public static double GetAverageAuraFound(this Magus mage)
+        public static double GetAverageAuraFound(this HermeticMagus mage)
         {
             double auraCount = mage.GetOwnedAuras().Count();
             double areaLore = mage.GetAbility(Abilities.AreaLore).Value;
@@ -55,7 +48,7 @@ namespace WizardMonks.Services.Characters
         {
         }
 
-        public static double GetVisCount(this Magus mage, Ability visArt)
+        public static double GetVisCount(this HermeticMagus mage, Ability visArt)
         {
             double total = 0;
             if (mage.Covenant != null)
@@ -69,7 +62,7 @@ namespace WizardMonks.Services.Characters
             return total;
         }
 
-        public static double UseVis(this Magus mage, Ability visType, double amount)
+        public static double UseVis(this HermeticMagus mage, Ability visType, double amount)
         {
             if (!MagicArts.IsArt(visType))
             {
@@ -96,7 +89,7 @@ namespace WizardMonks.Services.Characters
             return mage.VisStock[visType];
         }
 
-        public static void UseVis(this Magus mage, List<VisOffer> visOffers)
+        public static void UseVis(this HermeticMagus mage, List<VisOffer> visOffers)
         {
             foreach (VisOffer offer in visOffers)
             {
@@ -104,7 +97,7 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        public static double GainVis(this Magus mage, Ability visType, double amount)
+        public static double GainVis(this HermeticMagus mage, Ability visType, double amount)
         {
             if (!MagicArts.IsArt(visType))
             {
@@ -121,7 +114,7 @@ namespace WizardMonks.Services.Characters
             return mage.VisStock[visType];
         }
 
-        public static void GainVis(this Magus mage, List<VisOffer> visOffers)
+        public static void GainVis(this HermeticMagus mage, List<VisOffer> visOffers)
         {
             foreach (VisOffer offer in visOffers)
             {
@@ -129,7 +122,7 @@ namespace WizardMonks.Services.Characters
             }
         }
 
-        public static bool HasSufficientVis(this Magus mage, List<VisOffer> visOffers)
+        public static bool HasSufficientVis(this HermeticMagus mage, List<VisOffer> visOffers)
         {
             foreach (VisOffer offer in visOffers)
             {
@@ -141,7 +134,7 @@ namespace WizardMonks.Services.Characters
             return true;
         }
 
-        public static double CalculatePrestigeValueForSpell(this Magus magus, Spell spell)
+        public static double CalculatePrestigeValueForSpell(this HermeticMagus magus, Spell spell)
         {
             var payload = new List<Belief>();
             double magnitude = spell.Level / 5.0; // Prestige scales with magnitude

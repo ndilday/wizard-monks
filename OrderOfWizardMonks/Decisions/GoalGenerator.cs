@@ -3,149 +3,231 @@ using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
-using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Characters;
-using WizardMonks.Models.Covenants;
-using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions
 {
-    public static class GoalGenerator
+    /// <summary>
+    /// Default implementation of IGoalGenerator.
+    ///
+    /// For each goal category, evaluates motivational pressure from emotion tokens
+    /// and self-beliefs, then compares it to a personality-modulated generation threshold.
+    /// A new Intention is created when pressure exceeds the threshold and no equivalent
+    /// intention is already active.
+    ///
+    /// Personality shapes behavior here through two mechanisms only:
+    ///   1. Generation thresholds — facets lower or raise the pressure required to form a goal.
+    ///   2. Commitment strength — facets influence how durable a formed intention is.
+    /// Personality does not modulate emotion token intensity or decay rates.
+    /// </summary>
+    public sealed class GoalGenerator : IGoalGenerator
     {
-        public static void GenerateAndReviewGoals(HermeticMagus magus)
+        private const float BaseGenerationThreshold = 0.3f;
+        private const int BaseStagnationTicks = 8;
+
+        public IEnumerable<Intention> GenerateIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick)
         {
-            // Step 1: Review and remove completed goals
-           foreach(IGoal goal in magus.ActiveGoals)
-            {
-                if(goal.IsComplete())
-                {
-                    magus.MarkGoalComplete(goal);
-                }
-            }
+            var newIntentions = new List<Intention>();
 
-            // Step 2: Generate a list of potential new goals
-            var potentialGoals = new List<IGoal>();
-            potentialGoals.AddRange(GenerateFoundationalGoals(magus));
-            potentialGoals.AddRange(GenerateGoalsFromState(magus));
-            potentialGoals.AddRange(GenerateGoalsFromPersonality(magus));
-            potentialGoals.AddRange(GenerateGoalsFromBeliefs(magus));
-            potentialGoals.AddRange(GenerateGoalsFromIdeas(magus)); // From your IdeaManager
+            TryGenerateSelfPreservationIntentions(character, emotions, beliefs, activeIntentions, currentTick, newIntentions);
+            TryGenerateResearchIntentions(character, emotions, beliefs, activeIntentions, currentTick, newIntentions);
+            TryGenerateSocialIntentions(character, emotions, beliefs, activeIntentions, currentTick, newIntentions);
+            TryGenerateRecognitionIntentions(character, emotions, beliefs, activeIntentions, currentTick, newIntentions);
+            TryGenerateReactiveIntentions(character, emotions, beliefs, activeIntentions, currentTick, newIntentions);
 
-            // Step 3: Filter out goals that are already being pursued
-            var existingGoalTypes = new HashSet<Type>(magus.ActiveGoals.Select(g => g.GetType()));
-            var newGoals = potentialGoals
-                .Where(pg => !existingGoalTypes.Contains(pg.GetType()))
-                .GroupBy(g => g.GetType()) // Ensure we don't add multiple of the same goal type
-                .Select(g => g.OrderByDescending(goal => goal.Desire).First());
-
-            // Step 4: Adopt new goals
-            foreach (var goal in newGoals)
-            {
-                if (goal.Desire > 0.1) // Desire threshold to avoid clutter
-                {
-                    magus.AddGoal(goal);
-                    magus.Log.Add($"[Goal Added] New Goal: {goal.GetType().Name} with Desire {goal.Desire:F2}");
-                }
-            }
+            return newIntentions;
         }
 
-        private static IEnumerable<IGoal> GenerateFoundationalGoals(HermeticMagus magus)
+        // -----------------------------------------------------------------
+        // Self-preservation goals
+        // Pressure comes from Fear token intensity and self-beliefs about vulnerability.
+        // Personality shapes the threshold at which this pressure generates a goal:
+        //   - High Prudence lowers the threshold (acts earlier, more cautious)
+        //   - High Fearfulness lowers it further (more sensitive to threat cues)
+        // Personality does not alter the Fear token itself.
+        // -----------------------------------------------------------------
+        private static void TryGenerateSelfPreservationIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick,
+            List<Intention> output)
         {
-            // Every magus needs these for survival and basic function.
-            if (magus.LongevityRitual == 0 && magus.SeasonalAge >= 120) // age 30
-            {
-                yield return new AvoidDecrepitudeGoal(magus, 100.0); // High, non-negotiable desire
-            }
-            // Add other universals here, like "Build a Lab if you don't have one"
+            float fearIntensity = emotions.GetIntensity(EmotionType.Fear);
+            float vulnerabilityBelief = beliefs.SelfBeliefs.GetValue("Vulnerability");
+
+            float pressure = fearIntensity * 0.6f + Math.Max(0f, vulnerabilityBelief) * 0.4f;
+
+            float prudence = (float)character.Personality.GetFacet(HexacoFacet.Prudence);
+            float fearfulness = (float)character.Personality.GetFacet(HexacoFacet.Fearfulness);
+
+            // Both high Prudence and high Fearfulness lower the threshold,
+            // making self-preservation goals generate at lower levels of pressure.
+            float threshold = BaseGenerationThreshold / (prudence * fearfulness);
+
+            if (pressure < threshold) return;
+            if (HasActiveIntentionOfType<AvoidDecrepitudeGoal>(activeIntentions)) return;
+
+            var goal = new AvoidDecrepitudeGoal(character as HermeticMagus, pressure);
+            float commitment = ComputeCommitmentStrength(fearIntensity, character, HexacoFacet.Prudence);
+            int stagnation = ComputeStagnationTicks(character);
+
+            output.Add(new Intention(goal, commitment, pressure, currentTick, stagnation));
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromState(HermeticMagus magus)
+        // -----------------------------------------------------------------
+        // Research and mastery goals
+        // Pressure comes from Pride, Envy, and self-beliefs about competence.
+        // High Inquisitiveness lowers the generation threshold.
+        // -----------------------------------------------------------------
+        private static void TryGenerateResearchIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick,
+            List<Intention> output)
         {
-            // Goals based on "gaps" in the character's status.
+            float prideIntensity = emotions.GetIntensity(EmotionType.Pride);
+            float envyIntensity = emotions.GetIntensity(EmotionType.Envy);
+            float competenceBelief = beliefs.SelfBeliefs.GetValue("MagicalCompetence");
+            float inquisitiveness = (float)character.Personality.GetFacet(HexacoFacet.Inquisitiveness);
 
-            // The "Leaving the Nest" Goal for the newly-minted Hermetic HermeticMagus
-            bool hasLearnedHermeticBasics = magus.GetAbility(Abilities.ParmaMagica).Value > 0 && magus.GetAbility(Abilities.MagicTheory).Value > 0;
-            if (hasLearnedHermeticBasics && magus.Covenant != null && magus.Covenant.GetRoleForMagus(magus) == CovenantRole.Visitor)
-            {
-                // Desire is very high - they have what they came for and want autonomy.
-                yield return new FoundCovenantGoal(magus, 200.0);
-            }
+            float pressure = prideIntensity * 0.4f
+                           + envyIntensity * 0.3f
+                           + Math.Max(0f, competenceBelief) * 0.3f;
 
-            // 1. Check if the magus needs to FIND an apprentice.
-            if (magus.Apprentice == null && magus.SeasonalAge > 160 && !magus.ActiveGoals.OfType<FindApprenticeGoal>().Any())
-            {
-                double desire = (magus.SeasonalAge - 160) / 4.0;
-                yield return new FindApprenticeGoal(magus, desire);
-            }
+            float threshold = BaseGenerationThreshold / inquisitiveness;
 
-            // 2. Manage the TRAINING of an existing apprentice.
-            var existingTrainingGoal = magus.ActiveGoals.OfType<TrainApprenticeGoal>().FirstOrDefault();
+            if (pressure < threshold) return;
 
-            if (magus.Apprentice != null)
-            {
-                // Calculate the current training year and its deadline
-                uint seasonsSinceStart = magus.SeasonalAge - magus.ApprenticeTrainingStartSeason;
-                uint currentTrainingYearIndex = seasonsSinceStart / 4; // Year 1 is index 0, Year 2 is index 1, etc.
-                uint deadlineForThisYear = magus.ApprenticeTrainingStartSeason + ((currentTrainingYearIndex + 1) * 4) - 1;
-                uint startOfThisYear = deadlineForThisYear - 3;
-
-                // Check if training has been done for the current year block
-                bool trainingIsDoneForThisYear = magus.LastSeasonTrainedApprentice >= startOfThisYear;
-
-                if (trainingIsDoneForThisYear)
-                {
-                    // If training is done, any existing goal for this period is obsolete.
-                    if (existingTrainingGoal != null)
-                    {
-                        existingTrainingGoal.MarkAsSeasonallyComplete();
-                    }
-                }
-                else if (existingTrainingGoal == null)
-                {
-                    // A goal is needed, but none exists. Create one.
-                    yield return new TrainApprenticeGoal(magus, deadlineForThisYear, 100.0);
-                }
-            }
-            else if (existingTrainingGoal != null)
-            {
-                // Cleanup: If there's no apprentice, the training goal is obsolete.
-                existingTrainingGoal.MarkAsSeasonallyComplete();
-            }
+            character.Log.Add(
+                $"[GoalGenerator] Research pressure {pressure:F2} (threshold {threshold:F2}) — " +
+                $"research goal type selection not yet implemented.");
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromPersonality(HermeticMagus magus)
+        // -----------------------------------------------------------------
+        // Social and relationship goals
+        // Pressure comes from Gratitude, Admiration, and Anger tokens.
+        // Personality shapes the threshold (Sociability, Fairness) and the
+        // form the goal takes once generated — it does not alter the tokens.
+        // -----------------------------------------------------------------
+        private static void TryGenerateSocialIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick,
+            List<Intention> output)
         {
-            // Example: An inquisitive magus wants to do original research
-            double curiosityFactor = magus.Personality.GetDesireMultiplier(HexacoFacet.Inquisitiveness);
-            if (curiosityFactor > 1.1)
-            {
-                // a simple goal to improve their highest art
-                var bestArt = magus.Arts.OrderByDescending(a => a.Value).First();
-                double desire = curiosityFactor * 10;
-                yield return new AbilityScoreGoal(magus, null, desire, bestArt.Ability, bestArt.Value + 1);
-            }
+            float gratitude = emotions.GetIntensity(EmotionType.Gratitude);
+            float anger = emotions.GetIntensity(EmotionType.Anger);
+            float admiration = emotions.GetIntensity(EmotionType.Admiration);
+            float sociability = (float)character.Personality.GetFacet(HexacoFacet.Sociability);
+            float fairness = (float)character.Personality.GetFacet(HexacoFacet.Fairness);
+
+            float pressure = (gratitude + admiration) * 0.5f - anger * 0.3f;
+
+            // High Sociability and Fairness lower the threshold for social goal generation.
+            float threshold = BaseGenerationThreshold / (sociability * fairness);
+
+            if (pressure < threshold) return;
+
+            character.Log.Add(
+                $"[GoalGenerator] Social pressure {pressure:F2} — " +
+                $"social goal type selection not yet implemented.");
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromBeliefs(HermeticMagus magus)
+        // -----------------------------------------------------------------
+        // Recognition and reputation goals
+        // Pressure comes from Pride and self-beliefs about reputation gap.
+        // Low Modesty and high Social Self-Esteem lower the generation threshold.
+        // -----------------------------------------------------------------
+        private static void TryGenerateRecognitionIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick,
+            List<Intention> output)
         {
-            // This is the key for the Founding scenario.
-            // A hedge wizard arrives with a strong belief in Bonisagus.
-            var bonisagusBelief = magus.GetBeliefProfile(Founders.Bonisgaus).GetBeliefMagnitude(BeliefTopics.MagicTheory.Name);
+            float pride = emotions.GetIntensity(EmotionType.Pride);
+            float socialSelfEsteem = (float)character.Personality.GetFacet(HexacoFacet.SocialSelfEsteem);
+            float modesty = (float)character.Personality.GetFacet(HexacoFacet.Modesty);
 
-            if (bonisagusBelief > 10 && magus.GetAbility(Abilities.ParmaMagica).Value < 1)
-            {
-                // They believe Bonisagus is a master, and they lack the key Hermetic skills.
-                // This generates the goal to learn from him. The desire is proportional to the belief strength.
-                yield return new LearnFromMasterGoal(magus, Founders.Bonisgaus, bonisagusBelief * 5);
-            }
+            float pressure = pride * 0.7f;
+
+            // High Social Self-Esteem and low Modesty lower the threshold.
+            // 2f - modesty inverts it: Modesty 0 → factor 2.0; Modesty 2 → factor 0.0.
+            float threshold = BaseGenerationThreshold / (socialSelfEsteem * (2f - modesty));
+
+            if (pressure < threshold) return;
+
+            character.Log.Add(
+                $"[GoalGenerator] Recognition pressure {pressure:F2} — " +
+                $"recognition goal type selection not yet implemented.");
         }
 
-        private static IEnumerable<IGoal> GenerateGoalsFromIdeas(HermeticMagus magus)
+        // -----------------------------------------------------------------
+        // Reactive and crisis goals
+        // Any emotion token above a high threshold triggers reconsideration.
+        // No personality modulation on the threshold — crisis response is universal.
+        // -----------------------------------------------------------------
+        private static void TryGenerateReactiveIntentions(
+            Character character,
+            EmotionLedger emotions,
+            CharacterBeliefStore beliefs,
+            IReadOnlyList<Intention> activeIntentions,
+            int currentTick,
+            List<Intention> output)
         {
-            foreach (var idea in magus.GetInspirations())
-            {
-                yield return new PursueIdeaGoal(magus, idea);
-            }
+            float maxIntensity = emotions.Active.Values
+                .Select(t => t.Intensity)
+                .DefaultIfEmpty(0f)
+                .Max();
+
+            if (maxIntensity < 0.7f) return;
+
+            character.Log.Add(
+                $"[GoalGenerator] Reactive pressure {maxIntensity:F2} exceeds threshold — " +
+                $"reactive goal type selection not yet implemented.");
+        }
+
+        // -----------------------------------------------------------------
+        // Helpers
+        // -----------------------------------------------------------------
+
+        private static bool HasActiveIntentionOfType<TGoal>(IReadOnlyList<Intention> intentions)
+            where TGoal : IGoal
+            => intentions.Any(i => i.UnderlyingGoal is TGoal);
+
+        /// <summary>
+        /// Computes commitment strength from the generating emotion intensity,
+        /// scaled by the anchor personality facet. Higher facet score → more durable commitment.
+        /// </summary>
+        private static float ComputeCommitmentStrength(
+            float emotionIntensity,
+            Character character,
+            HexacoFacet anchorFacet)
+        {
+            float facetScore = (float)character.Personality.GetFacet(anchorFacet);
+            return Math.Clamp(emotionIntensity * facetScore, 0.1f, 0.95f);
+        }
+
+        /// <summary>
+        /// Computes the stagnation tolerance for an intention.
+        /// High Prudence characters tolerate longer periods without progress before reconsidering.
+        /// </summary>
+        private static int ComputeStagnationTicks(Character character)
+        {
+            float prudence = (float)character.Personality.GetFacet(HexacoFacet.Prudence);
+            return (int)Math.Clamp(BaseStagnationTicks * prudence, 2, 24);
         }
     }
 }

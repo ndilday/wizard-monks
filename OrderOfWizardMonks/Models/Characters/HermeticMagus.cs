@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models.Books;
@@ -146,7 +147,53 @@ namespace WizardMonks.Models.Characters
 
         private void InitializeGoals()
         {
-            ActiveGoals.Add(new AvoidDecrepitudeGoal(this, 1.0));
+            // Bootstrap intention — seeded directly at construction before any WorldEvents
+            // exist to drive organic goal generation. The GoalGenerator's dedup check will
+            // find this in ActiveIntentions and skip creating a duplicate.
+            ActiveIntentions.Add(new Intention(
+                new AvoidDecrepitudeGoal(this, 1.0),
+                commitmentStrength: 0.8f,
+                initialDesireScore: 0.8f,
+                formationTick: (int)SeasonalAge,
+                maxStagnationTicks: 24));
+
+            SeedInitialCognitiveState();
+        }
+
+        /// <summary>
+        /// Seeds ambient emotional state and self-beliefs at construction, representing
+        /// the emotional residue of prior experience. This gives the GoalGenerator enough
+        /// signal to fire on the first tick for experienced characters.
+        ///
+        /// Personality facets above 1.0 (above average) produce proportional ambient state.
+        /// The seeded intensities are intentionally modest — enough to clear thresholds
+        /// for high-facet characters but not so large as to dominate the simulation.
+        /// </summary>
+        private void SeedInitialCognitiveState()
+        {
+            int tick = (int)SeasonalAge;
+            float inquisitiveness = (float)Personality.GetFacet(HexacoFacet.Inquisitiveness);
+            float prudence = (float)Personality.GetFacet(HexacoFacet.Prudence);
+            float fearfulness = (float)Personality.GetFacet(HexacoFacet.Fearfulness);
+
+            // High Inquisitiveness → ambient Pride from years of magical work.
+            if (inquisitiveness > 1.0f)
+            {
+                float prideIntensity = (inquisitiveness - 1.0f) * 0.4f;
+                Emotions.Add(new EmotionToken(EmotionType.Pride, prideIntensity, 0.05f, tick));
+                CognitiveBeliefs.SelfBeliefs.Upsert("MagicalCompetence",
+                    (inquisitiveness - 1.0f) * 0.5f, 0.4f, tick);
+            }
+
+            // High Prudence + high Fearfulness + older age → ambient Fear of aging.
+            // SeasonalAge >= 140 corresponds to roughly age 35, when aging begins.
+            if (prudence > 1.0f && fearfulness > 1.0f && SeasonalAge >= 140)
+            {
+                float fearIntensity = (prudence - 1.0f) * (fearfulness - 1.0f) * 0.3f;
+                Emotions.Add(new EmotionToken(EmotionType.Fear, fearIntensity, 0.05f, tick));
+                CognitiveBeliefs.SelfBeliefs.Upsert("Vulnerability",
+                    (prudence - 1.0f) * 0.3f, 0.3f, tick);
+            }
         }
 
         #endregion
@@ -206,12 +253,22 @@ namespace WizardMonks.Models.Characters
 
         public void AddIdea(AIdea idea)
         {
-            if (!_ideas.Any(i => i.Id == idea.Id))
-            {
-                _ideas.Add(idea);
-                Log.Add($"Gained a new idea: {idea.Description}");
-                ActiveGoals.Add(new PursueIdeaGoal(this, idea));
-            }
+            if (_ideas.Any(i => i.Id == idea.Id)) return;
+
+            _ideas.Add(idea);
+            Log.Add($"Gained a new idea: {idea.Description}");
+
+            // Immediately form an intention — ideas are an unambiguous catalyst.
+            // Commitment and desire are personality-derived; no pressure threshold needed.
+            float inquisitiveness = (float)Personality.GetFacet(HexacoFacet.Inquisitiveness);
+            float creativity = (float)Personality.GetFacet(HexacoFacet.Creativity);
+            float commitment = Math.Clamp((inquisitiveness + creativity) / 2f * 0.5f, 0.1f, 0.9f);
+            float desire = Math.Clamp(inquisitiveness * 0.5f, 0.1f, 1.0f);
+            int stagnation = (int)Math.Clamp(8 * Personality.GetFacet(HexacoFacet.Prudence), 2, 24);
+
+            ActiveIntentions.Add(new Intention(
+                new PursueIdeaGoal(this, idea),
+                commitment, desire, (int)SeasonalAge, stagnation));
         }
 
         #endregion

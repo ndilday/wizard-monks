@@ -4,6 +4,7 @@ using System.Linq;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Ideas;
 
 namespace WizardMonks.Decisions
 {
@@ -86,6 +87,24 @@ namespace WizardMonks.Decisions
         // Pressure comes from Pride, Envy, and self-beliefs about competence.
         // High Inquisitiveness lowers the generation threshold.
         // -----------------------------------------------------------------
+        // Research and mastery goals
+        // Pressure comes from Pride, Envy, and self-beliefs about competence.
+        // High Inquisitiveness lowers the generation threshold.
+        //
+        // Multiple research intentions are allowed — a high-Inquisitiveness,
+        // low-Prudence mage naturally accumulates more than they finish.
+        // The only guard is against duplicating an intention for an idea
+        // already being actively pursued.
+        //
+        // Goal selection:
+        //   1. Find ideas not already covered by an active PursueIdeaGoal.
+        //      SpellIdeas scored by combined art values (achievability).
+        //      BreakthroughIdeas boosted by Envy intensity (competitive drive).
+        //      Each qualifying idea above the threshold gets its own Intention.
+        //   2. If no ideas exist, improve the character's highest-scored art
+        //      by one level — but only if no AbilityScoreGoal targeting a
+        //      magic art is already active.
+        // -----------------------------------------------------------------
         private static void TryGenerateResearchIntentions(
             Character character,
             EmotionLedger emotions,
@@ -94,6 +113,8 @@ namespace WizardMonks.Decisions
             int currentTick,
             List<Intention> output)
         {
+            if (character is not HermeticMagus magus) return;
+
             float prideIntensity = emotions.GetIntensity(EmotionType.Pride);
             float envyIntensity = emotions.GetIntensity(EmotionType.Envy);
             float competenceBelief = beliefs.SelfBeliefs.GetValue("MagicalCompetence");
@@ -107,9 +128,70 @@ namespace WizardMonks.Decisions
 
             if (pressure < threshold) return;
 
-            character.Log.Add(
-                $"[GoalGenerator] Research pressure {pressure:F2} (threshold {threshold:F2}) — " +
-                $"research goal type selection not yet implemented.");
+            float dominantEmotion = Math.Max(prideIntensity, envyIntensity);
+            float commitment = ComputeCommitmentStrength(dominantEmotion, character, HexacoFacet.Inquisitiveness);
+            int stagnation = ComputeStagnationTicks(character);
+
+            var pursuedIdeaIds = activeIntentions
+                .Select(i => i.UnderlyingGoal)
+                .OfType<PursueIdeaGoal>()
+                .Select(g => g.Idea.Id)
+                .ToHashSet();
+
+            bool generatedAny = false;
+            foreach (var idea in magus.GetInspirations())
+            {
+                if (pursuedIdeaIds.Contains(idea.Id)) continue;
+
+                float ideaScore = ScoreIdea(idea, magus, envyIntensity);
+                if (ideaScore <= 0f) continue;
+
+                output.Add(new Intention(new PursueIdeaGoal(magus, idea), commitment, pressure, currentTick, stagnation));
+                generatedAny = true;
+            }
+
+            if (!generatedAny && !HasActiveArtImprovementGoal(activeIntentions))
+            {
+                var artGoal = SelectArtImprovementGoal(magus, pressure);
+                if (artGoal != null)
+                    output.Add(new Intention(artGoal, commitment, pressure, currentTick, stagnation));
+            }
+        }
+
+        private static float ScoreIdea(AIdea idea, HermeticMagus magus, float envyIntensity)
+        {
+            if (idea is SpellIdea spellIdea)
+            {
+                // Higher combined art score = more achievable = higher confidence payoff.
+                double techScore = magus.Arts.GetAbility(spellIdea.Arts.Technique).Value;
+                double formScore = magus.Arts.GetAbility(spellIdea.Arts.Form).Value;
+                return (float)(techScore + formScore);
+            }
+            if (idea is BreakthroughIdea)
+            {
+                // Breakthroughs are ambitious; Envy (competitive drive) amplifies their appeal.
+                return 5f + envyIntensity * 10f;
+            }
+            return 0f;
+        }
+
+        // An AbilityScoreGoal targeting a magic art is already serving as
+        // a research intention; don't stack another one on top.
+        private static bool HasActiveArtImprovementGoal(IReadOnlyList<Intention> intentions)
+            => intentions
+                .Select(i => i.UnderlyingGoal)
+                .OfType<AbilityScoreGoal>()
+                .Any(g => MagicArts.IsArt(g.Ability));
+
+        private static AbilityScoreGoal SelectArtImprovementGoal(HermeticMagus magus, float pressure)
+        {
+            var best = MagicArts.GetEnumerator()
+                .Select(art => (art, score: magus.Arts.GetAbility(art).Value))
+                .OrderByDescending(x => x.score)
+                .FirstOrDefault();
+
+            if (best.art == null) return null;
+            return new AbilityScoreGoal(magus, null, pressure, best.art, best.score + 1);
         }
 
         // -----------------------------------------------------------------

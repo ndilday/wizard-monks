@@ -6,13 +6,13 @@ namespace WizardMonks.Decisions.Goals
 {
     public class AbilityScoreGoal : AGoal
     {
-        Ability _ability;
+        public Ability Ability { get; }
         public AbilityScoreGoal(Character character, uint? ageToCompleteBy, double desire, Ability ability, double level) :
             base(character, ageToCompleteBy, desire)
         {
-            _ability = ability;
+            Ability = ability;
             uint modifiedAge = ageToCompleteBy == null ? 200 : (uint)ageToCompleteBy;
-            Conditions.Add(new AbilityScoreCondition(character, modifiedAge, desire, ability, level));
+            Conditions.Add(new AbilityScoreCondition(character, modifiedAge, desire, Ability, level));
         }
     }
 }

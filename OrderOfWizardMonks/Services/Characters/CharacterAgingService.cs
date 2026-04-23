@@ -2,6 +2,7 @@
 using System;
 using WizardMonks.Core;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Events;
 
 namespace WizardMonks.Services.Characters
 {
@@ -62,6 +63,10 @@ namespace WizardMonks.Services.Characters
 
             AgingEventArgs args = new(character, crisis, apparent, died);
             character.OnAged(args);
+            character.LastAgingEvent = WorldEvent.AgingOutcome(
+                (int)character.SeasonalAge,
+                crisis ? WorldEventCategory.AgingCrisis : WorldEventCategory.AgingNormal,
+                character, agingRoll, crisis);
         }
 
         private static void IncreaseDecrepitudeToNextLevel(this Character character)

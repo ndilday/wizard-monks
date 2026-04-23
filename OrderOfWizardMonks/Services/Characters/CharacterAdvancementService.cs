@@ -2,16 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Events;
+using WizardMonks.Models.Ideas;
 
 namespace WizardMonks.Services.Characters
 {
     public static class CharacterAdvancementService
     {
+        private static readonly AppraisalEngine _appraisalEngine = new();
+        private static readonly ReflectionEngine _reflectionEngine = new();
+        private static readonly IReflectionPolicy _reflectionPolicy = new TickSynchronizedReflectionPolicy();
+        private static readonly IGoalGenerator _goalGenerator = new GoalGenerator();
         /// <summary>
         /// Determines the value of an experience gain in terms of practice seasons
         /// </summary>
@@ -66,20 +73,31 @@ namespace WizardMonks.Services.Characters
             {
                 return character.MandatoryAction;
             }
-            else
+
+            ConsideredActions actions = new();
+
+            // Legacy goals (bootstrap and any not yet migrated to the intention system).
+            foreach (IGoal goal in character.ActiveGoals)
             {
-                ConsideredActions actions = new();
-                foreach (IGoal goal in character.ActiveGoals)
+                if (!goal.IsComplete())
                 {
-                    if (!goal.IsComplete())
-                    {
-                        List<string> dummy = new List<string>();
-                        goal.AddActionPreferencesToList(actions, character.Desires, dummy);
-                    }
+                    List<string> dummy = new List<string>();
+                    goal.AddActionPreferencesToList(actions, character.Desires, dummy);
                 }
-                character.Log.AddRange(actions.Log());
-                return actions.GetBestAction();
             }
+
+            // Intention-wrapped goals from the cognitive architecture.
+            foreach (Intention intention in character.ActiveIntentions)
+            {
+                if (!intention.UnderlyingGoal.IsComplete())
+                {
+                    List<string> dummy = new List<string>();
+                    intention.UnderlyingGoal.AddActionPreferencesToList(actions, character.Desires, dummy);
+                }
+            }
+
+            character.Log.AddRange(actions.Log());
+            return actions.GetBestAction();
         }
 
         public static void ReprioritizeGoals(this Character character)
@@ -95,6 +113,9 @@ namespace WizardMonks.Services.Characters
                     }
                 }
             }
+
+            // Prune completed intentions from the new system.
+            character.ActiveIntentions.RemoveAll(i => i.UnderlyingGoal.IsComplete());
         }
 
         public static void CommitAction(this Character character, IActivity action)
@@ -109,6 +130,9 @@ namespace WizardMonks.Services.Characters
 
         public static IActivity Advance(this Character character)
         {
+            // Decay emotion tokens at the start of each tick before activity selection.
+            character.Emotions.Tick();
+
             IActivity activity = null;
             if (!character.IsCollaborating)
             {
@@ -136,10 +160,148 @@ namespace WizardMonks.Services.Characters
                         character.CurrentSeason = Season.Spring;
                         break;
                 }
+
+                RunCognitiveStack(character, activity);
             }
             character.IsCollaborating = false;
             character.ReprioritizeGoals();
             return activity;
+        }
+
+        /// <summary>
+        /// Runs the post-activity cognitive pipeline: appraise events, reflect,
+        /// generate new intentions, prune reconsidered ones.
+        /// </summary>
+        private static void RunCognitiveStack(Character character, IActivity activity)
+        {
+            int currentTick = (int)character.SeasonalAge;
+            float maxEventImportance = 0f;
+
+            // Appraise the activity outcome event if one was emitted.
+            if (activity is AMageActivity mageActivity && mageActivity.EmittedEvent != null)
+                maxEventImportance = AppraiseEvent(character, mageActivity.EmittedEvent, currentTick);
+
+            // Appraise aging event if one occurred this tick.
+            if (character.LastAgingEvent != null)
+            {
+                maxEventImportance = Math.Max(maxEventImportance,
+                    AppraiseEvent(character, character.LastAgingEvent, currentTick));
+                character.LastAgingEvent = null;
+            }
+
+            // Reflect: synthesize beliefs from accumulated memory entries.
+            bool beliefRevised = false;
+            if (_reflectionPolicy.ShouldReflect(character, character.Memory, currentTick))
+            {
+                _reflectionEngine.Reflect(character, character.Memory, character.CognitiveBeliefs, currentTick);
+                character.Memory.ExpireStaleEntries(currentTick);
+                beliefRevised = true;
+            }
+
+            // Generate new intentions from current emotional and belief state.
+            var newIntentions = _goalGenerator.GenerateIntentions(
+                character, character.Emotions, character.CognitiveBeliefs,
+                character.ActiveIntentions, currentTick);
+            foreach (var intention in newIntentions)
+            {
+                character.ActiveIntentions.Add(intention);
+                character.Log.Add($"[Cognition] New intention formed: {intention.UnderlyingGoal.GetType().Name}");
+            }
+
+            // Context-change goal generation: certain completions trigger immediate
+            // re-evaluation regardless of emotional pressure thresholds.
+            if (activity is AMageActivity completedMageActivity && completedMageActivity.EmittedEvent != null)
+                TryGenerateContextChangeIntentions(character, completedMageActivity.EmittedEvent, currentTick);
+
+            // Prune intentions that should be reconsidered.
+            // Use the most conflicting emotion (Fear or Distress) as the signal.
+            float conflictingEmotion = Math.Max(
+                character.Emotions.GetIntensity(EmotionType.Fear),
+                character.Emotions.GetIntensity(EmotionType.Distress));
+
+            var pruned = character.ActiveIntentions
+                .Where(i => i.ShouldReconsider(maxEventImportance, beliefRevised, conflictingEmotion, currentTick))
+                .ToList();
+            foreach (var intention in pruned)
+            {
+                character.ActiveIntentions.Remove(intention);
+                character.Log.Add($"[Cognition] Intention reconsidered: {intention.UnderlyingGoal.GetType().Name}");
+            }
+        }
+
+        /// <summary>
+        /// Appraises a single WorldEvent: pushes resulting tokens into the emotion ledger
+        /// and appends the memory entry. Returns the importance weight of the entry, or 0.
+        /// </summary>
+        private static float AppraiseEvent(Character character, WorldEvent worldEvent, int currentTick)
+        {
+            var entry = _appraisalEngine.Appraise(
+                character, worldEvent, character.ActiveIntentions, character.Emotions);
+            if (entry == null) return 0f;
+
+            foreach (var token in entry.EmotionSnapshot)
+                character.Emotions.Add(token);
+
+            character.Memory.Append(entry);
+            return entry.ImportanceWeight;
+        }
+
+        /// <summary>
+        /// Handles goal generation triggered by specific event completions rather than
+        /// accumulated emotional pressure. A mage who finishes a spell or achieves a
+        /// breakthrough immediately re-evaluates what to work on next — no threshold needed.
+        /// </summary>
+        private static void TryGenerateContextChangeIntentions(
+            Character character, WorldEvent triggeredEvent, int currentTick)
+        {
+            if (character is not HermeticMagus magus) return;
+
+            bool isCompletion = triggeredEvent.Category is
+                WorldEventCategory.SpellInvented or
+                WorldEventCategory.BreakthroughMade;
+
+            if (!isCompletion) return;
+
+            float inquisitiveness = (float)character.Personality.GetFacet(HexacoFacet.Inquisitiveness);
+            float commitment = Math.Clamp(inquisitiveness * 0.5f, 0.1f, 0.9f);
+            float desire = Math.Clamp(inquisitiveness * 0.5f, 0.1f, 1.0f);
+            int stagnation = (int)Math.Clamp(
+                8 * character.Personality.GetFacet(HexacoFacet.Prudence), 2, 24);
+
+            var pursuedIds = character.ActiveIntentions
+                .Select(i => i.UnderlyingGoal)
+                .OfType<PursueIdeaGoal>()
+                .Select(g => g.Idea.Id)
+                .ToHashSet();
+
+            // Pick the next unintenioned idea, if any.
+            float envyIntensity = character.Emotions.GetIntensity(EmotionType.Envy);
+            var nextIdea = magus.GetInspirations()
+                .Where(idea => !pursuedIds.Contains(idea.Id))
+                .Select(idea => (idea, score: ScoreIdeaForContextChange(idea, magus, envyIntensity)))
+                .OrderByDescending(x => x.score)
+                .Select(x => x.idea)
+                .FirstOrDefault();
+
+            if (nextIdea != null)
+            {
+                character.ActiveIntentions.Add(
+                    new Intention(new PursueIdeaGoal(magus, nextIdea), commitment, desire, currentTick, stagnation));
+                character.Log.Add(
+                    $"[Cognition] Context change ({triggeredEvent.Category}): pursuing '{nextIdea.Description}'");
+            }
+        }
+
+        private static float ScoreIdeaForContextChange(AIdea idea, HermeticMagus magus, float envyIntensity)
+        {
+            if (idea is SpellIdea spellIdea)
+            {
+                return (float)(magus.Arts.GetAbility(spellIdea.Arts.Technique).Value
+                             + magus.Arts.GetAbility(spellIdea.Arts.Form).Value);
+            }
+            if (idea is BreakthroughIdea)
+                return 5f + envyIntensity * 10f;
+            return 0f;
         }
 
         public static IActivity MageAdvance(this HermeticMagus mage)

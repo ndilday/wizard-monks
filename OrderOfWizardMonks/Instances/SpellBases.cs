@@ -24,11 +24,22 @@ namespace WizardMonks.Instances
             Add(new SpellBase(TechniqueEffects.Create, FormEffects.Insect, SpellArts.Creo | SpellArts.Animal, MagicArtPairs.CrAn, SpellTag.Creation, 5, "Create Insect"));
             #endregion
 
+            #region CrVi
+            Add(new SpellBase(TechniqueEffects.Create, FormEffects.Aura, SpellArts.Creo | SpellArts.Vim, MagicArtPairs.CrVi, SpellTag.Utility, 3, "Create Magical Aura"));
+            Add(new SpellBase(TechniqueEffects.Create, FormEffects.Vis, SpellArts.Creo | SpellArts.Vim, MagicArtPairs.CrVi, SpellTag.Utility, 5, "Conjure Magical Energy"));
+            #endregion
+
             #region InVi
             Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Aura, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, SpellTag.Knowledge, 1, "Detect Aura"));
             Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Vis, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, SpellTag.Knowledge, 1, "Detect Vis"));
             Add(new SpellBase(TechniqueEffects.Quantify, FormEffects.Vis, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, SpellTag.Knowledge, 4, "Quantify Vis"));
             Add(new SpellBase(TechniqueEffects.Detect, FormEffects.Gift, SpellArts.Intellego | SpellArts.Vim, MagicArtPairs.InVi, SpellTag.Knowledge, 6, "Detect Gift"));
+            #endregion
+
+            #region ReVi
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Aura, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Defensive, 3, "Ward Against Magic"));
+            Add(new SpellBase(TechniqueEffects.Manipulate, FormEffects.Vis, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Utility, 3, "Manipulate Magical Essence"));
+            Add(new SpellBase(TechniqueEffects.Control, FormEffects.Aura, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Utility, 4, "Control Magical Aura"));
             #endregion
         }
 

@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Core;
 using WizardMonks.Decisions.Goals;
+using WizardMonks.Models;
+using WizardMonks.Models.Beliefs;
+using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Laboratories;
 using WizardMonks.Models.Spells;
 using WizardMonks.Models.Traditions;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Instances
 {
@@ -26,9 +31,9 @@ namespace WizardMonks.Instances
 
         public static IEnumerable<HermeticMagus> GetEnumerator()
         {
-            yield return Bjornaer;
+            //yield return Bjornaer;
             yield return Bonisgaus;
-            yield return Criamon;
+            /*yield return Criamon;
             yield return Diedne;
             yield return Flambeau;
             yield return Guernicus;
@@ -37,14 +42,14 @@ namespace WizardMonks.Instances
             yield return Merinita;
             yield return Tremere;
             yield return Tytalus;
-            yield return Verditius;
+            yield return Verditius;*/
         }
 
         static Founders()
         {
             // Bonisagus must be built first — all other Founders clone from his tradition.
             BuildBonisagus();
-            BuildBjornaer();
+            /*BuildBjornaer();
             BuildCriamon();
             BuildDiedne();
             BuildFlambeau();
@@ -54,7 +59,7 @@ namespace WizardMonks.Instances
             BuildMerinita();
             BuildTremere();
             BuildTytalus();
-            BuildVerditius();
+            BuildVerditius();*/
         }
 
         /// <summary>
@@ -79,51 +84,28 @@ namespace WizardMonks.Instances
             // ----------------------------------------------------------------
             var concepts = new List<TraditionConcept>();
 
-            // Ranges
+            // Ranges — Bonisagus's own tradition; Eye/Sight/Arcane come from other Founders.
             concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Personal)));
             concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Touch)));
-            concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Eye)));
             concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Voice)));
-            concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Sight)));
-            concepts.Add(new TraditionConcept(new RangePrinciple(EffectRanges.Arcane)));
 
-            // Durations
+            // Durations — Concentration/Ring/Moon come from other Founders.
             concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Instant)));
-            concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Concentration)));
             concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Diameter)));
             concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Sun)));
-            concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Ring)));
-            concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Moon)));
             concepts.Add(new TraditionConcept(new DurationPrinciple(EffectDurations.Year)));
 
-            // Targets
+            // Targets — Part and above come from other Founders.
             concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Individual)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Taste)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Circle)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Part)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Touch)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Group)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Smell)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Room)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Structure)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Hearing)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Boundary)));
-            concepts.Add(new TraditionConcept(new TargetPrinciple(EffectTargets.Sight)));
 
             // Hermetic Magical Abilities — native, no research needed
             concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.MagicTheory)));
             concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.ParmaMagica)));
-            concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.Finesse)));
-            concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.Penetration)));
-            concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.Concentration)));
 
             // Standard Lab Activities — native Hermetic operations
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.InventSpells)));
-            concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.LongevityRitual)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.DistillVis)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.StudyVis)));
-            concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.EnchantFamiliar)));
-            concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.InventItem)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.OpenArts)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.OriginalResearch)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.WriteLabText)));
@@ -251,7 +233,7 @@ namespace WizardMonks.Instances
 
             Dictionary<string, double> reputation = new() { { "Magic Theory", 2 } };
 
-            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 80, bonisagusPersonality, reputation)
+            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 160, bonisagusPersonality, reputation)
             {
                 Name = "Bonisagus"
             };
@@ -293,6 +275,63 @@ namespace WizardMonks.Instances
             Bonisgaus.GetAbility(Abilities.ParmaMagica).AddExperience(5);
             Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(5);
             Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(5);
+
+            // ----------------------------------------------------------------
+            // Step 5: Alpine Sanctum
+            // ----------------------------------------------------------------
+            var alpineAura = new Aura(Domain.Magic, 4, "Bonisagus's Alpine Cave");
+            var vimVisSource = new VisSource(alpineAura, MagicArts.Vim, Season.Summer, 1.0);
+            alpineAura.VisSources.Add(vimVisSource);
+
+            var auraProfile = new BeliefProfile(SubjectType.Aura, 1.0);
+            auraProfile.AddOrUpdateBelief(new Belief(BeliefTopics.Owner, Bonisgaus.Id.GetHashCode()));
+            Bonisgaus.AddOrUpdateKnowledge(alpineAura, auraProfile);
+
+            // ----------------------------------------------------------------
+            // Step 6: Laboratory
+            // ----------------------------------------------------------------
+            var lab = new Laboratory(Bonisgaus, alpineAura, 0);
+            lab.AddFeature(LabFeatures.HighlyOrganized);
+            Bonisgaus.Laboratory = lab;
+
+            // ----------------------------------------------------------------
+            // Step 7: Starting vis stock (accumulated over years of solitary work)
+            // ----------------------------------------------------------------
+            Bonisgaus.VisStock[MagicArts.Vim] = 10;
+            Bonisgaus.VisStock[MagicArts.Creo] = 4;
+
+            // ----------------------------------------------------------------
+            // Step 8: Pre-Hermetic lab texts
+            // ----------------------------------------------------------------
+            var detectAuraBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
+            var detectVisBase  = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
+            var quantifyVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Quantify, FormEffects.Vis);
+            var wardMagicBase  = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura);
+
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
+                    detectAuraBase, 0, false, "Sense the Hidden Aura")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    detectVisBase, 0, false, "Sense the Hidden Vis")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    quantifyVisBase, 0, false, "Weigh the Power")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
+                    wardMagicBase, 0, false, "Aegis of the Self")
+            });
         }
 
         /// <summary>

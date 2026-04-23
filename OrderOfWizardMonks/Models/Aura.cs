@@ -74,13 +74,13 @@ namespace WizardMonks.Models
         public double Strength { get; private set; }
         public List<VisSource> VisSources { get; private set; }
         // TODO: handle regiones
-        public Aura(Domain type, double strength)
+        public Aura(Domain type, double strength, string name = "Generic Aura")
         {
             Domain = type;
             Strength = strength;
             VisSources = new List<VisSource>();
             Id = Guid.NewGuid();
-            Name = "Generic Aura Name";
+            Name = name;
         }
 
         public double GetAverageVisSourceSize(double magicLoreRoll)

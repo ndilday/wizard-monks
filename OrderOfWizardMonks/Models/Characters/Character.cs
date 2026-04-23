@@ -8,6 +8,7 @@ using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
+using WizardMonks.Models.Events;
 using WizardMonks.Models.Projects;
 using WizardMonks.Services.Characters;
 
@@ -86,6 +87,11 @@ namespace WizardMonks.Models.Characters
         public CharacterAbility Warping { get; private set; }
         public List<IGoal> ActiveGoals { get; private set; }
         public List<IGoal> CompletedGoals { get; private set; }
+        public List<Intention> ActiveIntentions { get; private set; }
+        public EmotionLedger Emotions { get; private set; }
+        public CharacterMemoryStream Memory { get; private set; }
+        public CharacterBeliefStore CognitiveBeliefs { get; private set; }
+        public WorldEvent LastAgingEvent { get; set; }
         public Desires Desires { get; set; }
         public string Name { get; set; }
         public Ability WritingLanguage { get; private set; }
@@ -156,6 +162,10 @@ namespace WizardMonks.Models.Characters
             WritingAbilities = [_writingAbility, WritingLanguage];
 
             ActiveGoals = [];
+            ActiveIntentions = [];
+            Emotions = new EmotionLedger();
+            Memory = new CharacterMemoryStream();
+            CognitiveBeliefs = new CharacterBeliefStore(this);
             Log = [];
             Warping = new CharacterAbility(Abilities.Warping);
             Personality = personality ?? new Personality();
@@ -202,6 +212,11 @@ namespace WizardMonks.Models.Characters
             // We want the new HermeticMagus pointing to the exact same books/projects, not clones of them.
             this.ActiveGoals = new List<IGoal>(source.ActiveGoals);
             this.CompletedGoals = new List<IGoal>(source.CompletedGoals);
+            this.ActiveIntentions = new List<Intention>(source.ActiveIntentions);
+            // Cognitive state is not transferred on copy — the new instance starts fresh.
+            this.Emotions = new EmotionLedger();
+            this.Memory = new CharacterMemoryStream();
+            this.CognitiveBeliefs = new CharacterBeliefStore(this);
             this.Books = new List<ABook>(source.Books);
             this.BooksRead = new HashSet<ABook>(source.BooksRead);
             this.BooksWritten = new List<ABook>(source.BooksWritten);

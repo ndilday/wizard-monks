@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Events;
 using WizardMonks.Models.Projects;
 using WizardMonks.Models.Spells;
 using WizardMonks.Services.Characters;
@@ -47,6 +48,13 @@ namespace WizardMonks.Activities.MageActivities
                 mage.LearnSpell(spell); // This is a new private helper method we will create
                 mage.ActiveProjects.Remove(project);
                 mage.Log.Add($"Successfully invented '{spell.Name}'!");
+                EmittedEvent = WorldEvent.LabOutcome(
+                    (int)mage.SeasonalAge, WorldEventCategory.SpellInvented, mage, (float)labTotal, spell.Name, true);
+            }
+            else
+            {
+                EmittedEvent = WorldEvent.LabOutcome(
+                    (int)mage.SeasonalAge, WorldEventCategory.LabSuccess, mage, (float)labTotal, spell.Name, true);
             }
         }
 

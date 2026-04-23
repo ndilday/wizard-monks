@@ -138,7 +138,7 @@ namespace SkillViewer
                     CancellationToken.None,
                     TaskCreationOptions.None,
                     uiScheduler);
-                character.Advance();
+                character.MageAdvance();
                 reportProgressTask = Task.Factory.StartNew(() =>
                 {
                     lstAdvance.DataSource = null;
@@ -161,7 +161,7 @@ namespace SkillViewer
                     CancellationToken.None,
                     TaskCreationOptions.None,
                     uiScheduler);
-                character.Advance();
+                character.MageAdvance();
                 reportProgressTask = Task.Factory.StartNew(() =>
                 {
                     lstAdvance.DataSource = null;

@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using System.Drawing;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
@@ -26,6 +26,7 @@ namespace SkillViewer
             DisplayVis();
             DisplayMisc();
             lstLog.DataSource = _character.Log;
+            AddCognitiveStatePanel();
         }
 
         private void DisplayMisc()
@@ -95,6 +96,68 @@ namespace SkillViewer
             txtMentemVis.Text = mage.GetVisCount(MagicArts.Mentem).ToString(FORMAT_STRING);
             txtTerramVis.Text = mage.GetVisCount(MagicArts.Terram).ToString(FORMAT_STRING);
             txtVimVis.Text = mage.GetVisCount(MagicArts.Vim).ToString(FORMAT_STRING);
+        }
+
+        private void AddCognitiveStatePanel()
+        {
+            if (_character is not HermeticMagus magus) return;
+
+            this.ClientSize = new Size(1310, this.ClientSize.Height);
+
+            var grpIntentions = new GroupBox
+            {
+                Text = "Active Intentions",
+                Location = new Point(900, 5),
+                Size = new Size(395, 325)
+            };
+
+            var dgvIntentions = new DataGridView
+            {
+                Location = new Point(6, 20),
+                Size = new Size(383, 295),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                RowHeadersWidth = 4,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                ScrollBars = ScrollBars.Vertical
+            };
+            dgvIntentions.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Goal", Name = "Goal", FillWeight = 55 });
+            dgvIntentions.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Desire", Name = "Desire", FillWeight = 15 });
+            dgvIntentions.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Commit", Name = "Commit", FillWeight = 15 });
+            dgvIntentions.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Ticks", Name = "Ticks", FillWeight = 15 });
+
+            foreach (var intention in magus.ActiveIntentions)
+            {
+                dgvIntentions.Rows.Add(
+                    intention.UnderlyingGoal.GetType().Name,
+                    intention.DesireScore.ToString("0.00"),
+                    intention.CommitmentStrength.ToString("0.00"),
+                    intention.TicksInvested);
+            }
+
+            grpIntentions.Controls.Add(dgvIntentions);
+            this.Controls.Add(grpIntentions);
+
+            var grpEmotions = new GroupBox
+            {
+                Text = "Active Emotions",
+                Location = new Point(900, 340),
+                Size = new Size(395, 175)
+            };
+
+            var lstEmotions = new ListBox
+            {
+                Location = new Point(6, 20),
+                Size = new Size(383, 145),
+                FormattingEnabled = true
+            };
+            foreach (var kv in magus.Emotions.Active)
+                lstEmotions.Items.Add($"{kv.Key,-18} {kv.Value.Intensity:0.000}");
+
+            grpEmotions.Controls.Add(lstEmotions);
+            this.Controls.Add(grpEmotions);
         }
 
         private void lstLog_MouseMove(object sender, MouseEventArgs e)

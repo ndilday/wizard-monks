@@ -1,6 +1,7 @@
 ﻿using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Events;
 using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
@@ -31,6 +32,8 @@ namespace WizardMonks.Activities.MageActivities
                     mage.Log.Add("Disaster! A subtle but dangerous flaw has crept into the lab's design.");
                     mage.Laboratory.AddFeature(LabFeatures.HiddenDefect);
                 }
+                EmittedEvent = WorldEvent.LabOutcome(
+                    (int)mage.SeasonalAge, WorldEventCategory.LabFailure, mage, (float)rollTotal, "Laboratory Refinement", false);
                 return; // A botch precludes any positive outcomes
             }
 
@@ -52,6 +55,9 @@ namespace WizardMonks.Activities.MageActivities
                     mage.Laboratory.AddFeature(LabFeatures.HighlyOrganized);
                 }
             }
+
+            EmittedEvent = WorldEvent.LabOutcome(
+                (int)mage.SeasonalAge, WorldEventCategory.LabSuccess, mage, (float)rollTotal, "Laboratory Refinement", true);
 
             // Bonus: As per the book, also check for the Spotless Virtue based on a Personality Trait roll.
             // This requires adding a "Tidy" trait or similar to the character model.

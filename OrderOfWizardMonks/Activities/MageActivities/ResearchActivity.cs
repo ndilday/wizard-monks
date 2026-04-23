@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Events;
 using WizardMonks.Models.Projects;
 using WizardMonks.Services.Characters;
 
@@ -60,6 +61,8 @@ namespace WizardMonks.Activities.MageActivities
                 if (phase.IsInvented)
                 {
                     mage.Log.Add($"Experimental spell '{phase.ExperimentalSpell.Name}' has been successfully invented!");
+                    EmittedEvent = WorldEvent.LabOutcome(
+                        (int)mage.SeasonalAge, WorldEventCategory.LabSuccess, mage, (float)progress, phase.ExperimentalSpell.Name, true);
                 }
             }
             else if (!phase.IsStabilized)
@@ -76,6 +79,8 @@ namespace WizardMonks.Activities.MageActivities
                     {
                         project.HasAchievedDiscovery = true;
                         mage.Log.Add($"BREAKTHROUGH! The secrets of '{project.Breakthrough.Name}' have been discovered!");
+                        EmittedEvent = WorldEvent.LabOutcome(
+                            (int)mage.SeasonalAge, WorldEventCategory.BreakthroughMade, mage, phase.BreakthroughPointsGained, project.Breakthrough.Name, true);
                         // The effect is applied when the project is removed/formalized, not immediately.
                     }
                     else

@@ -9,13 +9,13 @@ namespace WizardMonks.Decisions.Goals
 {
     public class PursueIdeaGoal : AGoal
     {
-        private readonly AIdea _idea;
+        public AIdea Idea { get; }
         private Spell _targetSpell; // The concrete spell we decide to invent
 
         public PursueIdeaGoal(HermeticMagus magus, AIdea idea, uint? ageToCompleteBy = null)
             : base(magus, ageToCompleteBy, 0) // Desire is calculated dynamically
         {
-            _idea = idea;
+            Idea = idea;
             Desire = CalculateDesire(magus);
         }
 
@@ -42,7 +42,7 @@ namespace WizardMonks.Decisions.Goals
             if (_completed) return;
 
             var magus = (HermeticMagus)Character;
-            if (_idea is SpellIdea spellIdea)
+            if (Idea is SpellIdea spellIdea)
             {
                 // If we haven't defined a target spell yet, create one
                 if (_targetSpell == null)

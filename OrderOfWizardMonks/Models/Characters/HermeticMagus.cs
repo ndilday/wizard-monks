@@ -228,8 +228,9 @@ namespace WizardMonks.Models.Characters
         /// </summary>
         public override CharacterAbilityBase GetAbility(Ability ability)
         {
-            // Hot path: Hermetic Arts via fixed Arts object.
-            var art = Arts.GetAbility(ability);
+            // Arts is null during the base Character constructor (virtual dispatch fires before
+            // HermeticMagus assigns Arts). Fall through to base in that case.
+            var art = Arts?.GetAbility(ability);
             if (art != null) return art;
 
             // Fall through to GiftedCharacter (tradition abilities + general abilities).

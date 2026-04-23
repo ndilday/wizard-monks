@@ -31,9 +31,9 @@ namespace WizardMonks.Instances
 
         public static IEnumerable<HermeticMagus> GetEnumerator()
         {
-            yield return Bjornaer;
+            //yield return Bjornaer;
             yield return Bonisgaus;
-            yield return Criamon;
+            /*yield return Criamon;
             yield return Diedne;
             yield return Flambeau;
             yield return Guernicus;
@@ -42,14 +42,14 @@ namespace WizardMonks.Instances
             yield return Merinita;
             yield return Tremere;
             yield return Tytalus;
-            yield return Verditius;
+            yield return Verditius;*/
         }
 
         static Founders()
         {
             // Bonisagus must be built first — all other Founders clone from his tradition.
             BuildBonisagus();
-            BuildBjornaer();
+            /*BuildBjornaer();
             BuildCriamon();
             BuildDiedne();
             BuildFlambeau();
@@ -59,7 +59,7 @@ namespace WizardMonks.Instances
             BuildMerinita();
             BuildTremere();
             BuildTytalus();
-            BuildVerditius();
+            BuildVerditius();*/
         }
 
         /// <summary>

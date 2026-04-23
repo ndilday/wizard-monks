@@ -233,7 +233,7 @@ namespace WizardMonks.Instances
 
             Dictionary<string, double> reputation = new() { { "Magic Theory", 2 } };
 
-            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 80, bonisagusPersonality, reputation)
+            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 160, bonisagusPersonality, reputation)
             {
                 Name = "Bonisagus"
             };

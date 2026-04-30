@@ -88,19 +88,29 @@ namespace WizardMonks.Services.Characters
             }
         }
 
+        /// <summary>
+        /// Extracts (dimension, value, weight) tuples from a single memory entry.
+        ///
+        /// The subject of the source event determines which belief profile receives
+        /// this evidence — that routing is handled by GroupBySubject. Here we only
+        /// decide what the evidence says about that subject.
+        ///
+        /// Evidence dimensions use the canonical BeliefTopic string keys so they
+        /// remain compatible with the existing BeliefTopic registry.
+        /// </summary>
         private static IEnumerable<(string dimension, float value, float weight)>
             ExtractEvidence(MemoryEntry entry)
         {
             float importance = entry.ImportanceWeight;
+            bool positive = entry.SourceEvent.IsPositiveOutcome ?? false;
 
             switch (entry.SourceEvent.Category)
             {
                 case WorldEventCategory.LabSuccess:
                 case WorldEventCategory.SpellInvented:
                 case WorldEventCategory.BreakthroughMade:
-                    yield return ("MagicalCompetence",
-                        entry.SourceEvent.IsPositiveOutcome == true ? 0.6f : -0.3f,
-                        importance);
+                    // Subject is competent; positive outcome reinforces that.
+                    yield return ("MagicalCompetence", positive ? 0.6f : -0.3f, importance);
                     break;
 
                 case WorldEventCategory.LabFailure:
@@ -108,10 +118,28 @@ namespace WizardMonks.Services.Characters
                     break;
 
                 case WorldEventCategory.AgingCrisis:
+                    // Subject is vulnerable — evidence about their mortality.
                     yield return ("Vulnerability", 0.7f, importance);
                     break;
 
+                case WorldEventCategory.TeachingReceived:
+                    // Subject is the teacher. Teaching is an act of generosity and
+                    // competence — evidence of Trustworthiness and MagicalCompetence.
+                    // The student also gains self-belief evidence (handled separately
+                    // because the student is a Participant, not the Subject; the
+                    // GroupBySubject routing directs this entry to the teacher's profile).
+                    yield return ("Trustworthiness", positive ? 0.5f : -0.2f, importance);
+                    yield return ("MagicalCompetence", positive ? 0.3f : 0.0f, importance);
+                    break;
+
+                case WorldEventCategory.BookReceived:
+                case WorldEventCategory.LabTextReceived:
+                    // Subject shared knowledge. Positive evidence of Trustworthiness.
+                    yield return ("Trustworthiness", positive ? 0.4f : 0.0f, importance);
+                    break;
+
                 case WorldEventCategory.RecruitmentSucceeded:
+                    // Subject brought someone into the fold — social and cooperative evidence.
                     yield return ("Sociability", 0.5f, importance);
                     yield return ("Trustworthiness", 0.4f, importance);
                     break;
@@ -128,6 +156,10 @@ namespace WizardMonks.Services.Characters
                 case WorldEventCategory.ApprenticeLost:
                     yield return ("Trustworthiness", -0.6f, importance);
                     break;
+
+                    // Categories that produce emotion tokens but no belief evidence yet.
+                    // AgingNormal, LongevityRitualVoided, AuraChanged, VisSourceDiscovered,
+                    // CovenantFounded, CharacterObserved, ScenarioEvent — extend here as needed.
             }
         }
     }

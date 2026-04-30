@@ -242,39 +242,28 @@ namespace WizardMonks.Instances
             // No opener — this tradition was built from first principles.
             Bonisgaus.OpenGift(bonisagusTradition);
 
-            Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = 1;
+            Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = -1;
             Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
             Bonisgaus.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
             Bonisgaus.GetAttribute(AttributeType.Quickness).BaseValue = -2;
             Bonisgaus.GetAttribute(AttributeType.Intelligence).BaseValue = 5;
-            Bonisgaus.GetAttribute(AttributeType.Communication).BaseValue = 2;
-            Bonisgaus.GetAttribute(AttributeType.Presence).BaseValue = -2;
-            Bonisgaus.GetAttribute(AttributeType.Perception).BaseValue = 0;
+            Bonisgaus.GetAttribute(AttributeType.Communication).BaseValue = 3;
+            Bonisgaus.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Bonisgaus.GetAttribute(AttributeType.Perception).BaseValue = 2;
 
-            Bonisgaus.GetAbility(MagicArts.Creo).AddExperience(1);
-            Bonisgaus.GetAbility(MagicArts.Intellego).AddExperience(1);
-            Bonisgaus.GetAbility(MagicArts.Muto).AddExperience(1);
-            Bonisgaus.GetAbility(MagicArts.Perdo).AddExperience(1);
-            Bonisgaus.GetAbility(MagicArts.Rego).AddExperience(1);
-            Bonisgaus.GetAbility(MagicArts.Animal).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Aquam).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Auram).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Corpus).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Herbam).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Ignem).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Imaginem).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Mentem).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Terram).AddExperience(0);
-            Bonisgaus.GetAbility(MagicArts.Vim).AddExperience(55);
-            Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(0);
-            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(15);
+            Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(76);
+            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(59);
+            Bonisgaus.GetAbility(Abilities.Awareness).AddExperience(30);
             Bonisgaus.GetAbility(Abilities.English).AddExperience(75);
-            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(45);
-            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(75);
-            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(75);
-            Bonisgaus.GetAbility(Abilities.ParmaMagica).AddExperience(5);
-            Bonisgaus.GetAbility(Abilities.Penetration).AddExperience(5);
-            Bonisgaus.GetAbility(Abilities.Concentration).AddExperience(5);
+            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(16);
+            Bonisgaus.GetAbility(Abilities.FolkKen).AddExperience(16);
+            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(80);
+            Bonisgaus.GetAbility(Abilities.MagicLore).AddExperience(30);
+            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(195);
+            Bonisgaus.GetAbility(Abilities.Philosophae).AddExperience(10);
+            Bonisgaus.GetAbility(Abilities.Scribing).AddExperience(5);
+            Bonisgaus.GetAbility(Abilities.Survival).AddExperience(15);
+            Bonisgaus.GetAbility(Abilities.Swim).AddExperience(15);
 
             // ----------------------------------------------------------------
             // Step 5: Alpine Sanctum

@@ -7,7 +7,9 @@ using WizardMonks.Models;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Ideas;
 using WizardMonks.Models.Laboratories;
+using WizardMonks.Models.Projects;
 using WizardMonks.Models.Spells;
 using WizardMonks.Models.Traditions;
 using WizardMonks.Services.Characters;
@@ -321,6 +323,42 @@ namespace WizardMonks.Instances
                 SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
                     wardMagicBase, 0, false, "Aegis of the Self")
             });
+
+            // ----------------------------------------------------------------
+            // Step 9: In-progress Parma Magica research
+            // ----------------------------------------------------------------
+            // As of Spring 730 AD, Bonisagus has accumulated 53 of the 60 breakthrough
+            // points required to complete Parma Magica. He has stabilized:
+            //   7 magnitude-3 ReVi effects (Personal/Instant/Individual, Level 3 → 3 pts each)
+            //   8 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
+            //   Total: 7×3 + 8×4 = 21 + 32 = 53 points
+            // The project's CurrentPhase is null — the ResearchService will generate the
+            // next experimental spell on the first tick once the simulation begins.
+            var parmaDef = new ParmaMagicaBreakthrough();
+            var parmaProject = new ResearchProject(Bonisgaus, parmaDef);
+
+            // 7 × Magnitude-3 phases (Ward Against Magic, Personal range)
+            for (int i = 0; i < 7; i++)
+            {
+                var spell = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}");
+                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
+            }
+
+            // 8 × Magnitude-4 phases (Ward Against Magic, Touch range adds +1 magnitude)
+            for (int i = 0; i < 8; i++)
+            {
+                var spell = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}");
+                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
+            }
+
+            Bonisgaus.ActiveProjects.Add(parmaProject);
+
+            // Seeding the idea fires the cognitive architecture: AddIdea creates a
+            // PursueIdeaGoal Intention, which will schedule OriginalResearchActivity
+            // each season until the breakthrough completes.
+            Bonisgaus.AddIdea(new BreakthroughIdea(parmaDef));
         }
 
         /// <summary>

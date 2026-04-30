@@ -1,9 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Ideas;
+using WizardMonks.Models.Projects;
 using WizardMonks.Models.Spells;
+using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Decisions.Goals
 {
@@ -42,7 +46,38 @@ namespace WizardMonks.Decisions.Goals
             if (_completed) return;
 
             var magus = (HermeticMagus)Character;
-            if (Idea is SpellIdea spellIdea)
+            if (Idea is BreakthroughIdea breakthroughIdea)
+            {
+                // Find an existing project for this breakthrough, or create one if absent.
+                var project = magus.ActiveProjects
+                    .OfType<ResearchProject>()
+                    .FirstOrDefault(p => p.Breakthrough.Id == breakthroughIdea.TargetBreakthrough.Id);
+
+                if (project == null)
+                {
+                    project = new ResearchProject(magus, breakthroughIdea.TargetBreakthrough);
+                    magus.ActiveProjects.Add(project);
+                    magus.Log.Add($"Began tracking original research project: {project.Description}");
+                }
+
+                if (project.IsComplete)
+                {
+                    _completed = true;
+                    return;
+                }
+
+                // TODO: Replace the fallback desire with a properly computed value once
+                // CalculateDesire handles BreakthroughIdea. The desire is currently 0 because
+                // reputationValue and utilityValue are placeholder zeros, so any non-zero
+                // fallback is better than letting this goal starve against other goals.
+                double activityDesire = Desire > 0 ? Desire : 0.8;
+                alreadyConsidered.Add(new OriginalResearchActivity(
+                    project.ProjectId,
+                    new ResearchService(),
+                    Abilities.MagicTheory,
+                    activityDesire));
+            }
+            else if (Idea is SpellIdea spellIdea)
             {
                 // If we haven't defined a target spell yet, create one
                 if (_targetSpell == null)

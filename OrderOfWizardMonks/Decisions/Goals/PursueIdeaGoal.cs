@@ -25,16 +25,26 @@ namespace WizardMonks.Decisions.Goals
 
         private double CalculateDesire(HermeticMagus magus)
         {
-            // Add value based on projected future benefits
+            // Base value by idea type.
+            // BreakthroughIdeas represent major theoretical discoveries whose value is
+            // high and intrinsic — they don't depend on utility or reputation calculations.
+            // 0.6 before personality scaling ensures breakthrough research competes
+            // successfully with instinctive self-preservation goals (longevity ritual
+            // bootstraps at desire ≈ 1.0 × Prudence multiplier ≈ 1.1 for most magi).
+            // TODO: Scale BreakthroughIdea base by proximity to completion and expected
+            //       seasons remaining once ResearchProject lookup is available here.
+            double baseValue = Idea is BreakthroughIdea ? 0.6 : 0.0;
+
             // Placeholder for reputation gain. This makes it forward-compatible.
             double reputationValue = 0; // e.g., ReputationSystem.EstimateGain(magus, _Idea);
 
-            // Placeholder for tangible benefits, like the lab-heating spell example
+            // Placeholder for tangible benefits (e.g., a spell that heats the lab in winter).
             double utilityValue = 0; // e.g., UtilitySystem.EstimateValue(_Idea);
 
-            double totalValue = reputationValue + utilityValue;
+            double totalValue = baseValue + reputationValue + utilityValue;
 
-            // Apply personality modifiers
+            // Apply personality modifiers. A mage high in Creativity and Inquisitiveness
+            // pursues breakthrough research with greater urgency.
             totalValue *= magus.Personality.GetDesireMultiplier(HexacoFacet.Creativity);
             totalValue *= magus.Personality.GetDesireMultiplier(HexacoFacet.Inquisitiveness);
 
@@ -66,16 +76,11 @@ namespace WizardMonks.Decisions.Goals
                     return;
                 }
 
-                // TODO: Replace the fallback desire with a properly computed value once
-                // CalculateDesire handles BreakthroughIdea. The desire is currently 0 because
-                // reputationValue and utilityValue are placeholder zeros, so any non-zero
-                // fallback is better than letting this goal starve against other goals.
-                double activityDesire = Desire > 0 ? Desire : 0.8;
                 alreadyConsidered.Add(new OriginalResearchActivity(
                     project.ProjectId,
                     new ResearchService(),
                     Abilities.MagicTheory,
-                    activityDesire));
+                    Desire));
             }
             else if (Idea is SpellIdea spellIdea)
             {

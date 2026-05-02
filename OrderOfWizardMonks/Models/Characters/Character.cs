@@ -85,8 +85,6 @@ namespace WizardMonks.Models.Characters
         public ushort LongevityRitual { get; set; }
         public byte Decrepitude { get; set; }
         public CharacterAbility Warping { get; private set; }
-        public List<IGoal> ActiveGoals { get; private set; }
-        public List<IGoal> CompletedGoals { get; private set; }
         public List<Intention> ActiveIntentions { get; private set; }
         public EmotionLedger Emotions { get; private set; }
         public CharacterMemoryStream Memory { get; private set; }
@@ -161,7 +159,6 @@ namespace WizardMonks.Models.Characters
             WritingLanguageCharacterAbility = GetAbility(writingLanguage);
             WritingAbilities = [_writingAbility, WritingLanguage];
 
-            ActiveGoals = [];
             ActiveIntentions = [];
             Emotions = new EmotionLedger();
             Memory = new CharacterMemoryStream();
@@ -210,8 +207,6 @@ namespace WizardMonks.Models.Characters
 
             // 4. Shallow Copy External Collections
             // We want the new HermeticMagus pointing to the exact same books/projects, not clones of them.
-            this.ActiveGoals = new List<IGoal>(source.ActiveGoals);
-            this.CompletedGoals = new List<IGoal>(source.CompletedGoals);
             this.ActiveIntentions = new List<Intention>(source.ActiveIntentions);
             // Cognitive state is not transferred on copy — the new instance starts fresh.
             this.Emotions = new EmotionLedger();
@@ -300,14 +295,6 @@ namespace WizardMonks.Models.Characters
         public virtual void RemoveBookFromCollection(ABook book)
         {
             Books.Remove(book);
-        }
-        #endregion
-
-        #region Preference/Goal Functions
-
-        public void AddGoal(IGoal goal)
-        {
-            ActiveGoals.Add(goal);
         }
         #endregion
 

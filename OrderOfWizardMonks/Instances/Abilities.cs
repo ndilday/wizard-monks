@@ -105,6 +105,7 @@ namespace WizardMonks.Instances
             yield return FolkKen;
             yield return Guile;
             yield return MagicLore;
+            yield return Scribing;
             yield return Stealth;
             yield return Survival;
             yield return Swim;

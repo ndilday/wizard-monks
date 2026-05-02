@@ -64,6 +64,176 @@ namespace WizardMonks.Instances
             BuildVerditius();*/
         }
 
+        public static void BuildBonisagus()
+        {
+            // ----------------------------------------------------------------
+            // Step 1: Build the character's MagicTradition
+            // ----------------------------------------------------------------
+            MagicalTradition bonisagusTradition = GenerateInitialHermeticTradition();
+
+            // ----------------------------------------------------------------
+            // Step 2: Build and open the character
+            // ----------------------------------------------------------------
+            var bonisagusPersonality = new Personality(new Dictionary<HexacoFacet, double>
+            {
+                // High Conscientiousness, High Openness, Low Agreeableness - a driven, brilliant, and difficult man.
+                [HexacoFacet.Sincerity] = 1.5,
+                [HexacoFacet.Fairness] = 1.4,
+                [HexacoFacet.GreedAvoidance] = 1.0,
+                [HexacoFacet.Modesty] = 0.5,
+                [HexacoFacet.Fearfulness] = 1.0,
+                [HexacoFacet.Anxiety] = 1.0,
+                [HexacoFacet.Dependence] = 0.5,
+                [HexacoFacet.Sentimentality] = 0.5,
+                [HexacoFacet.SocialSelfEsteem] = 1.8,
+                [HexacoFacet.SocialBoldness] = 1.9,
+                [HexacoFacet.Sociability] = 0.5,
+                [HexacoFacet.Liveliness] = 1.0,
+                [HexacoFacet.Forgiveness] = 1.0,
+                [HexacoFacet.Gentleness] = 1.0,
+                [HexacoFacet.Flexibility] = 1.0,
+                [HexacoFacet.Patience] = 0.4,
+                [HexacoFacet.Organization] = 1.8,
+                [HexacoFacet.Diligence] = 1.8,
+                [HexacoFacet.Perfectionism] = 1.9,
+                [HexacoFacet.Prudence] = 1.2,
+                [HexacoFacet.AestheticAppreciation] = 1.0,
+                [HexacoFacet.Inquisitiveness] = 1.9,
+                [HexacoFacet.Creativity] = 1.8,
+                [HexacoFacet.Unconventionality] = 1.8
+            });
+
+            Dictionary<string, double> reputation = new() { { "Magic Theory", 2 } };
+
+            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 160, bonisagusPersonality, reputation)
+            {
+                Name = "Bonisagus"
+            };
+
+            // Open Bonisagus's own Gift with his self-developed tradition.
+            // No opener — this tradition was built from first principles.
+            Bonisgaus.OpenGift(bonisagusTradition);
+
+            Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = -1;
+            Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Quickness).BaseValue = -2;
+            Bonisgaus.GetAttribute(AttributeType.Intelligence).BaseValue = 5;
+            Bonisgaus.GetAttribute(AttributeType.Communication).BaseValue = 3;
+            Bonisgaus.GetAttribute(AttributeType.Presence).BaseValue = 2;
+            Bonisgaus.GetAttribute(AttributeType.Perception).BaseValue = 2;
+
+            Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(76);
+            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(59);
+            Bonisgaus.GetAbility(Abilities.Awareness).AddExperience(30);
+            Bonisgaus.GetAbility(Abilities.English).AddExperience(75);
+            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(16);
+            Bonisgaus.GetAbility(Abilities.FolkKen).AddExperience(16);
+            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(80);
+            Bonisgaus.GetAbility(Abilities.MagicLore).AddExperience(30);
+            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(195);
+            Bonisgaus.GetAbility(Abilities.Philosophae).AddExperience(10);
+            Bonisgaus.GetAbility(Abilities.Scribing).AddExperience(5);
+            Bonisgaus.GetAbility(Abilities.Survival).AddExperience(15);
+            Bonisgaus.GetAbility(Abilities.Swim).AddExperience(15);
+
+            // ----------------------------------------------------------------
+            // Step 3: Alpine Sanctum
+            // ----------------------------------------------------------------
+            var alpineAura = new Aura(Domain.Magic, 4, "Bonisagus's Alpine Cave");
+            var vimVisSource = new VisSource(alpineAura, MagicArts.Vim, Season.Summer, 1.0);
+            alpineAura.VisSources.Add(vimVisSource);
+
+            var auraProfile = new BeliefProfile(SubjectType.Aura, 1.0);
+            auraProfile.AddOrUpdateBelief(new Belief(BeliefTopics.Owner, Bonisgaus.Id.GetHashCode()));
+            Bonisgaus.AddOrUpdateKnowledge(alpineAura, auraProfile);
+
+            // ----------------------------------------------------------------
+            // Step 4: Laboratory
+            // ----------------------------------------------------------------
+            var lab = new Laboratory(Bonisgaus, alpineAura, 0);
+            lab.Refine();
+            lab.Refine();
+            lab.Refine();
+            lab.AddFeature(LabFeatures.HighlyOrganized);
+            Bonisgaus.Laboratory = lab;
+
+            // ----------------------------------------------------------------
+            // Step 5: Starting vis stock (accumulated over years of solitary work)
+            // ----------------------------------------------------------------
+            Bonisgaus.VisStock[MagicArts.Vim] = 10;
+            Bonisgaus.VisStock[MagicArts.Creo] = 4;
+
+            // ----------------------------------------------------------------
+            // Step 6: Pre-Hermetic lab texts
+            // ----------------------------------------------------------------
+            var detectAuraBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
+            var detectVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
+            var quantifyVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Quantify, FormEffects.Vis);
+            var wardMagicBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura);
+
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
+                    detectAuraBase, 0, false, "Sense the Hidden Aura")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    detectVisBase, 0, false, "Sense the Hidden Vis")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    quantifyVisBase, 0, false, "Weigh the Power")
+            });
+            Bonisgaus.LabTextsOwned.Add(new LabText
+            {
+                Author = Bonisgaus,
+                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
+                    wardMagicBase, 0, false, "Aegis of the Self")
+            });
+
+            // ----------------------------------------------------------------
+            // Step 7: In-progress Parma Magica research
+            // ----------------------------------------------------------------
+            // As of Spring 730 AD, Bonisagus has accumulated 53 of the 60 breakthrough
+            // points required to complete Parma Magica. He has stabilized:
+            //   7 magnitude-3 ReVi effects (Personal/Instant/Individual, Level 3 → 3 pts each)
+            //   8 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
+            //   Total: 7×3 + 8×4 = 21 + 32 = 53 points
+            // The project's CurrentPhase is null — the ResearchService will generate the
+            // next experimental spell on the first tick once the simulation begins.
+            var parmaDef = new ParmaMagicaBreakthrough();
+            var parmaProject = new ResearchProject(Bonisgaus, parmaDef);
+
+            // 7 × Magnitude-3 phases (Ward Against Magic, Personal range)
+            for (int i = 0; i < 7; i++)
+            {
+                var spell = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}");
+                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
+            }
+
+            // 8 × Magnitude-4 phases (Ward Against Magic, Touch range adds +1 magnitude)
+            for (int i = 0; i < 8; i++)
+            {
+                var spell = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}");
+                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
+            }
+
+            Bonisgaus.ActiveProjects.Add(parmaProject);
+
+            // Seeding the idea fires the cognitive architecture: AddIdea creates a
+            // PursueIdeaGoal Intention, which will schedule OriginalResearchActivity
+            // each season until the breakthrough completes.
+            Bonisgaus.AddIdea(new BreakthroughIdea(parmaDef));
+        }
+
         /// <summary>
         /// Builds Bonisagus's MagicalTradition — the baseline Hermetic tradition
         /// from which all other Founders' traditions are cloned via OpenGift.
@@ -79,7 +249,7 @@ namespace WizardMonks.Instances
         /// structurally from the standard GetLabTotal fallback. Standard lab
         /// activities (InventSpells, LongevityRitual, etc.) use the fallback.
         /// </summary>
-        public static void BuildBonisagus()
+        private static MagicalTradition GenerateInitialHermeticTradition()
         {
             // ----------------------------------------------------------------
             // Step 1: Build the MagicalTradition
@@ -200,165 +370,7 @@ namespace WizardMonks.Instances
                 initialConcepts: concepts,
                 activityFormulas: formulas,
                 opener: null);
-
-            // ----------------------------------------------------------------
-            // Step 4: Build and open the character
-            // ----------------------------------------------------------------
-            var bonisagusPersonality = new Personality(new Dictionary<HexacoFacet, double>
-            {
-                // High Conscientiousness, High Openness, Low Agreeableness - a driven, brilliant, and difficult man.
-                [HexacoFacet.Sincerity] = 1.5,
-                [HexacoFacet.Fairness] = 1.4,
-                [HexacoFacet.GreedAvoidance] = 1.0,
-                [HexacoFacet.Modesty] = 0.5,
-                [HexacoFacet.Fearfulness] = 1.0,
-                [HexacoFacet.Anxiety] = 1.0,
-                [HexacoFacet.Dependence] = 0.5,
-                [HexacoFacet.Sentimentality] = 0.5,
-                [HexacoFacet.SocialSelfEsteem] = 1.8,
-                [HexacoFacet.SocialBoldness] = 1.9,
-                [HexacoFacet.Sociability] = 0.5,
-                [HexacoFacet.Liveliness] = 1.0,
-                [HexacoFacet.Forgiveness] = 1.0,
-                [HexacoFacet.Gentleness] = 1.0,
-                [HexacoFacet.Flexibility] = 1.0,
-                [HexacoFacet.Patience] = 0.4,
-                [HexacoFacet.Organization] = 1.8,
-                [HexacoFacet.Diligence] = 1.8,
-                [HexacoFacet.Perfectionism] = 1.9,
-                [HexacoFacet.Prudence] = 1.2,
-                [HexacoFacet.AestheticAppreciation] = 1.0,
-                [HexacoFacet.Inquisitiveness] = 1.9,
-                [HexacoFacet.Creativity] = 1.8,
-                [HexacoFacet.Unconventionality] = 1.8
-            });
-
-            Dictionary<string, double> reputation = new() { { "Magic Theory", 2 } };
-
-            Bonisgaus = new HermeticMagus(HousesEnum.Bonisagus, 160, bonisagusPersonality, reputation)
-            {
-                Name = "Bonisagus"
-            };
-
-            // Open Bonisagus's own Gift with his self-developed tradition.
-            // No opener — this tradition was built from first principles.
-            Bonisgaus.OpenGift(bonisagusTradition);
-
-            Bonisgaus.GetAttribute(AttributeType.Stamina).BaseValue = -1;
-            Bonisgaus.GetAttribute(AttributeType.Strength).BaseValue = -2;
-            Bonisgaus.GetAttribute(AttributeType.Dexterity).BaseValue = -2;
-            Bonisgaus.GetAttribute(AttributeType.Quickness).BaseValue = -2;
-            Bonisgaus.GetAttribute(AttributeType.Intelligence).BaseValue = 5;
-            Bonisgaus.GetAttribute(AttributeType.Communication).BaseValue = 3;
-            Bonisgaus.GetAttribute(AttributeType.Presence).BaseValue = 2;
-            Bonisgaus.GetAttribute(AttributeType.Perception).BaseValue = 2;
-
-            Bonisgaus.GetAbility(Abilities.AreaLore).AddExperience(76);
-            Bonisgaus.GetAbility(Abilities.ArtesLiberales).AddExperience(59);
-            Bonisgaus.GetAbility(Abilities.Awareness).AddExperience(30);
-            Bonisgaus.GetAbility(Abilities.English).AddExperience(75);
-            Bonisgaus.GetAbility(Abilities.Etiquette).AddExperience(16);
-            Bonisgaus.GetAbility(Abilities.FolkKen).AddExperience(16);
-            Bonisgaus.GetAbility(Abilities.Latin).AddExperience(80);
-            Bonisgaus.GetAbility(Abilities.MagicLore).AddExperience(30);
-            Bonisgaus.GetAbility(Abilities.MagicTheory).AddExperience(195);
-            Bonisgaus.GetAbility(Abilities.Philosophae).AddExperience(10);
-            Bonisgaus.GetAbility(Abilities.Scribing).AddExperience(5);
-            Bonisgaus.GetAbility(Abilities.Survival).AddExperience(15);
-            Bonisgaus.GetAbility(Abilities.Swim).AddExperience(15);
-
-            // ----------------------------------------------------------------
-            // Step 5: Alpine Sanctum
-            // ----------------------------------------------------------------
-            var alpineAura = new Aura(Domain.Magic, 4, "Bonisagus's Alpine Cave");
-            var vimVisSource = new VisSource(alpineAura, MagicArts.Vim, Season.Summer, 1.0);
-            alpineAura.VisSources.Add(vimVisSource);
-
-            var auraProfile = new BeliefProfile(SubjectType.Aura, 1.0);
-            auraProfile.AddOrUpdateBelief(new Belief(BeliefTopics.Owner, Bonisgaus.Id.GetHashCode()));
-            Bonisgaus.AddOrUpdateKnowledge(alpineAura, auraProfile);
-
-            // ----------------------------------------------------------------
-            // Step 6: Laboratory
-            // ----------------------------------------------------------------
-            var lab = new Laboratory(Bonisgaus, alpineAura, 0);
-            lab.AddFeature(LabFeatures.HighlyOrganized);
-            Bonisgaus.Laboratory = lab;
-
-            // ----------------------------------------------------------------
-            // Step 7: Starting vis stock (accumulated over years of solitary work)
-            // ----------------------------------------------------------------
-            Bonisgaus.VisStock[MagicArts.Vim] = 10;
-            Bonisgaus.VisStock[MagicArts.Creo] = 4;
-
-            // ----------------------------------------------------------------
-            // Step 8: Pre-Hermetic lab texts
-            // ----------------------------------------------------------------
-            var detectAuraBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
-            var detectVisBase  = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
-            var quantifyVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Quantify, FormEffects.Vis);
-            var wardMagicBase  = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura);
-
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
-                    detectAuraBase, 0, false, "Sense the Hidden Aura")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    detectVisBase, 0, false, "Sense the Hidden Vis")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    quantifyVisBase, 0, false, "Weigh the Power")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
-                    wardMagicBase, 0, false, "Aegis of the Self")
-            });
-
-            // ----------------------------------------------------------------
-            // Step 9: In-progress Parma Magica research
-            // ----------------------------------------------------------------
-            // As of Spring 730 AD, Bonisagus has accumulated 53 of the 60 breakthrough
-            // points required to complete Parma Magica. He has stabilized:
-            //   7 magnitude-3 ReVi effects (Personal/Instant/Individual, Level 3 → 3 pts each)
-            //   8 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
-            //   Total: 7×3 + 8×4 = 21 + 32 = 53 points
-            // The project's CurrentPhase is null — the ResearchService will generate the
-            // next experimental spell on the first tick once the simulation begins.
-            var parmaDef = new ParmaMagicaBreakthrough();
-            var parmaProject = new ResearchProject(Bonisgaus, parmaDef);
-
-            // 7 × Magnitude-3 phases (Ward Against Magic, Personal range)
-            for (int i = 0; i < 7; i++)
-            {
-                var spell = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}");
-                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
-            }
-
-            // 8 × Magnitude-4 phases (Ward Against Magic, Touch range adds +1 magnitude)
-            for (int i = 0; i < 8; i++)
-            {
-                var spell = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}");
-                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
-            }
-
-            Bonisgaus.ActiveProjects.Add(parmaProject);
-
-            // Seeding the idea fires the cognitive architecture: AddIdea creates a
-            // PursueIdeaGoal Intention, which will schedule OriginalResearchActivity
-            // each season until the breakthrough completes.
-            Bonisgaus.AddIdea(new BreakthroughIdea(parmaDef));
+            return bonisagusTradition;
         }
 
         /// <summary>

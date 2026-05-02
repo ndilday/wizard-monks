@@ -76,16 +76,6 @@ namespace WizardMonks.Services.Characters
 
             ConsideredActions actions = new();
 
-            // Legacy goals (bootstrap and any not yet migrated to the intention system).
-            foreach (IGoal goal in character.ActiveGoals)
-            {
-                if (!goal.IsComplete())
-                {
-                    List<string> dummy = new List<string>();
-                    goal.AddActionPreferencesToList(actions, character.Desires, dummy);
-                }
-            }
-
             // Intention-wrapped goals from the cognitive architecture.
             foreach (Intention intention in character.ActiveIntentions)
             {
@@ -102,18 +92,6 @@ namespace WizardMonks.Services.Characters
 
         public static void ReprioritizeGoals(this Character character)
         {
-            foreach (IGoal goal in character.ActiveGoals.ToList())
-            {
-                if (!goal.IsComplete())
-                {
-                    if (goal.AgeToCompleteBy < character.SeasonalAge)
-                    {
-                        character.Log.Add("Failed to achieve a goal");
-                        character.ActiveGoals.Remove(goal);
-                    }
-                }
-            }
-
             // Prune completed intentions from the new system.
             character.ActiveIntentions.RemoveAll(i => i.UnderlyingGoal.IsComplete());
         }

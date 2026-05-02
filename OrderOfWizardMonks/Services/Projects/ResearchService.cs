@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
@@ -7,6 +7,7 @@ using WizardMonks.Instances;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Projects;
 using WizardMonks.Models.Spells;
+using WizardMonks.Models.Traditions;
 
 namespace WizardMonks.Services.Characters
 {
@@ -26,8 +27,7 @@ namespace WizardMonks.Services.Characters
                 return null;
             }
 
-            int principleIndex = (int)(Die.Instance.RollDouble() * researchablePrinciples.Count);
-            object principle = researchablePrinciples[principleIndex];
+            object principle = SelectPrincipleByProgress(researchablePrinciples, breakthrough, researcher);
 
             return principle switch
             {
@@ -43,6 +43,54 @@ namespace WizardMonks.Services.Characters
             pool.AddRange(breakthrough.NewSpellAttributes);
             pool.AddRange(breakthrough.NewSpellBases);
             return pool;
+        }
+
+        /// <summary>
+        /// Selects a principle to research, weighted by how much progress the researcher
+        /// can make per season. SpellBase principles gain a bonus for prudent magi;
+        /// SpellAttribute principles gain a bonus for creative magi.
+        /// </summary>
+        private object SelectPrincipleByProgress(List<object> principles, BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            double creativity = researcher.Personality.GetFacet(HexacoFacet.Creativity);
+            double prudence = researcher.Personality.GetFacet(HexacoFacet.Prudence);
+            double attributeBonus = 1.0 + (creativity - prudence) * 0.1;
+            double baseBonus = 1.0 + (prudence - creativity) * 0.1;
+
+            var weighted = new List<(object principle, double weight)>();
+            double total = 0;
+
+            foreach (var principle in principles)
+            {
+                double labTotal = GetLabTotalForPrinciple(principle, breakthrough, researcher);
+                double personalityMultiplier = principle is SpellAttribute ? attributeBonus : baseBonus;
+                double weight = Math.Max(0.1, labTotal * personalityMultiplier);
+                weighted.Add((principle, weight));
+                total += weight;
+            }
+
+            double roll = Die.Instance.RollDouble() * total;
+            foreach (var (p, w) in weighted)
+            {
+                roll -= w;
+                if (roll <= 0) return p;
+            }
+            return principles.Last();
+        }
+
+        private double GetLabTotalForPrinciple(object principle, BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            if (principle is SpellBase sb)
+                return researcher.GetLabTotal(sb.ArtPair, Activity.OriginalResearch);
+
+            if (principle is SpellAttribute && breakthrough.AssociatedArtPairs.Any())
+            {
+                return breakthrough.AssociatedArtPairs
+                    .Select(pair => researcher.GetLabTotal(pair, Activity.OriginalResearch))
+                    .Max();
+            }
+
+            return 1;
         }
 
         private ResearchProjectPhase GenerateForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, HermeticMagus researcher)
@@ -72,7 +120,7 @@ namespace WizardMonks.Services.Characters
             if (principle is EffectTarget target) spell = new Spell(spell.Range, spell.Duration, target, spell.Base, 0, false, spell.Name);
 
             ushort currentMagnitudes = (ushort)(baseEffect.Magnitude + principle.Level);
-            ApplyInstabilityFactors(ref spell, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+            PadSpellToTargetMagnitudes(ref spell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
             string experimentalName = $"{researcher.Name}'s {SpellLevelMath.GetMagnitudesFromLevel(spell.Level)}-Mag Experimental {spell.Base.Name}";
             spell = new Spell(spell.Range, spell.Duration, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, experimentalName);
@@ -80,29 +128,53 @@ namespace WizardMonks.Services.Characters
             return new ResearchProjectPhase(spell, 1);
         }
 
+        /// <summary>
+        /// Generates a research phase targeting a new spell base. The RDT parameters are
+        /// chosen from those the researcher's tradition already knows, scaled to a target
+        /// level derived from the researcher's lab total and personality.
+        /// </summary>
+        private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, HermeticMagus researcher)
+        {
+            double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.OriginalResearch);
+            double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
+
+            double personalityModifier = (researcher.Personality.GetFacet(HexacoFacet.Creativity) - 1.0) * 5;
+            personalityModifier -= (researcher.Personality.GetFacet(HexacoFacet.Prudence) - 1.0) * 5;
+
+            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5 + personalityModifier);
+            ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(targetLevel);
+            int rdtBudget = totalMagnitudesNeeded - principle.Magnitude;
+
+            EffectRange chosenRange = BestFitRange(researcher, rdtBudget);
+            int rangeUsed = chosenRange.Level;
+
+            EffectDuration chosenDuration = BestFitDuration(researcher, rdtBudget - rangeUsed);
+            int durationUsed = chosenDuration.Level;
+
+            EffectTarget chosenTarget = BestFitTarget(researcher, rdtBudget - rangeUsed - durationUsed);
+
+            Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, principle, 0, false, "Unnamed Spell");
+
+            ushort currentMagnitudes = (ushort)(principle.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
+            PadSpellToTargetMagnitudes(ref experimentalSpell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+
+            return new ResearchProjectPhase(experimentalSpell, 1);
+        }
+
         private SpellBase FindBestFitSpellBase(ArtPair arts, ushort desiredMagnitude)
         {
-            // CORRECTED: Call the now-public GetSpellBasesByArtPair method.
             var bestFit = SpellBases.GetSpellBasesByArtPair(arts)
                 .OrderByDescending(b => b.Magnitude)
                 .FirstOrDefault(b => b.Magnitude <= desiredMagnitude);
 
-            // CORRECTED: Properly construct the fallback SpellBase.
             return bestFit ?? new SpellBase(
-                TechniqueEffects.Detect, // Generic fallback effect
-                FormEffects.Aura,       // Generic fallback effect
-                ConvertAbilitiesToSpellArts(arts.Technique, arts.Form), // Correctly generate SpellArts flags
-                arts,                   // Pass the correct ArtPair object
+                TechniqueEffects.Detect,
+                FormEffects.Aura,
+                ConvertAbilitiesToSpellArts(arts.Technique, arts.Form),
+                arts,
                 SpellTag.Knowledge,
                 1,
                 "Generic Foundational Effect");
-        }
-
-        private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, HermeticMagus researcher)
-        {
-            Spell experimentalSpell = new Spell(EffectRanges.Touch, EffectDurations.Concentration, EffectTargets.Individual, principle, 0, false, "Unnamed Spell");
-            ApplyInstabilityFactors(ref experimentalSpell, (ushort)(Die.Instance.RollSimpleDie() / 2));
-            return new ResearchProjectPhase(experimentalSpell, 1);
         }
 
         private ArtPair SelectExperimentalArtPair(List<ArtPair> candidates, HermeticMagus researcher)
@@ -132,18 +204,70 @@ namespace WizardMonks.Services.Characters
             return candidates.Last();
         }
 
-        private void ApplyInstabilityFactors(ref Spell spell, ushort magnitudesToAdd)
+        /// <summary>
+        /// Pads a spell up toward a target magnitude by upgrading to the highest known
+        /// duration that fits within the remaining budget. If no known duration improves
+        /// on the spell's current duration, the spell is returned unchanged.
+        /// </summary>
+        private void PadSpellToTargetMagnitudes(ref Spell spell, HermeticMagus researcher, ushort magnitudesToAdd)
         {
             if (magnitudesToAdd <= 0) return;
 
-            EffectDuration newDuration = spell.Duration;
-            if (magnitudesToAdd >= 2) newDuration = EffectDurations.Sun;
-            else if (magnitudesToAdd >= 1) newDuration = EffectDurations.Concentration;
+            int currentDurationLevel = spell.Duration.Level;
+            int maxDurationLevel = currentDurationLevel + magnitudesToAdd;
 
-            spell = new Spell(spell.Range, newDuration, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, spell.Name);
+            EffectDuration best = researcher.Tradition.GetConceptsOfType<DurationPrinciple>()
+                .Select(c => ((DurationPrinciple)c.Principle).Duration)
+                .Where(d => d.Level > currentDurationLevel && d.Level <= maxDurationLevel)
+                .OrderByDescending(d => d.Level)
+                .FirstOrDefault();
+
+            if (best != null)
+                spell = new Spell(spell.Range, best, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, spell.Name);
         }
 
-        // Helper method to convert Ability objects to the correct SpellArts flags for the SpellBase constructor.
+        /// <summary>
+        /// Returns the highest-magnitude range the researcher's tradition knows that fits
+        /// within the given budget. Falls back to Personal (0 magnitudes) if none fit.
+        /// </summary>
+        private EffectRange BestFitRange(HermeticMagus researcher, int magnitudeBudget)
+        {
+            return researcher.Tradition.GetConceptsOfType<RangePrinciple>()
+                .Select(c => ((RangePrinciple)c.Principle).Range)
+                .Append(EffectRanges.Personal)
+                .Where(r => r.Level <= magnitudeBudget)
+                .OrderByDescending(r => r.Level)
+                .First();
+        }
+
+        /// <summary>
+        /// Returns the highest-magnitude duration the researcher's tradition knows that fits
+        /// within the given budget. Falls back to Instant (0 magnitudes) if none fit.
+        /// </summary>
+        private EffectDuration BestFitDuration(HermeticMagus researcher, int magnitudeBudget)
+        {
+            return researcher.Tradition.GetConceptsOfType<DurationPrinciple>()
+                .Select(c => ((DurationPrinciple)c.Principle).Duration)
+                .Append(EffectDurations.Instant)
+                .Where(d => d.Level <= magnitudeBudget)
+                .OrderByDescending(d => d.Level)
+                .First();
+        }
+
+        /// <summary>
+        /// Returns the highest-magnitude target the researcher's tradition knows that fits
+        /// within the given budget. Falls back to Individual (0 magnitudes) if none fit.
+        /// </summary>
+        private EffectTarget BestFitTarget(HermeticMagus researcher, int magnitudeBudget)
+        {
+            return researcher.Tradition.GetConceptsOfType<TargetPrinciple>()
+                .Select(c => ((TargetPrinciple)c.Principle).Target)
+                .Append(EffectTargets.Individual)
+                .Where(t => t.Level <= magnitudeBudget)
+                .OrderByDescending(t => t.Level)
+                .First();
+        }
+
         private static SpellArts ConvertAbilitiesToSpellArts(Ability technique, Ability form)
         {
             SpellArts techFlag = (SpellArts)Enum.Parse(typeof(SpellArts), technique.AbilityName);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Activities;
 using WizardMonks.Decisions;
 using WizardMonks.Decisions.Goals;
 using WizardMonks.Instances;
@@ -245,6 +246,17 @@ namespace WizardMonks.Models.Characters
         {
             return base.GetAbilities().Concat(Arts);
         }
+
+        /// <summary>
+        /// Returns true if this mage's tradition includes a LabActivityPrinciple for
+        /// the given activity, meaning the mage is capable of attempting it.
+        ///
+        /// Every goal and decision helper that schedules a lab activity should call
+        /// this before adding the activity to the considered-actions set. Magi should
+        /// never attempt activities their tradition does not support.
+        /// </summary>
+        public bool CanPerformLabActivity(Activity activity) =>
+            Tradition?.SupportsActivity(activity) == true;
 
         #endregion
 

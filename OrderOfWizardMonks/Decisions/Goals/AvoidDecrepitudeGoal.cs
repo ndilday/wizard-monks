@@ -26,6 +26,17 @@ public class AvoidDecrepitudeGoal : AGoal
     // The core logic will reside in the AddActionPreferencesToList method.
     public override void AddActionPreferencesToList(ConsideredActions alreadyConsidered, Desires desires, IList<string> log)
     {
+        // Guard: if this mage's tradition does not include Longevity Rituals, this goal
+        // has nothing to recommend. A mage cannot attempt an activity outside their tradition.
+        // TODO: Once inter-Founder knowledge-sharing is modelled (post-Milestone 1), this will
+        // gate on the mage having integrated the LongevityRitual LabActivityPrinciple from
+        // another founder's tradition via teaching or lab-text exchange.
+        if (!_mage.CanPerformLabActivity(Activity.LongevityRitual))
+        {
+            log.Add("[AvoidDecrepitudeGoal] Tradition does not support Longevity Rituals; goal is inactive.");
+            return;
+        }
+
         // Step 1: Determine the deadline for the next aging roll.
         uint deadlineSeason;
         if (_mage.LongevityRitual == 0)

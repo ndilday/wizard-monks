@@ -18,15 +18,20 @@ namespace WizardMonks.Instances
         public static readonly LabFeature HighlyOrganized;
         public static readonly LabFeature Spotless;
         public static readonly LabFeature HiddenDefect;
+        public static readonly LabFeature GreaterFeature;
+        public static readonly LabFeature GreaterFocus;
+        // TODO adding inventive genius as a lab focus for now
+        public static readonly LabFeature InventiveGenius;
 
         static LabFeatures()
         {
             //Altar = new LabFeature("Altar", 3, )
             HighlyOrganized = new LabFeature("Highly Organized", 0, 0, 0, 1, 0, 0, 0, null, null);
-
             Spotless = new LabFeature("Spotless", 0, 1, 1, 0, 0, 0, 0, new Tuple<Ability, double>(MagicArts.Creo, 1), null);
-
             HiddenDefect = new LabFeature("Hidden Defect", 0, 0, 0, 0, -3, 0, 0, null, null);
+            GreaterFeature = new LabFeature("Greater Experimentation Feature", 3, 2, 0, 0, 0, 0, 0, null, new Tuple<Activity, double>(Activity.InventSpells, 3));
+            GreaterFocus = new LabFeature("Greater Experimentation Focus", -3, 0, 0, -2, 0, 0, 0, null, new Tuple<Activity, double>(Activity.InventSpells, 4));
+            InventiveGenius = new LabFeature("Inventive Genius", 0, 0, 0, 0, 0, 0, 0, null, new Tuple<Activity, double>(Activity.InventSpells, 6));
 
             AllFeatures = [HighlyOrganized, Spotless, HiddenDefect];
             FeaturesByArt = [];

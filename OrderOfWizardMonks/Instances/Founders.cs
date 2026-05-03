@@ -156,6 +156,10 @@ namespace WizardMonks.Instances
             lab.Refine();
             lab.Refine();
             lab.AddFeature(LabFeatures.HighlyOrganized);
+            lab.AddFeature(LabFeatures.GreaterFeature);
+            lab.AddFeature(LabFeatures.GreaterFocus);
+            lab.AddFeature(LabFeatures.GreaterFeature);
+            lab.AddFeature(LabFeatures.InventiveGenius);
             Bonisgaus.Laboratory = lab;
 
             // ----------------------------------------------------------------

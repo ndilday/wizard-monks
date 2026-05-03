@@ -8,7 +8,7 @@ namespace WizardMonks.Models.Laboratories
     public class LabFeature
     {
         public string Name { get; protected set; }
-        public byte Size { get; protected set; }
+        public double Size { get; protected set; }
         public double Aesthetics { get; protected set; }
         public double Health { get; protected set; }
         public double Quality { get; protected set; }
@@ -18,7 +18,7 @@ namespace WizardMonks.Models.Laboratories
         public Tuple<Ability, double> ArtModifier { get; protected set; }
         public Tuple<Activity, double> ActivityModifier { get; protected set; }
 
-        public LabFeature(string name, byte size, double aesthetics, double health, double quality, double safety, double upkeep, double warping, Tuple<Ability, double> artMod, Tuple<Activity, double> activityMod)
+        public LabFeature(string name, double size, double aesthetics, double health, double quality, double safety, double upkeep, double warping, Tuple<Ability, double> artMod, Tuple<Activity, double> activityMod)
         {
             Name = name;
             Size = size;

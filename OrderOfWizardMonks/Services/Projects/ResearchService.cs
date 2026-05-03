@@ -47,24 +47,16 @@ namespace WizardMonks.Services.Characters
 
         /// <summary>
         /// Selects a principle to research, weighted by how much progress the researcher
-        /// can make per season. SpellBase principles gain a bonus for prudent magi;
-        /// SpellAttribute principles gain a bonus for creative magi.
+        /// can make per season on each candidate.
         /// </summary>
         private object SelectPrincipleByProgress(List<object> principles, BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
-            double creativity = researcher.Personality.GetFacet(HexacoFacet.Creativity);
-            double prudence = researcher.Personality.GetFacet(HexacoFacet.Prudence);
-            double attributeBonus = 1.0 + (creativity - prudence) * 0.1;
-            double baseBonus = 1.0 + (prudence - creativity) * 0.1;
-
             var weighted = new List<(object principle, double weight)>();
             double total = 0;
 
             foreach (var principle in principles)
             {
-                double labTotal = GetLabTotalForPrinciple(principle, breakthrough, researcher);
-                double personalityMultiplier = principle is SpellAttribute ? attributeBonus : baseBonus;
-                double weight = Math.Max(0.1, labTotal * personalityMultiplier);
+                double weight = Math.Max(0.1, GetLabTotalForPrinciple(principle, breakthrough, researcher));
                 weighted.Add((principle, weight));
                 total += weight;
             }
@@ -100,11 +92,7 @@ namespace WizardMonks.Services.Characters
 
             double labTotal = researcher.GetLabTotal(chosenArts, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
-
-            double personalityModifier = (researcher.Personality.GetFacet(HexacoFacet.Creativity) - 1.0) * 5;
-            personalityModifier -= (researcher.Personality.GetFacet(HexacoFacet.Prudence) - 1.0) * 5;
-
-            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5 + personalityModifier);
+            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5);
 
             ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(targetLevel);
             ushort principleMagnitudes = principle.Level;
@@ -137,11 +125,7 @@ namespace WizardMonks.Services.Characters
         {
             double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
-
-            double personalityModifier = (researcher.Personality.GetFacet(HexacoFacet.Creativity) - 1.0) * 5;
-            personalityModifier -= (researcher.Personality.GetFacet(HexacoFacet.Prudence) - 1.0) * 5;
-
-            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5 + personalityModifier);
+            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5);
             ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(targetLevel);
             int rdtBudget = totalMagnitudesNeeded - principle.Magnitude;
 

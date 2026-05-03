@@ -168,12 +168,26 @@ namespace WizardMonks.Services.Characters
             }
 
             // Reflect: synthesize beliefs from accumulated memory entries.
-            bool beliefRevised = false;
             if (_reflectionPolicy.ShouldReflect(character, character.Memory, currentTick))
             {
                 _reflectionEngine.Reflect(character, character.Memory, character.CognitiveBeliefs, currentTick);
                 character.Memory.ExpireStaleEntries(currentTick);
-                beliefRevised = true;
+            }
+
+            // Prune intentions that should be reconsidered before generating new ones,
+            // so the generator sees the post-reconsideration state and deduplication works correctly.
+            // Use the most conflicting emotion (Fear or Distress) as the signal.
+            float conflictingEmotion = Math.Max(
+                character.Emotions.GetIntensity(EmotionType.Fear),
+                character.Emotions.GetIntensity(EmotionType.Distress));
+
+            var pruned = character.ActiveIntentions
+                .Where(i => i.ShouldReconsider(maxEventImportance, conflictingEmotion, currentTick))
+                .ToList();
+            foreach (var intention in pruned)
+            {
+                character.ActiveIntentions.Remove(intention);
+                character.Log.Add($"[Cognition] Intention reconsidered: {intention.UnderlyingGoal.GetType().Name}");
             }
 
             // Generate new intentions from current emotional and belief state.
@@ -190,21 +204,6 @@ namespace WizardMonks.Services.Characters
             // re-evaluation regardless of emotional pressure thresholds.
             if (activity is AMageActivity completedMageActivity && completedMageActivity.EmittedEvent != null)
                 TryGenerateContextChangeIntentions(character, completedMageActivity.EmittedEvent, currentTick);
-
-            // Prune intentions that should be reconsidered.
-            // Use the most conflicting emotion (Fear or Distress) as the signal.
-            float conflictingEmotion = Math.Max(
-                character.Emotions.GetIntensity(EmotionType.Fear),
-                character.Emotions.GetIntensity(EmotionType.Distress));
-
-            var pruned = character.ActiveIntentions
-                .Where(i => i.ShouldReconsider(maxEventImportance, beliefRevised, conflictingEmotion, currentTick))
-                .ToList();
-            foreach (var intention in pruned)
-            {
-                character.ActiveIntentions.Remove(intention);
-                character.Log.Add($"[Cognition] Intention reconsidered: {intention.UnderlyingGoal.GetType().Name}");
-            }
         }
 
         /// <summary>

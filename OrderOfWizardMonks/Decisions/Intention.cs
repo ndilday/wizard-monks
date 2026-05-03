@@ -79,21 +79,25 @@ namespace WizardMonks.Decisions
         /// <summary>
         /// Evaluates whether this intention should be reconsidered.
         ///
-        /// Reconsideration triggers (PRD §2.2.3):
-        ///   1. Incoming event importance exceeds CommitmentStrength.
-        ///   2. A belief revision occurred this tick.
+        /// Reconsideration triggers:
+        ///   1. Goal is complete.
+        ///   2. An incoming event importance exceeds CommitmentStrength.
         ///   3. A conflicting emotion token exceeds CommitmentStrength.
-        ///   4. Too many ticks without meaningful progress.
+        ///   4. Too many ticks without meaningful progress (stagnation).
+        ///
+        /// Belief revision alone is intentionally not a trigger here. Periodic
+        /// reflection is background cognitive housekeeping; it updates beliefs
+        /// and desire scores but should not discard ongoing commitments. When
+        /// revised beliefs genuinely invalidate a goal the other triggers
+        /// (stagnation, emotion intensity) will eventually fire.
         /// </summary>
         public bool ShouldReconsider(
             float incomingEventImportance,
-            bool beliefRevisionOccurred,
             float conflictingEmotionIntensity,
             int currentTick)
         {
             if (UnderlyingGoal.IsComplete()) return true;
             if (incomingEventImportance > CommitmentStrength) return true;
-            if (beliefRevisionOccurred) return true;
             if (conflictingEmotionIntensity > CommitmentStrength) return true;
             if ((currentTick - _lastProgressTick) > MaxStagnationTicks) return true;
 

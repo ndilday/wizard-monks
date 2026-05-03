@@ -16,7 +16,6 @@ namespace WizardMonks.Activities
         CopyLabText,
         LongevityRitual,
         EnchantFamiliar,
-        OriginalResearch,
         InitiateOther,
         InitiateSelf,
         Adventure,

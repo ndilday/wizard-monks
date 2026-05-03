@@ -81,12 +81,12 @@ namespace WizardMonks.Services.Characters
         private double GetLabTotalForPrinciple(object principle, BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
             if (principle is SpellBase sb)
-                return researcher.GetLabTotal(sb.ArtPair, Activity.OriginalResearch);
+                return researcher.GetLabTotal(sb.ArtPair, Activity.InventSpells);
 
             if (principle is SpellAttribute && breakthrough.AssociatedArtPairs.Any())
             {
                 return breakthrough.AssociatedArtPairs
-                    .Select(pair => researcher.GetLabTotal(pair, Activity.OriginalResearch))
+                    .Select(pair => researcher.GetLabTotal(pair, Activity.InventSpells))
                     .Max();
             }
 
@@ -98,7 +98,7 @@ namespace WizardMonks.Services.Characters
             ArtPair chosenArts = SelectExperimentalArtPair(definition.AssociatedArtPairs, researcher);
             if (chosenArts == null) return null;
 
-            double labTotal = researcher.GetLabTotal(chosenArts, Activity.OriginalResearch);
+            double labTotal = researcher.GetLabTotal(chosenArts, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
 
             double personalityModifier = (researcher.Personality.GetFacet(HexacoFacet.Creativity) - 1.0) * 5;
@@ -135,7 +135,7 @@ namespace WizardMonks.Services.Characters
         /// </summary>
         private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, HermeticMagus researcher)
         {
-            double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.OriginalResearch);
+            double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
 
             double personalityModifier = (researcher.Personality.GetFacet(HexacoFacet.Creativity) - 1.0) * 5;

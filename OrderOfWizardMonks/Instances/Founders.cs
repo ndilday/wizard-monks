@@ -279,7 +279,6 @@ namespace WizardMonks.Instances
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.DistillVis)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.StudyVis)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.OpenArts)));
-            concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.OriginalResearch)));
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.WriteLabText)));
 
             // SpellBases — populated from the static SpellBases registry

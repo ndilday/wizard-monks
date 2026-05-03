@@ -19,7 +19,7 @@ namespace WizardMonks.Activities.MageActivities
         {
             ProjectId = projectId;
             _researchService = researchService ?? throw new ArgumentNullException(nameof(researchService));
-            Action = Activity.OriginalResearch;
+            Action = Activity.InventSpells;
         }
 
         protected override void DoMageAction(HermeticMagus mage)

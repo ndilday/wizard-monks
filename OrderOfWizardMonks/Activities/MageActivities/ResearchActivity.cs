@@ -37,11 +37,11 @@ namespace WizardMonks.Activities.MageActivities
                 var firstPhase = _researchService.GenerateExperimentalSpellPhase(project.Breakthrough, mage);
                 if (firstPhase == null)
                 {
-                    mage.Log.Add($"Research project '{project.Description}' could not generate a first phase.");
+                    mage.Log.Add($"Research project '{project.Description}' could not generate an experimental effect.");
                     return;
                 }
                 project.StartNewPhase(firstPhase);
-                mage.Log.Add($"Began first research phase on '{project.Description}'.");
+                mage.Log.Add($"Began experimental effect phase on '{project.Description}'.");
             }
 
             var phase = project.CurrentPhase;

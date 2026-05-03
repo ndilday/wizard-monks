@@ -125,8 +125,7 @@ namespace WizardMonks.Services.Characters
         {
             double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
-            double targetLevel = Math.Max(5, maxSingleSeasonLevel - 5);
-            ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(targetLevel);
+            ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(maxSingleSeasonLevel);
             int rdtBudget = totalMagnitudesNeeded - principle.Magnitude;
 
             EffectRange chosenRange = BestFitRange(researcher, rdtBudget);

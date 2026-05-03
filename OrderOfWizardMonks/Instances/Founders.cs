@@ -206,27 +206,27 @@ namespace WizardMonks.Instances
             // ----------------------------------------------------------------
             // As of Spring 730 AD, Bonisagus has accumulated 53 of the 60 breakthrough
             // points required to complete Parma Magica. He has stabilized:
-            //   7 magnitude-3 ReVi effects (Personal/Instant/Individual, Level 3 → 3 pts each)
-            //   8 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
+            //   6 magnitude-3 ReVi effects (Personal/Sun/Individual, Level 3 → 3 pts each)
+            //   9 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
             //   Total: 7×3 + 8×4 = 21 + 32 = 53 points
             // The project's CurrentPhase is null — the ResearchService will generate the
             // next experimental spell on the first tick once the simulation begins.
             var parmaDef = new ParmaMagicaBreakthrough();
             var parmaProject = new ResearchProject(Bonisgaus, parmaDef);
 
-            // 7 × Magnitude-3 phases (Ward Against Magic, Personal range)
-            for (int i = 0; i < 7; i++)
+            // 7 × Magnitude- phases (Ward Against Magic, Personal range)
+            for (int i = 0; i < 6; i++)
             {
-                var spell = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}");
+                var spell = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}", 2);
                 parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
             }
 
             // 8 × Magnitude-4 phases (Ward Against Magic, Touch range adds +1 magnitude)
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
             {
-                var spell = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}");
+                var spell = new Spell(EffectRanges.Touch, EffectDurations.Sun, EffectTargets.Individual,
+                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}", 2);
                 parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
             }
 

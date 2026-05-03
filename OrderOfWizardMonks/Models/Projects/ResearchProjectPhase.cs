@@ -43,7 +43,7 @@ namespace WizardMonks.Models.Projects
         private void Stabilize()
         {
             IsStabilized = true;
-            BreakthroughPointsGained = SpellLevelMath.GetMagnitudesFromLevel(ExperimentalSpell.Level);
+            BreakthroughPointsGained = ExperimentalSpell.Level / 5;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace WizardMonks.Models.Projects
             var phase = new ResearchProjectPhase(spell, 0);
             phase.InventionProgress = spell.Level;   // fully invented
             phase.IsStabilized = true;
-            phase.BreakthroughPointsGained = SpellLevelMath.GetMagnitudesFromLevel(spell.Level);
+            phase.BreakthroughPointsGained = spell.Level / 5;
             return phase;
         }
     }

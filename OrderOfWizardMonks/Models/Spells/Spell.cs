@@ -36,6 +36,7 @@ namespace WizardMonks.Models.Spells
         public SpellBase Base { get; private set; }
         public byte Modifiers { get; private set; }
         public bool IsRitual { get; private set; }
+        public byte AdditionalLevels { get; private set; }
 
         public SpellArts RequisiteArts { get; private set; }
         public string Name { get; private set; }
@@ -45,13 +46,13 @@ namespace WizardMonks.Models.Spells
             get
             {
                 int rdtMagnitudes = Range.Level + Duration.Level + Target.Level;
-                double totalMagnitudes = Base.Magnitude + rdtMagnitudes;
+                double totalMagnitudes = Base.Magnitude + rdtMagnitudes + AdditionalLevels;
 
                 return SpellLevelMath.GetLevelFromMagnitude(totalMagnitudes);
             }
         }
 
-        public Spell(EffectRange range, EffectDuration duration, EffectTarget target, SpellBase spellBase, byte modifiers, bool isRitual, string name)
+        public Spell(EffectRange range, EffectDuration duration, EffectTarget target, SpellBase spellBase, byte modifiers, bool isRitual, string name, byte additionalLevels=0)
         {
             Range = range;
             Duration = duration;
@@ -60,6 +61,7 @@ namespace WizardMonks.Models.Spells
             Modifiers = modifiers;
             IsRitual = isRitual;
             Name = name;
+            AdditionalLevels = additionalLevels;
         }
     }
 }

@@ -151,6 +151,7 @@ namespace WizardMonks.Models.Characters
             BooksWritten = [];
             Books = [];
             IsWritableTopicsCacheClean = false;
+            WritableTopicsCache = [];
 
             _areaAbility = areaAbility;
             _writingAbility = writingAbility;
@@ -226,6 +227,9 @@ namespace WizardMonks.Models.Characters
             this.WritingCharacterAbility = this.GetAbility(this._writingAbility);
             this.WritingLanguageCharacterAbility = this.GetAbility(this.WritingLanguage);
             this.WritingAbilities = new List<Ability> { this._writingAbility, this.WritingLanguage };
+
+            this.WritableTopicsCache = [];
+            this.IsWritableTopicsCacheClean = false;
         }
 
         public void OnAged(AgingEventArgs e)

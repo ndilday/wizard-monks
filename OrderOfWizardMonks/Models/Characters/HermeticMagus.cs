@@ -333,13 +333,8 @@ namespace WizardMonks.Models.Characters
 
         #region Aura & Vis
 
-        public IEnumerable<Aura> GetOwnedAuras()
-        {
-            return Beliefs
-                .Where(b => b.Key is Aura aura &&
-                            b.Value.GetBeliefMagnitude(Models.Beliefs.BeliefTopics.Owner.Name) > 0)
-                .Select(b => (Aura)b.Key);
-        }
+        // GetOwnedAuras is provided by CharacterBeliefService as an extension method,
+        // using covenant-aware ownership matching.
 
         #endregion
 

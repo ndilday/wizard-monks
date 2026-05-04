@@ -121,10 +121,16 @@ namespace WizardMonks.Decisions.Goals
             if (artPairs == null || artPairs.Count == 0) return;
 
             double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
-            double estimatedSeasonsToComplete = remaining * 3;
+            double bestLabTotal = Math.Max(1, artPairs.Max(p => magus.GetLabTotal(p, Activity.InventSpells)));
+            double distillRate = magus.GetVisDistillationRate();
+            double totalSeasonsNeeded = 10.0 * remaining / bestLabTotal;
+            uint planningHorizon = (uint)(magus.SeasonalAge + Math.Max(1, totalSeasonsNeeded));
 
-            CalculateDesireFunc desireFunc = (gain, depth) => Desire * (gain / estimatedSeasonsToComplete);
-            uint planningHorizon = (uint)(magus.SeasonalAge + estimatedSeasonsToComplete);
+            CalculateDesireFunc desireFunc = (gain, depth) =>
+            {
+                double deltaSeasons = 10.0 * remaining * gain / (bestLabTotal * (bestLabTotal + gain));
+                return deltaSeasons * distillRate;
+            };
 
             var helper = new MultiPairLabTotalIncreaseHelper(
                 magus,

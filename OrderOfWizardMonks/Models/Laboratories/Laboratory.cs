@@ -45,7 +45,6 @@ namespace WizardMonks.Models.Laboratories
             {
                 totalModifier += ActivityModifiers[activity];
             }
-            totalModifier += _aura.Strength;
             if (Specialization != null)
             {
                 var currentSpecialization = Specialization.GetCurrentBonuses();

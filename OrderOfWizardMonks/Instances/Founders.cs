@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using WizardMonks.Activities;
 using WizardMonks.Core;
-using WizardMonks.Decisions.Goals;
 using WizardMonks.Models;
 using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
@@ -145,8 +144,9 @@ namespace WizardMonks.Instances
             alpineAura.VisSources.Add(vimVisSource);
 
             var auraProfile = new BeliefProfile(SubjectType.Aura, 1.0);
-            auraProfile.AddOrUpdateBelief(new Belief(BeliefTopics.Owner, Bonisgaus.Id.GetHashCode()));
+            auraProfile.AddOrUpdateBelief(new Belief(BeliefTopics.Strength, alpineAura.Strength));
             Bonisgaus.AddOrUpdateKnowledge(alpineAura, auraProfile);
+            Bonisgaus.FoundCovenant(alpineAura);
 
             // ----------------------------------------------------------------
             // Step 4: Laboratory
@@ -276,7 +276,6 @@ namespace WizardMonks.Instances
 
             // Hermetic Magical Abilities — native, no research needed
             concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.MagicTheory)));
-            concepts.Add(new TraditionConcept(new MagicalAbilityPrinciple(Abilities.ParmaMagica)));
 
             // Standard Lab Activities — native Hermetic operations
             concepts.Add(new TraditionConcept(new LabActivityPrinciple(Activity.InventSpells)));

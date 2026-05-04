@@ -33,6 +33,7 @@ namespace WizardMonks.Services.Characters
             {
                 SpellAttribute sa => GenerateForNewAttribute(sa, breakthrough, researcher),
                 SpellBase sb => GenerateForNewSpellBase(sb, researcher),
+                Ability => GenerateForNewAbility(breakthrough, researcher),
                 _ => throw new NotImplementedException($"No research generation handler for type {principle.GetType().Name}")
             };
         }
@@ -42,6 +43,7 @@ namespace WizardMonks.Services.Characters
             var pool = new List<object>();
             pool.AddRange(breakthrough.NewSpellAttributes);
             pool.AddRange(breakthrough.NewSpellBases);
+            pool.AddRange(breakthrough.NewAbilities);
             return pool;
         }
 
@@ -75,7 +77,7 @@ namespace WizardMonks.Services.Characters
             if (principle is SpellBase sb)
                 return researcher.GetLabTotal(sb.ArtPair, Activity.InventSpells);
 
-            if (principle is SpellAttribute && breakthrough.AssociatedArtPairs.Any())
+            if ((principle is SpellAttribute || principle is Ability) && breakthrough.AssociatedArtPairs.Any())
             {
                 return breakthrough.AssociatedArtPairs
                     .Select(pair => researcher.GetLabTotal(pair, Activity.InventSpells))
@@ -142,6 +144,56 @@ namespace WizardMonks.Services.Characters
             PadSpellToTargetMagnitudes(ref experimentalSpell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
             return new ResearchProjectPhase(experimentalSpell, 1);
+        }
+
+        /// <summary>
+        /// Generates a research phase for a breakthrough whose output is a new ability
+        /// rather than a new spell base or attribute. Selects an art pair from the
+        /// breakthrough's AssociatedArtPairs and builds an experimental spell in that pair,
+        /// using the same level-scaling logic as GenerateForNewSpellBase.
+        /// </summary>
+        private ResearchProjectPhase GenerateForNewAbility(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            ArtPair chosenArts = SelectExperimentalArtPair(breakthrough.AssociatedArtPairs, researcher);
+            if (chosenArts == null) return null;
+
+            double labTotal = researcher.GetLabTotal(chosenArts, Activity.InventSpells);
+            double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
+            ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(maxSingleSeasonLevel);
+
+            var baseEffect = FindBestFitSpellBase(chosenArts, totalMagnitudesNeeded);
+            int rdtBudget = totalMagnitudesNeeded - baseEffect.Magnitude;
+
+            EffectRange chosenRange = BestFitRange(researcher, rdtBudget);
+            EffectDuration chosenDuration = BestFitDuration(researcher, rdtBudget - chosenRange.Level);
+            EffectTarget chosenTarget = BestFitTarget(researcher, rdtBudget - chosenRange.Level - chosenDuration.Level);
+
+            Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, baseEffect, 0, false, "Unnamed Spell");
+
+            ushort currentMagnitudes = (ushort)(baseEffect.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
+            PadSpellToTargetMagnitudes(ref experimentalSpell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+
+            string experimentalName = $"{researcher.Name}'s {SpellLevelMath.GetMagnitudesFromLevel(experimentalSpell.Level)}-Mag Experimental {experimentalSpell.Base.Name}";
+            experimentalSpell = new Spell(experimentalSpell.Range, experimentalSpell.Duration, experimentalSpell.Target, experimentalSpell.Base, experimentalSpell.Modifiers, experimentalSpell.IsRitual, experimentalName);
+
+            return new ResearchProjectPhase(experimentalSpell, 1);
+        }
+
+        /// <summary>
+        /// Applies a completed breakthrough's effects to the researcher: adds new abilities
+        /// to their tradition, spell bases, and lab activities as defined by the breakthrough.
+        /// </summary>
+        public void ApplyBreakthroughEffects(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            if (breakthrough.NewAbilities.Count == 0) return;
+
+            double xpPerAbility = (double)breakthrough.BreakthroughPointsRequired / breakthrough.NewAbilities.Count;
+            foreach (var ability in breakthrough.NewAbilities)
+            {
+                researcher.UnlockTraditionAbility(ability);
+                researcher.GetAbility(ability).AddExperience(xpPerAbility);
+                researcher.Log.Add($"[Breakthrough] Unlocked {ability.AbilityName}, gained {xpPerAbility:F0} XP.");
+            }
         }
 
         private SpellBase FindBestFitSpellBase(ArtPair arts, ushort desiredMagnitude)

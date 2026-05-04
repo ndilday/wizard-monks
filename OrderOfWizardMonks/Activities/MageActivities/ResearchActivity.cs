@@ -79,9 +79,9 @@ namespace WizardMonks.Activities.MageActivities
                     {
                         project.HasAchievedDiscovery = true;
                         mage.Log.Add($"BREAKTHROUGH! The secrets of '{project.Breakthrough.Name}' have been discovered!");
+                        _researchService.ApplyBreakthroughEffects(project.Breakthrough, mage);
                         EmittedEvent = WorldEvent.LabOutcome(
                             (int)mage.SeasonalAge, WorldEventCategory.BreakthroughMade, mage, phase.BreakthroughPointsGained, project.Breakthrough.Name, true);
-                        // The effect is applied when the project is removed/formalized, not immediately.
                     }
                     else
                     {

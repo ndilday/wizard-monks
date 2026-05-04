@@ -177,6 +177,27 @@ namespace WizardMonks.Models.Characters
             return _traditionAbilities.Values;
         }
 
+        /// <summary>
+        /// Adds a newly researched ability to this character's tradition and
+        /// initializes an ability slot for it. Called when a breakthrough that
+        /// produces a new ability completes. Idempotent: no-ops if the ability
+        /// is already present.
+        /// </summary>
+        public void UnlockTraditionAbility(Ability ability)
+        {
+            if (Tradition == null)
+                throw new InvalidOperationException("Cannot unlock abilities on an un-Opened Gift.");
+
+            Tradition.IntegrateConcept(new TraditionConcept(new MagicalAbilityPrinciple(ability)));
+
+            if (!_traditionAbilities.ContainsKey(ability.AbilityId))
+            {
+                _traditionAbilities[ability.AbilityId] = ability.AbilityType == AbilityType.Art
+                    ? new AcceleratedAbility(ability)
+                    : new CharacterAbility(ability);
+            }
+        }
+
         #endregion
 
         #region Spell Functions

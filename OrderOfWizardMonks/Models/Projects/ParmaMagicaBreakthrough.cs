@@ -8,15 +8,15 @@ namespace WizardMonks.Models.Projects
 {
     /// <summary>
     /// Defines the breakthrough that produces Parma Magica — Bonisagus's discovery
-    /// of a personal ward providing general resistance against magical effects.
+    /// of a personal ritual providing general resistance against magical effects.
     ///
-    /// The research is conducted via Rego Vim experimental spells (the natural
-    /// art pair for warding effects). Sixty breakthrough points are required,
-    /// matching the canonical Hermetic Breakthrough threshold.
+    /// The research is conducted via Rego experimental spells across all ten Forms,
+    /// reflecting Bonisagus's exploration of magical resistance in every domain.
+    /// Sixty breakthrough points are required, matching the canonical Hermetic
+    /// Breakthrough threshold.
     ///
-    /// On completion, the breakthrough unlocks the existing ReVi ward spell base
-    /// as a fully formalized Hermetic effect, and — outside the simulation's
-    /// current scope — the special mechanics of Parma Magica as a seasonal ritual.
+    /// On completion, the Parma Magica ability is added to the researcher's tradition,
+    /// allowing it to be taught to and learned by other magi.
     /// </summary>
     public class ParmaMagicaBreakthrough : BreakthroughDefinition
     {
@@ -24,18 +24,20 @@ namespace WizardMonks.Models.Projects
             name: "Parma Magica",
             desc: "A personal ritual that provides general magical resistance, allowing magi to " +
                   "work alongside each other without threatening one another with their Gift. " +
-                  "Achieved through extensive Rego Vim experimental research into ward effects.",
+                  "Achieved through extensive experimental research into Rego effects across all Forms.",
             points: 60,
             newAttributes: new List<SpellAttribute>(),
-            newSpellBases: new List<SpellBase>
-            {
-                // The Ward Against Magic spell base drives the experimental phases.
-                // Completing the breakthrough formalizes it as a standard Hermetic effect.
-                SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura)
-            },
+            newSpellBases: new List<SpellBase>(),
             newActivities: new List<Activity>(),
             newRefinements: new List<object>(),
-            associatedArtPairs: new List<ArtPair> { MagicArtPairs.ReVi }
+            associatedArtPairs: new List<ArtPair>
+            {
+                MagicArtPairs.ReAn, MagicArtPairs.ReAq, MagicArtPairs.ReAu,
+                MagicArtPairs.ReCo, MagicArtPairs.ReHe, MagicArtPairs.ReIg,
+                MagicArtPairs.ReIm, MagicArtPairs.ReMe, MagicArtPairs.ReTe,
+                MagicArtPairs.ReVi
+            },
+            newAbilities: new List<Ability> { Abilities.ParmaMagica }
         )
         {
         }

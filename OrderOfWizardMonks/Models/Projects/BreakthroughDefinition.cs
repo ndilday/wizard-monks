@@ -18,12 +18,13 @@ namespace WizardMonks.Models.Projects
         public List<SpellBase> NewSpellBases { get; private set; }
         public List<Activity> NewLabActivities { get; private set; }
         public List<object> PrincipleRefinements { get; private set; }
+        public List<Ability> NewAbilities { get; private set; }
 
         public List<ArtPair> AssociatedArtPairs { get; private set; }
 
-        protected BreakthroughDefinition(string name, string desc, ushort points, 
+        protected BreakthroughDefinition(string name, string desc, ushort points,
             List<SpellAttribute> newAttributes, List<SpellBase> newSpellBases, List<Activity> newActivities, List<object> newRefinements,
-            List<ArtPair> associatedArtPairs)
+            List<ArtPair> associatedArtPairs, List<Ability> newAbilities = null)
         {
             Name = name;
             Description = desc;
@@ -33,6 +34,7 @@ namespace WizardMonks.Models.Projects
             NewLabActivities = newActivities;
             PrincipleRefinements = newRefinements;
             AssociatedArtPairs = associatedArtPairs;
+            NewAbilities = newAbilities ?? new List<Ability>();
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using WizardMonks.Activities;
 using WizardMonks.Activities.MageActivities;
 using WizardMonks.Decisions.Conditions.Helpers;
 using WizardMonks.Instances;
@@ -81,6 +83,8 @@ namespace WizardMonks.Decisions.Goals
                     new ResearchService(),
                     Abilities.MagicTheory,
                     Desire));
+
+                ConsiderIncreasingResearchTotal(alreadyConsidered, desires, log, breakthroughIdea, project, magus);
             }
             else if (Idea is SpellIdea spellIdea)
             {
@@ -107,6 +111,29 @@ namespace WizardMonks.Decisions.Goals
                     (gain, depth) => this.Desire * (gain / _targetSpell.Level));
                 spellHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
+        }
+
+        private void ConsiderIncreasingResearchTotal(
+            ConsideredActions alreadyConsidered, Desires desires, IList<string> log,
+            BreakthroughIdea breakthroughIdea, ResearchProject project, HermeticMagus magus)
+        {
+            var artPairs = breakthroughIdea.TargetBreakthrough.AssociatedArtPairs;
+            if (artPairs == null || artPairs.Count == 0) return;
+
+            double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
+            double estimatedSeasonsToComplete = remaining * 3;
+
+            CalculateDesireFunc desireFunc = (gain, depth) => Desire * (gain / estimatedSeasonsToComplete);
+            uint planningHorizon = (uint)(magus.SeasonalAge + estimatedSeasonsToComplete);
+
+            var helper = new MultiPairLabTotalIncreaseHelper(
+                magus,
+                planningHorizon,
+                1,
+                artPairs,
+                Activity.InventSpells,
+                desireFunc);
+            helper.AddActionPreferencesToList(alreadyConsidered, desires, log);
         }
     }
 }

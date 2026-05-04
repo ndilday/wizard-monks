@@ -4,6 +4,7 @@ using WizardMonks.Core;
 using WizardMonks.Instances;
 using WizardMonks.Models;
 using WizardMonks.Models.Characters;
+using WizardMonks.Models.Spells;
 using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.ExposingActivities
@@ -25,11 +26,18 @@ namespace WizardMonks.Activities.ExposingActivities
             {
                 character.Log.Add("Searching for a vis site in aura " + Aura.Strength.ToString("0.000"));
                 HermeticMagus mage = (HermeticMagus)character;
-                // add bonus to area lore equal to casting total div 5?
-                // TODO: once spells are implemented, increase finding chances based on aura-detection spells
                 double magicLore = mage.GetAbility(Abilities.MagicLore).Value;
                 magicLore += mage.GetAttribute(AttributeType.Perception).Value;
-                magicLore += mage.GetCastingTotal(MagicArtPairs.InVi) / 5;
+                Spell bestVisSearchSpell =
+                    mage.GetBestSpell(SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis));
+                if (bestVisSearchSpell != null)
+                {
+                    magicLore += bestVisSearchSpell.Level / 5.0;
+                }
+                else
+                {
+                    magicLore += mage.GetSpontaneousCastingTotal(MagicArtPairs.InVi) / 5.0;
+                }
                 double roll = Die.Instance.RollDouble() * 5;
 
                 // die roll will be 0-5; area lore will be between 0 and 25; aura will be 0-9, giving vis counts of 0-35

@@ -13,12 +13,18 @@ namespace WizardMonks.Services.Characters
 {
     /// <summary>
     /// A service dedicated to the logic of magical research and breakthroughs.
-    /// It generates the experimental spells that magi must invent to make progress on their research projects.
+    /// It selects the experimental spells that magi must invent to make progress on their research projects.
     /// This keeps complex procedural generation logic separate from the data models.
     /// </summary>
     public class ResearchService
     {
-        public ResearchProjectPhase GenerateExperimentalSpellPhase(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        /// <summary>
+        /// Selects the experimental spell a researcher should work on next for the given breakthrough.
+        /// Returns null if no principle is within the researcher's current lab total capability.
+        /// Call this at planning time; store the result on the activity so the decision is made
+        /// before the season begins, not lazily during execution.
+        /// </summary>
+        public Spell SelectExperimentalSpell(BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
             var researchablePrinciples = GetResearchablePrinciples(breakthrough);
             if (!researchablePrinciples.Any())
@@ -29,11 +35,17 @@ namespace WizardMonks.Services.Characters
 
             object principle = SelectPrincipleByProgress(researchablePrinciples, breakthrough, researcher);
 
+            if (principle == null)
+            {
+                researcher.Log.Add($"[Research] No principles in '{breakthrough.Name}' are within current lab total capabilities.");
+                return null;
+            }
+
             return principle switch
             {
-                SpellAttribute sa => GenerateForNewAttribute(sa, breakthrough, researcher),
-                SpellBase sb => GenerateForNewSpellBase(sb, researcher),
-                Ability => GenerateForNewAbility(breakthrough, researcher),
+                SpellAttribute sa => GenerateSpellForNewAttribute(sa, breakthrough, researcher),
+                SpellBase sb => GenerateSpellForNewSpellBase(sb, researcher),
+                Ability => GenerateSpellForNewAbility(breakthrough, researcher),
                 _ => throw new NotImplementedException($"No research generation handler for type {principle.GetType().Name}")
             };
         }
@@ -60,10 +72,13 @@ namespace WizardMonks.Services.Characters
 
             foreach (var principle in principles)
             {
-                double weight = Math.Max(0.1, GetLabTotalForPrinciple(principle, breakthrough, researcher));
+                double weight = GetLabTotalForPrinciple(principle, breakthrough, researcher);
+                if (weight <= 0) continue;
                 weighted.Add((principle, weight));
                 total += weight;
             }
+
+            if (!weighted.Any()) return null;
 
             double roll = Die.Instance.RollDouble() * total;
             foreach (var (p, w) in weighted)
@@ -71,13 +86,19 @@ namespace WizardMonks.Services.Characters
                 roll -= w;
                 if (roll <= 0) return p;
             }
-            return principles.Last();
+            return weighted.Last().principle;
         }
 
         private double GetLabTotalForPrinciple(object principle, BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
             if (principle is SpellBase sb)
-                return researcher.GetLabTotal(sb.ArtPair, Activity.InventSpells);
+            {
+                double labTotal = researcher.GetLabTotal(sb.ArtPair, Activity.InventSpells);
+                double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
+                ushort maxMagnitudes = SpellLevelMath.GetMagnitudesFromLevel(maxSingleSeasonLevel);
+                if (sb.Magnitude > maxMagnitudes) return 0;
+                return labTotal;
+            }
 
             if ((principle is SpellAttribute || principle is Ability) && breakthrough.AssociatedArtPairs.Any())
             {
@@ -89,7 +110,7 @@ namespace WizardMonks.Services.Characters
             return 1;
         }
 
-        private ResearchProjectPhase GenerateForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, HermeticMagus researcher)
+        private Spell GenerateSpellForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, HermeticMagus researcher)
         {
             ArtPair chosenArts = SelectExperimentalArtPair(definition.AssociatedArtPairs, researcher);
             if (chosenArts == null) return null;
@@ -112,49 +133,47 @@ namespace WizardMonks.Services.Characters
             if (principle is EffectTarget target) spell = new Spell(spell.Range, spell.Duration, target, spell.Base, 0, false, spell.Name);
 
             ushort currentMagnitudes = (ushort)(baseEffect.Magnitude + principle.Level);
-            PadSpellToTargetMagnitudes(ref spell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+            PadSpellToTargetMagnitudes(ref spell, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
             string experimentalName = $"{researcher.Name}'s {SpellLevelMath.GetMagnitudesFromLevel(spell.Level)}-Mag Experimental {spell.Base.Name}";
-            spell = new Spell(spell.Range, spell.Duration, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, experimentalName);
-
-            return new ResearchProjectPhase(spell, 1);
+            return new Spell(spell.Range, spell.Duration, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, experimentalName);
         }
 
         /// <summary>
-        /// Generates a research phase targeting a new spell base. The RDT parameters are
+        /// Generates a spell targeting a new spell base. The RDT parameters are
         /// chosen from those the researcher's tradition already knows, scaled to a target
-        /// level derived from the researcher's lab total and personality.
+        /// level derived from the researcher's lab total.
         /// </summary>
-        private ResearchProjectPhase GenerateForNewSpellBase(SpellBase principle, HermeticMagus researcher)
+        private Spell GenerateSpellForNewSpellBase(SpellBase principle, HermeticMagus researcher)
         {
             double labTotal = researcher.GetLabTotal(principle.ArtPair, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
             ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(maxSingleSeasonLevel);
             int rdtBudget = totalMagnitudesNeeded - principle.Magnitude;
 
-            EffectRange chosenRange = BestFitRange(researcher, rdtBudget);
-            int rangeUsed = chosenRange.Level;
-
-            EffectDuration chosenDuration = BestFitDuration(researcher, rdtBudget - rangeUsed);
+            EffectDuration chosenDuration = BestFitDuration(researcher, rdtBudget);
             int durationUsed = chosenDuration.Level;
+
+            EffectRange chosenRange = BestFitRange(researcher, rdtBudget - durationUsed);
+            int rangeUsed = chosenRange.Level;
 
             EffectTarget chosenTarget = BestFitTarget(researcher, rdtBudget - rangeUsed - durationUsed);
 
             Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, principle, 0, false, "Unnamed Spell");
 
             ushort currentMagnitudes = (ushort)(principle.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
-            PadSpellToTargetMagnitudes(ref experimentalSpell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+            PadSpellToTargetMagnitudes(ref experimentalSpell, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
-            return new ResearchProjectPhase(experimentalSpell, 1);
+            return experimentalSpell;
         }
 
         /// <summary>
-        /// Generates a research phase for a breakthrough whose output is a new ability
+        /// Generates a spell for a breakthrough whose output is a new ability
         /// rather than a new spell base or attribute. Selects an art pair from the
         /// breakthrough's AssociatedArtPairs and builds an experimental spell in that pair,
-        /// using the same level-scaling logic as GenerateForNewSpellBase.
+        /// using the same level-scaling logic as GenerateSpellForNewSpellBase.
         /// </summary>
-        private ResearchProjectPhase GenerateForNewAbility(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        private Spell GenerateSpellForNewAbility(BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
             ArtPair chosenArts = SelectExperimentalArtPair(breakthrough.AssociatedArtPairs, researcher);
             if (chosenArts == null) return null;
@@ -173,12 +192,10 @@ namespace WizardMonks.Services.Characters
             Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, baseEffect, 0, false, "Unnamed Spell");
 
             ushort currentMagnitudes = (ushort)(baseEffect.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
-            PadSpellToTargetMagnitudes(ref experimentalSpell, researcher, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
+            PadSpellToTargetMagnitudes(ref experimentalSpell, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
             string experimentalName = $"{researcher.Name}'s {SpellLevelMath.GetMagnitudesFromLevel(experimentalSpell.Level)}-Mag Experimental {experimentalSpell.Base.Name}";
-            experimentalSpell = new Spell(experimentalSpell.Range, experimentalSpell.Duration, experimentalSpell.Target, experimentalSpell.Base, experimentalSpell.Modifiers, experimentalSpell.IsRitual, experimentalName);
-
-            return new ResearchProjectPhase(experimentalSpell, 1);
+            return new Spell(experimentalSpell.Range, experimentalSpell.Duration, experimentalSpell.Target, experimentalSpell.Base, experimentalSpell.Modifiers, experimentalSpell.IsRitual, experimentalName);
         }
 
         /// <summary>
@@ -240,26 +257,13 @@ namespace WizardMonks.Services.Characters
             return candidates.Last();
         }
 
-        /// <summary>
-        /// Pads a spell up toward a target magnitude by upgrading to the highest known
-        /// duration that fits within the remaining budget. If no known duration improves
-        /// on the spell's current duration, the spell is returned unchanged.
-        /// </summary>
-        private void PadSpellToTargetMagnitudes(ref Spell spell, HermeticMagus researcher, ushort magnitudesToAdd)
+        private void PadSpellToTargetMagnitudes(ref Spell spell, ushort magnitudesToAdd)
         {
             if (magnitudesToAdd <= 0) return;
 
-            int currentDurationLevel = spell.Duration.Level;
-            int maxDurationLevel = currentDurationLevel + magnitudesToAdd;
-
-            EffectDuration best = researcher.Tradition.GetConceptsOfType<DurationPrinciple>()
-                .Select(c => ((DurationPrinciple)c.Principle).Duration)
-                .Where(d => d.Level > currentDurationLevel && d.Level <= maxDurationLevel)
-                .OrderByDescending(d => d.Level)
-                .FirstOrDefault();
-
-            if (best != null)
-                spell = new Spell(spell.Range, best, spell.Target, spell.Base, spell.Modifiers, spell.IsRitual, spell.Name);
+            byte newAdditionalLevels = (byte)(spell.AdditionalLevels + magnitudesToAdd);
+            spell = new Spell(spell.Range, spell.Duration, spell.Target, spell.Base,
+                spell.Modifiers, spell.IsRitual, spell.Name, newAdditionalLevels);
         }
 
         /// <summary>

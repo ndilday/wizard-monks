@@ -8,6 +8,7 @@ using WizardMonks.Models.Beliefs;
 using WizardMonks.Models.Books;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Laboratories;
+using WizardMonks.Models.Projects;
 using WizardMonks.Models.Spells;
 
 namespace WizardMonks.Services.Characters
@@ -198,16 +199,37 @@ namespace WizardMonks.Services.Characters
                         new Belief(belief.Topic, belief.Magnitude * 0.20));
                 }
             }
+
+            if (text.LinkedBreakthrough != null && !text.LinkedBreakthrough.IsIntegratedInto(mage.Tradition))
+            {
+                var breakthrough = text.LinkedBreakthrough;
+                var project = mage.ActiveProjects
+                    .OfType<ResearchProject>()
+                    .FirstOrDefault(p => p.Breakthrough.Id == breakthrough.Id);
+
+                if (project == null)
+                {
+                    project = new ResearchProject(mage, breakthrough);
+                    mage.ActiveProjects.Add(project);
+                }
+
+                int pointsGained = spell.Level / 5;
+                project.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
+                mage.Log.Add($"[Insight] Gained {pointsGained} breakthrough points toward '{breakthrough.Name}' " +
+                             $"from lab text '{spell.Name}'.");
+            }
         }
 
-        public static void LearnSpell(this HermeticMagus mage, Spell spell)
+        public static void LearnSpell(this HermeticMagus mage, Spell spell,
+            BreakthroughDefinition linkedBreakthrough = null)
         {
             mage.SpellList.Add(spell);
             LabText newLabText = new()
             {
                 Author = mage,
                 IsShorthand = true,
-                SpellContained = spell
+                SpellContained = spell,
+                LinkedBreakthrough = linkedBreakthrough
             };
             double magnitude = spell.Level / 5.0;
             newLabText.BeliefPayload.Add(

@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Events;
 using WizardMonks.Models.Projects;
+using WizardMonks.Models.Spells;
 using WizardMonks.Services.Characters;
 
 namespace WizardMonks.Activities.MageActivities
@@ -11,13 +12,15 @@ namespace WizardMonks.Activities.MageActivities
     public class OriginalResearchActivity : AExposingMageActivity
     {
         public Guid ProjectId { get; private set; }
+        public Spell ExperimentalSpell { get; private set; }
 
         private readonly ResearchService _researchService;
 
-        public OriginalResearchActivity(Guid projectId, ResearchService researchService, Ability exposure, double desire)
+        public OriginalResearchActivity(Guid projectId, Spell experimentalSpell, ResearchService researchService, Ability exposure, double desire)
             : base(exposure, desire)
         {
             ProjectId = projectId;
+            ExperimentalSpell = experimentalSpell ?? throw new ArgumentNullException(nameof(experimentalSpell));
             _researchService = researchService ?? throw new ArgumentNullException(nameof(researchService));
             Action = Activity.InventSpells;
         }
@@ -33,14 +36,7 @@ namespace WizardMonks.Activities.MageActivities
 
             if (project.CurrentPhase == null)
             {
-                // Generate the first phase if none exists yet.
-                var firstPhase = _researchService.GenerateExperimentalSpellPhase(project.Breakthrough, mage);
-                if (firstPhase == null)
-                {
-                    mage.Log.Add($"Research project '{project.Description}' could not generate an experimental effect.");
-                    return;
-                }
-                project.StartNewPhase(firstPhase);
+                project.StartNewPhase(new ResearchProjectPhase(ExperimentalSpell, 1));
                 mage.Log.Add($"Began experimental effect phase on '{project.Description}'.");
             }
 
@@ -48,7 +44,6 @@ namespace WizardMonks.Activities.MageActivities
 
             if (!phase.IsInvented)
             {
-                // Work on inventing the experimental spell.
                 double labTotal = mage.GetSpellLabTotal(phase.ExperimentalSpell);
                 double progress = labTotal - phase.ExperimentalSpell.Level;
                 if (progress <= 0)
@@ -60,6 +55,7 @@ namespace WizardMonks.Activities.MageActivities
                 mage.Log.Add($"Advanced research on '{phase.ExperimentalSpell.Name}'. Progress: {phase.InventionProgress:F1}/{phase.ExperimentalSpell.Level:F0}");
                 if (phase.IsInvented)
                 {
+                    mage.LearnSpell(phase.ExperimentalSpell, project.Breakthrough);
                     mage.Log.Add($"Experimental spell '{phase.ExperimentalSpell.Name}' has been successfully invented!");
                     EmittedEvent = WorldEvent.LabOutcome(
                         (int)mage.SeasonalAge, WorldEventCategory.LabSuccess, mage, (float)progress, phase.ExperimentalSpell.Name, true);
@@ -67,13 +63,12 @@ namespace WizardMonks.Activities.MageActivities
             }
             else if (!phase.IsStabilized)
             {
-                // Work on stabilizing the spell.
                 phase.WorkOnStabilization();
                 mage.Log.Add($"Worked on stabilizing '{phase.ExperimentalSpell.Name}'. Seasons remaining: {phase.SeasonsToStabilize}");
                 if (phase.IsStabilized)
                 {
                     mage.Log.Add($"Research phase complete! Gained {phase.BreakthroughPointsGained} breakthrough points.");
-                    project.CompletedPhases.Add(phase);
+                    project.CompleteCurrentPhase();
 
                     if (project.BreakthroughPointsAccumulated >= project.BreakthroughPointsRequired)
                     {
@@ -83,18 +78,7 @@ namespace WizardMonks.Activities.MageActivities
                         EmittedEvent = WorldEvent.LabOutcome(
                             (int)mage.SeasonalAge, WorldEventCategory.BreakthroughMade, mage, phase.BreakthroughPointsGained, project.Breakthrough.Name, true);
                     }
-                    else
-                    {
-                        // Generate and start the next phase.
-                        var nextPhase = _researchService.GenerateExperimentalSpellPhase(project.Breakthrough, mage);
-                        if (nextPhase == null)
-                        {
-                            mage.Log.Add($"Could not generate next research phase for '{project.Description}'.");
-                            return;
-                        }
-                        project.StartNewPhase(nextPhase);
-                        mage.Log.Add("Beginning the next phase of research.");
-                    }
+                    // Next phase spell selection happens at planning time next season.
                 }
             }
         }

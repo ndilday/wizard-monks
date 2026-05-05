@@ -47,16 +47,18 @@ namespace WizardMonks.Instances
             #endregion
 
             #region ReAu
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.MinorWeather, SpellArts.Rego | SpellArts.Auram, MagicArtPairs.ReAu, SpellTag.Protection, 3, "Ward Against Minor Weather"));
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.NormalWeather, SpellArts.Rego | SpellArts.Auram, MagicArtPairs.ReAu, SpellTag.Protection, 4, "Ward Against Normal Weather"));
             Add(new SpellBase(TechniqueEffects.Ward, FormEffects.SevereWeather, SpellArts.Rego | SpellArts.Auram, MagicArtPairs.ReAu, SpellTag.Protection, 5, "Ward Against Severe Weather"));
             #endregion
 
             #region ReCo
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Body, SpellArts.Rego | SpellArts.Corpus, MagicArtPairs.ReCo, SpellTag.Protection, 15, "Ward Against Human Beings"));
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Body, SpellArts.Rego | SpellArts.Corpus, MagicArtPairs.ReCo, SpellTag.Protection, 7, "Ward Against Human Beings"));
             #endregion
 
             #region ReHe
             Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Wood, SpellArts.Rego | SpellArts.Herbam, MagicArtPairs.ReHe, SpellTag.Protection, 4, "Deflect a Single Attack by a Wooden Weapon"));
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Plant, SpellArts.Rego | SpellArts.Herbam, MagicArtPairs.ReHe, SpellTag.Protection, 15, "Ward Against Mundane Plant Products"));
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Plant, SpellArts.Rego | SpellArts.Herbam, MagicArtPairs.ReHe, SpellTag.Protection, 7, "Ward Against Mundane Plant Products"));
             #endregion
 
             #region ReIg
@@ -73,8 +75,8 @@ namespace WizardMonks.Instances
 
             #region ReTe
             Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Dirt,  SpellArts.Rego | SpellArts.Terram, MagicArtPairs.ReTe, SpellTag.Protection,  5, "Ward Against Dirt"));
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Stone, SpellArts.Rego | SpellArts.Terram, MagicArtPairs.ReTe, SpellTag.Protection, 10, "Ward Against Stone"));
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Metal, SpellArts.Rego | SpellArts.Terram, MagicArtPairs.ReTe, SpellTag.Protection, 15, "Ward Against Metal"));
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Stone, SpellArts.Rego | SpellArts.Terram, MagicArtPairs.ReTe, SpellTag.Protection, 6, "Ward Against Stone"));
+            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Metal, SpellArts.Rego | SpellArts.Terram, MagicArtPairs.ReTe, SpellTag.Protection, 7, "Ward Against Metal"));
             #endregion
 
             #region ReVi

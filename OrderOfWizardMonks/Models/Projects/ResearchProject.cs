@@ -32,5 +32,14 @@ namespace WizardMonks.Models.Projects
         {
             CurrentPhase = phase;
         }
+
+        public void CompleteCurrentPhase()
+        {
+            if (CurrentPhase != null)
+            {
+                CompletedPhases.Add(CurrentPhase);
+                CurrentPhase = null;
+            }
+        }
     }
 }

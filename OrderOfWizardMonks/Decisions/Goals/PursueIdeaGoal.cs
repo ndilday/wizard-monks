@@ -78,6 +78,7 @@ namespace WizardMonks.Decisions.Goals
                     return;
                 }
 
+                var researchService = new ResearchService();
                 var artPairs = breakthroughIdea.TargetBreakthrough.AssociatedArtPairs;
                 double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
                 double bestLabTotal = (artPairs != null && artPairs.Count > 0)
@@ -85,12 +86,23 @@ namespace WizardMonks.Decisions.Goals
                     : 1.0;
                 double totalSeasonsNeeded = Math.Max(1, 20.0 * remaining / bestLabTotal);
 
-                // One season of direct research always reduces remaining by exactly 1 season.
-                alreadyConsidered.Add(new OriginalResearchActivity(
-                    project.ProjectId,
-                    new ResearchService(),
-                    Abilities.MagicTheory,
-                    Desire / totalSeasonsNeeded));
+                // Determine which experimental spell to work on this season.
+                // If a phase is already in progress, continue with its spell.
+                // Otherwise select a new one at planning time so the decision is made
+                // before execution, not lazily during DoMageAction.
+                Spell experimentalSpell = (project.CurrentPhase != null && !project.CurrentPhase.IsStabilized)
+                    ? project.CurrentPhase.ExperimentalSpell
+                    : researchService.SelectExperimentalSpell(breakthroughIdea.TargetBreakthrough, magus);
+
+                if (experimentalSpell != null)
+                {
+                    alreadyConsidered.Add(new OriginalResearchActivity(
+                        project.ProjectId,
+                        experimentalSpell,
+                        researchService,
+                        Abilities.MagicTheory,
+                        Desire / totalSeasonsNeeded));
+                }
 
                 if (artPairs != null && artPairs.Count > 0)
                     ConsiderIncreasingResearchTotal(alreadyConsidered, desires, log,

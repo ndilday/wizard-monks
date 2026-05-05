@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Models.Characters;
 using WizardMonks.Models.Spells;
+using WizardMonks.Models.Traditions;
 
 
 namespace WizardMonks.Models.Projects
@@ -28,6 +30,18 @@ namespace WizardMonks.Models.Projects
         /// whose Tags field contains any of these tags becomes a valid research target.
         /// </summary>
         public List<SpellTag> ResearchTags { get; private set; }
+
+        /// <summary>
+        /// Returns true if all of this breakthrough's outputs are already present
+        /// in the given tradition, meaning the mage who holds it has no need to
+        /// research or gain points toward it.
+        /// </summary>
+        public bool IsIntegratedInto(MagicalTradition tradition)
+        {
+            return NewAbilities.All(ability =>
+                tradition.GetConceptsOfType<MagicalAbilityPrinciple>()
+                    .Any(c => ((MagicalAbilityPrinciple)c.Principle).Ability.AbilityId == ability.AbilityId));
+        }
 
         protected BreakthroughDefinition(string name, string desc, ushort points,
             List<SpellAttribute> newAttributes, List<SpellBase> newSpellBases, List<Activity> newActivities, List<object> newRefinements,

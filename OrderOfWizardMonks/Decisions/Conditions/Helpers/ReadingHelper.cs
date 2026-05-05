@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
 using WizardMonks.Economy;
@@ -37,11 +38,19 @@ namespace WizardMonks.Decisions.Conditions.Helpers
                 double newBookDesire = _desireFunc(7, _conditionDepth);
                 desires.AddBookDesire(new BookDesire(_mage, _ability, newBookDesire, _mage.GetAbility(_ability).Value));
 
-                // consider both writing and vis to provide the capital to trade for a book?
-                WritingHelper writingHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
+                // WritingHelper and FindVisSourceHelper produce economic resources (book trade
+                // value and vis pawns respectively), not direct ability gain. Scale their desire
+                // by how many average quality-7 books that resource can buy, using distillRate
+                // as the standard single-book cost in vis-equivalent units.
+                double distillRate = Math.Max(0.01, _mage.GetVisDistillationRate());
+
+                CalculateDesireFunc resourceToBookDesire = (resourceValue, depth) =>
+                    newBookDesire * (resourceValue / (distillRate * depth));
+
+                WritingHelper writingHelper = new(_mage, _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), resourceToBookDesire);
                 writingHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
 
-                FindVisSourceHelper findVisSourceHelper = new(_mage, MagicArts.GetEnumerator().ToList() , _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), _desireFunc);
+                FindVisSourceHelper findVisSourceHelper = new(_mage, MagicArts.GetEnumerator().ToList(), _ageToCompleteBy - 1, (ushort)(_conditionDepth + 1), resourceToBookDesire);
                 findVisSourceHelper.AddActionPreferencesToList(alreadyConsidered, desires, log);
             }
         }

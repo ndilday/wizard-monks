@@ -3,16 +3,18 @@ using WizardMonks.Models.Characters;
 
 namespace WizardMonks.Models.Spells
 {
+    [Flags]
     public enum SpellTag
     {
         None = 0,
-        Offensive = 1 << 0,
-        Defensive = 1 << 1,
-        Healing = 1 << 2,
-        Utility = 1 << 3,
-        Creation = 1 << 4,
-        Deception = 1 << 5,
-        Knowledge = 1 << 6
+        Offensive   = 1 << 0,
+        Defensive   = 1 << 1,
+        Healing     = 1 << 2,
+        Utility     = 1 << 3,
+        Creation    = 1 << 4,
+        Deception   = 1 << 5,
+        Knowledge   = 1 << 6,
+        Protection  = 1 << 7,
     }
 
     [Flags]
@@ -96,9 +98,32 @@ namespace WizardMonks.Models.Spells
         SevereWeather = 0x0000000000400000,
         VerySevereWeather = 0x0000000000800000,
         DebilitatingAir = 0x0000000001000000,
-        //Vim
+        // Corpus
+        Body    = 0x0000000002000000,
+        Corpse  = 0x0000000004000000,
+        // Herbam
+        Plant   = 0x0000000010000000,
+        Wood    = 0x0000000020000000,
+        // Ignem
+        Fire    = 0x0000000100000000,
+        Heat    = 0x0000000200000000,
+        Light   = 0x0000000400000000,
+        // Imaginem
+        Image   = 0x0000001000000000,
+        Sound   = 0x0000002000000000,
+        Smell   = 0x0000004000000000,
+        // Mentem
+        Emotion         = 0x0000010000000000,
+        Memory          = 0x0000020000000000,
+        Consciousness   = 0x0000040000000000,
+        // Terram
+        Dirt    = 0x0000100000000000,
+        Stone   = 0x0000200000000000,
+        Metal   = 0x0000400000000000,
+        Gem     = 0x0000800000000000,
+        // Vim
         Aura = 0x0100000000000000,
-        Vis = 0x0200000000000000,
+        Vis  = 0x0200000000000000,
         Gift = 0x0400000000000000,
     }
 

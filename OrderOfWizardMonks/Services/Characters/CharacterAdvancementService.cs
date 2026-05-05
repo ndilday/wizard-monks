@@ -76,13 +76,18 @@ namespace WizardMonks.Services.Characters
 
             ConsideredActions actions = new();
 
-            // Intention-wrapped goals from the cognitive architecture.
+            // Each goal gets its own max-mode collection so duplicate action paths within
+            // the goal's helper tree take the highest desire rather than summing. The
+            // per-goal results are then merged additively into the global collection so
+            // that actions genuinely useful to multiple independent goals accumulate.
             foreach (Intention intention in character.ActiveIntentions)
             {
                 if (!intention.UnderlyingGoal.IsComplete())
                 {
+                    ConsideredActions goalActions = new(useMaxSemantics: true);
                     List<string> dummy = new List<string>();
-                    intention.UnderlyingGoal.AddActionPreferencesToList(actions, character.Desires, dummy);
+                    intention.UnderlyingGoal.AddActionPreferencesToList(goalActions, character.Desires, dummy);
+                    actions.MergeFrom(goalActions);
                 }
             }
 

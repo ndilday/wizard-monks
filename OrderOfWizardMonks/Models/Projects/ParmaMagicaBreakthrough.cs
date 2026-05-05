@@ -24,7 +24,7 @@ namespace WizardMonks.Models.Projects
             name: "Parma Magica",
             desc: "A personal ritual that provides general magical resistance, allowing magi to " +
                   "work alongside each other without threatening one another with their Gift. " +
-                  "Achieved through extensive experimental research into Rego effects across all Forms.",
+                  "Achieved through extensive experimental research into Rego ward effects across all Forms.",
             points: 60,
             newAttributes: new List<SpellAttribute>(),
             newSpellBases: new List<SpellBase>(),
@@ -37,7 +37,8 @@ namespace WizardMonks.Models.Projects
                 MagicArtPairs.ReIm, MagicArtPairs.ReMe, MagicArtPairs.ReTe,
                 MagicArtPairs.ReVi
             },
-            newAbilities: new List<Ability> { Abilities.ParmaMagica }
+            newAbilities: new List<Ability> { Abilities.ParmaMagica },
+            researchTags: new List<SpellTag> { SpellTag.Protection }
         )
         {
         }

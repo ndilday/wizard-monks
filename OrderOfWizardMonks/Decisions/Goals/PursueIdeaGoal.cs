@@ -78,13 +78,23 @@ namespace WizardMonks.Decisions.Goals
                     return;
                 }
 
+                var artPairs = breakthroughIdea.TargetBreakthrough.AssociatedArtPairs;
+                double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
+                double bestLabTotal = (artPairs != null && artPairs.Count > 0)
+                    ? Math.Max(1, artPairs.Max(p => magus.GetLabTotal(p, Activity.InventSpells)))
+                    : 1.0;
+                double totalSeasonsNeeded = Math.Max(1, 20.0 * remaining / bestLabTotal);
+
+                // One season of direct research always reduces remaining by exactly 1 season.
                 alreadyConsidered.Add(new OriginalResearchActivity(
                     project.ProjectId,
                     new ResearchService(),
                     Abilities.MagicTheory,
-                    Desire));
+                    Desire / totalSeasonsNeeded));
 
-                ConsiderIncreasingResearchTotal(alreadyConsidered, desires, log, breakthroughIdea, project, magus);
+                if (artPairs != null && artPairs.Count > 0)
+                    ConsiderIncreasingResearchTotal(alreadyConsidered, desires, log,
+                        artPairs, remaining, bestLabTotal, totalSeasonsNeeded, magus);
             }
             else if (Idea is SpellIdea spellIdea)
             {
@@ -115,30 +125,22 @@ namespace WizardMonks.Decisions.Goals
 
         private void ConsiderIncreasingResearchTotal(
             ConsideredActions alreadyConsidered, Desires desires, IList<string> log,
-            BreakthroughIdea breakthroughIdea, ResearchProject project, HermeticMagus magus)
+            IReadOnlyList<ArtPair> artPairs,
+            double remaining, double bestLabTotal, double totalSeasonsNeeded,
+            HermeticMagus magus)
         {
-            var artPairs = breakthroughIdea.TargetBreakthrough.AssociatedArtPairs;
-            if (artPairs == null || artPairs.Count == 0) return;
-
-            double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
-            double bestLabTotal = Math.Max(1, artPairs.Max(p => magus.GetLabTotal(p, Activity.InventSpells)));
-            double distillRate = magus.GetVisDistillationRate();
-            double totalSeasonsNeeded = 10.0 * remaining / bestLabTotal;
-            uint planningHorizon = (uint)(magus.SeasonalAge + Math.Max(1, totalSeasonsNeeded));
+            uint planningHorizon = (uint)(magus.SeasonalAge + totalSeasonsNeeded + 1);
 
             CalculateDesireFunc desireFunc = (gain, depth) =>
             {
-                double deltaSeasons = 10.0 * remaining * gain / (bestLabTotal * (bestLabTotal + gain));
-                return deltaSeasons * distillRate;
+                double deltaSeasons = 20.0 * remaining * gain / (bestLabTotal * (bestLabTotal + gain));
+                double netDeltaSeasons = deltaSeasons - depth;
+                if (netDeltaSeasons <= 0) return 0;
+                return Desire * netDeltaSeasons / totalSeasonsNeeded;
             };
 
             var helper = new MultiPairLabTotalIncreaseHelper(
-                magus,
-                planningHorizon,
-                1,
-                artPairs,
-                Activity.InventSpells,
-                desireFunc);
+                magus, planningHorizon, 1, artPairs, Activity.InventSpells, desireFunc);
             helper.AddActionPreferencesToList(alreadyConsidered, desires, log);
         }
     }

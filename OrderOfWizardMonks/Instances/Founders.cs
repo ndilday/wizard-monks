@@ -176,30 +176,20 @@ namespace WizardMonks.Instances
             var quantifyVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Quantify, FormEffects.Vis);
             var wardMagicBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura);
 
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Instant, EffectTargets.Individual,
-                    detectAuraBase, 0, false, "Sense the Hidden Aura")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    detectVisBase, 0, false, "Sense the Hidden Vis")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Touch, EffectDurations.Instant, EffectTargets.Individual,
-                    quantifyVisBase, 0, false, "Weigh the Power")
-            });
-            Bonisgaus.LabTextsOwned.Add(new LabText
-            {
-                Author = Bonisgaus,
-                SpellContained = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
-                    wardMagicBase, 0, false, "Aegis of the Self")
-            });
+            var senseHiddenAura    = new Spell(EffectRanges.Touch, EffectDurations.Sun, EffectTargets.Individual, detectAuraBase,   0, false, "Sense the Hidden Aura");
+            var senseHiddenVis     = new Spell(EffectRanges.Touch,    EffectDurations.Sun, EffectTargets.Individual, detectVisBase,    0, false, "Sense the Hidden Vis");
+            var weighThePower      = new Spell(EffectRanges.Touch,    EffectDurations.Sun, EffectTargets.Individual, quantifyVisBase,  0, false, "Weigh the Power");
+            var aegisOfTheSelf     = new Spell(EffectRanges.Personal, EffectDurations.Sun,     EffectTargets.Individual, wardMagicBase,    0, false, "Aegis of the Self");
+
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenAura });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenVis });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = weighThePower });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = aegisOfTheSelf });
+
+            Bonisgaus.SpellList.Add(senseHiddenAura);
+            Bonisgaus.SpellList.Add(senseHiddenVis);
+            Bonisgaus.SpellList.Add(weighThePower);
+            Bonisgaus.SpellList.Add(aegisOfTheSelf);
 
             // ----------------------------------------------------------------
             // Step 7: In-progress Parma Magica research

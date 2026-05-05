@@ -43,6 +43,8 @@ namespace WizardMonks.Services.Characters
             var pool = new List<object>();
             pool.AddRange(breakthrough.NewSpellAttributes);
             pool.AddRange(breakthrough.NewSpellBases);
+            foreach (var tag in breakthrough.ResearchTags)
+                pool.AddRange(SpellBases.GetSpellBasesByTag(tag).Cast<object>());
             pool.AddRange(breakthrough.NewAbilities);
             return pool;
         }
@@ -198,18 +200,17 @@ namespace WizardMonks.Services.Characters
 
         private SpellBase FindBestFitSpellBase(ArtPair arts, ushort desiredMagnitude)
         {
-            var bestFit = SpellBases.GetSpellBasesByArtPair(arts)
+            var bases = SpellBases.GetSpellBasesByArtPair(arts);
+            var bestFit = bases?
                 .OrderByDescending(b => b.Magnitude)
                 .FirstOrDefault(b => b.Magnitude <= desiredMagnitude);
 
-            return bestFit ?? new SpellBase(
-                TechniqueEffects.Detect,
-                FormEffects.Aura,
-                ConvertAbilitiesToSpellArts(arts.Technique, arts.Form),
-                arts,
-                SpellTag.Knowledge,
-                1,
-                "Generic Foundational Effect");
+            if (bestFit == null)
+                throw new InvalidOperationException(
+                    $"No spell base found for art pair {arts.Technique.AbilityName}/{arts.Form.AbilityName} " +
+                    $"at or below magnitude {desiredMagnitude}. Add a spell base for this pair to SpellBases.");
+
+            return bestFit;
         }
 
         private ArtPair SelectExperimentalArtPair(List<ArtPair> candidates, HermeticMagus researcher)

@@ -10,8 +10,8 @@ namespace WizardMonks.Models.Projects
     /// Defines the breakthrough that produces Parma Magica — Bonisagus's discovery
     /// of a personal ritual providing general resistance against magical effects.
     ///
-    /// The research is conducted via Rego experimental spells across all ten Forms,
-    /// reflecting Bonisagus's exploration of magical resistance in every domain.
+    /// The research is conducted via Rego ward effects across all ten Forms,
+    /// driven by the Protection tag rather than explicit art-pair enumeration.
     /// Sixty breakthrough points are required, matching the canonical Hermetic
     /// Breakthrough threshold.
     ///
@@ -30,13 +30,6 @@ namespace WizardMonks.Models.Projects
             newSpellBases: new List<SpellBase>(),
             newActivities: new List<Activity>(),
             newRefinements: new List<object>(),
-            associatedArtPairs: new List<ArtPair>
-            {
-                MagicArtPairs.ReAn, MagicArtPairs.ReAq, MagicArtPairs.ReAu,
-                MagicArtPairs.ReCo, MagicArtPairs.ReHe, MagicArtPairs.ReIg,
-                MagicArtPairs.ReIm, MagicArtPairs.ReMe, MagicArtPairs.ReTe,
-                MagicArtPairs.ReVi
-            },
             newAbilities: new List<Ability> { Abilities.ParmaMagica },
             researchTags: new List<SpellTag> { SpellTag.Protection }
         )

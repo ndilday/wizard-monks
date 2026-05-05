@@ -174,51 +174,75 @@ namespace WizardMonks.Instances
             var detectAuraBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Aura);
             var detectVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Detect, FormEffects.Vis);
             var quantifyVisBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Quantify, FormEffects.Vis);
-            var wardMagicBase = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Aura);
 
             var senseHiddenAura    = new Spell(EffectRanges.Touch, EffectDurations.Sun, EffectTargets.Individual, detectAuraBase,   0, false, "Sense the Hidden Aura");
             var senseHiddenVis     = new Spell(EffectRanges.Touch,    EffectDurations.Sun, EffectTargets.Individual, detectVisBase,    0, false, "Sense the Hidden Vis");
             var weighThePower      = new Spell(EffectRanges.Touch,    EffectDurations.Sun, EffectTargets.Individual, quantifyVisBase,  0, false, "Weigh the Power");
-            var aegisOfTheSelf     = new Spell(EffectRanges.Personal, EffectDurations.Sun,     EffectTargets.Individual, wardMagicBase,    0, false, "Aegis of the Self");
 
-            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenAura });
-            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenVis });
-            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = weighThePower });
-            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = aegisOfTheSelf });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenAura, IsShorthand = true });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = senseHiddenVis, IsShorthand = true });
+            Bonisgaus.LabTextsOwned.Add(new LabText { Author = Bonisgaus, SpellContained = weighThePower, IsShorthand = true });
 
             Bonisgaus.SpellList.Add(senseHiddenAura);
             Bonisgaus.SpellList.Add(senseHiddenVis);
             Bonisgaus.SpellList.Add(weighThePower);
-            Bonisgaus.SpellList.Add(aegisOfTheSelf);
 
             // ----------------------------------------------------------------
             // Step 7: In-progress Parma Magica research
             // ----------------------------------------------------------------
-            // As of Spring 730 AD, Bonisagus has accumulated 53 of the 60 breakthrough
+            // As of Spring 730 AD, Bonisagus has accumulated 54 of the 60 breakthrough
             // points required to complete Parma Magica. He has stabilized:
-            //   6 magnitude-3 ReVi effects (Personal/Sun/Individual, Level 3 → 3 pts each)
-            //   9 magnitude-4 ReVi effects (Touch/Instant/Individual,    Level 4 → 4 pts each)
-            //   Total: 7×3 + 8×4 = 21 + 32 = 53 points
-            // The project's CurrentPhase is null — the ResearchService will generate the
-            // next experimental spell on the first tick once the simulation begins.
+            //   6 level-15 (3-magnitude) ward experiments: 3 pts each = 18 pts
+            //   9 level-20 (4-magnitude) ward experiments: 4 pts each = 36 pts
+            //   Total: 54 points
+            // Each stabilized phase produced a learned spell with a breakthrough-linked
+            // lab text. The simulation will generate the remaining phase(s) needed.
             var parmaDef = new ParmaMagicaBreakthrough();
             var parmaProject = new ResearchProject(Bonisgaus, parmaDef);
 
-            // 7 × Magnitude- phases (Ward Against Magic, Personal range)
-            for (int i = 0; i < 6; i++)
+            void AddResearchPhase(Spell spell)
             {
-                var spell = new Spell(EffectRanges.Personal, EffectDurations.Sun, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Ward Study #{i + 1}", 2);
+                Bonisgaus.LearnSpell(spell, parmaDef);
                 parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
             }
 
-            // 8 × Magnitude-4 phases (Ward Against Magic, Touch range adds +1 magnitude)
-            for (int i = 0; i < 9; i++)
-            {
-                var spell = new Spell(EffectRanges.Touch, EffectDurations.Sun, EffectTargets.Individual,
-                    wardMagicBase, 0, false, $"Bonisagus's Experimental Extended Ward #{i + 1}", 2);
-                parmaProject.CompletedPhases.Add(ResearchProjectPhase.CreateCompleted(spell));
-            }
+            var reAnBase        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Animal);
+            var reAqBase        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Water);
+            var reAuNormBase    = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.NormalWeather);
+            var reAuSevBase     = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.SevereWeather);
+            var reHeBase        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Plant);
+            var reIgBase        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Fire);
+            var reCoBase        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Body);
+            var reTeDirt        = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Dirt);
+            var reTeStone       = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Stone);
+            var reTeMetal       = SpellBases.GetSpellBaseForEffect(TechniqueEffects.Ward, FormEffects.Metal);
+
+            // ── 6 × Level-15 (7 internal magnitudes: base+RDT=3, additionalLevels=4) ──
+            // ReAn(2)+Touch(1)+4        = 7   ReAu/Min(3)+Personal+4  = 7
+            // ReIm(3)+Personal+4        = 7   ReMe(3)+Personal+4      = 7
+            // ReAn(2)+Personal+Dia(1)+4 = 7   ReAu/Min(3)+Personal+4  = 7 (2nd)
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun, EffectTargets.Individual, reAnBase,    0, false, "Bonisagus's Ward Against Beasts",    2));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun, EffectTargets.Individual, reAuNormBase,0, false, "Bonisagus's Ward Against Weather",   0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Sun, EffectTargets.Individual, reAuSevBase, 0, false, "Bonisagus's Ward Against Storms",    0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Sun, EffectTargets.Individual, reAqBase,    0, false, "Bonisagus's Ward Against Water",     0));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun, EffectTargets.Individual, reIgBase,    0, false, "Bonisagus's Ward Against Fire",      0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Sun, EffectTargets.Individual, reTeDirt,    0, false, "Bonisagus's Ward Against Dirt",      0));
+
+            // ── 9 × Level-20 (8 internal magnitudes: base+RDT=4, additionalLevels=4) ──
+            // ReAu/Norm(4)+Personal+4   = 8   ReHe/Wood(4)+Personal+4 = 8
+            // ReIg(4)+Personal+4        = 8   ReAu/Min(3)+Touch(1)+4  = 8
+            // ReIm(3)+Touch(1)+4        = 8   ReMe(3)+Touch(1)+4      = 8
+            // ReAn(2)+Voice(2)+4        = 8   ReAn(2)+Touch+Dia+4     = 8
+            // ReMe(3)+Personal+Dia(1)+4 = 8
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun,        EffectTargets.Individual, reAuSevBase,  0, false, "Bonisagus's Ward Against Storms II",     0));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun,        EffectTargets.Individual, reAqBase,     0, false, "Bonisagus's Ward Against Water II",      0));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun,        EffectTargets.Individual, reTeDirt,     0, false, "Bonisagus's Ward Against Dirt II",       0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Diameter,   EffectTargets.Individual, reCoBase,     0, false, "Bonisagus's Ward Against People",        0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Diameter,   EffectTargets.Individual, reHeBase,     0, false, "Bonisagus's Ward Against Plants",        0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Diameter,   EffectTargets.Individual, reTeMetal,    0, false, "Bonisagus's Ward Against Metal",         0));
+            AddResearchPhase(new Spell(EffectRanges.Personal,   EffectDurations.Sun,        EffectTargets.Individual, reTeStone,    0, false, "Bonisagus's Ward Against Stone",         0));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Diameter,   EffectTargets.Individual, reTeStone,    0, false, "Bonisagus's Shared Ward Against Stone",  0));
+            AddResearchPhase(new Spell(EffectRanges.Touch,      EffectDurations.Sun,        EffectTargets.Individual, reAnBase,     0, false, "Bonisagus's Ward Against Beasts II",     3));
 
             Bonisgaus.ActiveProjects.Add(parmaProject);
 

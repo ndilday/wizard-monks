@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WizardMonks.Activities;
@@ -22,12 +22,11 @@ namespace WizardMonks.Models.Projects
         public List<object> PrincipleRefinements { get; private set; }
         public List<Ability> NewAbilities { get; private set; }
 
-        public List<ArtPair> AssociatedArtPairs { get; private set; }
-
         /// <summary>
         /// Tags used to dynamically select spell bases for experimental research from the
-        /// global registry, instead of curating a fixed NewSpellBases list. Any spell base
-        /// whose Tags field contains any of these tags becomes a valid research target.
+        /// global registry. Any spell base whose Tags field contains any of these tags
+        /// becomes a valid research target, and its art pair drives art-pair selection
+        /// for planning and lab-total calculations.
         /// </summary>
         public List<SpellTag> ResearchTags { get; private set; }
 
@@ -45,8 +44,7 @@ namespace WizardMonks.Models.Projects
 
         protected BreakthroughDefinition(string name, string desc, ushort points,
             List<SpellAttribute> newAttributes, List<SpellBase> newSpellBases, List<Activity> newActivities, List<object> newRefinements,
-            List<ArtPair> associatedArtPairs, List<Ability> newAbilities = null,
-            List<SpellTag> researchTags = null)
+            List<Ability> newAbilities = null, List<SpellTag> researchTags = null)
         {
             Name = name;
             Description = desc;
@@ -55,7 +53,6 @@ namespace WizardMonks.Models.Projects
             NewSpellBases = newSpellBases;
             NewLabActivities = newActivities;
             PrincipleRefinements = newRefinements;
-            AssociatedArtPairs = associatedArtPairs;
             NewAbilities = newAbilities ?? new List<Ability>();
             ResearchTags = researchTags ?? new List<SpellTag>();
         }

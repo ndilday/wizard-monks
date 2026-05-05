@@ -79,11 +79,8 @@ namespace WizardMonks.Decisions.Goals
                 }
 
                 var researchService = new ResearchService();
-                var artPairs = breakthroughIdea.TargetBreakthrough.AssociatedArtPairs;
                 double remaining = Math.Max(1, project.BreakthroughPointsRequired - project.BreakthroughPointsAccumulated);
-                double bestLabTotal = (artPairs != null && artPairs.Count > 0)
-                    ? Math.Max(1, artPairs.Max(p => magus.GetLabTotal(p, Activity.InventSpells)))
-                    : 1.0;
+                double bestLabTotal = researchService.GetBestLabTotal(breakthroughIdea.TargetBreakthrough, magus);
                 double totalSeasonsNeeded = Math.Max(1, 20.0 * remaining / bestLabTotal);
 
                 // Determine which experimental spell to work on this season.
@@ -104,7 +101,8 @@ namespace WizardMonks.Decisions.Goals
                         Desire / totalSeasonsNeeded));
                 }
 
-                if (artPairs != null && artPairs.Count > 0)
+                var artPairs = researchService.GetResearchableArtPairs(breakthroughIdea.TargetBreakthrough, magus);
+                if (artPairs.Any())
                     ConsiderIncreasingResearchTotal(alreadyConsidered, desires, log,
                         artPairs, remaining, bestLabTotal, totalSeasonsNeeded, magus);
             }

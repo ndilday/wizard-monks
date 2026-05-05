@@ -66,11 +66,9 @@ namespace WizardMonks.Instances
             #endregion
 
             #region ReIm
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Image, SpellArts.Rego | SpellArts.Imaginem, MagicArtPairs.ReIm, SpellTag.Protection, 3, "Ward Against Images"));
             #endregion
 
             #region ReMe
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Emotion, SpellArts.Rego | SpellArts.Mentem, MagicArtPairs.ReMe, SpellTag.Protection, 3, "Ward Against Minds"));
             #endregion
 
             #region ReTe
@@ -80,7 +78,6 @@ namespace WizardMonks.Instances
             #endregion
 
             #region ReVi
-            Add(new SpellBase(TechniqueEffects.Ward, FormEffects.Aura, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Defensive | SpellTag.Protection, 3, "Ward Against Magic"));
             Add(new SpellBase(TechniqueEffects.Manipulate, FormEffects.Vis, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Utility, 3, "Manipulate Magical Essence"));
             Add(new SpellBase(TechniqueEffects.Control, FormEffects.Aura, SpellArts.Rego | SpellArts.Vim, MagicArtPairs.ReVi, SpellTag.Utility, 4, "Control Magical Aura"));
             #endregion

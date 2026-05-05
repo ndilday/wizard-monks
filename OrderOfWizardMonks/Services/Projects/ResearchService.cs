@@ -100,19 +100,56 @@ namespace WizardMonks.Services.Characters
                 return labTotal;
             }
 
-            if ((principle is SpellAttribute || principle is Ability) && breakthrough.AssociatedArtPairs.Any())
+            if (principle is SpellAttribute || principle is Ability)
             {
-                return breakthrough.AssociatedArtPairs
-                    .Select(pair => researcher.GetLabTotal(pair, Activity.InventSpells))
-                    .Max();
+                var pairs = GetResearchableArtPairs(breakthrough, researcher);
+                if (pairs.Any())
+                    return pairs.Max(p => researcher.GetLabTotal(p, Activity.InventSpells));
             }
 
             return 1;
         }
 
+        /// <summary>
+        /// Returns the art pairs relevant to researching this breakthrough.
+        /// For tag- and spell-base-driven breakthroughs these are derived from the
+        /// matching spell bases. For attribute-only breakthroughs (where any TeFo
+        /// is valid) the researcher's own tradition's known spell bases are used.
+        /// </summary>
+        public IReadOnlyList<ArtPair> GetResearchableArtPairs(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            var pairs = breakthrough.ResearchTags
+                .SelectMany(SpellBases.GetSpellBasesByTag)
+                .Concat(breakthrough.NewSpellBases)
+                .Select(sb => sb.ArtPair)
+                .Distinct()
+                .ToList();
+
+            if (!pairs.Any() && breakthrough.NewSpellAttributes.Any())
+            {
+                pairs = researcher.Tradition.GetKnownSpellBases()
+                    .Select(sb => sb.ArtPair)
+                    .Distinct()
+                    .ToList();
+            }
+
+            return pairs;
+        }
+
+        /// <summary>
+        /// Returns the highest lab total the researcher can bring to bear on
+        /// any of the breakthrough's researchable art pairs.
+        /// </summary>
+        public double GetBestLabTotal(BreakthroughDefinition breakthrough, HermeticMagus researcher)
+        {
+            var pairs = GetResearchableArtPairs(breakthrough, researcher);
+            if (!pairs.Any()) return 1.0;
+            return Math.Max(1, pairs.Max(p => researcher.GetLabTotal(p, Activity.InventSpells)));
+        }
+
         private Spell GenerateSpellForNewAttribute(SpellAttribute principle, BreakthroughDefinition definition, HermeticMagus researcher)
         {
-            ArtPair chosenArts = SelectExperimentalArtPair(definition.AssociatedArtPairs, researcher);
+            ArtPair chosenArts = SelectExperimentalArtPair(GetResearchableArtPairs(definition, researcher), researcher);
             if (chosenArts == null) return null;
 
             double labTotal = researcher.GetLabTotal(chosenArts, Activity.InventSpells);
@@ -168,30 +205,34 @@ namespace WizardMonks.Services.Characters
         }
 
         /// <summary>
-        /// Generates a spell for a breakthrough whose output is a new ability
-        /// rather than a new spell base or attribute. Selects an art pair from the
-        /// breakthrough's AssociatedArtPairs and builds an experimental spell in that pair,
-        /// using the same level-scaling logic as GenerateSpellForNewSpellBase.
+        /// Generates a spell for a breakthrough whose output is a new ability.
+        /// The experimental effect is drawn from the same tag-based pool used for
+        /// general principle selection, so the art pair is determined by whichever
+        /// tagged spell base the researcher is best positioned to invent.
         /// </summary>
         private Spell GenerateSpellForNewAbility(BreakthroughDefinition breakthrough, HermeticMagus researcher)
         {
-            ArtPair chosenArts = SelectExperimentalArtPair(breakthrough.AssociatedArtPairs, researcher);
-            if (chosenArts == null) return null;
+            var candidates = breakthrough.ResearchTags
+                .SelectMany(SpellBases.GetSpellBasesByTag)
+                .Concat(breakthrough.NewSpellBases)
+                .Cast<object>()
+                .ToList();
 
-            double labTotal = researcher.GetLabTotal(chosenArts, Activity.InventSpells);
+            if (!(SelectPrincipleByProgress(candidates, breakthrough, researcher) is SpellBase chosenBase))
+                return null;
+
+            double labTotal = researcher.GetLabTotal(chosenBase.ArtPair, Activity.InventSpells);
             double maxSingleSeasonLevel = Math.Floor(labTotal / 2.0);
             ushort totalMagnitudesNeeded = SpellLevelMath.GetMagnitudesFromLevel(maxSingleSeasonLevel);
-
-            var baseEffect = FindBestFitSpellBase(chosenArts, totalMagnitudesNeeded);
-            int rdtBudget = totalMagnitudesNeeded - baseEffect.Magnitude;
+            int rdtBudget = totalMagnitudesNeeded - chosenBase.Magnitude;
 
             EffectRange chosenRange = BestFitRange(researcher, rdtBudget);
             EffectDuration chosenDuration = BestFitDuration(researcher, rdtBudget - chosenRange.Level);
             EffectTarget chosenTarget = BestFitTarget(researcher, rdtBudget - chosenRange.Level - chosenDuration.Level);
 
-            Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, baseEffect, 0, false, "Unnamed Spell");
+            Spell experimentalSpell = new Spell(chosenRange, chosenDuration, chosenTarget, chosenBase, 0, false, "Unnamed Spell");
 
-            ushort currentMagnitudes = (ushort)(baseEffect.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
+            ushort currentMagnitudes = (ushort)(chosenBase.Magnitude + chosenRange.Level + chosenDuration.Level + chosenTarget.Level);
             PadSpellToTargetMagnitudes(ref experimentalSpell, (ushort)(totalMagnitudesNeeded - currentMagnitudes));
 
             string experimentalName = $"{researcher.Name}'s {SpellLevelMath.GetMagnitudesFromLevel(experimentalSpell.Level)}-Mag Experimental {experimentalSpell.Base.Name}";
@@ -230,7 +271,7 @@ namespace WizardMonks.Services.Characters
             return bestFit;
         }
 
-        private ArtPair SelectExperimentalArtPair(List<ArtPair> candidates, HermeticMagus researcher)
+        private ArtPair SelectExperimentalArtPair(IReadOnlyList<ArtPair> candidates, HermeticMagus researcher)
         {
             if (candidates == null || !candidates.Any()) return null;
 

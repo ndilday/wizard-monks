@@ -19,6 +19,7 @@ namespace WizardMonks.Services.Characters
         private static readonly ReflectionEngine _reflectionEngine = new();
         private static readonly IReflectionPolicy _reflectionPolicy = new TickSynchronizedReflectionPolicy();
         private static readonly IGoalGenerator _goalGenerator = new GoalGenerator();
+        private static readonly IGoalGenerator _pragmaticGoalGenerator = new PragmaticGoalGenerator();
         /// <summary>
         /// Determines the value of an experience gain in terms of practice seasons
         /// </summary>
@@ -203,6 +204,18 @@ namespace WizardMonks.Services.Characters
             {
                 character.ActiveIntentions.Add(intention);
                 character.Log.Add($"[Cognition] New intention formed: {intention.UnderlyingGoal.GetType().Name}");
+            }
+
+            // Generate situational background intentions from available resources and
+            // capabilities. Runs after emotional goal generation so it sees the full
+            // updated intention list and avoids duplicating already-covered ground.
+            var pragmaticIntentions = _pragmaticGoalGenerator.GenerateIntentions(
+                character, character.Emotions, character.CognitiveBeliefs,
+                character.ActiveIntentions, currentTick);
+            foreach (var intention in pragmaticIntentions)
+            {
+                character.ActiveIntentions.Add(intention);
+                character.Log.Add($"[Cognition] Pragmatic intention formed: {intention.UnderlyingGoal.GetType().Name}");
             }
 
             // Context-change goal generation: certain completions trigger immediate
